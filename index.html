@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>M-UAY Firm — AI-Generated Art & Video Studio</title>
-<meta name="description" content="Premium AI-generated images and cinematic videos by M-UAY Firm, Karachi.">
+<title>Aethrai Studio — AI-Generated Art & Video Studio</title>
+<meta name="description" content="Premium AI-generated images and cinematic videos by Aethrai Studio, Karachi.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="shortcut icon" href="favicon.svg">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -302,8 +302,8 @@ section{padding:100px 0}
 
 /* ── CONTACT ──────────────────────────────────── */
 #contact{background:linear-gradient(to bottom,#04040c,#07071a)}
-.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:64px;margin-top:56px;align-items:start}
-.contact-desc{color:rgba(232,232,240,.45);line-height:1.8;font-size:.97rem;margin-bottom:32px}
+.contact-inner{max-width:680px;margin:56px auto 0}
+.contact-desc{color:rgba(232,232,240,.45);line-height:1.8;font-size:.97rem;margin-bottom:32px;text-align:center}
 .clink{
   display:flex;align-items:center;gap:16px;
   padding:15px 20px;border:1px solid rgba(255,255,255,.06);border-radius:14px;
@@ -318,20 +318,6 @@ section{padding:100px 0}
 .clink-ico i{color:#fff;font-size:.95rem}
 .clink strong{display:block;font-size:.92rem;margin-bottom:2px}
 .clink span{font-size:.78rem;color:rgba(232,232,240,.4)}
-/* form */
-.c-form{display:flex;flex-direction:column;gap:18px}
-.c-form input,.c-form textarea{
-  width:100%;padding:14px 18px;
-  background:rgba(255,255,255,.025);border:1px solid rgba(255,255,255,.07);
-  border-radius:12px;color:#e8e8f0;
-  font-family:'Rajdhani',sans-serif;font-size:.97rem;outline:none;
-  transition:border-color .3s,box-shadow .3s;
-}
-.c-form textarea{height:130px;resize:vertical}
-.c-form input:focus,.c-form textarea:focus{
-  border-color:rgba(176,110,255,.5);box-shadow:0 0 0 3px rgba(176,110,255,.08);
-}
-.c-form input::placeholder,.c-form textarea::placeholder{color:rgba(232,232,240,.25)}
 
 /* ── BUY ──────────────────────────────────────── */
 #buy{background:#04040c;position:relative}
@@ -452,7 +438,6 @@ footer{
   nav{padding:14px 24px}
   nav.stuck{padding:10px 24px}
   .nav-links{display:none}
-  .contact-grid{grid-template-columns:1fr;gap:40px}
   .buy-grid{grid-template-columns:1fr}
   .foot-inner{flex-direction:column;text-align:center}
 }
@@ -469,7 +454,7 @@ footer{
 
 <!-- ENTER OVERLAY -->
 <div id="enter-overlay">
-  <div class="enter-logo">M-UAY</div>
+  <div class="enter-logo">AETHRAI</div>
   <div class="enter-sub">AI Creative Studio · Karachi</div>
   <div class="enter-line"></div>
   <button class="enter-btn" id="enter-btn"><i class="fas fa-play" style="font-size:.75rem;margin-right:6px"></i> Enter with Sound</button>
@@ -477,7 +462,7 @@ footer{
 
 <!-- NAV -->
 <nav id="nav">
-  <div class="nav-logo">M-UAY FIRM</div>
+  <div class="nav-logo">AETHRAI STUDIO</div>
   <ul class="nav-links">
     <li><a href="#portfolio">Portfolio</a></li>
     <li><a href="#contact">Contact</a></li>
@@ -494,14 +479,14 @@ footer{
     <div class="hero-eyebrow" data-aos="fade-down">
       <i class="fas fa-wand-magic-sparkles"></i> AI-Generated · Midjourney · Cinematic
     </div>
-    <div class="hero-firm" data-aos="fade-up" data-aos-delay="100">M-UAY Firm</div>
+    <div class="hero-firm" data-aos="fade-up" data-aos-delay="100">Aethrai Studio</div>
     <h1 class="hero-title">
       <span class="hero-t1" data-aos="fade-up" data-aos-delay="180">AI ART</span>
       <span class="hero-t2" data-aos="fade-up" data-aos-delay="280">STUDIO</span>
     </h1>
     <p class="hero-desc" data-aos="fade-up" data-aos-delay="380">
       Custom AI-generated images &amp; cinematic videos crafted with Midjourney.<br>
-      From cosmic visions to cultural masterpieces.
+      From cultural masterpieces to historical epics.
     </p>
     <div class="hero-cta-row" data-aos="fade-up" data-aos-delay="480">
       <a href="#portfolio" class="btn-glow"><i class="fas fa-images"></i> View Portfolio</a>
@@ -519,12 +504,11 @@ footer{
       <div>
         <div class="sec-eyebrow" data-aos="fade-up">Our Work</div>
         <h2 class="sec-title" data-aos="fade-up" data-aos-delay="100">AI Portfolio</h2>
-        <p class="sec-sub" data-aos="fade-up" data-aos-delay="180">30 AI images + 8 cinematic videos — all generated with Midjourney</p>
+        <p class="sec-sub" data-aos="fade-up" data-aos-delay="180">24 AI images + 16 cinematic videos — all generated with Midjourney</p>
       </div>
     </div>
     <div class="filters" data-aos="fade-up">
       <button class="f-btn active" data-cat="all">All <span id="cnt-all"></span></button>
-      <button class="f-btn" data-cat="cosmic">Cosmic</button>
       <button class="f-btn" data-cat="cultural">Cultural</button>
       <button class="f-btn" data-cat="historical">Historical</button>
       <button class="f-btn" data-cat="3dart">3D Art</button>
@@ -553,37 +537,24 @@ footer{
       <h2 class="sec-title" data-aos="fade-up" data-aos-delay="100">Start a Project</h2>
       <p class="sec-sub" style="margin:0 auto" data-aos="fade-up" data-aos-delay="180">Available 24/7 — let's create something extraordinary together</p>
     </div>
-    <div class="contact-grid">
-      <div data-aos="fade-right">
-        <p class="contact-desc">We're M-UAY Firm, Karachi's AI creative studio specialising in Midjourney-powered images and cinematic AI videos. Every project is personal.</p>
-        <a class="clink" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20AI%20art." target="_blank">
-          <div class="clink-ico" style="background:rgba(37,211,102,.12)"><i class="fab fa-whatsapp" style="color:#25d366"></i></div>
-          <div><strong>WhatsApp</strong><span>+92 300 216 6620 — Fastest response</span></div>
-        </a>
-        <a class="clink" href="https://www.linkedin.com/company/smarthireai2026" target="_blank">
-          <div class="clink-ico" style="background:rgba(0,119,181,.12)"><i class="fab fa-linkedin-in" style="color:#0077b5"></i></div>
-          <div><strong>LinkedIn</strong><span>M-UAY Firm</span></div>
-        </a>
-        <a class="clink" href="https://www.upwork.com/services/product/design-ai-generated-photo-or-video-2056971193430539602?ref=project_share" target="_blank">
-          <div class="clink-ico" style="background:rgba(20,168,0,.12)"><i class="fas fa-briefcase" style="color:#6fda44"></i></div>
-          <div><strong>Upwork</strong><span>Secured milestone payments</span></div>
-        </a>
-        <a class="clink" href="mailto:umaramir.dev@gmail.com">
-          <div class="clink-ico" style="background:rgba(234,67,53,.1)"><i class="fas fa-envelope" style="color:#ea4335"></i></div>
-          <div><strong>Email</strong><span>umaramir.dev@gmail.com</span></div>
-        </a>
-      </div>
-      <div data-aos="fade-left">
-        <form class="c-form" onsubmit="submitForm(event)">
-          <input type="text" placeholder="Your Name" required>
-          <input type="email" placeholder="Email Address" required>
-          <input type="text" placeholder="What do you need? (e.g. 3 AI portraits)">
-          <textarea placeholder="Tell us your vision, style references, deadline..."></textarea>
-          <button type="submit" class="btn-glow" style="justify-content:center">
-            <i class="fas fa-paper-plane"></i> Send Brief
-          </button>
-        </form>
-      </div>
+    <div class="contact-inner" data-aos="fade-up" data-aos-delay="100">
+      <p class="contact-desc">We're Aethrai Studio, Karachi's AI creative studio specialising in Midjourney-powered images and cinematic AI videos. Every project is personal.</p>
+      <a class="clink" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20AI%20art." target="_blank">
+        <div class="clink-ico" style="background:rgba(37,211,102,.12)"><i class="fab fa-whatsapp" style="color:#25d366"></i></div>
+        <div><strong>WhatsApp</strong><span>+92 300 216 6620 — Fastest response</span></div>
+      </a>
+      <a class="clink" href="https://www.linkedin.com/company/smarthireai2026" target="_blank">
+        <div class="clink-ico" style="background:rgba(0,119,181,.12)"><i class="fab fa-linkedin-in" style="color:#0077b5"></i></div>
+        <div><strong>LinkedIn</strong><span>Aethrai Studio</span></div>
+      </a>
+      <a class="clink" href="https://www.upwork.com/services/product/design-ai-generated-photo-or-video-2056971193430539602?ref=project_share" target="_blank">
+        <div class="clink-ico" style="background:rgba(20,168,0,.12)"><i class="fas fa-briefcase" style="color:#6fda44"></i></div>
+        <div><strong>Upwork</strong><span>Secured milestone payments</span></div>
+      </a>
+      <a class="clink" href="mailto:umaramir.dev@gmail.com">
+        <div class="clink-ico" style="background:rgba(234,67,53,.1)"><i class="fas fa-envelope" style="color:#ea4335"></i></div>
+        <div><strong>Email</strong><span>umaramir.dev@gmail.com</span></div>
+      </a>
     </div>
   </div>
 </section>
@@ -601,7 +572,7 @@ footer{
         <div class="buy-card-ico wa"><i class="fab fa-whatsapp"></i></div>
         <h3>WhatsApp Order</h3>
         <p>Message us directly for the fastest response. Discuss requirements and get started immediately.</p>
-        <a href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20AI%20art%20from%20M-UAY%20Firm." target="_blank">
+        <a href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20AI%20art%20from%20Aethrai%20Studio." target="_blank">
           <i class="fab fa-whatsapp"></i> Order on WhatsApp
         </a>
       </div>
@@ -617,7 +588,7 @@ footer{
         <div class="buy-card-ico em"><i class="fas fa-envelope-open-text"></i></div>
         <h3>Email Brief</h3>
         <p>Send a detailed creative brief by email for larger or complex projects requiring thorough discussion.</p>
-        <a href="mailto:umaramir.dev@gmail.com?subject=AI%20Art%20Commission%20-%20M-UAY%20Firm">
+        <a href="mailto:umaramir.dev@gmail.com?subject=AI%20Art%20Commission%20-%20Aethrai%20Studio">
           <i class="fas fa-envelope"></i> Email Your Brief
         </a>
       </div>
@@ -632,7 +603,7 @@ footer{
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <div class="foot-logo">M-UAY FIRM</div>
+      <div class="foot-logo">AETHRAI STUDIO</div>
       <div class="socials">
         <a class="soc" href="https://www.linkedin.com/company/smarthireai2026" target="_blank"><i class="fab fa-linkedin-in"></i></a>
         <a class="soc" href="https://wa.me/923002166620" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -644,7 +615,7 @@ footer{
         <a href="#contact">Contact</a>
         <a href="#buy">Order</a>
       </div>
-      <div class="foot-copy">© 2025 M-UAY Firm · Karachi, Pakistan</div>
+      <div class="foot-copy">© 2025 Aethrai Studio · Karachi, Pakistan</div>
     </div>
   </div>
 </footer>
@@ -657,7 +628,7 @@ footer{
     <div class="m-bar"></div>
   </div>
   <div class="m-label">
-    <div class="m-name">M-UAY Ambience</div>
+    <div class="m-name">Aethrai Ambience</div>
     <div class="m-sub">Procedural Score</div>
   </div>
   <button class="m-toggle" id="m-toggle"><i class="fas fa-play" id="m-icon"></i></button>
@@ -673,44 +644,48 @@ footer{
 <script>
 /* ── MEDIA DATA ─────────────────────────────── */
 const MEDIA = [
-  {type:'img',src:'assets/images/img1.png', cat:'cosmic',   title:'Layered Cosmic Spaces',       tag:'AI Image'},
-  {type:'img',src:'assets/images/img2.png', cat:'cosmic',   title:'Cosmic Order & Geometry',      tag:'AI Image'},
-  {type:'img',src:'assets/images/img3.png', cat:'cultural', title:'Whirling Dervish Ceremony',    tag:'AI Image'},
-  {type:'img',src:'assets/images/img4.png', cat:'cultural', title:'Sufi Mystic at Mosque',        tag:'AI Image'},
-  {type:'img',src:'assets/images/img5.png', cat:'cultural', title:'Mughal-Era Dervish Dance',     tag:'AI Image'},
-  {type:'img',src:'assets/images/img6.png', cat:'historical',title:'Mohenjo-Daro Street',         tag:'AI Image'},
-  {type:'img',src:'assets/images/img7.png', cat:'historical',title:'Indus River at Sunset',       tag:'AI Image'},
-  {type:'img',src:'assets/images/img8.png', cat:'historical',title:'Achaemenid Persian Palace',   tag:'AI Image'},
-  {type:'img',src:'assets/images/img9.png', cat:'historical',title:'King Philip II Coronation',   tag:'AI Image'},
-  {type:'img',src:'assets/images/img10.png',cat:'historical',title:'Bucephalus the War Horse',    tag:'AI Image'},
-  {type:'img',src:'assets/images/img11.png',cat:'cultural', title:'Karachi Street Realism',       tag:'AI Image'},
-  {type:'img',src:'assets/images/img12.png',cat:'cultural', title:'Pakistani People at Dawn',     tag:'AI Image'},
-  {type:'img',src:'assets/images/img13.png',cat:'nature',   title:'Makran Coast Sunrise',         tag:'AI Image'},
-  {type:'img',src:'assets/images/img14.png',cat:'cultural', title:'India–Pakistan Border Night',  tag:'AI Image'},
-  {type:'img',src:'assets/images/img15.png',cat:'3dart',    title:'3D Cartoon Monkey',            tag:'AI Image'},
-  {type:'img',src:'assets/images/img16.png',cat:'3dart',    title:'Animated Lion Cub',            tag:'AI Image'},
-  {type:'img',src:'assets/images/img17.png',cat:'3dart',    title:'Pixar-Style Character',        tag:'AI Image'},
-  {type:'img',src:'assets/images/img18.png',cat:'3dart',    title:'Adorable Toddler Girl',        tag:'AI Image'},
-  {type:'img',src:'assets/images/img19.png',cat:'sports',   title:'Go-Kart Steering Detail',      tag:'AI Image'},
-  {type:'img',src:'assets/images/img20.png',cat:'sports',   title:'Kart Racing Perfect Line',     tag:'AI Image'},
-  {type:'img',src:'assets/images/img21.png',cat:'sports',   title:'Focused Racer Close-Up',       tag:'AI Image'},
-  {type:'img',src:'assets/images/img22.png',cat:'sports',   title:'Padel Ball Impact',            tag:'AI Image'},
-  {type:'img',src:'assets/images/img23.png',cat:'sports',   title:'Cruiser Motorcycle',           tag:'AI Image'},
-  {type:'img',src:'assets/images/img24.png',cat:'nature',   title:'Aerial Delta View',            tag:'AI Image'},
-  {type:'img',src:'assets/images/img25.png',cat:'nature',   title:'Agricultural Canal',           tag:'AI Image'},
-  {type:'img',src:'assets/images/img26.png',cat:'cultural', title:'Pakistani Child Portrait',     tag:'AI Image'},
-  {type:'img',src:'assets/images/img27.png',cat:'3dart',    title:'Dreamy Pastel Sky',            tag:'AI Image'},
-  {type:'img',src:'assets/images/img28.png',cat:'3dart',    title:'Adorable Pixar Animals',       tag:'AI Image'},
-  {type:'img',src:'assets/images/img29.png',cat:'3dart',    title:'3D Bubble Typography',         tag:'AI Image'},
-  {type:'img',src:'assets/images/img30.png',cat:'3dart',    title:'CoComelon Animation Style',    tag:'AI Image'},
-  {type:'vid',src:'assets/videos/vid1.mp4', cat:'cultural', title:'Mughal Era Fountain',          tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid2.mp4', cat:'cosmic',   title:'Dense Galactic Clusters',      tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid3.mp4', cat:'cultural', title:'Whirling Dervish Dance',       tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid4.mp4', cat:'3dart',    title:'Pixar-Style Characters',       tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid5.mp4', cat:'historical',title:'Ancient Mohenjo-Daro',        tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid6.mp4', cat:'sports',   title:'Go-Kart Race Finish',          tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid7.mp4', cat:'nature',   title:'Makran Coast at Sunrise',      tag:'AI Video'},
-  {type:'vid',src:'assets/videos/vid8.mp4', cat:'cosmic',   title:'Divine Spark of Creation',     tag:'AI Video'},
+  /* IMAGES */
+  {type:'img',src:'assets/images/stkmedia_A_Gen_Z_girl_standing_alone_in_heavy_rain_at_night_w_fbb19fb3-80d1-4f9f-8623-6d7bc52a43ce_1.png',cat:'cultural',title:'Gen Z Girl in Heavy Rain',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_A_friendly_adorable_3D_animated_lion_cub_with_a_fluf_8ad87cb2-1d27-42cf-ab9a-3d03470c2190_2.png',cat:'3dart',title:'Friendly 3D Animated Lion Cub',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_A_group_whirling_dervish_in_traditional_Mughal-era_a_dd373a40-f56f-4afd-92ad-aada50860db2_0.png',cat:'cultural',title:'Whirling Dervish in Mughal-Era Attire',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Adorable_toddler_girl_with_oversized_head_enormous_s_ec2e2656-199a-46c9-b807-0db7b22ff40f_0.png',cat:'3dart',title:'Adorable Toddler Girl Character',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Aerial_cinematic_view_of_a_vast_delta_dry_crack_rive_bcbdafa8-2ac3-4969-a803-a431f1b04e3b_3.png',cat:'nature',title:'Aerial Delta Dry Crack River',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Camera_starts_on_dreamy_pastel_sky_with_pink_purple__ceb0cf5e-4b81-4dd4-96b8-6641f954f6a9_2.png',cat:'3dart',title:'Dreamy Pastel Sky Scene',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Cinematic_Cadbury_style_emotional_commercial_directe_ada961a8-a40c-42c9-9b1b-0db98d245e4d_1.png',cat:'cultural',title:'Cinematic Cadbury-Style Commercial',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Close-up_calm_focused_racer_eyes_subtle_cool_dayligh_a3ec4cdd-72e9-42a5-86e1-c18e24a1763b_0.png',cat:'sports',title:'Focused Racer Eyes Close-Up',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_CoComelon_style_3D_giant_bold_title_ACTIONS_in_chunk_6afccfa9-3101-4831-9717-54a279a3ffc7_3.png',cat:'3dart',title:'CoComelon-Style 3D Bold Title',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Create_a_premium_cinematic_chocolate_commercial_with_4e0da9e2-fc66-4dff-a30c-3b5549139c8f_1.png',cat:'cultural',title:'Premium Cinematic Chocolate Commercial',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Create_an_extreme_cinematic_close-up_of_a_young_Paki_cd50b6c1-3f27-4825-9dce-e6648173e02d_3.png',cat:'cultural',title:'Young Pakistani Cinematic Close-Up',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_Massive_3D_inflated_bubble_text_JUMP__LEARN_in_backg_dc7ad57a-1a1f-4c67-a51a-79efd3e370f6_1.png',cat:'3dart',title:'Massive 3D Bubble Text',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_South_Asian_female_late_20s_appearance_soft_oval_fac_75ca0598-d46c-45e5-8309-dec6d85a91fe_3.png',cat:'cultural',title:'South Asian Female Portrait',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_YouTube_thumbnail_two_adorable_Pixar_3D_toddler_char_f7529839-6a48-48f7-b61e-911428d22a28_3.png',cat:'3dart',title:'Pixar-Style 3D Toddler Characters',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_ancient_battlefield_arrows_flying_through_sky_indian_18333c13-6163-4e2f-8154-3296791630c3_2.png',cat:'historical',title:'Ancient Battlefield Arrows in Sky',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_cinematic_school_recess_scene_warm_natural_afternoon_a7e0327c-d028-44c4-a367-1a7b869b2cd3_3.png',cat:'cultural',title:'Cinematic School Recess Scene',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_close-up_of_healthy_Pakistani_child_swallowing_after_f8733e80-c3e6-4446-933e-18c298ade436_0.png',cat:'cultural',title:'Pakistani Child Portrait Close-Up',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_documentary_realism_everyday_street_life_in_Karachi__7503824f-844b-4d35-a6c6-7ad3367ebf4f_0.png',cat:'cultural',title:'Documentary Karachi Street Life',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_king_porus_indian_ruler_age_40_tall_powerful_build_l_138dcc2f-4844-4dfa-a998-6f942fe7001f_3.png',cat:'historical',title:'King Porus — Indian Ruler Portrait',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_king_porus_indian_ruler_age_40_tall_powerful_build_l_2aeea0e5-6894-43fb-8c6d-bf3c90618490_3.png',cat:'historical',title:'King Porus — Battle Ready',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_stateira_ii_persian_princess_daughter_of_darius_iii_ac_7ffd53da-e463-4cac-9a52-3c7226fd248b.png',cat:'historical',title:'Stateira II — Persian Princess',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_ultra_realistic_product_photo_enhancement_preserve_e_2474a0df-32f7-4318-9f04-77b171f93986_0.png',cat:'cultural',title:'Ultra-Realistic Product Enhancement',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_25dfbf37-86fa-4d1e-9788-9c39d511f1d9_0.png',cat:'3dart',title:'Whimsical Cinematic Dessert World I',tag:'AI Image'},
+  {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_b3df6646-0bdf-43ca-81dc-85b6aaf32f10_1.png',cat:'3dart',title:'Whimsical Cinematic Dessert World II',tag:'AI Image'},
+  /* VIDEOS */
+  {type:'vid',src:'assets/videos/stkmedia_A_stylish_Gen_Z_Indian_girl_in_the_rain_at_night_wea_bf99e3de-769d-4df1-9b5b-d60d94a0e1b5_3.mp4',cat:'cultural',title:'Stylish Gen Z Girl in Night Rain I',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_A_stylish_Gen_Z_Indian_girl_in_the_rain_at_night_wea_e03631ff-3f3a-4e3f-a684-f0af06d3e099_3.mp4',cat:'cultural',title:'Stylish Gen Z Girl in Night Rain II',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Balochi_father_gently_dancing_with_his_baby_son_in_a_39759fcb-8770-404c-8424-3255f43b923c_0.mp4',cat:'cultural',title:'Balochi Father Dancing with Baby Son',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.mp4',cat:'cultural',title:'Karachi Cityscape at Golden Hour',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Cinematic_heartwarming_wide_farewell_shot_of_all_cut_e1473f7c-b2ad-43a5-a6bb-3d0b3afa9baa_0.mp4',cat:'cultural',title:'Cinematic Heartwarming Farewell Shot',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Karachi_teen_girl_in_dorm_room_paying_electricity_bi_8e8be3dc-10b9-4c22-a8a7-13c693b033ca_0.mp4',cat:'cultural',title:'Karachi Teen Girl Dorm Life',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Pakistani_children_playing_and_laughing_naturally_ou_2d16c159-f156-4724-86e7-0743d9d1a339_1.mp4',cat:'cultural',title:'Pakistani Children Playing Outdoors',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Pakistani_female_university_graduate_in_cap_and_gown_619f8dc4-5a19-493a-823d-4aac6e26b269_0.mp4',cat:'cultural',title:'Pakistani Female University Graduate',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',cat:'historical',title:'Ultra-Wide Aerial Night — India-Pakistan Border',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.mp4',cat:'historical',title:'Ancient Indus Valley Civilization',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_close-up_of_proud_Sindhi_man_with_red_beard_and_ajra_087be79e-7f7e-4a68-93d9-510ec4c6b67d_1.mp4',cat:'cultural',title:'Proud Sindhi Man Close-Up',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_female_polio_vaccinator_Pakistan_adjusting_scarf_aga_f3948ea2-e39d-4d5e-bf59-4d36ac07f818_0.mp4',cat:'cultural',title:'Pakistan Polio Vaccinator',tag:'AI Video'},
+  {type:'vid',src:"assets/videos/stkmedia_httpss.mj.run2frzVLh4z1U_mother_holding_toddlers_han_d0dbcbda-f799-4bac-94c7-ab156e323e7b_2.mp4",cat:'cultural',title:"Mother Holding Toddler's Hand",tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_portraits_of_diverse_Karachi_citizens_smiling_cinema_44edc97f-0a94-41cc-8816-1f683667e025_3.mp4',cat:'cultural',title:'Diverse Karachi Citizens Portraits',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',cat:'cultural',title:'Wide Aerial Shot of Karachi Beach',tag:'AI Video'},
+  {type:'vid',src:'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',cat:'historical',title:'Young Alexander Taming Bucephalus',tag:'AI Video'},
 ];
 
 /* ── CURSOR ─────────────────────────────────── */
@@ -740,13 +715,18 @@ window.addEventListener('scroll',()=>nav.classList.toggle('stuck',scrollY>60));
 
 /* ── HERO VIDEO SLIDESHOW ───────────────────── */
 function initHeroSlideshow(){
-  const HERO_VIDS=['assets/videos/vid2.mp4','assets/videos/vid7.mp4','assets/videos/vid1.mp4',
-                   'assets/videos/vid8.mp4','assets/videos/vid3.mp4','assets/videos/vid5.mp4'];
-  const DURATION=9000; /* ms each video stays visible */
+  const HERO_VIDS=[
+    'assets/videos/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.mp4',
+    'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',
+    'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',
+    'assets/videos/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.mp4',
+    'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',
+    'assets/videos/stkmedia_A_stylish_Gen_Z_Indian_girl_in_the_rain_at_night_wea_bf99e3de-769d-4df1-9b5b-d60d94a0e1b5_3.mp4'
+  ];
+  const DURATION=9000;
   const wrapper=document.getElementById('hero-videos');
   let current=0, els=[];
 
-  /* Pre-create all video elements */
   HERO_VIDS.forEach((src,i)=>{
     const v=document.createElement('video');
     v.className='hero-vid-slide';
@@ -757,7 +737,6 @@ function initHeroSlideshow(){
     v.play().catch(()=>{});
   });
 
-  /* Activate first */
   els[0].classList.add('active');
 
   setInterval(()=>{
@@ -809,7 +788,6 @@ function buildGrid(filter='all'){
   document.getElementById('cnt-all').textContent=`(${MEDIA.length})`;
 }
 
-// filters
 document.querySelectorAll('.f-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
@@ -868,7 +846,6 @@ function startMusic(){
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   if(audioCtx.state==='suspended') audioCtx.resume();
 
-  /* Long lush reverb */
   const conv = audioCtx.createConvolver();
   const rLen = audioCtx.sampleRate*6;
   const rBuf = audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
@@ -880,27 +857,24 @@ function startMusic(){
   masterGain.gain.linearRampToValueAtTime(0.16,audioCtx.currentTime+5);
   conv.connect(masterGain); masterGain.connect(audioCtx.destination);
 
-  /* LFO helper */
   function lfo(rate,target,depth){
     const l=audioCtx.createOscillator(), lg=audioCtx.createGain();
     l.frequency.value=rate; lg.gain.value=depth;
     l.connect(lg); lg.connect(target); l.start();
   }
 
-  /* Deep bass drones — C minor (C G Eb) */
   function drone(freq,vol,lfoRate,lfoDepth,type='sine'){
     const o=audioCtx.createOscillator(), g=audioCtx.createGain();
     o.type=type; o.frequency.value=freq; g.gain.value=vol;
     lfo(lfoRate,o.frequency,lfoDepth);
     o.connect(g); g.connect(conv); o.start();
   }
-  drone(65.41, 0.14, 0.03, 0.9);          /* C2 */
-  drone(65.41*0.999, 0.07, 0.05, 0.6);    /* C2 detuned twin */
-  drone(98.00, 0.06, 0.04, 0.5);          /* G2 perfect 5th */
-  drone(77.78, 0.04, 0.06, 0.4);          /* Eb2 minor 3rd */
-  drone(130.81, 0.04, 0.07, 0.3);         /* C3 octave */
+  drone(65.41, 0.14, 0.03, 0.9);
+  drone(65.41*0.999, 0.07, 0.05, 0.6);
+  drone(98.00, 0.06, 0.04, 0.5);
+  drone(77.78, 0.04, 0.06, 0.4);
+  drone(130.81, 0.04, 0.07, 0.3);
 
-  /* Warm pad: slow-attack triangle chord C3-G3-Eb4 */
   function pad(freq,vol){
     const o=audioCtx.createOscillator(), filt=audioCtx.createBiquadFilter(), g=audioCtx.createGain();
     o.type='triangle'; o.frequency.value=freq;
@@ -912,7 +886,6 @@ function startMusic(){
   }
   pad(130.81,0.025); pad(196,0.020); pad(155.56,0.018); pad(261.63,0.014);
 
-  /* Occasional soft high shimmer notes */
   const SHIMMER=[523.25,622.25,698.46,783.99,932.33,1046.50];
   function shimmer(){
     const f=SHIMMER[Math.floor(Math.random()*SHIMMER.length)];
@@ -976,15 +949,6 @@ document.querySelectorAll('.buy-card').forEach(c=>{
   });
   c.addEventListener('mouseleave',()=>c.style.transform='');
 });
-
-/* ── CONTACT FORM ────────────────────────────── */
-function submitForm(e){
-  e.preventDefault();
-  const btn=e.target.querySelector('button[type=submit]');
-  btn.innerHTML='<i class="fas fa-check"></i> Sent!';
-  btn.style.background='linear-gradient(135deg,#00c853,#00e676)';
-  setTimeout(()=>{btn.innerHTML='<i class="fas fa-paper-plane"></i> Send Brief';btn.style.background='';e.target.reset()},3200);
-}
 
 /* ── MOUSE PARALLAX BLOBS ─────────────────────── */
 document.addEventListener('mousemove',e=>{
