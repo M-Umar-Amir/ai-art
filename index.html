@@ -107,13 +107,6 @@ nav.stuck{
   display:flex;align-items:center;justify-content:center;
   overflow:hidden;
 }
-#hero-videos{position:absolute;inset:0;width:100%;height:100%}
-.hero-vid-slide{
-  position:absolute;inset:0;width:100%;height:100%;
-  object-fit:cover;opacity:0;
-  transition:opacity 2s ease;
-}
-.hero-vid-slide.active{opacity:.38}
 .hero-overlay{
   position:absolute;inset:0;
   background:radial-gradient(ellipse at center,transparent 40%,#04040c 100%);
@@ -473,7 +466,7 @@ footer{
 
 <!-- HERO -->
 <section id="hero">
-  <div id="hero-videos"></div>
+  <video id="hero-bg" muted loop playsinline preload="none" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 2s ease"></video>
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-eyebrow" data-aos="fade-down">
@@ -713,38 +706,12 @@ document.getElementById('enter-btn').addEventListener('click',()=>{
 const nav = document.getElementById('nav');
 window.addEventListener('scroll',()=>nav.classList.toggle('stuck',scrollY>60));
 
-/* ── HERO VIDEO SLIDESHOW ───────────────────── */
+/* ── HERO SHOWREEL ──────────────────────────── */
 function initHeroSlideshow(){
-  const HERO_VIDS=[
-    'assets/videos/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.mp4',
-    'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',
-    'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',
-    'assets/videos/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.mp4',
-    'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',
-    'assets/videos/stkmedia_A_stylish_Gen_Z_Indian_girl_in_the_rain_at_night_wea_bf99e3de-769d-4df1-9b5b-d60d94a0e1b5_3.mp4'
-  ];
-  const DURATION=9000;
-  const wrapper=document.getElementById('hero-videos');
-  let current=0, els=[];
-
-  HERO_VIDS.forEach((src,i)=>{
-    const v=document.createElement('video');
-    v.className='hero-vid-slide';
-    v.muted=true; v.loop=true; v.playsInline=true; v.autoplay=true;
-    v.src=src;
-    wrapper.appendChild(v);
-    els.push(v);
-    v.play().catch(()=>{});
-  });
-
-  els[0].classList.add('active');
-
-  setInterval(()=>{
-    const prev=current;
-    current=(current+1)%els.length;
-    els[current].classList.add('active');
-    setTimeout(()=>els[prev].classList.remove('active'), 2100);
-  }, DURATION);
+  const v = document.getElementById('hero-bg');
+  v.src = 'assets/videos/showreel.mp4';
+  v.play().catch(()=>{});
+  setTimeout(()=>{ v.style.opacity='.38'; }, 200);
 }
 
 /* ── PORTFOLIO GRID ─────────────────────────── */
