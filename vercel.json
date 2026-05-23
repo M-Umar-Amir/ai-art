@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "name": "smarthire-ai",
+  "name": "epical-studio",
   "builds": [
     { "src": "**", "use": "@vercel/static" }
   ],
