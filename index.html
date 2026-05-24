@@ -1036,7 +1036,7 @@ async function startMusic() {
   // Master — 10s fade in, quiet enough to sit under content
   masterGain = audioCtx.createGain();
   masterGain.gain.setValueAtTime(0, t);
-  masterGain.gain.linearRampToValueAtTime(0.28, t + 10);
+  masterGain.gain.linearRampToValueAtTime(0.15, t + 10);
   masterGain.connect(dry);
   masterGain.connect(conv);
 
@@ -1093,7 +1093,7 @@ document.getElementById('m-toggle').addEventListener('click', () => {
     document.getElementById('m-eq').classList.add('off');
   } else {
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    masterGain.gain.linearRampToValueAtTime(0.28, now + 2);
+    masterGain.gain.linearRampToValueAtTime(0.15, now + 2);
     musicOn = true;
     document.getElementById('m-icon').className = 'fas fa-pause';
     document.getElementById('m-eq').classList.remove('off');
