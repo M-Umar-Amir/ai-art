@@ -7,9 +7,15 @@
 <meta name="description" content="Premium AI-generated images and cinematic videos by Epical Studio, Karachi.">
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
 <link rel="shortcut icon" href="favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Rajdhani:wght@300;400;500;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
+<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"></noscript>
 <style>
 /* ── RESET ────────────────────────────────────── */
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
@@ -78,12 +84,19 @@ nav.stuck{
   padding:12px 48px;
   border-bottom:1px solid rgba(176,110,255,.12);
 }
-.nav-logo{
+.nav-logo{display:flex;flex-direction:column;align-items:flex-start;gap:1px}
+.nav-logo-top{display:flex;align-items:center;gap:10px}
+.nav-logo-img{height:34px;width:auto;object-fit:contain;filter:drop-shadow(0 0 8px rgba(176,110,255,.5))}
+.nav-logo-text{
   font-family:'Cinzel',serif;font-size:1.15rem;font-weight:700;letter-spacing:.25em;
   background:linear-gradient(135deg,#b06eff,#00d4ff,#ff6bff);
   background-size:200% 200%;
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
   animation:logoShimmer 4s ease infinite;
+}
+.nav-logo-div{
+  font-family:'Rajdhani',sans-serif;font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;
+  color:rgba(255,255,255,.35);padding-left:44px;
 }
 .nav-links{display:flex;gap:32px;list-style:none}
 .nav-links a{
@@ -499,6 +512,9 @@ footer{
   .featured-swiper .swiper-slide{width:240px;height:340px}
 }
 </style>
+<!-- Vercel Web Analytics -->
+<script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 </head>
 <body>
 
@@ -508,7 +524,9 @@ footer{
 
 <!-- ENTER OVERLAY -->
 <div id="enter-overlay">
+  <img src="assets/e.png" style="height:90px;width:auto;margin-bottom:14px;filter:drop-shadow(0 0 24px rgba(176,110,255,.65))" alt="Epical Studio">
   <div class="enter-logo">EPICAL</div>
+  <div style="font-family:'Rajdhani',sans-serif;font-size:.7rem;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.35);margin-top:-4px;margin-bottom:18px">a division of filmworks</div>
   <div class="enter-sub">AI Creative Studio · Karachi</div>
   <div class="enter-line"></div>
   <button class="enter-btn" id="enter-btn"><i class="fas fa-play" style="font-size:.75rem;margin-right:6px"></i> Enter with Sound</button>
@@ -516,7 +534,13 @@ footer{
 
 <!-- NAV -->
 <nav id="nav">
-  <div class="nav-logo">EPICAL STUDIO</div>
+  <div class="nav-logo">
+    <div class="nav-logo-top">
+      <img class="nav-logo-img" src="assets/e.png" alt="Epical Studio">
+      <span class="nav-logo-text">EPICAL STUDIO</span>
+    </div>
+    <div class="nav-logo-div">a division of filmworks</div>
+  </div>
   <ul class="nav-links">
     <li><a href="#featured">Featured</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
@@ -532,19 +556,19 @@ footer{
   <div class="hero-grad-top"></div>
   <div class="hero-overlay"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow" data-aos="fade-down">
+    <div class="hero-eyebrow">
       <i class="fas fa-wand-magic-sparkles"></i> AI-Generated · Midjourney · Cinematic
     </div>
-    <div class="hero-firm" data-aos="fade-up" data-aos-delay="100">Epical Studio</div>
+    <div class="hero-firm">Epical Studio</div>
     <h1 class="hero-title">
-      <span class="hero-t1" data-aos="fade-up" data-aos-delay="180">AI ART</span>
-      <span class="hero-t2" data-aos="fade-up" data-aos-delay="280">STUDIO</span>
+      <span class="hero-t1">AI ART</span>
+      <span class="hero-t2">STUDIO</span>
     </h1>
-    <p class="hero-desc" data-aos="fade-up" data-aos-delay="380">
+    <p class="hero-desc">
       Custom AI-generated images &amp; cinematic videos crafted with Midjourney.<br>
       From cultural masterpieces to historical epics.
     </p>
-    <div class="hero-cta-row" data-aos="fade-up" data-aos-delay="480">
+    <div class="hero-cta-row">
       <a href="#portfolio" class="btn-glow"><i class="fas fa-images"></i> View Portfolio</a>
       <a href="#featured" class="btn-ghost"><i class="fas fa-film"></i> Featured Works</a>
     </div>
@@ -719,13 +743,12 @@ footer{
 <a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20AI%20art." target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <!-- SCRIPTS -->
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
 
-<script>
+<script type="module">
 /* ── MEDIA DATA ─────────────────────────────── */
 const MEDIA = [
   /* IMAGES */
@@ -790,7 +813,6 @@ document.getElementById('enter-btn').addEventListener('click',()=>{
   startMusic();
   document.getElementById('enter-overlay').classList.add('fade');
   setTimeout(()=>document.getElementById('enter-overlay').style.display='none',900);
-  AOS.init({duration:750,once:true,offset:60});
   initHeroSlideshow();
 });
 
@@ -815,11 +837,11 @@ function initHeroSlideshow(){
     const slide = document.createElement('div');
     slide.className = 'swiper-slide';
     if(m.type==='img'){
-      slide.innerHTML=`<img src="${m.src}" alt="${m.title}" loading="lazy"><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`;
+      slide.innerHTML=`<img src="${m.src}" alt="${m.title}" loading="lazy" decoding="async"><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`;
     } else {
-      slide.innerHTML=`<video src="${m.src}" muted loop playsinline preload="metadata"></video><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`;
+      slide.innerHTML=`<video data-src="${m.src}" muted loop playsinline preload="none"></video><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`;
       const v = slide.querySelector('video');
-      slide.addEventListener('mouseenter',()=>v.play());
+      slide.addEventListener('mouseenter',()=>{if(v.dataset.src){v.src=v.dataset.src;delete v.dataset.src}v.play()});
       slide.addEventListener('mouseleave',()=>{v.pause();v.currentTime=0});
     }
     wrap.appendChild(slide);
@@ -843,6 +865,15 @@ const featSwiper = new Swiper('.featured-swiper',{
 const grid = document.getElementById('port-grid');
 let visibleItems = [];
 
+const vidObs = new IntersectionObserver((entries,obs)=>{
+  entries.forEach(e=>{
+    if(!e.isIntersecting) return;
+    const v=e.target;
+    if(v.dataset.src){v.src=v.dataset.src;delete v.dataset.src}
+    obs.unobserve(v);
+  });
+},{rootMargin:'200px'});
+
 function buildGrid(filter='all'){
   grid.innerHTML='';
   visibleItems=[];
@@ -855,7 +886,7 @@ function buildGrid(filter='all'){
     el.dataset.idx=idx;
     if(m.type==='img'){
       el.innerHTML=`
-        <img src="${m.src}" alt="${m.title}" loading="lazy">
+        <img src="${m.src}" alt="${m.title}" loading="lazy" decoding="async">
         <div class="port-ov">
           <div class="pcat">${m.cat}</div>
           <h4>${m.title}</h4>
@@ -864,14 +895,15 @@ function buildGrid(filter='all'){
     } else {
       el.innerHTML=`
         <div class="vid-badge"><i class="fas fa-play"></i></div>
-        <video src="${m.src}" muted loop playsinline preload="metadata"></video>
+        <video data-src="${m.src}" muted loop playsinline preload="none"></video>
         <div class="port-ov">
           <div class="pcat">${m.cat}</div>
           <h4>${m.title}</h4>
           <div class="ptype"><i class="fas fa-video"></i>${m.tag}</div>
         </div>`;
       const vid = el.querySelector('video');
-      el.addEventListener('mouseenter',()=>vid.play());
+      vidObs.observe(vid);
+      el.addEventListener('mouseenter',()=>{if(vid.dataset.src){vid.src=vid.dataset.src;delete vid.dataset.src}vid.play()});
       el.addEventListener('mouseleave',()=>{vid.pause();vid.currentTime=0});
     }
     el.addEventListener('click',()=>openLB(idx));
@@ -982,10 +1014,10 @@ document.addEventListener('mousemove',e=>{
 
 /* ── PROCEDURAL AMBIENT ─────────────────────── */
 let audioCtx, masterGain, musicOn=false;
-function startMusic(){
+async function startMusic(){
   if(audioCtx) return;
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
-  if(audioCtx.state==='suspended') audioCtx.resume();
+  await audioCtx.resume();
   const conv = audioCtx.createConvolver();
   const rLen = audioCtx.sampleRate*6;
   const rBuf = audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
@@ -1030,11 +1062,13 @@ document.getElementById('m-toggle').addEventListener('click',()=>{
   if(!audioCtx){startMusic();return}
   if(musicOn){
     masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
     masterGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+.7);
     musicOn=false;document.getElementById('m-icon').className='fas fa-play';document.getElementById('m-eq').classList.add('off');
   } else {
     if(audioCtx.state==='suspended') audioCtx.resume();
     masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
+    masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
     masterGain.gain.linearRampToValueAtTime(.18,audioCtx.currentTime+1.2);
     musicOn=true;document.getElementById('m-icon').className='fas fa-pause';document.getElementById('m-eq').classList.remove('off');
   }
