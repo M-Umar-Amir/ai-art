@@ -1012,26 +1012,39 @@ async function startMusic(){
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   await audioCtx.resume();
 
-  // Reverb impulse response — shorter decay for clarity
+  // Reverb impulse response — short tail, cube decay = less wash on phone
   const conv = audioCtx.createConvolver();
-  const rLen = audioCtx.sampleRate*4;
+  const rLen = audioCtx.sampleRate*2.5;
   const rBuf = audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
-  for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2)}
+  for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,3)}
   conv.buffer=rBuf;
 
-  // Dry/wet buses — sources connect to BOTH so reverb doesn't bury the signal
+  // Compressor → prevents clipping/distortion on mobile speakers
+  const comp = audioCtx.createDynamicsCompressor();
+  comp.threshold.value=-18;comp.knee.value=10;comp.ratio.value=5;
+  comp.attack.value=0.005;comp.release.value=0.2;
+  comp.connect(audioCtx.destination);
+
+  // High-pass strips sub-bass muddiness on phone speakers
+  const hpf = audioCtx.createBiquadFilter();
+  hpf.type='highpass';hpf.frequency.value=80;hpf.connect(comp);
+
+  // Low-pass on wet bus — softens harsh reverb tail on small speakers
+  const wetLpf = audioCtx.createBiquadFilter();
+  wetLpf.type='lowpass';wetLpf.frequency.value=3500;wetLpf.connect(hpf);
+
   const dryBus = audioCtx.createGain();
   const wetBus = audioCtx.createGain();
-  dryBus.gain.value = 0.65;
-  wetBus.gain.value = 0.38;
+  dryBus.gain.value = 0.72;
+  wetBus.gain.value = 0.22;
   conv.connect(wetBus);
-  dryBus.connect(audioCtx.destination);
-  wetBus.connect(audioCtx.destination);
+  dryBus.connect(hpf);
+  wetBus.connect(wetLpf);
 
   // Separate master for fade in/out
   masterGain = audioCtx.createGain();
   masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(0.52, audioCtx.currentTime+5);
+  masterGain.gain.linearRampToValueAtTime(0.70, audioCtx.currentTime+5);
 
   // Route masterGain → both buses
   masterGain.connect(dryBus);
@@ -1080,7 +1093,7 @@ document.getElementById('m-toggle').addEventListener('click',()=>{
     if(audioCtx.state==='suspended') audioCtx.resume();
     masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
     masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(.52,audioCtx.currentTime+1.2);
+    masterGain.gain.linearRampToValueAtTime(.70,audioCtx.currentTime+1.2);
     musicOn=true;document.getElementById('m-icon').className='fas fa-pause';document.getElementById('m-eq').classList.remove('off');
   }
 });
