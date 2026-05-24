@@ -154,9 +154,9 @@ nav.stuck{
 }
 .hero-title{
   font-family:'Cinzel',serif;
-  font-size:clamp(3rem,10vw,9rem);
+  font-size:clamp(1.8rem,5vw,4.5rem);
   font-weight:900;line-height:.95;
-  letter-spacing:.05em;margin-bottom:28px;
+  letter-spacing:.05em;margin-bottom:16px;
 }
 .hero-t1{
   display:block;
@@ -555,12 +555,10 @@ footer{
   <div class="hero-overlay"></div>
   <div class="hero-content">
     <div class="hero-eyebrow">
-      <i class="fas fa-wand-magic-sparkles"></i> Cinematic
+      <i class="fas fa-wand-magic-sparkles"></i> Creative Studio
     </div>
-    <div class="hero-firm">Epical Studio</div>
     <h1 class="hero-title">
-      <span class="hero-t1">AI ART</span>
-      <span class="hero-t2">STUDIO</span>
+      <span class="hero-t1">ART STUDIO</span>
     </h1>
     <p class="hero-desc">
       Custom images &amp; cinematic videos.<br>
@@ -695,9 +693,6 @@ footer{
         </a>
       </div>
     </div>
-    <div class="buy-note sr-up">
-      <strong>Transparent pricing</strong> · Images from <strong>2,000 PKR</strong> · Videos from <strong>2,000–6,000 PKR</strong>
-    </div>
   </div>
 </section>
 
@@ -812,6 +807,7 @@ document.getElementById('enter-btn').addEventListener('click',()=>{
   document.getElementById('enter-overlay').classList.add('fade');
   setTimeout(()=>document.getElementById('enter-overlay').style.display='none',900);
   initHeroSlideshow();
+  requestAnimationFrame(()=>{ buildFeatured(); buildGrid(); });
 });
 
 /* ── NAVBAR ─────────────────────────────────── */
@@ -827,7 +823,7 @@ function initHeroSlideshow(){
 }
 
 /* ── FEATURED SWIPER ────────────────────────── */
-(function buildFeatured(){
+function buildFeatured(){
   const wrap = document.getElementById('feat-wrapper');
   FEAT_PICKS.forEach(idx=>{
     const m = MEDIA[idx];
@@ -844,20 +840,19 @@ function initHeroSlideshow(){
     }
     wrap.appendChild(slide);
   });
-})();
-
-const featSwiper = new Swiper('.featured-swiper',{
-  slidesPerView:'auto',
-  centeredSlides:true,
-  spaceBetween:24,
-  loop:true,
-  grabCursor:true,
-  autoplay:{delay:3500,disableOnInteraction:false,pauseOnMouseEnter:true},
-  pagination:{el:'.swiper-pagination',clickable:true},
-  navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'},
-  effect:'coverflow',
-  coverflowEffect:{rotate:15,stretch:0,depth:120,modifier:1,slideShadows:false},
-});
+  new Swiper('.featured-swiper',{
+    slidesPerView:'auto',
+    centeredSlides:true,
+    spaceBetween:24,
+    loop:true,
+    grabCursor:true,
+    autoplay:{delay:3500,disableOnInteraction:false,pauseOnMouseEnter:true},
+    pagination:{el:'.swiper-pagination',clickable:true},
+    navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'},
+    effect:'coverflow',
+    coverflowEffect:{rotate:15,stretch:0,depth:120,modifier:1,slideShadows:false},
+  });
+}
 
 /* ── PORTFOLIO GRID ─────────────────────────── */
 const grid = document.getElementById('port-grid');
@@ -915,6 +910,7 @@ function buildGrid(filter='all'){
   });
 }
 
+document.getElementById('cnt-all').textContent=`(${MEDIA.length})`;
 document.querySelectorAll('.f-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
@@ -922,7 +918,6 @@ document.querySelectorAll('.f-btn').forEach(btn=>{
     buildGrid(btn.dataset.cat);
   });
 });
-buildGrid();
 
 /* ── LIGHTBOX ───────────────────────────────── */
 const lb = document.getElementById('lightbox');
