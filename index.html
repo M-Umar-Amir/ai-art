@@ -1020,9 +1020,9 @@ async function startMusic() {
   comp.ratio.value = 4; comp.attack.value = 0.01; comp.release.value = 0.3;
   comp.connect(audioCtx.destination);
 
-  // Warm low-pass ceiling keeps everything mellow (no harshness on phone)
+  // Low-pass at 1400Hz — mellow on earphones, not muffled on phone speakers
   const lpf = audioCtx.createBiquadFilter();
-  lpf.type = 'lowpass'; lpf.frequency.value = 700; lpf.Q.value = 0.5;
+  lpf.type = 'lowpass'; lpf.frequency.value = 1400; lpf.Q.value = 0.5;
   lpf.connect(comp);
 
   // Light reverb — 2s tail, very low wet mix (0.14) for subtle space
@@ -1045,18 +1045,19 @@ async function startMusic() {
   masterGain.connect(dry);
   masterGain.connect(conv);
 
-  // Three sine oscillators only:
-  //   110.00 Hz — A2 root (warm, round)
-  //   110.18 Hz — 0.18 Hz detune → ~5.5s natural beat = meditative breath pulse
-  //   165.00 Hz — E3 perfect fifth, adds gentle air
+  // Three sine oscillators — one octave up from before (phone speakers roll
+  // off below ~180Hz; 220Hz sits safely in their clean range)
+  //   220.00 Hz — A3 root, warm but fully audible on phone speakers
+  //   220.20 Hz — 0.20 Hz detune → ~5s natural beat = meditative breath pulse
+  //   330.00 Hz — E4 perfect fifth, adds gentle air
   function tone(freq, vol) {
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
     o.type = 'sine'; o.frequency.value = freq; g.gain.value = vol;
     o.connect(g); g.connect(masterGain); o.start(t);
   }
-  tone(110,    0.32);
-  tone(110.18, 0.22);
-  tone(165,    0.09);
+  tone(220,    0.32);
+  tone(220.20, 0.22);
+  tone(330,    0.09);
 
   musicOn = true;
   document.getElementById('m-icon').className = 'fas fa-pause';
