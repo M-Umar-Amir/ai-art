@@ -1011,39 +1011,57 @@ async function startMusic(){
   if(audioCtx) return;
   audioCtx = new (window.AudioContext||window.webkitAudioContext)();
   await audioCtx.resume();
+
+  // Reverb impulse response — shorter decay for clarity
   const conv = audioCtx.createConvolver();
-  const rLen = audioCtx.sampleRate*6;
+  const rLen = audioCtx.sampleRate*4;
   const rBuf = audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
-  for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,1.1)}
+  for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,2)}
   conv.buffer=rBuf;
+
+  // Dry/wet buses — sources connect to BOTH so reverb doesn't bury the signal
+  const dryBus = audioCtx.createGain();
+  const wetBus = audioCtx.createGain();
+  dryBus.gain.value = 0.65;
+  wetBus.gain.value = 0.38;
+  conv.connect(wetBus);
+  dryBus.connect(audioCtx.destination);
+  wetBus.connect(audioCtx.destination);
+
+  // Separate master for fade in/out
   masterGain = audioCtx.createGain();
-  masterGain.gain.setValueAtTime(0,audioCtx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(0.16,audioCtx.currentTime+5);
-  conv.connect(masterGain); masterGain.connect(audioCtx.destination);
+  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
+  masterGain.gain.linearRampToValueAtTime(0.52, audioCtx.currentTime+5);
+
+  // Route masterGain → both buses
+  masterGain.connect(dryBus);
+  masterGain.connect(conv);
+
   function lfo(rate,target,depth){
     const l=audioCtx.createOscillator(),lg=audioCtx.createGain();
     l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();
   }
-  function drone(freq,vol,lfoRate,lfoDepth,type='sine'){
+  function source(freq,vol,lfoRate,lfoDepth,type='sine'){
     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
     o.type=type;o.frequency.value=freq;g.gain.value=vol;
-    lfo(lfoRate,o.frequency,lfoDepth);o.connect(g);g.connect(conv);o.start();
+    lfo(lfoRate,o.frequency,lfoDepth);o.connect(g);g.connect(masterGain);o.start();
   }
-  drone(65.41,.14,.03,.9);drone(65.41*.999,.07,.05,.6);drone(98,.06,.04,.5);drone(77.78,.04,.06,.4);drone(130.81,.04,.07,.3);
+  // Deep drones — C2 root with detuned pair for warmth
+  source(65.41,.22,.03,.9);source(65.41*.999,.12,.05,.6);source(98,.10,.04,.5);source(77.78,.07,.06,.4);source(130.81,.06,.07,.3);
   function pad(freq,vol){
     const o=audioCtx.createOscillator(),filt=audioCtx.createBiquadFilter(),g=audioCtx.createGain();
-    o.type='triangle';o.frequency.value=freq;filt.type='lowpass';filt.frequency.value=600;filt.Q.value=.3;
+    o.type='triangle';o.frequency.value=freq;filt.type='lowpass';filt.frequency.value=700;filt.Q.value=.3;
     g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(vol,audioCtx.currentTime+8);
-    lfo(.04+Math.random()*.04,o.frequency,freq*.002);o.connect(filt);filt.connect(g);g.connect(conv);o.start();
+    lfo(.04+Math.random()*.04,o.frequency,freq*.002);o.connect(filt);filt.connect(g);g.connect(masterGain);o.start();
   }
-  pad(130.81,.025);pad(196,.020);pad(155.56,.018);pad(261.63,.014);
+  pad(130.81,.045);pad(196,.036);pad(155.56,.030);pad(261.63,.025);
   const SHIMMER=[523.25,622.25,698.46,783.99,932.33,1046.50];
   function shimmer(){
     const f=SHIMMER[Math.floor(Math.random()*SHIMMER.length)],t=audioCtx.currentTime;
     const o=audioCtx.createOscillator(),g=audioCtx.createGain();
     o.type='sine';o.frequency.value=f;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.035,t+2.5);g.gain.linearRampToValueAtTime(0,t+10);
-    o.connect(g);g.connect(conv);o.start(t);o.stop(t+11);
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.055,t+2.5);g.gain.linearRampToValueAtTime(0,t+10);
+    o.connect(g);g.connect(masterGain);o.start(t);o.stop(t+11);
     setTimeout(shimmer,7000+Math.random()*9000);
   }
   setTimeout(shimmer,4000);
@@ -1062,7 +1080,7 @@ document.getElementById('m-toggle').addEventListener('click',()=>{
     if(audioCtx.state==='suspended') audioCtx.resume();
     masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
     masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(.18,audioCtx.currentTime+1.2);
+    masterGain.gain.linearRampToValueAtTime(.52,audioCtx.currentTime+1.2);
     musicOn=true;document.getElementById('m-icon').className='fas fa-pause';document.getElementById('m-eq').classList.remove('off');
   }
 });
