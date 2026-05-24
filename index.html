@@ -726,8 +726,8 @@ footer{
     <div class="m-bar"></div>
   </div>
   <div class="m-label">
-    <div class="m-name">Ambient Tone</div>
-    <div class="m-sub">Soothing Drone</div>
+    <div class="m-name">Epical Ambient</div>
+    <div class="m-sub">Generative Score</div>
   </div>
   <button class="m-toggle" id="m-toggle"><i class="fas fa-play" id="m-icon"></i></button>
 </div>
@@ -1005,7 +1005,7 @@ document.addEventListener('mousemove',e=>{
   });
 });
 
-/* ── AMBIENT DRONE ───────────────────────────── */
+/* ── GENERATIVE AMBIENT ──────────────────────── */
 let audioCtx, masterGain, musicOn = false;
 
 async function startMusic() {
@@ -1014,50 +1014,67 @@ async function startMusic() {
   await audioCtx.resume();
   const t = audioCtx.currentTime;
 
-  // Output: compressor → destination
+  // Compressor at output
   const comp = audioCtx.createDynamicsCompressor();
-  comp.threshold.value = -20; comp.knee.value = 12;
-  comp.ratio.value = 4; comp.attack.value = 0.01; comp.release.value = 0.3;
+  comp.threshold.value = -18; comp.knee.value = 12;
+  comp.ratio.value = 4; comp.attack.value = 0.02; comp.release.value = 0.4;
   comp.connect(audioCtx.destination);
 
-  // Low-pass at 1400Hz — mellow on earphones, not muffled on phone speakers
-  const lpf = audioCtx.createBiquadFilter();
-  lpf.type = 'lowpass'; lpf.frequency.value = 1400; lpf.Q.value = 0.5;
-  lpf.connect(comp);
-
-  // Light reverb — 2s tail, very low wet mix (0.14) for subtle space
+  // Reverb — 3s tail, 20% wet for depth without mush
   const conv = audioCtx.createConvolver();
-  const rLen = audioCtx.sampleRate * 2;
+  const rLen = audioCtx.sampleRate * 3;
   const rBuf = audioCtx.createBuffer(2, rLen, audioCtx.sampleRate);
   for (let c = 0; c < 2; c++) {
     const d = rBuf.getChannelData(c);
-    for (let i = 0; i < rLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / rLen, 5);
+    for (let i = 0; i < rLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / rLen, 4);
   }
   conv.buffer = rBuf;
-  const dry = audioCtx.createGain(); dry.gain.value = 0.86;
-  const wet = audioCtx.createGain(); wet.gain.value = 0.14;
-  dry.connect(lpf); conv.connect(wet); wet.connect(lpf);
+  const dry = audioCtx.createGain(); dry.gain.value = 0.80;
+  const wet = audioCtx.createGain(); wet.gain.value = 0.20;
+  dry.connect(comp); conv.connect(wet); wet.connect(comp);
 
-  // Master — 8s fade in
+  // Master — 10s fade in, quiet enough to sit under content
   masterGain = audioCtx.createGain();
   masterGain.gain.setValueAtTime(0, t);
-  masterGain.gain.linearRampToValueAtTime(0.26, t + 8);
+  masterGain.gain.linearRampToValueAtTime(0.28, t + 10);
   masterGain.connect(dry);
   masterGain.connect(conv);
 
-  // Three sine oscillators — one octave up from before (phone speakers roll
-  // off below ~180Hz; 220Hz sits safely in their clean range)
-  //   220.00 Hz — A3 root, warm but fully audible on phone speakers
-  //   220.20 Hz — 0.20 Hz detune → ~5s natural beat = meditative breath pulse
-  //   330.00 Hz — E4 perfect fifth, adds gentle air
-  function tone(freq, vol) {
+  // Cmaj7 chord pad — C4 E4 G4 B4, sine, staggered soft entry
+  // All frequencies 260–494Hz: clean on phone speakers
+  const PAD = [261.63, 329.63, 392.00, 493.88];
+  const PAD_VOL = [0.11, 0.09, 0.08, 0.06];
+  PAD.forEach((freq, i) => {
     const o = audioCtx.createOscillator(), g = audioCtx.createGain();
-    o.type = 'sine'; o.frequency.value = freq; g.gain.value = vol;
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, t);
+    g.gain.linearRampToValueAtTime(PAD_VOL[i], t + 5 + i * 2.5);
     o.connect(g); g.connect(masterGain); o.start(t);
+  });
+
+  // Generative melody — C pentatonic notes drift in and out (Brian Eno style)
+  // Each note has a slow attack, hold, and release — overlapping, never repeating
+  const PENTA = [261.63, 329.63, 392.00, 440.00, 523.25, 659.25];
+  function melodNote() {
+    const freq = PENTA[Math.floor(Math.random() * PENTA.length)];
+    const now  = audioCtx.currentTime;
+    const atk  = 1.5 + Math.random() * 2;      // 1.5–3.5s attack
+    const hold = 3   + Math.random() * 5;       // 3–8s hold
+    const rel  = 2   + Math.random() * 2.5;     // 2–4.5s release
+    const vol  = 0.05 + Math.random() * 0.06;   // 0.05–0.11
+
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq;
+    g.gain.setValueAtTime(0, now);
+    g.gain.linearRampToValueAtTime(vol, now + atk);
+    g.gain.setValueAtTime(vol, now + atk + hold);
+    g.gain.linearRampToValueAtTime(0, now + atk + hold + rel);
+    o.connect(g); g.connect(masterGain);
+    o.start(now); o.stop(now + atk + hold + rel + 0.1);
+
+    setTimeout(melodNote, (2.5 + Math.random() * 5) * 1000);
   }
-  tone(220,    0.32);
-  tone(220.20, 0.22);
-  tone(330,    0.09);
+  setTimeout(melodNote, 3000);
 
   musicOn = true;
   document.getElementById('m-icon').className = 'fas fa-pause';
@@ -1070,13 +1087,13 @@ document.getElementById('m-toggle').addEventListener('click', () => {
   masterGain.gain.cancelScheduledValues(now);
   masterGain.gain.setValueAtTime(masterGain.gain.value, now);
   if (musicOn) {
-    masterGain.gain.linearRampToValueAtTime(0, now + 1);
+    masterGain.gain.linearRampToValueAtTime(0, now + 1.5);
     musicOn = false;
     document.getElementById('m-icon').className = 'fas fa-play';
     document.getElementById('m-eq').classList.add('off');
   } else {
     if (audioCtx.state === 'suspended') audioCtx.resume();
-    masterGain.gain.linearRampToValueAtTime(0.26, now + 1.5);
+    masterGain.gain.linearRampToValueAtTime(0.28, now + 2);
     musicOn = true;
     document.getElementById('m-icon').className = 'fas fa-pause';
     document.getElementById('m-eq').classList.remove('off');
