@@ -726,8 +726,8 @@ footer{
     <div class="m-bar"></div>
   </div>
   <div class="m-label">
-    <div class="m-name">Epical Ambience</div>
-    <div class="m-sub">Procedural Score</div>
+    <div class="m-name">Ambient Tone</div>
+    <div class="m-sub">Soothing Drone</div>
   </div>
   <button class="m-toggle" id="m-toggle"><i class="fas fa-play" id="m-icon"></i></button>
 </div>
@@ -1005,96 +1005,80 @@ document.addEventListener('mousemove',e=>{
   });
 });
 
-/* ── PROCEDURAL AMBIENT ─────────────────────── */
-let audioCtx, masterGain, musicOn=false;
-async function startMusic(){
-  if(audioCtx) return;
-  audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+/* ── AMBIENT DRONE ───────────────────────────── */
+let audioCtx, masterGain, musicOn = false;
+
+async function startMusic() {
+  if (audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
   await audioCtx.resume();
+  const t = audioCtx.currentTime;
 
-  // Reverb impulse response — short tail, cube decay = less wash on phone
-  const conv = audioCtx.createConvolver();
-  const rLen = audioCtx.sampleRate*2.5;
-  const rBuf = audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
-  for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,3)}
-  conv.buffer=rBuf;
-
-  // Compressor → prevents clipping/distortion on mobile speakers
+  // Output: compressor → destination
   const comp = audioCtx.createDynamicsCompressor();
-  comp.threshold.value=-18;comp.knee.value=10;comp.ratio.value=5;
-  comp.attack.value=0.005;comp.release.value=0.2;
+  comp.threshold.value = -20; comp.knee.value = 12;
+  comp.ratio.value = 4; comp.attack.value = 0.01; comp.release.value = 0.3;
   comp.connect(audioCtx.destination);
 
-  // High-pass strips sub-bass muddiness on phone speakers
-  const hpf = audioCtx.createBiquadFilter();
-  hpf.type='highpass';hpf.frequency.value=80;hpf.connect(comp);
+  // Warm low-pass ceiling keeps everything mellow (no harshness on phone)
+  const lpf = audioCtx.createBiquadFilter();
+  lpf.type = 'lowpass'; lpf.frequency.value = 700; lpf.Q.value = 0.5;
+  lpf.connect(comp);
 
-  // Low-pass on wet bus — softens harsh reverb tail on small speakers
-  const wetLpf = audioCtx.createBiquadFilter();
-  wetLpf.type='lowpass';wetLpf.frequency.value=3500;wetLpf.connect(hpf);
+  // Light reverb — 2s tail, very low wet mix (0.14) for subtle space
+  const conv = audioCtx.createConvolver();
+  const rLen = audioCtx.sampleRate * 2;
+  const rBuf = audioCtx.createBuffer(2, rLen, audioCtx.sampleRate);
+  for (let c = 0; c < 2; c++) {
+    const d = rBuf.getChannelData(c);
+    for (let i = 0; i < rLen; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / rLen, 5);
+  }
+  conv.buffer = rBuf;
+  const dry = audioCtx.createGain(); dry.gain.value = 0.86;
+  const wet = audioCtx.createGain(); wet.gain.value = 0.14;
+  dry.connect(lpf); conv.connect(wet); wet.connect(lpf);
 
-  const dryBus = audioCtx.createGain();
-  const wetBus = audioCtx.createGain();
-  dryBus.gain.value = 0.72;
-  wetBus.gain.value = 0.22;
-  conv.connect(wetBus);
-  dryBus.connect(hpf);
-  wetBus.connect(wetLpf);
-
-  // Separate master for fade in/out
+  // Master — 8s fade in
   masterGain = audioCtx.createGain();
-  masterGain.gain.setValueAtTime(0, audioCtx.currentTime);
-  masterGain.gain.linearRampToValueAtTime(0.70, audioCtx.currentTime+5);
-
-  // Route masterGain → both buses
-  masterGain.connect(dryBus);
+  masterGain.gain.setValueAtTime(0, t);
+  masterGain.gain.linearRampToValueAtTime(0.78, t + 8);
+  masterGain.connect(dry);
   masterGain.connect(conv);
 
-  function lfo(rate,target,depth){
-    const l=audioCtx.createOscillator(),lg=audioCtx.createGain();
-    l.frequency.value=rate;lg.gain.value=depth;l.connect(lg);lg.connect(target);l.start();
+  // Three sine oscillators only:
+  //   110.00 Hz — A2 root (warm, round)
+  //   110.18 Hz — 0.18 Hz detune → ~5.5s natural beat = meditative breath pulse
+  //   165.00 Hz — E3 perfect fifth, adds gentle air
+  function tone(freq, vol) {
+    const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+    o.type = 'sine'; o.frequency.value = freq; g.gain.value = vol;
+    o.connect(g); g.connect(masterGain); o.start(t);
   }
-  function source(freq,vol,lfoRate,lfoDepth,type='sine'){
-    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-    o.type=type;o.frequency.value=freq;g.gain.value=vol;
-    lfo(lfoRate,o.frequency,lfoDepth);o.connect(g);g.connect(masterGain);o.start();
-  }
-  // Deep drones — C2 root with detuned pair for warmth
-  source(65.41,.22,.03,.9);source(65.41*.999,.12,.05,.6);source(98,.10,.04,.5);source(77.78,.07,.06,.4);source(130.81,.06,.07,.3);
-  function pad(freq,vol){
-    const o=audioCtx.createOscillator(),filt=audioCtx.createBiquadFilter(),g=audioCtx.createGain();
-    o.type='triangle';o.frequency.value=freq;filt.type='lowpass';filt.frequency.value=700;filt.Q.value=.3;
-    g.gain.setValueAtTime(0,audioCtx.currentTime);g.gain.linearRampToValueAtTime(vol,audioCtx.currentTime+8);
-    lfo(.04+Math.random()*.04,o.frequency,freq*.002);o.connect(filt);filt.connect(g);g.connect(masterGain);o.start();
-  }
-  pad(130.81,.045);pad(196,.036);pad(155.56,.030);pad(261.63,.025);
-  const SHIMMER=[523.25,622.25,698.46,783.99,932.33,1046.50];
-  function shimmer(){
-    const f=SHIMMER[Math.floor(Math.random()*SHIMMER.length)],t=audioCtx.currentTime;
-    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-    o.type='sine';o.frequency.value=f;
-    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.055,t+2.5);g.gain.linearRampToValueAtTime(0,t+10);
-    o.connect(g);g.connect(masterGain);o.start(t);o.stop(t+11);
-    setTimeout(shimmer,7000+Math.random()*9000);
-  }
-  setTimeout(shimmer,4000);
-  musicOn=true;
-  document.getElementById('m-icon').className='fas fa-pause';
+  tone(110,    0.32);
+  tone(110.18, 0.22);
+  tone(165,    0.09);
+
+  musicOn = true;
+  document.getElementById('m-icon').className = 'fas fa-pause';
   document.getElementById('m-eq').classList.remove('off');
 }
-document.getElementById('m-toggle').addEventListener('click',()=>{
-  if(!audioCtx){startMusic();return}
-  if(musicOn){
-    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-    masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(0,audioCtx.currentTime+.7);
-    musicOn=false;document.getElementById('m-icon').className='fas fa-play';document.getElementById('m-eq').classList.add('off');
+
+document.getElementById('m-toggle').addEventListener('click', () => {
+  if (!audioCtx) { startMusic(); return; }
+  const now = audioCtx.currentTime;
+  masterGain.gain.cancelScheduledValues(now);
+  masterGain.gain.setValueAtTime(masterGain.gain.value, now);
+  if (musicOn) {
+    masterGain.gain.linearRampToValueAtTime(0, now + 1);
+    musicOn = false;
+    document.getElementById('m-icon').className = 'fas fa-play';
+    document.getElementById('m-eq').classList.add('off');
   } else {
-    if(audioCtx.state==='suspended') audioCtx.resume();
-    masterGain.gain.cancelScheduledValues(audioCtx.currentTime);
-    masterGain.gain.setValueAtTime(masterGain.gain.value,audioCtx.currentTime);
-    masterGain.gain.linearRampToValueAtTime(.70,audioCtx.currentTime+1.2);
-    musicOn=true;document.getElementById('m-icon').className='fas fa-pause';document.getElementById('m-eq').classList.remove('off');
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+    masterGain.gain.linearRampToValueAtTime(0.78, now + 1.5);
+    musicOn = true;
+    document.getElementById('m-icon').className = 'fas fa-pause';
+    document.getElementById('m-eq').classList.remove('off');
   }
 });
 </script>
