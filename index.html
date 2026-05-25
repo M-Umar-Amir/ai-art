@@ -9,11 +9,9 @@
 <link rel="shortcut icon" href="favicon.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&family=Rajdhani:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<link rel="preload" as="style" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"></noscript>
-<link rel="preload" as="style" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap"></noscript>
+<link rel="preload" as="image" href="assets/e.jpg" fetchpriority="high">
 <style>
 :root{
   --black:#040404;
@@ -318,6 +316,15 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   .port-head{flex-direction:column;align-items:flex-start}
   .featured-swiper .swiper-slide{width:210px;height:300px}
 }
+
+/* ── HERO INTRO ANIMATIONS ── */
+.hero-eyebrow,.hero-name,.hero-tagline,.hero-desc,.hero-cta-row{opacity:0;transform:translateY(40px)}
+#hero.hero-revealed .hero-eyebrow{animation:heroIn 1s cubic-bezier(.16,1,.3,1) forwards .15s}
+#hero.hero-revealed .hero-name{animation:heroIn 1.4s cubic-bezier(.16,1,.3,1) forwards .3s}
+#hero.hero-revealed .hero-tagline{animation:heroIn 1s cubic-bezier(.16,1,.3,1) forwards .6s}
+#hero.hero-revealed .hero-desc{animation:heroIn 1s ease forwards .85s}
+#hero.hero-revealed .hero-cta-row{animation:heroIn 1s ease forwards 1.05s}
+@keyframes heroIn{to{opacity:1;transform:none}}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
 <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
@@ -331,15 +338,15 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <!-- ENTER OVERLAY -->
 <div id="enter-overlay">
   <div class="eo-bar eo-bar-top"></div>
-  <img src="assets/e.jpg" class="eo-logo" alt="Epical Studio">
+  <img src="assets/e.jpg" class="eo-logo" alt="Epical Studio" width="1280" height="853">
   <div class="eo-line"></div>
-  <button class="eo-btn" id="enter-btn"><i class="fas fa-play" style="font-size:.58rem;margin-right:7px"></i>Enter with Sound</button>
+  <button class="eo-btn" id="enter-btn"><svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" style="margin-right:7px;flex-shrink:0" aria-hidden="true"><polygon points="0,0 9,5 0,10"/></svg>Enter with Sound</button>
   <div class="eo-bar eo-bar-bot"></div>
 </div>
 
 <!-- NAV -->
 <nav id="nav">
-  <a href="#hero"><img src="assets/e.jpg" class="nav-logo-img" alt="Epical Studio"></a>
+  <a href="#hero"><img src="assets/e.jpg" class="nav-logo-img" alt="Epical Studio" width="1280" height="853"></a>
   <ul class="nav-links">
     <li><a href="#featured">Featured</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
@@ -559,7 +566,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <footer>
   <div class="wrap">
     <div class="foot-inner">
-      <img src="assets/e.jpg" class="foot-logo-img" alt="Epical Studio">
+      <img src="assets/e.jpg" class="foot-logo-img" alt="Epical Studio" width="1280" height="853">
       <div class="socials">
         <a class="soc" href="https://www.linkedin.com/company/smarthireai2026" target="_blank"><i class="fab fa-linkedin-in"></i></a>
         <a class="soc" href="https://wa.me/923002166620" target="_blank"><i class="fab fa-whatsapp"></i></a>
@@ -593,11 +600,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <!-- WA FLOAT -->
 <a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20AI%20art." target="_blank"><i class="fab fa-whatsapp"></i></a>
 
-<!-- SCRIPTS -->
-<script defer src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js"></script>
 
 <script type="module">
 /* ── MEDIA DATA ── */
@@ -707,14 +709,24 @@ heroEl.addEventListener('mousemove',e=>{
 const nav=document.getElementById('nav');
 window.addEventListener('scroll',()=>nav.classList.toggle('stuck',scrollY>60));
 
+/* ── DYNAMIC RESOURCE LOADERS ── */
+function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
+function loadStyle(href){const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)}
+
 /* ── ENTER OVERLAY ── */
 document.getElementById('enter-btn').addEventListener('click',()=>{
   startMusic();
   document.getElementById('enter-overlay').classList.add('fade');
   setTimeout(()=>document.getElementById('enter-overlay').style.display='none',1300);
   initHeroVideo();
-  requestAnimationFrame(()=>{buildFeatured();buildGrid()});
-  window.dispatchEvent(new Event('overlayDone'));
+  document.getElementById('hero').classList.add('hero-revealed');
+  loadStyle('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
+  loadStyle('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
+  buildGrid();
+  loadScript('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js').then(buildFeatured);
+  loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js').then(()=>{
+    VanillaTilt.init(document.querySelectorAll('.port-item'),{max:6,speed:400,glare:true,'max-glare':.08,scale:1.02});
+  });
 });
 
 /* ── HERO VIDEO ── */
@@ -858,26 +870,11 @@ document.querySelectorAll('.about-img-wrap img').forEach(img=>{
   if(img.complete)img.classList.add('img-loaded');
 });
 
-/* ── GSAP SCROLL REVEAL ── */
-if(typeof gsap!=='undefined'&&typeof ScrollTrigger!=='undefined'){
-  gsap.registerPlugin(ScrollTrigger);
-  document.querySelectorAll('.sr-up').forEach(el=>{
-    gsap.fromTo(el,{opacity:0,y:36},{opacity:1,y:0,duration:.9,ease:'power3.out',scrollTrigger:{trigger:el,start:'top 88%',toggleActions:'play none none none'}});
-  });
-}
-
-/* ── GSAP HERO INTRO ── */
-if(typeof gsap!=='undefined'){
-  gsap.set(['.hero-eyebrow','.hero-name','.hero-tagline','.hero-desc','.hero-cta-row'],{opacity:0,y:40});
-}
-window.addEventListener('overlayDone',()=>{
-  if(typeof gsap==='undefined')return;
-  gsap.to('.hero-eyebrow',{opacity:1,y:0,duration:1,ease:'expo.out',delay:.15});
-  gsap.to('.hero-name',{opacity:1,y:0,duration:1.4,ease:'expo.out',delay:.3});
-  gsap.to('.hero-tagline',{opacity:1,y:0,duration:1,ease:'expo.out',delay:.6});
-  gsap.to('.hero-desc',{opacity:1,y:0,duration:1,ease:'power3.out',delay:.85});
-  gsap.to('.hero-cta-row',{opacity:1,y:0,duration:1,ease:'power3.out',delay:1.05});
-});
+/* ── SCROLL REVEAL (native IntersectionObserver) ── */
+const srObs=new IntersectionObserver((entries,obs)=>{
+  entries.forEach(e=>{if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target)}});
+},{rootMargin:'0px 0px -80px 0px'});
+document.querySelectorAll('.sr-up').forEach(el=>srObs.observe(el));
 
 /* ── 3D TILT ON ORDER CARDS ── */
 document.querySelectorAll('.buy-card').forEach(c=>{
