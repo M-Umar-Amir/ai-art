@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Epical Studio - Creative Images and Videos</title>
-<meta name="description" content="Epical Studio creates stunning cinematic images and videos — cultural narratives, historical epics, 3D character art, and commercial works. Commission your vision today.">
+<meta name="description" content="Epical Studio creates stunning cinematic images and videos —  Commission your vision today.">
 <meta name="keywords" content="cinematic video production, cinematic video production studio, synthetic cinema, commercial video production, video production studio, commission cinematic video, custom cinematic video, cinematic image production, cinematic cultural video, cinematic commercial studio">
 <meta name="robots" content="index, follow">
 <meta name="author" content="Epical Studio">
@@ -379,6 +379,9 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 .sr-up{opacity:0;transform:translateY(34px);transition:opacity .7s,transform .7s}
 .sr-up.visible{opacity:1;transform:none}
 
+/* ── SEO VISUALLY-HIDDEN (clip technique, readable by crawlers) ── */
+.seo-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
 /* ── RESPONSIVE ── */
 @media(max-width:960px){
   nav{padding:16px 24px}nav.stuck{padding:12px 24px}
@@ -441,7 +444,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   <div class="hero-lb hero-lb-bot"></div>
   <div class="hero-content">
     <div class="hero-eyebrow"><span></span>Cinematic Image & Video Production Studio<span></span></div>
-    <h1 class="hero-name">EPICAL</h1>
+    <h1 class="hero-name">EPICAL<span class="seo-hidden"> Epical Filmworks Studio creates beautiful cinematic images and videos, cultural narratives, historical epics, 3D character art and commercial works</span></h1>
     <div class="hero-filmworks">a division of filmworks</div>
     <p class="hero-desc">Commission cinematic images & videos</p>
     <div class="hero-cta-row">
