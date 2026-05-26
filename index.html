@@ -104,8 +104,8 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Bebas+Neue&family=Cinzel:wght@400;600;700;900&family=Space+Grotesk:wght@300;400;500;600&display=swap"></noscript>
 <link rel="preload" as="image" href="assets/e.jpg" fetchpriority="high">
 <style>
 :root{
@@ -176,8 +176,8 @@ nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:13px 52p
 #particles-hero{position:absolute;inset:0;z-index:1}
 .hero-vignette{
   position:absolute;inset:0;z-index:2;pointer-events:none;
-  background:radial-gradient(ellipse at center,transparent 15%,rgba(4,4,4,.88) 80%),
-    linear-gradient(to bottom,rgba(4,4,4,.35) 0%,transparent 25%,transparent 70%,rgba(4,4,4,.7) 100%);
+  background:radial-gradient(ellipse at center,transparent 25%,rgba(4,4,4,.42) 80%),
+    linear-gradient(to bottom,rgba(4,4,4,.28) 0%,transparent 20%,transparent 72%,rgba(4,4,4,.5) 100%);
 }
 .hero-flare{position:absolute;inset:0;z-index:2;pointer-events:none;background:radial-gradient(circle 320px at var(--flare-x) var(--flare-y),rgba(200,169,110,.06) 0%,transparent 70%);transition:background .08s}
 .hero-lb{position:absolute;left:0;right:0;height:clamp(28px,4.5vh,58px);background:rgba(4,4,4,.96);z-index:3}
@@ -186,11 +186,16 @@ nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:13px 52p
 .hero-eyebrow{display:inline-flex;align-items:center;gap:14px;font-size:.6rem;letter-spacing:5px;text-transform:uppercase;color:rgba(200,169,110,.65);margin-bottom:24px}
 .hero-eyebrow span{display:block;width:28px;height:1px;background:var(--gold);opacity:.5}
 .hero-name{
-  font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,17vw,13rem);
-  letter-spacing:.1em;line-height:.9;
+  font-family:'Orbitron',sans-serif;font-size:clamp(3.2rem,11vw,9rem);
+  letter-spacing:.22em;line-height:.95;font-weight:900;
   background:linear-gradient(180deg,#ffffff 0%,var(--cream) 40%,rgba(168,158,140,.55) 100%);
   -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  filter:drop-shadow(0 0 70px rgba(200,169,110,.18));margin-bottom:10px;
+  filter:drop-shadow(0 0 70px rgba(200,169,110,.18));margin-bottom:4px;
+}
+.hero-filmworks{
+  font-family:'Orbitron',sans-serif;font-size:clamp(.85rem,2.6vw,1.7rem);
+  letter-spacing:.55em;font-weight:700;text-transform:uppercase;
+  color:var(--gold);opacity:.72;margin-bottom:22px;
 }
 .hero-tagline{
   font-family:'Cinzel',serif;font-size:clamp(.55rem,1.4vw,.8rem);
@@ -391,12 +396,13 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 }
 
 /* ── HERO INTRO ANIMATIONS ── */
-.hero-eyebrow,.hero-name,.hero-tagline,.hero-desc,.hero-cta-row{opacity:0;transform:translateY(40px)}
+.hero-eyebrow,.hero-name,.hero-filmworks,.hero-tagline,.hero-desc,.hero-cta-row{opacity:0;transform:translateY(40px)}
 #hero.hero-revealed .hero-eyebrow{animation:heroIn 1s cubic-bezier(.16,1,.3,1) forwards .15s}
 #hero.hero-revealed .hero-name{animation:heroIn 1.4s cubic-bezier(.16,1,.3,1) forwards .3s}
-#hero.hero-revealed .hero-tagline{animation:heroIn 1s cubic-bezier(.16,1,.3,1) forwards .6s}
-#hero.hero-revealed .hero-desc{animation:heroIn 1s ease forwards .85s}
-#hero.hero-revealed .hero-cta-row{animation:heroIn 1s ease forwards 1.05s}
+#hero.hero-revealed .hero-filmworks{animation:heroIn 1s cubic-bezier(.16,1,.3,1) forwards .52s}
+#hero.hero-revealed .hero-tagline{animation:heroIn 1s cubic-bezier(.16,1,.3,1) forwards .68s}
+#hero.hero-revealed .hero-desc{animation:heroIn 1s ease forwards .9s}
+#hero.hero-revealed .hero-cta-row{animation:heroIn 1s ease forwards 1.1s}
 @keyframes heroIn{to{opacity:1;transform:none}}
 </style>
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
@@ -420,7 +426,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
     <li><a href="#featured">Featured</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
     <li><a href="#about">About</a></li>
-    <li><a href="#contact">Contact</a></li>
     <li><a href="#buy">Order</a></li>
   </ul>
   <button class="nav-order" onclick="document.getElementById('buy').scrollIntoView({behavior:'smooth'})">Order Now</button>
@@ -437,6 +442,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   <div class="hero-content">
     <div class="hero-eyebrow"><span></span>Cinematic Video Production Studio<span></span></div>
     <h1 class="hero-name">EPICAL</h1>
+    <div class="hero-filmworks">Filmworks</div>
     <div class="hero-tagline">— The Art of Synthetic Cinema —</div>
     <p class="hero-desc">Commission cinematic videos &amp; images — cultural narratives, historical epics, commercial works.</p>
     <div class="hero-cta-row">
@@ -556,38 +562,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 
 <div class="grad-div"></div>
 
-<!-- CONTACT -->
-<section id="contact">
-  <div class="wrap">
-    <div style="text-align:center">
-      <div class="sec-eyebrow sr-up">Get In Touch</div>
-      <h2 class="sec-title sr-up">Start a Project</h2>
-      <p class="sec-sub sr-up" style="margin:0 auto">Available 24/7 — let's create something extraordinary together</p>
-    </div>
-    <div class="contact-inner">
-      <p class="contact-desc">We're Epical Studio, a creative studio specialising in premium images and cinematic videos. Every project is personal.</p>
-      <a class="clink" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20commission%20artwork." target="_blank">
-        <div class="clink-ico" style="background:rgba(200,169,110,.07)"><i class="fab fa-whatsapp" style="color:var(--gold)"></i></div>
-        <div><strong>WhatsApp</strong><span>+92 300 216 6620 — Fastest response</span></div>
-      </a>
-      <a class="clink" href="https://www.linkedin.com/company/smarthireai2026" target="_blank">
-        <div class="clink-ico" style="background:rgba(200,169,110,.07)"><i class="fab fa-linkedin-in" style="color:var(--gold)"></i></div>
-        <div><strong>LinkedIn</strong><span>Epical Studio</span></div>
-      </a>
-      <a class="clink" href="https://www.upwork.com/services/product/design-ai-generated-photo-or-video-2056971193430539602?ref=project_share" target="_blank">
-        <div class="clink-ico" style="background:rgba(200,169,110,.07)"><i class="fas fa-briefcase" style="color:var(--gold)"></i></div>
-        <div><strong>Upwork</strong><span>Secured milestone payments</span></div>
-      </a>
-      <a class="clink" href="mailto:umaramir.dev@gmail.com">
-        <div class="clink-ico" style="background:rgba(200,169,110,.07)"><i class="fas fa-envelope" style="color:var(--gold)"></i></div>
-        <div><strong>Email</strong><span>umaramir.dev@gmail.com</span></div>
-      </a>
-    </div>
-  </div>
-</section>
-
-<div class="grad-div"></div>
-
 <!-- ORDER -->
 <section id="buy">
   <div class="wrap">
@@ -635,7 +609,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
         <a href="#featured">Featured</a>
         <a href="#portfolio">Portfolio</a>
         <a href="#about">About</a>
-        <a href="#contact">Contact</a>
         <a href="#buy">Order</a>
       </div>
       <div class="foot-copy">© 2026 Epical Studio — The Art of Synthetic Cinema</div>
@@ -793,7 +766,7 @@ function initHeroVideo(){
   const v=document.getElementById('hero-bg');
   v.src='assets/videos/showreel.mp4';
   v.play().catch(()=>{});
-  setTimeout(()=>{v.style.opacity='.3'},300);
+  setTimeout(()=>{v.style.opacity='.65'},300);
 }
 
 /* ── FEATURED SWIPER ── */
@@ -961,6 +934,16 @@ document.addEventListener('mousemove',e=>{
     b.style.transform=`translate(${xp*(i+1)*.5}px,${yp*(i+1)*.5}px)`;
   });
 });
+
+/* ── AUTOPLAY MUSIC ON FIRST INTERACTION ── */
+(function(){
+  const EVENTS=['click','mousemove','scroll','touchstart','keydown'];
+  function onFirst(){
+    EVENTS.forEach(e=>document.removeEventListener(e,onFirst,{capture:true}));
+    startMusic();
+  }
+  EVENTS.forEach(e=>document.addEventListener(e,onFirst,{capture:true,once:false,passive:true}));
+})();
 
 /* ── GENERATIVE AMBIENT ── */
 let audioCtx,masterGain,musicOn=false;
