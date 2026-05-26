@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -122,7 +122,7 @@
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--black);color:var(--cream);font-family:'Space Grotesk',sans-serif;overflow-x:hidden;cursor:none}
+body{background:var(--black);color:var(--cream);font-family:'Space Grotesk',sans-serif;overflow-x:hidden}
 ::selection{background:rgba(200,169,110,.28)}
 ::-webkit-scrollbar{width:2px}
 ::-webkit-scrollbar-track{background:var(--black)}
@@ -130,9 +130,6 @@ body{background:var(--black);color:var(--cream);font-family:'Space Grotesk',sans
 a{text-decoration:none;color:inherit}
 img{display:block}
 
-/* ── CURSOR ── */
-#c-dot{position:fixed;width:6px;height:6px;background:var(--gold);border-radius:50%;pointer-events:none;z-index:99999;transform:translate(-50%,-50%);transition:transform .1s}
-#c-ring{position:fixed;width:28px;height:28px;border:1px solid rgba(200,169,110,.38);border-radius:50%;pointer-events:none;z-index:99998;transform:translate(-50%,-50%);transition:width .28s,height .28s,border-color .28s}
 
 /* ── FILM GRAIN ── */
 #grain{position:fixed;inset:0;z-index:99997;pointer-events:none;opacity:.03;mix-blend-mode:overlay;
@@ -142,24 +139,15 @@ img{display:block}
 #enter-overlay{
   position:fixed;inset:0;z-index:9999;background:#040404;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
-  transition:opacity 1.2s ease;
 }
-#enter-overlay.fade{opacity:0;pointer-events:none}
-.eo-bar{position:absolute;left:0;right:0;height:clamp(36px,6vh,72px);background:#040404;z-index:1}
+.eo-bar{position:absolute;left:0;right:0;height:clamp(36px,6vh,72px);background:#040404;z-index:1;transition:height .9s cubic-bezier(.4,0,.2,1)}
 .eo-bar-top{top:0}.eo-bar-bot{bottom:0}
-.eo-logo{width:min(92vw,1380px);max-height:72vh;object-fit:contain;opacity:0;mix-blend-mode:lighten;margin-bottom:36px;animation:eoUp 2.4s cubic-bezier(.16,1,.3,1) forwards .4s}
+.eo-logo{width:min(92vw,1380px);max-height:72vh;object-fit:contain;opacity:0;mix-blend-mode:lighten;animation:eoUp 2.4s cubic-bezier(.16,1,.3,1) forwards .4s;transition:transform 1.8s cubic-bezier(.4,0,.2,1),opacity 1.4s ease}
 @keyframes eoUp{from{opacity:0;transform:scale(.93) translateY(14px)}to{opacity:1;transform:scale(1) translateY(0)}}
-.eo-line{width:1px;height:48px;background:linear-gradient(to bottom,transparent,var(--gold));margin-bottom:18px;opacity:0;animation:eoUp .7s ease forwards 1.9s}
-.eo-btn{
-  padding:12px 50px;border:1px solid rgba(200,169,110,.4);border-radius:0;
-  font-family:'Space Grotesk',sans-serif;font-size:.68rem;font-weight:500;
-  letter-spacing:4px;text-transform:uppercase;color:var(--gold);
-  cursor:none;background:transparent;transition:all .3s;
-  opacity:0;animation:eoUp .7s ease forwards 2.3s;position:relative;overflow:hidden;
-}
-.eo-btn::before{content:'';position:absolute;inset:0;background:rgba(200,169,110,.06);opacity:0;transition:opacity .3s}
-.eo-btn:hover{border-color:var(--gold);color:var(--cream);letter-spacing:5px}
-.eo-btn:hover::before{opacity:1}
+/* Eclipse-out animation */
+#enter-overlay.eclipse-out{opacity:0;pointer-events:none;transition:opacity 1.3s ease .5s}
+#enter-overlay.eclipse-out .eo-bar{height:0!important}
+#enter-overlay.eclipse-out .eo-logo{transform:scale(4.5) !important;opacity:0!important}
 
 /* ── NAV ── */
 nav{
@@ -176,7 +164,7 @@ nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:13px 52p
 .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:linear-gradient(to right,var(--gold),var(--silver));transition:width .3s}
 .nav-links a:hover{color:var(--cream)}
 .nav-links a:hover::after{width:100%}
-.nav-order{padding:8px 22px;border:1px solid rgba(200,169,110,.38);border-radius:0;font-family:'Space Grotesk',sans-serif;font-size:.66rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);cursor:none;background:transparent;transition:all .3s}
+.nav-order{padding:8px 22px;border:1px solid rgba(200,169,110,.38);border-radius:0;font-family:'Space Grotesk',sans-serif;font-size:.66rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);background:transparent;transition:all .3s}
 .nav-order:hover{background:rgba(200,169,110,.08);color:var(--cream);letter-spacing:4px}
 
 /* ── HERO ── */
@@ -210,9 +198,9 @@ nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:13px 52p
 }
 .hero-desc{font-size:clamp(.88rem,1.7vw,1rem);color:rgba(221,216,204,.38);max-width:440px;margin:0 auto 44px;line-height:1.82;font-weight:300;letter-spacing:.015em}
 .hero-cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.btn-gold{padding:13px 36px;background:linear-gradient(135deg,rgba(200,169,110,.12),rgba(200,169,110,.06));border:1px solid rgba(200,169,110,.48);border-radius:0;color:var(--gold);font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;cursor:none;transition:all .3s;display:inline-flex;align-items:center;gap:9px}
+.btn-gold{padding:13px 36px;background:linear-gradient(135deg,rgba(200,169,110,.12),rgba(200,169,110,.06));border:1px solid rgba(200,169,110,.48);border-radius:0;color:var(--gold);font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:all .3s;display:inline-flex;align-items:center;gap:9px}
 .btn-gold:hover{background:rgba(200,169,110,.14);border-color:var(--gold);color:var(--cream);letter-spacing:4px}
-.btn-ghost{padding:12px 34px;background:transparent;border:1px solid rgba(221,216,204,.1);border-radius:0;color:rgba(221,216,204,.4);font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;cursor:none;transition:all .3s;display:inline-flex;align-items:center;gap:9px}
+.btn-ghost{padding:12px 34px;background:transparent;border:1px solid rgba(221,216,204,.1);border-radius:0;color:rgba(221,216,204,.4);font-family:'Space Grotesk',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:all .3s;display:inline-flex;align-items:center;gap:9px}
 .btn-ghost:hover{border-color:rgba(200,169,110,.38);color:var(--gold);letter-spacing:4px}
 .scroll-hint{position:absolute;bottom:clamp(50px,8vh,90px);left:50%;transform:translateX(-50%);z-index:4;display:flex;flex-direction:column;align-items:center;gap:8px;color:rgba(200,169,110,.28);font-size:.56rem;letter-spacing:4px;text-transform:uppercase}
 .scroll-bar{width:1px;height:44px;background:linear-gradient(to bottom,transparent,rgba(200,169,110,.38));animation:sb 2.2s ease-in-out infinite}
@@ -266,13 +254,13 @@ section{padding:100px 0}
 .port-blob{position:absolute;border-radius:50%;filter:blur(160px);pointer-events:none;opacity:.055}
 .port-head{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;margin-bottom:40px}
 .filters{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:40px}
-.f-btn{padding:7px 17px;border:1px solid var(--border);border-radius:0;font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:rgba(221,216,204,.32);cursor:none;background:transparent;transition:all .3s}
+.f-btn{padding:7px 17px;border:1px solid var(--border);border-radius:0;font-family:'Space Grotesk',sans-serif;font-size:.62rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;color:rgba(221,216,204,.32);background:transparent;transition:all .3s}
 .f-btn.active,.f-btn:hover{border-color:rgba(200,169,110,.38);color:var(--gold);background:rgba(200,169,110,.04)}
 .port-grid{columns:4;column-gap:10px}
 @media(max-width:1100px){.port-grid{columns:3}}
 @media(max-width:740px){.port-grid{columns:2}}
 @media(max-width:460px){.port-grid{columns:1}}
-.port-item{break-inside:avoid;margin-bottom:10px;position:relative;border-radius:0;overflow:hidden;cursor:none;border:1px solid var(--border);transition:transform .4s,box-shadow .4s,opacity .4s,border-color .3s}
+.port-item{break-inside:avoid;margin-bottom:10px;position:relative;border-radius:0;overflow:hidden;cursor:pointer;border:1px solid var(--border);transition:transform .4s,box-shadow .4s,opacity .4s,border-color .3s}
 .port-item:hover{transform:translateY(-5px);box-shadow:0 20px 50px rgba(200,169,110,.09);border-color:rgba(200,169,110,.22)}
 .port-item img,.port-item video{display:block;width:100%;height:auto;transition:transform .5s}
 .port-item:hover img,.port-item:hover video{transform:scale(1.035)}
@@ -289,9 +277,9 @@ section{padding:100px 0}
 #lightbox.open{opacity:1;pointer-events:all}
 #lb-content{position:relative;max-width:90vw;max-height:90vh;display:flex;align-items:center;justify-content:center}
 #lb-content img,#lb-content video{max-width:90vw;max-height:88vh;border-radius:0;border:1px solid var(--border);object-fit:contain}
-#lb-close{position:fixed;top:20px;right:20px;width:40px;height:40px;border-radius:0;background:rgba(4,4,4,.8);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:rgba(221,216,204,.45);font-size:.82rem;cursor:none;transition:all .3s}
+#lb-close{position:fixed;top:20px;right:20px;width:40px;height:40px;border-radius:0;background:rgba(4,4,4,.8);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:rgba(221,216,204,.45);font-size:.82rem;cursor:pointer;transition:all .3s}
 #lb-close:hover{border-color:rgba(220,70,70,.5);color:#d66}
-#lb-prev,#lb-next{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:0;background:rgba(4,4,4,.7);border:1px solid rgba(200,169,110,.18);display:flex;align-items:center;justify-content:center;color:rgba(221,216,204,.55);font-size:.88rem;cursor:none;transition:all .3s}
+#lb-prev,#lb-next{position:fixed;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:0;background:rgba(4,4,4,.7);border:1px solid rgba(200,169,110,.18);display:flex;align-items:center;justify-content:center;color:rgba(221,216,204,.55);font-size:.88rem;cursor:pointer;transition:all .3s}
 #lb-prev{left:16px}#lb-next{right:16px}
 #lb-prev:hover,#lb-next:hover{border-color:var(--gold);color:var(--gold)}
 #lb-caption{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:.74rem;letter-spacing:2.5px;color:rgba(221,216,204,.45);text-align:center;white-space:nowrap}
@@ -318,11 +306,11 @@ section{padding:100px 0}
 /* ── IMG LAZY FADE ── */
 .port-item img{opacity:0;transition:opacity .45s ease,transform .5s}
 .port-item img.img-loaded{opacity:1}
-/* ── VIDEO PLACEHOLDER ── */
-.vid-placeholder{width:100%;aspect-ratio:9/16;background:linear-gradient(135deg,#0e0d0b 0%,#181410 50%,#0e0d0b 100%);background-size:200% 200%;animation:vShimmer 3.5s ease-in-out infinite;display:flex;align-items:center;justify-content:center;position:relative}
-@keyframes vShimmer{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
-.vid-placeholder-icon{width:38px;height:38px;border-radius:0;background:rgba(200,169,110,.07);border:1px solid rgba(200,169,110,.18);display:flex;align-items:center;justify-content:center;color:rgba(200,169,110,.35);font-size:.65rem;transition:all .3s}
-.port-item:hover .vid-placeholder-icon{background:rgba(200,169,110,.14);border-color:rgba(200,169,110,.4);color:var(--gold)}
+/* ── VIDEO THUMBNAIL POSTER ── */
+.vid-thumb{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;opacity:0;transition:opacity .45s ease}
+.vid-thumb.img-loaded{opacity:1}
+.vid-badge-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;width:48px;height:48px;border-radius:0;background:rgba(4,4,4,.68);backdrop-filter:blur(8px);border:1px solid rgba(200,169,110,.4);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.9rem;transition:all .3s;pointer-events:none}
+.port-item:hover .vid-badge-play{background:rgba(200,169,110,.15);border-color:var(--gold);transform:translate(-50%,-50%) scale(1.1)}
 
 /* ── CONTACT ── */
 #contact{background:var(--black);position:relative}
@@ -374,7 +362,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 .m-label{display:flex;flex-direction:column}
 .m-name{font-size:.68rem;font-weight:500;color:var(--cream);letter-spacing:.3px}
 .m-sub{font-size:.58rem;color:rgba(221,216,204,.28)}
-.m-toggle{width:29px;height:29px;border-radius:0;background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.28);color:var(--gold);font-size:.68rem;cursor:none;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.m-toggle{width:29px;height:29px;border-radius:0;background:rgba(200,169,110,.08);border:1px solid rgba(200,169,110,.28);color:var(--gold);font-size:.68rem;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s}
 .m-toggle:hover{background:rgba(200,169,110,.16)}
 
 /* ── WA FLOAT ── */
@@ -417,20 +405,16 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <body>
 
 <div id="grain"></div>
-<div id="c-dot"></div>
-<div id="c-ring"></div>
 
 <!-- ENTER OVERLAY -->
-<div id="enter-overlay">
+<div id="enter-overlay" role="presentation" aria-hidden="true">
   <div class="eo-bar eo-bar-top"></div>
-  <img src="assets/e.jpg" class="eo-logo" alt="Epical Studio" width="1280" height="853">
-  <div class="eo-line"></div>
-  <button class="eo-btn" id="enter-btn"><svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor" style="margin-right:7px;flex-shrink:0" aria-hidden="true"><polygon points="0,0 9,5 0,10"/></svg>Enter with Sound</button>
+  <img src="assets/e.jpg" class="eo-logo" alt="" width="1280" height="853">
   <div class="eo-bar eo-bar-bot"></div>
 </div>
 
 <!-- NAV -->
-<nav id="nav">
+<nav id="nav" aria-label="Main navigation">
   <a href="#hero"><img src="assets/e.jpg" class="nav-logo-img" alt="Epical Studio" width="1280" height="853"></a>
   <ul class="nav-links">
     <li><a href="#featured">Featured</a></li>
@@ -452,7 +436,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   <div class="hero-lb hero-lb-bot"></div>
   <div class="hero-content">
     <div class="hero-eyebrow"><span></span>Cinematic Video Production Studio<span></span></div>
-    <div class="hero-name">EPICAL</div>
+    <h1 class="hero-name">EPICAL</h1>
     <div class="hero-tagline">— The Art of Synthetic Cinema —</div>
     <p class="hero-desc">Commission cinematic videos &amp; images — cultural narratives, historical epics, commercial works.</p>
     <div class="hero-cta-row">
@@ -678,63 +662,48 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <script type="module">
 /* ── MEDIA DATA ── */
 const MEDIA = [
-  {type:'img',src:'assets/images/stkmedia_A_Gen_Z_girl_standing_alone_in_heavy_rain_at_night_w_fbb19fb3-80d1-4f9f-8623-6d7bc52a43ce_1.png',cat:'cultural',title:'Gen Z Girl in Heavy Rain',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_A_friendly_adorable_3D_animated_lion_cub_with_a_fluf_8ad87cb2-1d27-42cf-ab9a-3d03470c2190_2.png',cat:'3dart',title:'Friendly 3D Animated Lion Cub',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_A_group_whirling_dervish_in_traditional_Mughal-era_a_dd373a40-f56f-4afd-92ad-aada50860db2_0.png',cat:'cultural',title:'Whirling Dervish in Mughal-Era Attire',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Adorable_toddler_girl_with_oversized_head_enormous_s_ec2e2656-199a-46c9-b807-0db7b22ff40f_0.png',cat:'3dart',title:'Adorable Toddler Girl Character',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Aerial_cinematic_view_of_a_vast_delta_dry_crack_rive_bcbdafa8-2ac3-4969-a803-a431f1b04e3b_3.png',cat:'nature',title:'Aerial Delta Dry Crack River',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Camera_starts_on_dreamy_pastel_sky_with_pink_purple__ceb0cf5e-4b81-4dd4-96b8-6641f954f6a9_2.png',cat:'3dart',title:'Dreamy Pastel Sky Scene',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Cinematic_Cadbury_style_emotional_commercial_directe_ada961a8-a40c-42c9-9b1b-0db98d245e4d_1.png',cat:'cultural',title:'Cinematic Cadbury-Style Commercial',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Close-up_calm_focused_racer_eyes_subtle_cool_dayligh_a3ec4cdd-72e9-42a5-86e1-c18e24a1763b_0.png',cat:'sports',title:'Focused Racer Eyes Close-Up',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_CoComelon_style_3D_giant_bold_title_ACTIONS_in_chunk_6afccfa9-3101-4831-9717-54a279a3ffc7_3.png',cat:'3dart',title:'CoComelon-Style 3D Bold Title',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Create_a_premium_cinematic_chocolate_commercial_with_4e0da9e2-fc66-4dff-a30c-3b5549139c8f_1.png',cat:'cultural',title:'Premium Cinematic Chocolate Commercial',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Create_an_extreme_cinematic_close-up_of_a_young_Paki_cd50b6c1-3f27-4825-9dce-e6648173e02d_3.png',cat:'cultural',title:'Young Person Cinematic Close-Up',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Massive_3D_inflated_bubble_text_JUMP__LEARN_in_backg_dc7ad57a-1a1f-4c67-a51a-79efd3e370f6_1.png',cat:'3dart',title:'Massive 3D Bubble Text',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_South_Asian_female_late_20s_appearance_soft_oval_fac_75ca0598-d46c-45e5-8309-dec6d85a91fe_3.png',cat:'cultural',title:'South Asian Female Portrait',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_YouTube_thumbnail_two_adorable_Pixar_3D_toddler_char_f7529839-6a48-48f7-b61e-911428d22a28_3.png',cat:'3dart',title:'Pixar-Style 3D Toddler Characters',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_ancient_battlefield_arrows_flying_through_sky_indian_18333c13-6163-4e2f-8154-3296791630c3_2.png',cat:'historical',title:'Ancient Battlefield Arrows in Sky',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_cinematic_school_recess_scene_warm_natural_afternoon_a7e0327c-d028-44c4-a367-1a7b869b2cd3_3.png',cat:'cultural',title:'Cinematic School Recess Scene',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_close-up_of_healthy_Pakistani_child_swallowing_after_f8733e80-c3e6-4446-933e-18c298ade436_0.png',cat:'cultural',title:'Child Portrait Close-Up',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_documentary_realism_everyday_street_life_in_Karachi__7503824f-844b-4d35-a6c6-7ad3367ebf4f_0.png',cat:'cultural',title:'Documentary Street Life',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_king_porus_indian_ruler_age_40_tall_powerful_build_l_138dcc2f-4844-4dfa-a998-6f942fe7001f_3.png',cat:'historical',title:'King Porus — Indian Ruler Portrait',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_king_porus_indian_ruler_age_40_tall_powerful_build_l_2aeea0e5-6894-43fb-8c6d-bf3c90618490_3.png',cat:'historical',title:'King Porus — Battle Ready',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_stateira_ii_persian_princess_daughter_of_darius_iii_ac_7ffd53da-e463-4cac-9a52-3c7226fd248b.png',cat:'historical',title:'Stateira II — Persian Princess',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_ultra_realistic_product_photo_enhancement_preserve_e_2474a0df-32f7-4318-9f04-77b171f93986_0.png',cat:'cultural',title:'Ultra-Realistic Product Enhancement',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_25dfbf37-86fa-4d1e-9788-9c39d511f1d9_0.png',cat:'3dart',title:'Whimsical Cinematic Dessert World I',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_b3df6646-0bdf-43ca-81dc-85b6aaf32f10_1.png',cat:'3dart',title:'Whimsical Cinematic Dessert World II',tag:'Image'},
-  {type:'vid',src:'assets/videos/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.mp4',cat:'historical',title:'Ancient Indus Valley Civilization',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Balochi_father_gently_dancing_with_his_baby_son_in_a_39759fcb-8770-404c-8424-3255f43b923c_0.mp4',cat:'cultural',title:'Balochi Father Dancing with Baby Son',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.mp4',cat:'cultural',title:'Cityscape at Golden Hour',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Cinematic_heartwarming_wide_farewell_shot_of_all_cut_e1473f7c-b2ad-43a5-a6bb-3d0b3afa9baa_0.mp4',cat:'cultural',title:'Cinematic Heartwarming Farewell Shot',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_close-up_of_proud_Sindhi_man_with_red_beard_and_ajra_087be79e-7f7e-4a68-93d9-510ec4c6b67d_1.mp4',cat:'cultural',title:'Proud Sindhi Man Close-Up',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_female_polio_vaccinator_Pakistan_adjusting_scarf_aga_f3948ea2-e39d-4d5e-bf59-4d36ac07f818_0.mp4',cat:'cultural',title:'Polio Vaccinator',tag:'Video'},
-  {type:'vid',src:"assets/videos/stkmedia_httpss.mj.run2frzVLh4z1U_mother_holding_toddlers_han_d0dbcbda-f799-4bac-94c7-ab156e323e7b_2.mp4",cat:'cultural',title:"Mother Holding Toddler's Hand",tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Karachi_teen_girl_in_dorm_room_paying_electricity_bi_8e8be3dc-10b9-4c22-a8a7-13c693b033ca_0.mp4',cat:'cultural',title:'Teen Girl Dorm Life',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Pakistani_children_playing_and_laughing_naturally_ou_2d16c159-f156-4724-86e7-0743d9d1a339_1.mp4',cat:'cultural',title:'Children Playing Outdoors',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Pakistani_female_university_graduate_in_cap_and_gown_619f8dc4-5a19-493a-823d-4aac6e26b269_0.mp4',cat:'cultural',title:'Female University Graduate',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_portraits_of_diverse_Karachi_citizens_smiling_cinema_44edc97f-0a94-41cc-8816-1f683667e025_3.mp4',cat:'cultural',title:'Diverse Citizens Portraits',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',cat:'historical',title:'Ultra-Wide Aerial Night — Border Region',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',cat:'cultural',title:'Wide Aerial Shot of Beach',tag:'Video'},
-  {type:'vid',src:'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',cat:'historical',title:'Young Alexander Taming Bucephalus',tag:'Video'},
+  {type:'img',src:'assets/images/stkmedia_A_Gen_Z_girl_standing_alone_in_heavy_rain_at_night_w_fbb19fb3-80d1-4f9f-8623-6d7bc52a43ce_1.webp',cat:'cultural',title:'Gen Z Girl in Heavy Rain',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_A_friendly_adorable_3D_animated_lion_cub_with_a_fluf_8ad87cb2-1d27-42cf-ab9a-3d03470c2190_2.webp',cat:'3dart',title:'Friendly 3D Animated Lion Cub',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_A_group_whirling_dervish_in_traditional_Mughal-era_a_dd373a40-f56f-4afd-92ad-aada50860db2_0.webp',cat:'cultural',title:'Whirling Dervish in Mughal-Era Attire',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Adorable_toddler_girl_with_oversized_head_enormous_s_ec2e2656-199a-46c9-b807-0db7b22ff40f_0.webp',cat:'3dart',title:'Adorable Toddler Girl Character',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Aerial_cinematic_view_of_a_vast_delta_dry_crack_rive_bcbdafa8-2ac3-4969-a803-a431f1b04e3b_3.webp',cat:'nature',title:'Aerial Delta Dry Crack River',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Camera_starts_on_dreamy_pastel_sky_with_pink_purple__ceb0cf5e-4b81-4dd4-96b8-6641f954f6a9_2.webp',cat:'3dart',title:'Dreamy Pastel Sky Scene',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Cinematic_Cadbury_style_emotional_commercial_directe_ada961a8-a40c-42c9-9b1b-0db98d245e4d_1.webp',cat:'cultural',title:'Cinematic Cadbury-Style Commercial',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Close-up_calm_focused_racer_eyes_subtle_cool_dayligh_a3ec4cdd-72e9-42a5-86e1-c18e24a1763b_0.webp',cat:'sports',title:'Focused Racer Eyes Close-Up',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_CoComelon_style_3D_giant_bold_title_ACTIONS_in_chunk_6afccfa9-3101-4831-9717-54a279a3ffc7_3.webp',cat:'3dart',title:'CoComelon-Style 3D Bold Title',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Create_a_premium_cinematic_chocolate_commercial_with_4e0da9e2-fc66-4dff-a30c-3b5549139c8f_1.webp',cat:'cultural',title:'Premium Cinematic Chocolate Commercial',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Create_an_extreme_cinematic_close-up_of_a_young_Paki_cd50b6c1-3f27-4825-9dce-e6648173e02d_3.webp',cat:'cultural',title:'Young Person Cinematic Close-Up',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Massive_3D_inflated_bubble_text_JUMP__LEARN_in_backg_dc7ad57a-1a1f-4c67-a51a-79efd3e370f6_1.webp',cat:'3dart',title:'Massive 3D Bubble Text',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_South_Asian_female_late_20s_appearance_soft_oval_fac_75ca0598-d46c-45e5-8309-dec6d85a91fe_3.webp',cat:'cultural',title:'South Asian Female Portrait',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_YouTube_thumbnail_two_adorable_Pixar_3D_toddler_char_f7529839-6a48-48f7-b61e-911428d22a28_3.webp',cat:'3dart',title:'Pixar-Style 3D Toddler Characters',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_ancient_battlefield_arrows_flying_through_sky_indian_18333c13-6163-4e2f-8154-3296791630c3_2.webp',cat:'historical',title:'Ancient Battlefield Arrows in Sky',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_cinematic_school_recess_scene_warm_natural_afternoon_a7e0327c-d028-44c4-a367-1a7b869b2cd3_3.webp',cat:'cultural',title:'Cinematic School Recess Scene',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_close-up_of_healthy_Pakistani_child_swallowing_after_f8733e80-c3e6-4446-933e-18c298ade436_0.webp',cat:'cultural',title:'Child Portrait Close-Up',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_documentary_realism_everyday_street_life_in_Karachi__7503824f-844b-4d35-a6c6-7ad3367ebf4f_0.webp',cat:'cultural',title:'Documentary Street Life',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_king_porus_indian_ruler_age_40_tall_powerful_build_l_138dcc2f-4844-4dfa-a998-6f942fe7001f_3.webp',cat:'historical',title:'King Porus — Indian Ruler Portrait',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_king_porus_indian_ruler_age_40_tall_powerful_build_l_2aeea0e5-6894-43fb-8c6d-bf3c90618490_3.webp',cat:'historical',title:'King Porus — Battle Ready',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_stateira_ii_persian_princess_daughter_of_darius_iii_ac_7ffd53da-e463-4cac-9a52-3c7226fd248b.webp',cat:'historical',title:'Stateira II — Persian Princess',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_ultra_realistic_product_photo_enhancement_preserve_e_2474a0df-32f7-4318-9f04-77b171f93986_0.webp',cat:'cultural',title:'Ultra-Realistic Product Enhancement',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_25dfbf37-86fa-4d1e-9788-9c39d511f1d9_0.webp',cat:'3dart',title:'Whimsical Cinematic Dessert World I',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_b3df6646-0bdf-43ca-81dc-85b6aaf32f10_1.webp',cat:'3dart',title:'Whimsical Cinematic Dessert World II',tag:'Image'},
+  {type:'vid',src:'assets/videos/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.mp4',poster:'assets/thumbs/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.jpg',cat:'historical',title:'Ancient Indus Valley Civilization',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Balochi_father_gently_dancing_with_his_baby_son_in_a_39759fcb-8770-404c-8424-3255f43b923c_0.mp4',poster:'assets/thumbs/stkmedia_Balochi_father_gently_dancing_with_his_baby_son_in_a_39759fcb-8770-404c-8424-3255f43b923c_0.jpg',cat:'cultural',title:'Balochi Father Dancing with Baby Son',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.mp4',poster:'assets/thumbs/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.jpg',cat:'cultural',title:'Cityscape at Golden Hour',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Cinematic_heartwarming_wide_farewell_shot_of_all_cut_e1473f7c-b2ad-43a5-a6bb-3d0b3afa9baa_0.mp4',poster:'assets/thumbs/stkmedia_Cinematic_heartwarming_wide_farewell_shot_of_all_cut_e1473f7c-b2ad-43a5-a6bb-3d0b3afa9baa_0.jpg',cat:'cultural',title:'Cinematic Heartwarming Farewell Shot',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_close-up_of_proud_Sindhi_man_with_red_beard_and_ajra_087be79e-7f7e-4a68-93d9-510ec4c6b67d_1.mp4',poster:'assets/thumbs/stkmedia_close-up_of_proud_Sindhi_man_with_red_beard_and_ajra_087be79e-7f7e-4a68-93d9-510ec4c6b67d_1.jpg',cat:'cultural',title:'Proud Sindhi Man Close-Up',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_female_polio_vaccinator_Pakistan_adjusting_scarf_aga_f3948ea2-e39d-4d5e-bf59-4d36ac07f818_0.mp4',poster:'assets/thumbs/stkmedia_female_polio_vaccinator_Pakistan_adjusting_scarf_aga_f3948ea2-e39d-4d5e-bf59-4d36ac07f818_0.jpg',cat:'cultural',title:'Polio Vaccinator',tag:'Video'},
+  {type:'vid',src:"assets/videos/stkmedia_httpss.mj.run2frzVLh4z1U_mother_holding_toddlers_han_d0dbcbda-f799-4bac-94c7-ab156e323e7b_2.mp4",poster:'assets/thumbs/stkmedia_httpss.mj.run2frzVLh4z1U_mother_holding_toddlers_han_d0dbcbda-f799-4bac-94c7-ab156e323e7b_2.jpg',cat:'cultural',title:"Mother Holding Toddler's Hand",tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Karachi_teen_girl_in_dorm_room_paying_electricity_bi_8e8be3dc-10b9-4c22-a8a7-13c693b033ca_0.mp4',poster:'assets/thumbs/stkmedia_Karachi_teen_girl_in_dorm_room_paying_electricity_bi_8e8be3dc-10b9-4c22-a8a7-13c693b033ca_0.jpg',cat:'cultural',title:'Teen Girl Dorm Life',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Pakistani_children_playing_and_laughing_naturally_ou_2d16c159-f156-4724-86e7-0743d9d1a339_1.mp4',poster:'assets/thumbs/stkmedia_Pakistani_children_playing_and_laughing_naturally_ou_2d16c159-f156-4724-86e7-0743d9d1a339_1.jpg',cat:'cultural',title:'Children Playing Outdoors',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Pakistani_female_university_graduate_in_cap_and_gown_619f8dc4-5a19-493a-823d-4aac6e26b269_0.mp4',poster:'assets/thumbs/stkmedia_Pakistani_female_university_graduate_in_cap_and_gown_619f8dc4-5a19-493a-823d-4aac6e26b269_0.jpg',cat:'cultural',title:'Female University Graduate',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_portraits_of_diverse_Karachi_citizens_smiling_cinema_44edc97f-0a94-41cc-8816-1f683667e025_3.mp4',poster:'assets/thumbs/stkmedia_portraits_of_diverse_Karachi_citizens_smiling_cinema_44edc97f-0a94-41cc-8816-1f683667e025_3.jpg',cat:'cultural',title:'Diverse Citizens Portraits',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',poster:'assets/thumbs/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.jpg',cat:'historical',title:'Ultra-Wide Aerial Night — Border Region',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',poster:'assets/thumbs/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.jpg',cat:'cultural',title:'Wide Aerial Shot of Beach',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',poster:'assets/thumbs/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.jpg',cat:'historical',title:'Young Alexander Taming Bucephalus',tag:'Video'},
 ];
 
 const FEAT_PICKS = [0,6,14,18,22,24,26,30,36,37];
 
-/* ── CURSOR ── */
-const dot = document.getElementById('c-dot');
-const ring = document.getElementById('c-ring');
-let mx=0,my=0,rx=0,ry=0;
-document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY});
-(function loop(){
-  rx+=(mx-rx)*.14; ry+=(my-ry)*.14;
-  dot.style.left=mx+'px'; dot.style.top=my+'px';
-  ring.style.left=rx+'px'; ring.style.top=ry+'px';
-  requestAnimationFrame(loop);
-})();
-document.querySelectorAll('a,button,.port-item,.buy-card,.clink').forEach(el=>{
-  el.addEventListener('mouseenter',()=>{ring.style.width='46px';ring.style.height='46px';ring.style.borderColor='rgba(200,169,110,.65)'});
-  el.addEventListener('mouseleave',()=>{ring.style.width='28px';ring.style.height='28px';ring.style.borderColor='rgba(200,169,110,.38)'});
-});
 
 /* ── MARQUEE ── */
 const WORDS = ['Epical Studio','The Art of Synthetic Cinema','Images','Cinematic Videos','Cultural','Historical','3D Art','Synthetic','Premium Quality','Cinematic'];
@@ -787,11 +756,18 @@ window.addEventListener('scroll',()=>nav.classList.toggle('stuck',scrollY>60));
 function loadScript(src){return new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.async=true;s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
 function loadStyle(href){const l=document.createElement('link');l.rel='stylesheet';l.href=href;document.head.appendChild(l)}
 
-/* ── ENTER OVERLAY ── */
-document.getElementById('enter-btn').addEventListener('click',()=>{
-  startMusic();
-  document.getElementById('enter-overlay').classList.add('fade');
-  setTimeout(()=>document.getElementById('enter-overlay').style.display='none',1300);
+/* ── AUTO-DISMISS ENTER OVERLAY (eclipse animation) ── */
+let entryDone=false;
+function triggerEntry(){
+  if(entryDone)return; entryDone=true;
+  const ov=document.getElementById('enter-overlay');
+  const logo=ov.querySelector('.eo-logo');
+  /* Snapshot current animated state so transition starts correctly */
+  logo.style.opacity='1';
+  logo.style.transform='scale(1)';
+  logo.style.animation='none';
+  logo.offsetHeight; /* force reflow */
+  ov.classList.add('eclipse-out');
   initHeroVideo();
   document.getElementById('hero').classList.add('hero-revealed');
   loadStyle('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
@@ -801,7 +777,16 @@ document.getElementById('enter-btn').addEventListener('click',()=>{
   loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js').then(()=>{
     VanillaTilt.init(document.querySelectorAll('.port-item'),{max:6,speed:400,glare:true,'max-glare':.08,scale:1.02});
   });
-});
+  setTimeout(()=>{ov.style.display='none'},2200);
+}
+/* Trigger after logo animation completes (2.8s total) with a short cinematic pause */
+function scheduleEntry(){
+  const logo=document.querySelector('.eo-logo');
+  if(logo){logo.addEventListener('animationend',()=>setTimeout(triggerEntry,500),{once:true})}
+  setTimeout(triggerEntry,4500); /* hard fallback */
+}
+if(document.readyState==='complete'){scheduleEntry()}
+else{window.addEventListener('load',scheduleEntry)}
 
 /* ── HERO VIDEO ── */
 function initHeroVideo(){
@@ -827,11 +812,17 @@ function buildFeatured(){
       slide.appendChild(img);
       slide.insertAdjacentHTML('beforeend',`<div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`);
     } else {
-      /* Placeholder — no <video> until hover */
-      slide.innerHTML=`<div class="vid-placeholder" style="width:100%;height:100%;position:absolute;inset:0;aspect-ratio:unset"><div class="vid-placeholder-icon"><i class="fas fa-play"></i></div></div><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`;
+      /* Show poster image, swap to video on hover */
+      const poster=document.createElement('img');
+      poster.src=m.poster||'';poster.alt=m.title;poster.loading='lazy';poster.decoding='async';
+      poster.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;';
+      poster.addEventListener('load',()=>poster.classList.add('img-loaded'));
+      if(poster.complete)poster.classList.add('img-loaded');
+      slide.appendChild(poster);
+      slide.insertAdjacentHTML('beforeend',`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(4,4,4,.68);backdrop-filter:blur(8px);border:1px solid rgba(200,169,110,.4);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;pointer-events:none"><i class="fas fa-play"></i></div><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`);
       let vid=null;
       slide.addEventListener('mouseenter',()=>{
-        if(!vid){vid=document.createElement('video');vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');vid.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;';slide.prepend(vid)}
+        if(!vid){vid=document.createElement('video');vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');vid.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;z-index:1;';slide.prepend(vid)}
         vid.play();
       });
       slide.addEventListener('mouseleave',()=>{if(vid){vid.pause();vid.currentTime=0}});
@@ -882,15 +873,21 @@ function buildGrid(filter='all'){
       el.appendChild(img);
       el.insertAdjacentHTML('beforeend',ov);
     } else {
-      /* No <video> element until user hovers — zero network cost */
-      el.innerHTML=`<div class="vid-badge"><i class="fas fa-play"></i></div><div class="vid-placeholder"><div class="vid-placeholder-icon"><i class="fas fa-play"></i></div></div>${ov}`;
+      /* Show poster thumbnail, swap to video on hover */
+      const thumb=document.createElement('img');
+      thumb.className='vid-thumb';thumb.alt=m.title;thumb.loading='lazy';thumb.decoding='async';
+      thumb.src=m.poster||'';
+      thumb.addEventListener('load',()=>thumb.classList.add('img-loaded'));
+      if(thumb.complete)thumb.classList.add('img-loaded');
+      el.appendChild(thumb);
+      el.insertAdjacentHTML('beforeend',`<div class="vid-badge-play"><i class="fas fa-play"></i></div>${ov}`);
       let vid=null;
       el.addEventListener('mouseenter',()=>{
         if(!vid){
           vid=document.createElement('video');
           vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');
           vid.style.cssText='display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;';
-          el.querySelector('.vid-placeholder').replaceWith(vid);
+          thumb.replaceWith(vid);
         }
         vid.play();
       });
