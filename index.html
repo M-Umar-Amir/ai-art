@@ -238,21 +238,6 @@ section{padding:100px 0}
 .stat-num{font-family:'Orbitron',sans-serif;font-size:clamp(2.8rem,5.5vw,4.5rem);background:linear-gradient(180deg,var(--cream) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:8px}
 .stat-label{font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(200,169,110,.42)}
 
-/* ── SHOWREEL ── */
-#showreel{background:var(--black);padding:80px 0 60px;overflow:hidden}
-.show-head{text-align:center;margin-bottom:48px}
-.featured-swiper{width:100%;padding:20px 32px 50px}
-.featured-swiper .swiper-slide{width:270px;height:390px;border-radius:0;overflow:hidden;border:1px solid var(--border);position:relative;transition:transform .3s,box-shadow .3s}
-.featured-swiper .swiper-slide:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(200,169,110,.1)}
-.featured-swiper .swiper-slide img,.featured-swiper .swiper-slide video{width:100%;height:100%;object-fit:cover;display:block}
-.feat-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(4,4,4,.97) 0%,rgba(4,4,4,.15) 55%,transparent 100%);padding:20px;display:flex;flex-direction:column;justify-content:flex-end;opacity:0;transition:opacity .35s}
-.featured-swiper .swiper-slide:hover .feat-overlay{opacity:1}
-.feat-overlay h4{font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;margin-bottom:5px;line-height:1.3;color:var(--cream)}
-.feat-overlay span{font-size:.56rem;letter-spacing:3px;text-transform:uppercase;color:var(--gold)}
-.swiper-button-prev,.swiper-button-next{color:var(--gold)!important;background:rgba(4,4,4,.75)!important;width:40px!important;height:40px!important;border-radius:0!important;border:1px solid rgba(200,169,110,.22)!important}
-.swiper-button-prev::after,.swiper-button-next::after{font-size:.78rem!important}
-.swiper-pagination-bullet{background:rgba(200,169,110,.28)!important}
-.swiper-pagination-bullet-active{background:var(--gold)!important}
 
 /* ── PORTFOLIO ── */
 #portfolio{background:var(--black);position:relative;overflow:hidden}
@@ -426,7 +411,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <nav id="nav" aria-label="Main navigation">
   <a href="#hero"><img src="assets/e.jpg" class="nav-logo-img" alt="Epical Studio" width="1280" height="853"></a>
   <ul class="nav-links">
-    <li><a href="#showreel">Showreel</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#buy">Order</a></li>
@@ -457,23 +441,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 
 <!-- MARQUEE -->
 <div class="marquee-strip"><div class="marquee-track" id="marquee-track"></div></div>
-
-<div class="grad-div"></div>
-
-<!-- SHOWREEL -->
-<section id="showreel">
-  <div class="wrap show-head">
-    <div class="sec-eyebrow sr-up">Video Works</div>
-    <h2 class="sec-title sr-up">Showreel</h2>
-    <p class="sec-sub sr-up">All cinematic video productions — hover to play</p>
-  </div>
-  <div class="swiper featured-swiper">
-    <div class="swiper-wrapper" id="showreel-wrapper"></div>
-    <div class="swiper-pagination"></div>
-    <div class="swiper-button-prev"></div>
-    <div class="swiper-button-next"></div>
-  </div>
-</section>
 
 <div class="grad-div"></div>
 
@@ -608,7 +575,6 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
         <a class="soc" href="mailto:umaramir.dev@gmail.com"><i class="fas fa-envelope"></i></a>
       </div>
       <div class="foot-links">
-        <a href="#showreel">Showreel</a>
         <a href="#portfolio">Portfolio</a>
         <a href="#about">About</a>
         <a href="#buy">Order</a>
@@ -637,6 +603,14 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <script type="module">
 /* ── MEDIA DATA ── */
 const MEDIA = [
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_0ae06b37-6e41-4a5f-bcfb-af064fee624c_1.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness I',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_93af6919-8dfb-4916-9c0b-54800fc36930_3.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness II',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_1.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up I',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_2.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up II',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_f840c2d0-1455-464d-9f07-b69f3ec689dc_3.webp',cat:'commercial',title:'Luxury Perfume — Dark Emergence',tag:'Image'},
+  {type:'img',src:'assets/images/SET3FRAME2.webp',cat:'commercial',title:'Perfume TVC — Frame 2',tag:'Image'},
+  {type:'img',src:'assets/images/SET3FRAME3.webp',cat:'commercial',title:'Perfume TVC — Frame 3',tag:'Image'},
+  {type:'img',src:'assets/images/Eid mubarak 2026.webp',cat:'cultural',title:'Eid Mubarak 2026',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_A_Gen_Z_girl_standing_alone_in_heavy_rain_at_night_w_fbb19fb3-80d1-4f9f-8623-6d7bc52a43ce_1.webp',cat:'cultural',title:'Gen Z Girl in Heavy Rain',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_A_friendly_adorable_3D_animated_lion_cub_with_a_fluf_8ad87cb2-1d27-42cf-ab9a-3d03470c2190_2.webp',cat:'3dart',title:'Friendly 3D Animated Lion Cub',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_A_group_whirling_dervish_in_traditional_Mughal-era_a_dd373a40-f56f-4afd-92ad-aada50860db2_0.webp',cat:'cultural',title:'Whirling Dervish in Mughal-Era Attire',tag:'Image'},
@@ -675,18 +649,10 @@ const MEDIA = [
   {type:'vid',src:'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',poster:'assets/thumbs/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.jpg',cat:'historical',title:'Ultra-Wide Aerial Night — Border Region',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',poster:'assets/thumbs/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.jpg',cat:'cultural',title:'Wide Aerial Shot of Beach',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',poster:'assets/thumbs/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.jpg',cat:'historical',title:'Young Alexander Taming Bucephalus',tag:'Video'},
-  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_0ae06b37-6e41-4a5f-bcfb-af064fee624c_1.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness I',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_93af6919-8dfb-4916-9c0b-54800fc36930_3.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness II',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_1.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up I',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_2.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up II',tag:'Image'},
-  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_f840c2d0-1455-464d-9f07-b69f3ec689dc_3.webp',cat:'commercial',title:'Luxury Perfume — Dark Emergence',tag:'Image'},
-  {type:'img',src:'assets/images/SET3FRAME2.webp',cat:'commercial',title:'Perfume TVC — Frame 2',tag:'Image'},
-  {type:'img',src:'assets/images/SET3FRAME3.webp',cat:'commercial',title:'Perfume TVC — Frame 3',tag:'Image'},
-  {type:'img',src:'assets/images/Eid mubarak 2026.webp',cat:'cultural',title:'Eid Mubarak 2026',tag:'Image'},
   {type:'vid',src:'assets/videos/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_863d463b-139e-4ef9-858b-ec0a38e40b3a_0.mp4',poster:'assets/thumbs/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_863d463b-139e-4ef9-858b-ec0a38e40b3a_0.jpg',cat:'commercial',title:'Luxury Perfume — Cinematic Shot I',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_dafe1624-3f17-4358-97ef-65fe2231921c_3.mp4',poster:'assets/thumbs/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_dafe1624-3f17-4358-97ef-65fe2231921c_3.jpg',cat:'commercial',title:'Luxury Perfume — Cinematic Shot II',tag:'Video'},
   {type:'vid',src:'assets/Perfume_TVC/hf_20260526_120947_e042006c-8bd5-4941-9498-44e9ed32efaa.mp4',poster:'assets/thumbs/hf_20260526_120947_e042006c-8bd5-4941-9498-44e9ed32efaa.jpg',cat:'commercial',title:'Perfume TVC — Commercial I',tag:'Video'},
-  {type:'vid',src:'assets/Perfume_TVC/hf_20260526_122630_869ee492-ba16-4cbf-9ae0-37091db0c0ad.mp4',poster:'assets/thumbs/hf_20260526_122630_869ee492-ba16-4cbf-9ae0-37091db0c0ad.jpg',cat:'commercial',title:'Perfume TVC — Commercial II',tag:'Video'},
+  {type:'vid',src:'assets/Perfume_TVC/hf_20260526_122630_869ee492-ba16-4cbf-9ae0-37091db0c0ad.mp4',poster:'assets/thumbs/hf_20260526_122630_869ee492-ba16-4cbf-9ae0-37091db0c0ad.jpg',cat:'commercial',title:'Perfume TVC — Commercial II',tag:'Video'}
 ];
 
 /* ── MARQUEE ── */
@@ -755,9 +721,7 @@ function triggerEntry(){
   initHeroVideo();
   document.getElementById('hero').classList.add('hero-revealed');
   loadStyle('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
-  loadStyle('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
   buildGrid();
-  loadScript('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js').then(buildShowreel);
   loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js').then(()=>{
     VanillaTilt.init(document.querySelectorAll('.port-item'),{max:6,speed:400,glare:true,'max-glare':.08,scale:1.02});
   });
@@ -778,37 +742,6 @@ function initHeroVideo(){
   v.src='assets/videos/showreel.mp4';
   v.play().catch(()=>{});
   setTimeout(()=>{v.style.opacity='.65'},300);
-}
-
-/* ── SHOWREEL SWIPER (videos only) ── */
-function buildShowreel(){
-  const wrap=document.getElementById('showreel-wrapper');
-  MEDIA.filter(m=>m.type==='vid').forEach(m=>{
-    const slide=document.createElement('div');
-    slide.className='swiper-slide';
-    const poster=document.createElement('img');
-    poster.src=m.poster||'';poster.alt=m.title;poster.loading='lazy';poster.decoding='async';
-    poster.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;';
-    poster.addEventListener('load',()=>poster.classList.add('img-loaded'));
-    if(poster.complete)poster.classList.add('img-loaded');
-    slide.appendChild(poster);
-    slide.insertAdjacentHTML('beforeend',`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(4,4,4,.68);backdrop-filter:blur(8px);border:1px solid rgba(200,169,110,.4);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;pointer-events:none"><i class="fas fa-play"></i></div><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`);
-    let vid=null;
-    slide.addEventListener('mouseenter',()=>{
-      if(!vid){vid=document.createElement('video');vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');vid.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;z-index:1;';slide.prepend(vid)}
-      vid.play();
-    });
-    slide.addEventListener('mouseleave',()=>{if(vid){vid.pause();vid.currentTime=0}});
-    wrap.appendChild(slide);
-  });
-  new Swiper('.featured-swiper',{
-    slidesPerView:'auto',centeredSlides:true,spaceBetween:20,loop:true,grabCursor:true,
-    autoplay:{delay:3500,disableOnInteraction:false,pauseOnMouseEnter:true},
-    pagination:{el:'.swiper-pagination',clickable:true},
-    navigation:{nextEl:'.swiper-button-next',prevEl:'.swiper-button-prev'},
-    effect:'coverflow',
-    coverflowEffect:{rotate:12,stretch:0,depth:100,modifier:1,slideShadows:false},
-  });
 }
 
 /* ── PORTFOLIO GRID ── */
