@@ -238,9 +238,9 @@ section{padding:100px 0}
 .stat-num{font-family:'Orbitron',sans-serif;font-size:clamp(2.8rem,5.5vw,4.5rem);background:linear-gradient(180deg,var(--cream) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:8px}
 .stat-label{font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(200,169,110,.42)}
 
-/* ── FEATURED ── */
-#featured{background:var(--black);padding:80px 0 60px;overflow:hidden}
-.feat-head{text-align:center;margin-bottom:48px}
+/* ── SHOWREEL ── */
+#showreel{background:var(--black);padding:80px 0 60px;overflow:hidden}
+.show-head{text-align:center;margin-bottom:48px}
 .featured-swiper{width:100%;padding:20px 32px 50px}
 .featured-swiper .swiper-slide{width:270px;height:390px;border-radius:0;overflow:hidden;border:1px solid var(--border);position:relative;transition:transform .3s,box-shadow .3s}
 .featured-swiper .swiper-slide:hover{transform:translateY(-8px);box-shadow:0 24px 60px rgba(200,169,110,.1)}
@@ -426,7 +426,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <nav id="nav" aria-label="Main navigation">
   <a href="#hero"><img src="assets/e.jpg" class="nav-logo-img" alt="Epical Studio" width="1280" height="853"></a>
   <ul class="nav-links">
-    <li><a href="#featured">Featured</a></li>
+    <li><a href="#showreel">Showreel</a></li>
     <li><a href="#portfolio">Portfolio</a></li>
     <li><a href="#about">About</a></li>
     <li><a href="#buy">Order</a></li>
@@ -460,15 +460,15 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 
 <div class="grad-div"></div>
 
-<!-- FEATURED -->
-<section id="featured">
-  <div class="wrap feat-head">
-    <div class="sec-eyebrow sr-up">Featured Works</div>
-    <h2 class="sec-title sr-up">Top Picks</h2>
-    <p class="sec-sub sr-up">Our finest images and videos — hover to reveal details</p>
+<!-- SHOWREEL -->
+<section id="showreel">
+  <div class="wrap show-head">
+    <div class="sec-eyebrow sr-up">Video Works</div>
+    <h2 class="sec-title sr-up">Showreel</h2>
+    <p class="sec-sub sr-up">All cinematic video productions — hover to play</p>
   </div>
   <div class="swiper featured-swiper">
-    <div class="swiper-wrapper" id="feat-wrapper"></div>
+    <div class="swiper-wrapper" id="showreel-wrapper"></div>
     <div class="swiper-pagination"></div>
     <div class="swiper-button-prev"></div>
     <div class="swiper-button-next"></div>
@@ -481,10 +481,10 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <section id="stats">
   <div class="wrap">
     <div class="stats-grid">
-      <div class="stat-item sr-up"><div class="stat-num">38</div><div class="stat-label">Total Works</div></div>
-      <div class="stat-item sr-up"><div class="stat-num">24</div><div class="stat-label">Images</div></div>
-      <div class="stat-item sr-up"><div class="stat-num">14</div><div class="stat-label">Videos</div></div>
-      <div class="stat-item sr-up"><div class="stat-num">5+</div><div class="stat-label">Categories</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">50</div><div class="stat-label">Total Works</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">32</div><div class="stat-label">Images</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">18</div><div class="stat-label">Videos</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">6+</div><div class="stat-label">Categories</div></div>
     </div>
   </div>
 </section>
@@ -500,17 +500,17 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
       <div>
         <div class="sec-eyebrow sr-up">Our Work</div>
         <h2 class="sec-title sr-up">Portfolio</h2>
-        <p class="sec-sub sr-up">24 cinematic images · 14 commercial video productions</p>
+        <p class="sec-sub sr-up">32 cinematic images — hover to explore</p>
       </div>
     </div>
     <div class="filters sr-up">
       <button class="f-btn active" data-cat="all">All <span id="cnt-all"></span></button>
+      <button class="f-btn" data-cat="commercial">Commercial</button>
       <button class="f-btn" data-cat="cultural">Cultural</button>
       <button class="f-btn" data-cat="historical">Historical</button>
       <button class="f-btn" data-cat="3dart">3D Art</button>
       <button class="f-btn" data-cat="sports">Sports</button>
       <button class="f-btn" data-cat="nature">Nature</button>
-      <button class="f-btn" data-cat="video" id="vid-filter">Videos Only</button>
     </div>
     <div class="port-grid" id="port-grid"></div>
   </div>
@@ -608,7 +608,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
         <a class="soc" href="mailto:umaramir.dev@gmail.com"><i class="fas fa-envelope"></i></a>
       </div>
       <div class="foot-links">
-        <a href="#featured">Featured</a>
+        <a href="#showreel">Showreel</a>
         <a href="#portfolio">Portfolio</a>
         <a href="#about">About</a>
         <a href="#buy">Order</a>
@@ -675,10 +675,19 @@ const MEDIA = [
   {type:'vid',src:'assets/videos/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.mp4',poster:'assets/thumbs/stkmedia_Ultra-wide_aerial_night_shot_of_the_India-Pakistan_b_1e7e7fe9-9240-43fa-b542-06210679018d_3.jpg',cat:'historical',title:'Ultra-Wide Aerial Night — Border Region',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.mp4',poster:'assets/thumbs/stkmedia_wide_aerial_shot_of_Karachi_Beach_with_people_enjoyi_b78f9c37-d883-4122-a3e5-ef48c1278406_0.jpg',cat:'cultural',title:'Wide Aerial Shot of Beach',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.mp4',poster:'assets/thumbs/stkmedia_young_alexander_turning_wild_horse_bucephalus_toward_d2995800-82e7-4c4e-839c-e90c4c180307_3.jpg',cat:'historical',title:'Young Alexander Taming Bucephalus',tag:'Video'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_0ae06b37-6e41-4a5f-bcfb-af064fee624c_1.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness I',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_93af6919-8dfb-4916-9c0b-54800fc36930_3.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness II',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_1.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up I',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_2.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up II',tag:'Image'},
+  {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_f840c2d0-1455-464d-9f07-b69f3ec689dc_3.webp',cat:'commercial',title:'Luxury Perfume — Dark Emergence',tag:'Image'},
+  {type:'img',src:'assets/images/SET3FRAME2.webp',cat:'commercial',title:'Perfume TVC — Frame 2',tag:'Image'},
+  {type:'img',src:'assets/images/SET3FRAME3.webp',cat:'commercial',title:'Perfume TVC — Frame 3',tag:'Image'},
+  {type:'img',src:'assets/images/Eid mubarak 2026.webp',cat:'cultural',title:'Eid Mubarak 2026',tag:'Image'},
+  {type:'vid',src:'assets/videos/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_863d463b-139e-4ef9-858b-ec0a38e40b3a_0.mp4',poster:'assets/thumbs/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_863d463b-139e-4ef9-858b-ec0a38e40b3a_0.jpg',cat:'commercial',title:'Luxury Perfume — Cinematic Shot I',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_dafe1624-3f17-4358-97ef-65fe2231921c_3.mp4',poster:'assets/thumbs/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_dafe1624-3f17-4358-97ef-65fe2231921c_3.jpg',cat:'commercial',title:'Luxury Perfume — Cinematic Shot II',tag:'Video'},
+  {type:'vid',src:'assets/Perfume_TVC/hf_20260526_120947_e042006c-8bd5-4941-9498-44e9ed32efaa.mp4',poster:'assets/thumbs/hf_20260526_120947_e042006c-8bd5-4941-9498-44e9ed32efaa.jpg',cat:'commercial',title:'Perfume TVC — Commercial I',tag:'Video'},
+  {type:'vid',src:'assets/Perfume_TVC/hf_20260526_122630_869ee492-ba16-4cbf-9ae0-37091db0c0ad.mp4',poster:'assets/thumbs/hf_20260526_122630_869ee492-ba16-4cbf-9ae0-37091db0c0ad.jpg',cat:'commercial',title:'Perfume TVC — Commercial II',tag:'Video'},
 ];
-
-const FEAT_PICKS = [0,6,14,18,22,24,26,30,36,37];
-
 
 /* ── MARQUEE ── */
 const WORDS = ['Epical Studio','The Art of Synthetic Cinema','Images','Cinematic Videos','Cultural','Historical','3D Art','Synthetic','Premium Quality','Cinematic'];
@@ -748,7 +757,7 @@ function triggerEntry(){
   loadStyle('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css');
   loadStyle('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css');
   buildGrid();
-  loadScript('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js').then(buildFeatured);
+  loadScript('https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js').then(buildShowreel);
   loadScript('https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.7.0/vanilla-tilt.min.js').then(()=>{
     VanillaTilt.init(document.querySelectorAll('.port-item'),{max:6,speed:400,glare:true,'max-glare':.08,scale:1.02});
   });
@@ -771,37 +780,25 @@ function initHeroVideo(){
   setTimeout(()=>{v.style.opacity='.65'},300);
 }
 
-/* ── FEATURED SWIPER ── */
-function buildFeatured(){
-  const wrap=document.getElementById('feat-wrapper');
-  FEAT_PICKS.forEach(idx=>{
-    const m=MEDIA[idx];if(!m)return;
+/* ── SHOWREEL SWIPER (videos only) ── */
+function buildShowreel(){
+  const wrap=document.getElementById('showreel-wrapper');
+  MEDIA.filter(m=>m.type==='vid').forEach(m=>{
     const slide=document.createElement('div');
     slide.className='swiper-slide';
-    if(m.type==='img'){
-      const img=document.createElement('img');
-      img.alt=m.title;img.loading='lazy';img.decoding='async';
-      img.addEventListener('load',()=>img.classList.add('img-loaded'));
-      if(img.complete)img.classList.add('img-loaded');
-      img.src=m.src;
-      slide.appendChild(img);
-      slide.insertAdjacentHTML('beforeend',`<div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`);
-    } else {
-      /* Show poster image, swap to video on hover */
-      const poster=document.createElement('img');
-      poster.src=m.poster||'';poster.alt=m.title;poster.loading='lazy';poster.decoding='async';
-      poster.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;';
-      poster.addEventListener('load',()=>poster.classList.add('img-loaded'));
-      if(poster.complete)poster.classList.add('img-loaded');
-      slide.appendChild(poster);
-      slide.insertAdjacentHTML('beforeend',`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(4,4,4,.68);backdrop-filter:blur(8px);border:1px solid rgba(200,169,110,.4);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;pointer-events:none"><i class="fas fa-play"></i></div><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`);
-      let vid=null;
-      slide.addEventListener('mouseenter',()=>{
-        if(!vid){vid=document.createElement('video');vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');vid.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;z-index:1;';slide.prepend(vid)}
-        vid.play();
-      });
-      slide.addEventListener('mouseleave',()=>{if(vid){vid.pause();vid.currentTime=0}});
-    }
+    const poster=document.createElement('img');
+    poster.src=m.poster||'';poster.alt=m.title;poster.loading='lazy';poster.decoding='async';
+    poster.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;';
+    poster.addEventListener('load',()=>poster.classList.add('img-loaded'));
+    if(poster.complete)poster.classList.add('img-loaded');
+    slide.appendChild(poster);
+    slide.insertAdjacentHTML('beforeend',`<div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:44px;height:44px;background:rgba(4,4,4,.68);backdrop-filter:blur(8px);border:1px solid rgba(200,169,110,.4);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.85rem;pointer-events:none"><i class="fas fa-play"></i></div><div class="feat-overlay"><h4>${m.title}</h4><span>${m.tag}</span></div>`);
+    let vid=null;
+    slide.addEventListener('mouseenter',()=>{
+      if(!vid){vid=document.createElement('video');vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');vid.style.cssText='width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;z-index:1;';slide.prepend(vid)}
+      vid.play();
+    });
+    slide.addEventListener('mouseleave',()=>{if(vid){vid.pause();vid.currentTime=0}});
     wrap.appendChild(slide);
   });
   new Swiper('.featured-swiper',{
@@ -831,7 +828,8 @@ const imgObs=new IntersectionObserver((entries,obs)=>{
 function buildGrid(filter='all'){
   grid.innerHTML='';visibleItems=[];
   MEDIA.forEach((m,idx)=>{
-    const show=filter==='all'||filter===m.cat||(filter==='video'&&m.type==='vid');
+    if(m.type!=='img')return;
+    const show=filter==='all'||filter===m.cat;
     if(!show)return;
     visibleItems.push(idx);
     const el=document.createElement('div');
@@ -871,13 +869,13 @@ function buildGrid(filter='all'){
     el.addEventListener('click',()=>openLB(idx));
     grid.appendChild(el);
   });
-  document.getElementById('cnt-all').textContent=`(${MEDIA.length})`;
+  document.getElementById('cnt-all').textContent=`(${MEDIA.filter(m=>m.type==='img').length})`;
   if(typeof VanillaTilt!=='undefined'){
     VanillaTilt.init(grid.querySelectorAll('.port-item'),{max:6,speed:400,glare:true,'max-glare':.08,scale:1.02});
   }
 }
 
-document.getElementById('cnt-all').textContent=`(${MEDIA.length})`;
+document.getElementById('cnt-all').textContent=`(${MEDIA.filter(m=>m.type==='img').length})`;
 document.querySelectorAll('.f-btn').forEach(btn=>{
   btn.addEventListener('click',()=>{
     document.querySelectorAll('.f-btn').forEach(b=>b.classList.remove('active'));
