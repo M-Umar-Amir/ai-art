@@ -106,6 +106,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&display=swap"></noscript>
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap"></noscript>
 <link rel="preload" as="image" href="assets/e.jpg" fetchpriority="high">
 <style>
 :root{
@@ -122,7 +124,7 @@
 }
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
-body{background:var(--black);color:var(--cream);font-family:'Orbitron',sans-serif;overflow-x:hidden}
+body{background:var(--black);color:var(--cream);font-family:'DM Sans',sans-serif;overflow-x:hidden}
 ::selection{background:rgba(200,169,110,.28)}
 ::-webkit-scrollbar{width:2px}
 ::-webkit-scrollbar-track{background:var(--black)}
@@ -448,9 +450,9 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <section id="stats">
   <div class="wrap">
     <div class="stats-grid">
-      <div class="stat-item sr-up"><div class="stat-num">50</div><div class="stat-label">Total Works</div></div>
-      <div class="stat-item sr-up"><div class="stat-num">32</div><div class="stat-label">Images</div></div>
-      <div class="stat-item sr-up"><div class="stat-num">18</div><div class="stat-label">Videos</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">63</div><div class="stat-label">Total Works</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">42</div><div class="stat-label">Images</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">21</div><div class="stat-label">Videos</div></div>
       <div class="stat-item sr-up"><div class="stat-num">6+</div><div class="stat-label">Categories</div></div>
     </div>
   </div>
@@ -467,7 +469,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
       <div>
         <div class="sec-eyebrow sr-up">Our Work</div>
         <h2 class="sec-title sr-up">Portfolio</h2>
-        <p class="sec-sub sr-up">32 cinematic images — hover to explore</p>
+        <p class="sec-sub sr-up">42 cinematic images — hover to explore</p>
       </div>
     </div>
     <div class="filters sr-up">
@@ -478,6 +480,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
       <button class="f-btn" data-cat="3dart">3D Art</button>
       <button class="f-btn" data-cat="sports">Sports</button>
       <button class="f-btn" data-cat="nature">Nature</button>
+      <button class="f-btn" data-cat="food">Food</button>
     </div>
     <div class="port-grid" id="port-grid"></div>
   </div>
@@ -603,6 +606,16 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <script type="module">
 /* ── MEDIA DATA ── */
 const MEDIA = [
+  {type:'img',src:'assets/images/EMBER_luxury_cinematic_burger_campaign_202605271444.webp',cat:'food',title:'EMBER Cinematic Burger Campaign I',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_cinematic_burger_campaign_202605271453.webp',cat:'food',title:'EMBER Cinematic Burger Campaign II',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_campaign_202605271428.webp',cat:'food',title:'EMBER Gourmet Burger Campaign',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_macro_202605271445.webp',cat:'food',title:'EMBER Gourmet Burger Macro',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_ingredient_202605271502.webp',cat:'food',title:'EMBER Burger Ingredients',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_menu_202605271506.webp',cat:'food',title:'EMBER Burger Menu',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_packaging_202605271511.webp',cat:'food',title:'EMBER Burger Packaging I',tag:'Image'},
+  {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_packaging_202605271513.webp',cat:'food',title:'EMBER Burger Packaging II',tag:'Image'},
+  {type:'img',src:'assets/images/footer_campaign_strip_at_bottom__202605271427.webp',cat:'food',title:'EMBER Campaign Strip',tag:'Image'},
+  {type:'img',src:'assets/images/make_the_flame_color,_gradient_202605271408.webp',cat:'food',title:'EMBER Flame Color Study',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_0ae06b37-6e41-4a5f-bcfb-af064fee624c_1.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness I',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_93af6919-8dfb-4916-9c0b-54800fc36930_3.webp',cat:'commercial',title:'Luxury Perfume — Emerging Darkness II',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_Ultra_macro_luxury_perfume_bottle_emerging_from_dark_cdfae5ff-5050-43ce-849f-b0b52442f7a7_1.webp',cat:'commercial',title:'Luxury Perfume — Macro Close-Up I',tag:'Image'},
@@ -635,6 +648,9 @@ const MEDIA = [
   {type:'img',src:'assets/images/stkmedia_ultra_realistic_product_photo_enhancement_preserve_e_2474a0df-32f7-4318-9f04-77b171f93986_0.webp',cat:'cultural',title:'Ultra-Realistic Product Enhancement',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_25dfbf37-86fa-4d1e-9788-9c39d511f1d9_0.webp',cat:'3dart',title:'Whimsical Cinematic Dessert World I',tag:'Image'},
   {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_b3df6646-0bdf-43ca-81dc-85b6aaf32f10_1.webp',cat:'3dart',title:'Whimsical Cinematic Dessert World II',tag:'Image'},
+  {type:'vid',src:'assets/videos/stkmedia_ultra_macro_cinematic_caramelized_onions_falling_ont_e20f9e89-838c-4548-b116-9ce6ab39ef50_1.mp4',poster:'assets/thumbs/stkmedia_ultra_macro_cinematic_caramelized_onions_falling_ont_e20f9e89-838c-4548-b116-9ce6ab39ef50_1.jpg',cat:'food',title:'EMBER Burger — Caramelized Onions',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_ultra_macro_cinematic_gourmet_burger_sauce_drip_glos_87ffc4d4-37d3-48f4-a53a-ea40293b3d66_2.mp4',poster:'assets/thumbs/stkmedia_ultra_macro_cinematic_gourmet_burger_sauce_drip_glos_87ffc4d4-37d3-48f4-a53a-ea40293b3d66_2.jpg',cat:'food',title:'EMBER Burger — Sauce Drip',tag:'Video'},
+  {type:'vid',src:'assets/videos/stkmedia_ultra_macro_cinematic_molten_cheddar_cheese_melting__8721d130-79a0-43fa-9c0d-d3102a1c7801_1.mp4',poster:'assets/thumbs/stkmedia_ultra_macro_cinematic_molten_cheddar_cheese_melting__8721d130-79a0-43fa-9c0d-d3102a1c7801_1.jpg',cat:'food',title:'EMBER Burger — Molten Cheddar',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.mp4',poster:'assets/thumbs/stkmedia_ancient_Indus_valley_civilization_women_carrying_ter_1417b1c5-0343-475b-861a-eb5ad144dbf5_1.jpg',cat:'historical',title:'Ancient Indus Valley Civilization',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_Balochi_father_gently_dancing_with_his_baby_son_in_a_39759fcb-8770-404c-8424-3255f43b923c_0.mp4',poster:'assets/thumbs/stkmedia_Balochi_father_gently_dancing_with_his_baby_son_in_a_39759fcb-8770-404c-8424-3255f43b923c_0.jpg',cat:'cultural',title:'Balochi Father Dancing with Baby Son',tag:'Video'},
   {type:'vid',src:'assets/videos/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.mp4',poster:'assets/thumbs/stkmedia_Cinematic_aerial_shot_of_Karachi_cityscape_at_golden_6a6b7b4e-3276-43dd-b7d7-b479a41b8880_1.jpg',cat:'cultural',title:'Cityscape at Golden Hour',tag:'Video'},
