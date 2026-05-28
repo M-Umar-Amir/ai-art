@@ -371,6 +371,54 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 /* ── SEO VISUALLY-HIDDEN (clip technique, readable by crawlers) ── */
 .seo-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
+/* ── TESTIMONIALS ── */
+#testimonials{background:var(--black2)}
+.testi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:50px}
+.testi-card{border:1px solid var(--border);background:var(--smoke);padding:30px 26px;position:relative;overflow:hidden;transition:transform .4s,border-color .4s,box-shadow .4s;display:flex;flex-direction:column}
+.testi-card:hover{transform:translateY(-6px);border-color:rgba(200,169,110,.24);box-shadow:0 24px 48px rgba(200,169,110,.08)}
+.testi-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,var(--gold),var(--silver))}
+.testi-quote{font-size:3.2rem;line-height:.8;color:var(--gold);opacity:.2;font-family:Georgia,serif;margin-bottom:12px;user-select:none}
+.testi-text{font-size:.87rem;line-height:1.92;color:rgba(221,216,204,.52);font-weight:300;margin-bottom:20px;font-style:italic;flex:1}
+.testi-stars{display:flex;gap:4px;margin-bottom:16px;color:var(--gold);font-size:.7rem}
+.testi-author{display:flex;align-items:center;gap:14px;border-top:1px solid var(--border);padding-top:16px}
+.testi-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,rgba(200,169,110,.14),rgba(200,169,110,.04));border:1px solid rgba(200,169,110,.22);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.82rem;font-family:'Orbitron',sans-serif;font-weight:700;flex-shrink:0}
+.testi-name{font-family:'Orbitron',sans-serif;font-size:.69rem;font-weight:600;color:var(--cream);margin-bottom:3px}
+.testi-role{font-size:.61rem;color:rgba(200,169,110,.46);letter-spacing:.6px}
+
+/* ── PLANS ── */
+#plans{background:var(--black)}
+.plans-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:50px}
+.plan-card{border:1px solid var(--border);background:var(--smoke);padding:36px 28px;position:relative;overflow:hidden;transition:transform .4s,border-color .4s,box-shadow .4s;display:flex;flex-direction:column}
+.plan-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,rgba(200,169,110,.16),transparent)}
+.plan-card:hover{transform:translateY(-8px);box-shadow:0 28px 52px rgba(200,169,110,.08)}
+.plan-card.featured{border-color:rgba(200,169,110,.34);background:rgba(200,169,110,.03)}
+.plan-card.featured::before{background:linear-gradient(to right,var(--gold),var(--silver))}
+.plan-badge{display:inline-block;padding:4px 12px;background:rgba(200,169,110,.1);border:1px solid rgba(200,169,110,.26);color:var(--gold);font-family:'Orbitron',sans-serif;font-size:.53rem;letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;align-self:flex-start}
+.plan-name{font-family:'Orbitron',sans-serif;font-size:.98rem;font-weight:700;color:var(--cream);margin-bottom:8px;letter-spacing:.3px}
+.plan-price{font-family:'Orbitron',sans-serif;font-size:clamp(1.8rem,3vw,2.4rem);font-weight:900;background:linear-gradient(135deg,var(--cream) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:4px}
+.plan-price-unit{font-size:.68rem;color:rgba(221,216,204,.28);display:block;margin-bottom:16px;letter-spacing:.4px}
+.plan-desc{font-size:.79rem;color:rgba(221,216,204,.34);line-height:1.75;margin-bottom:22px;font-weight:300;border-bottom:1px solid var(--border);padding-bottom:20px}
+.plan-features{list-style:none;margin-bottom:28px;display:flex;flex-direction:column;gap:11px;flex:1}
+.plan-features li{font-size:.78rem;color:rgba(221,216,204,.48);line-height:1.5;display:flex;gap:10px;align-items:flex-start}
+.plan-features li i{color:var(--gold);font-size:.6rem;margin-top:4px;flex-shrink:0}
+.plan-cta{display:flex;align-items:center;justify-content:center;gap:7px;padding:12px 20px;font-family:'Orbitron',sans-serif;font-size:.65rem;font-weight:500;letter-spacing:2.5px;text-transform:uppercase;transition:all .3s;background:rgba(200,169,110,.06);border:1px solid rgba(200,169,110,.2);color:var(--gold)}
+.plan-cta:hover{background:rgba(200,169,110,.13);border-color:var(--gold);color:var(--cream);letter-spacing:3px}
+.plan-card.featured .plan-cta{background:rgba(200,169,110,.1);border-color:rgba(200,169,110,.42)}
+.plan-note{text-align:center;margin-top:22px;font-size:.73rem;color:rgba(221,216,204,.2);line-height:1.85}
+
+/* ── FAQ ── */
+#faq{background:var(--black2)}
+.faq-wrap{max-width:860px;margin:50px auto 0}
+details.faq-item{border-bottom:1px solid var(--border)}
+details.faq-item:first-child{border-top:1px solid var(--border)}
+details.faq-item summary{padding:22px 0;cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:20px;list-style:none;outline:none}
+details.faq-item summary::-webkit-details-marker{display:none}
+.faq-q{font-family:'Orbitron',sans-serif;font-size:.8rem;font-weight:600;color:rgba(221,216,204,.62);line-height:1.45;transition:color .3s}
+.faq-icon{width:28px;height:28px;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:rgba(200,169,110,.42);font-size:.6rem;transition:all .3s}
+details.faq-item[open] .faq-q{color:var(--cream)}
+details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--gold);background:rgba(200,169,110,.06);transform:rotate(45deg)}
+.faq-a{padding:0 44px 22px 0;font-size:.85rem;color:rgba(221,216,204,.38);line-height:1.95;font-weight:300}
+
 /* ── RESPONSIVE ── */
 @media(max-width:960px){
   nav{padding:16px 24px}nav.stuck{padding:12px 24px}
@@ -381,6 +429,8 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   .stat-item{border-right:none;border-bottom:1px solid var(--border)}
   .stat-item:nth-child(odd){border-right:1px solid var(--border)}
   .about-caps{grid-template-columns:1fr}
+  .testi-grid{grid-template-columns:1fr}
+  .plans-grid{grid-template-columns:1fr}
 }
 @media(max-width:600px){
   .port-head{flex-direction:column;align-items:flex-start}
@@ -417,6 +467,9 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   <ul class="nav-links">
     <li><a href="#portfolio">Portfolio</a></li>
     <li><a href="#about">About</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
+    <li><a href="#plans">Plans</a></li>
+    <li><a href="#faq">FAQ</a></li>
     <li><a href="#buy">Order</a></li>
   </ul>
   <button class="nav-order" onclick="document.getElementById('buy').scrollIntoView({behavior:'smooth'})">Order Now</button>
@@ -536,6 +589,109 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 
 <div class="grad-div"></div>
 
+<!-- TESTIMONIALS -->
+<section id="testimonials">
+  <div class="wrap">
+    <div style="text-align:center;margin-bottom:10px">
+      <div class="sec-eyebrow sr-up">Client Voices</div>
+      <h2 class="sec-title sr-up">What Clients Say</h2>
+      <p class="sec-sub sr-up" style="margin:0 auto">Brands and creators who commissioned Epical Studio</p>
+    </div>
+    <div class="testi-grid">
+      <div class="testi-card sr-up">
+        <div class="testi-quote">"</div>
+        <p class="testi-text">Epical Studio transformed our product launch. The cinematic burger visuals stopped the scroll instantly — our Instagram engagement tripled within the first week. Worth every rupee. We're commissioning the next campaign before this one even wraps.</p>
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <div class="testi-author">
+          <div class="testi-avatar">O</div>
+          <div><div class="testi-name">Omar Hassan</div><div class="testi-role">Brand Manager · EMBER Burgers</div></div>
+        </div>
+      </div>
+      <div class="testi-card sr-up">
+        <div class="testi-quote">"</div>
+        <p class="testi-text">I commissioned a cultural narrative video and genuinely couldn't believe the result. The cinematography rivals traditional productions that cost 10× more. My audience thought I hired a full film crew — the comments were flooded with questions about who shot it.</p>
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <div class="testi-author">
+          <div class="testi-avatar">A</div>
+          <div><div class="testi-name">Aisha Siddiqui</div><div class="testi-role">Content Creator · 200K Subscribers</div></div>
+        </div>
+      </div>
+      <div class="testi-card sr-up">
+        <div class="testi-quote">"</div>
+        <p class="testi-text">The perfume campaign Epical delivered was nothing short of extraordinary. Dark, cinematic, exactly the luxury aesthetic our brand needed. Sales enquiries doubled after we updated our website and packaging with their imagery. A studio unlike anything else in Pakistan.</p>
+        <div class="testi-stars"><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></div>
+        <div class="testi-author">
+          <div class="testi-avatar">Z</div>
+          <div><div class="testi-name">Zaid Karimi</div><div class="testi-role">Co-Founder · Attar &amp; Oud Co.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="grad-div"></div>
+
+<!-- PLANS -->
+<section id="plans">
+  <div class="wrap">
+    <div style="text-align:center">
+      <div class="sec-eyebrow sr-up">Pricing</div>
+      <h2 class="sec-title sr-up">Simple, Clear Plans</h2>
+      <p class="sec-sub sr-up" style="margin:0 auto">Every plan includes a human creative director behind every frame — not just a prompt and a prayer</p>
+    </div>
+    <div class="plans-grid">
+      <div class="plan-card sr-up">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">2,000</div>
+        <span class="plan-price-unit">PKR per image</span>
+        <p class="plan-desc">One fully directed cinematic image. Perfect for testing the studio's output before committing to a full campaign.</p>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i>1 cinematic image, custom directed</li>
+          <li><i class="fas fa-check"></i>Up to 2 revision rounds</li>
+          <li><i class="fas fa-check"></i>High-res delivery (PNG + WebP)</li>
+          <li><i class="fas fa-check"></i>48-hour turnaround</li>
+          <li><i class="fas fa-check"></i>Personal &amp; social use licence</li>
+        </ul>
+        <a href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20order%20the%20Starter%20plan." target="_blank" class="plan-cta"><i class="fab fa-whatsapp"></i>Order on WhatsApp</a>
+      </div>
+      <div class="plan-card featured sr-up">
+        <div class="plan-badge">Most Popular</div>
+        <div class="plan-name">Standard</div>
+        <div class="plan-price">8,000</div>
+        <span class="plan-price-unit">PKR per package</span>
+        <p class="plan-desc">Images and a short cinematic video in one directed package — the go-to for product launches and social campaigns.</p>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i>3 cinematic images, fully directed</li>
+          <li><i class="fas fa-check"></i>1 cinematic video (15–30 sec)</li>
+          <li><i class="fas fa-check"></i>Up to 3 revision rounds</li>
+          <li><i class="fas fa-check"></i>Commercial use licence</li>
+          <li><i class="fas fa-check"></i>Priority 36-hour turnaround</li>
+          <li><i class="fas fa-check"></i>Social-ready exports (Reels, Stories, Feed)</li>
+        </ul>
+        <a href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20order%20the%20Standard%20plan." target="_blank" class="plan-cta"><i class="fab fa-whatsapp"></i>Order on WhatsApp</a>
+      </div>
+      <div class="plan-card sr-up">
+        <div class="plan-name">Campaign</div>
+        <div class="plan-price">22,000</div>
+        <span class="plan-price-unit">PKR full campaign</span>
+        <p class="plan-desc">A complete visual identity campaign — everything a brand needs to launch a product, collection, or event with cinematic authority.</p>
+        <ul class="plan-features">
+          <li><i class="fas fa-check"></i>10 cinematic images, campaign directed</li>
+          <li><i class="fas fa-check"></i>3 cinematic videos (up to 60 sec each)</li>
+          <li><i class="fas fa-check"></i>Full brand visual kit</li>
+          <li><i class="fas fa-check"></i>Unlimited revisions</li>
+          <li><i class="fas fa-check"></i>Full commercial use licence</li>
+          <li><i class="fas fa-check"></i>Dedicated creative director</li>
+        </ul>
+        <a href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20order%20the%20Campaign%20plan." target="_blank" class="plan-cta"><i class="fab fa-whatsapp"></i>Order on WhatsApp</a>
+      </div>
+    </div>
+    <p class="plan-note">All prices in PKR. Secure payment via <strong style="color:rgba(221,216,204,.38)">Upwork</strong> available for milestone-based contracts and full dispute protection. Custom scopes quoted on request.</p>
+  </div>
+</section>
+
+<div class="grad-div"></div>
+
 <!-- ORDER -->
 <section id="buy">
   <div class="wrap">
@@ -568,6 +724,49 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
   </div>
 </section>
 
+<div class="grad-div"></div>
+
+<!-- FAQ -->
+<section id="faq">
+  <div class="wrap">
+    <div style="text-align:center">
+      <div class="sec-eyebrow sr-up">Questions</div>
+      <h2 class="sec-title sr-up">Frequently Asked</h2>
+      <p class="sec-sub sr-up" style="margin:0 auto">Everything you need to know about synthetic cinema and working with Epical Studio</p>
+    </div>
+    <div class="faq-wrap">
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">What exactly is synthetic cinema?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">Synthetic cinema is a production method that uses cutting-edge generative AI tools — guided by a human creative director — to produce imagery and video that matches the visual quality of traditional film production. Think of it as a virtual film set: no cameras, no crews, no expensive locations — but the same cinematic language, lighting, composition, and emotional weight.</p>
+      </details>
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">Is this just AI-generated content, or is a human actually directing it?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">Every piece produced at Epical Studio is directed by a human creative — not just prompted and delivered. That means deliberate decisions around visual storytelling, colour grading, pacing, composition, and brand fit. The AI is our tool, not our director. The difference shows in the output: our work is crafted, not coincidental.</p>
+      </details>
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">Can I use the images and videos for commercial purposes?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">Yes — all Standard and Campaign plans include a full commercial use licence, covering advertising, product packaging, social media, websites, and print. Starter plan covers personal and social use. If you need a broader licence (broadcast, outdoor, OOH), just ask and we'll quote accordingly.</p>
+      </details>
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">How does the ordering and production process work?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">You share your creative brief — mood references, brand colours, subject, and intent. We confirm the scope and timeline, then begin production. You receive a first draft for review, share feedback, and we refine until it's right. Final files are delivered at full resolution, ready to publish. Most projects move from brief to delivery in 24–48 hours.</p>
+      </details>
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">What if I'm not satisfied with the result?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">Every plan includes revision rounds, and we genuinely don't consider a project closed until you're happy. For clients who prefer extra security, ordering via Upwork gives full milestone-based payment protection and formal dispute resolution — you don't pay until you approve the work.</p>
+      </details>
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">Can you match a specific visual style or replicate a reference?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">Absolutely. Send us any reference — a film still, a mood board, a competitor's ad, or even a rough sketch. Our creative director studies the reference and interprets it into original work that captures the feel without copying it. Style-matched commissions are one of our most popular request types.</p>
+      </details>
+      <details class="faq-item sr-up">
+        <summary><span class="faq-q">Do you work with international clients?</span><span class="faq-icon"><i class="fas fa-plus"></i></span></summary>
+        <p class="faq-a">Yes. We work with clients worldwide. International orders are handled securely through Upwork with full payment protection, or via invoice for established clients. Deliverables are digital and timezone-independent — we've delivered campaigns to clients across the Middle East, UK, and North America.</p>
+      </details>
+    </div>
+  </div>
+</section>
+
 <!-- FOOTER -->
 <footer>
   <div class="wrap">
@@ -582,6 +781,9 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
       <div class="foot-links">
         <a href="#portfolio">Portfolio</a>
         <a href="#about">About</a>
+        <a href="#testimonials">Reviews</a>
+        <a href="#plans">Plans</a>
+        <a href="#faq">FAQ</a>
         <a href="#buy">Order</a>
       </div>
       <div class="foot-copy">© 2026 Epical Studio — The Art of Synthetic Cinema</div>
