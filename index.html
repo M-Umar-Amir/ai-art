@@ -298,6 +298,8 @@ section{padding:100px 0}
 /* ── IMG LAZY FADE ── */
 .port-item img{opacity:0;transition:opacity .45s ease,transform .5s}
 .port-item img.img-loaded{opacity:1}
+.port-item.no-img{background:linear-gradient(160deg,#141209 0%,#1f1a10 45%,#0e0c08 100%);min-height:280px}
+.port-item.no-img .port-ov{opacity:1}
 /* ── VIDEO THUMBNAIL POSTER ── */
 .vid-thumb{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;opacity:0;transition:opacity .45s ease}
 .vid-thumb.img-loaded{opacity:1}
@@ -450,8 +452,8 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <section id="stats">
   <div class="wrap">
     <div class="stats-grid">
-      <div class="stat-item sr-up"><div class="stat-num">63</div><div class="stat-label">Total Works</div></div>
-      <div class="stat-item sr-up"><div class="stat-num">42</div><div class="stat-label">Images</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">71</div><div class="stat-label">Total Works</div></div>
+      <div class="stat-item sr-up"><div class="stat-num">50</div><div class="stat-label">Images</div></div>
       <div class="stat-item sr-up"><div class="stat-num">21</div><div class="stat-label">Videos</div></div>
       <div class="stat-item sr-up"><div class="stat-num">6+</div><div class="stat-label">Categories</div></div>
     </div>
@@ -469,7 +471,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
       <div>
         <div class="sec-eyebrow sr-up">Our Work</div>
         <h2 class="sec-title sr-up">Portfolio</h2>
-        <p class="sec-sub sr-up">42 cinematic images — hover to explore</p>
+        <p class="sec-sub sr-up">50 cinematic images — hover to explore</p>
       </div>
     </div>
     <div class="filters sr-up">
@@ -606,6 +608,14 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 <script type="module">
 /* ── MEDIA DATA ── */
 const MEDIA = [
+  {type:'img',src:'assets/images/happy_ice_cream_scoop_hero_product_202605280001.webp',cat:'food',title:'HAPPY Ice Cream — Scoop Hero Shot',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_pastel_product_campaign_202605280002.webp',cat:'food',title:'HAPPY Ice Cream — Pastel Product Campaign',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_flavor_collection_overhead_202605280003.webp',cat:'food',title:'HAPPY Ice Cream — Flavor Collection',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_packaging_branding_202605280004.webp',cat:'food',title:'HAPPY Ice Cream — Packaging Design',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_brand_identity_mockup_202605280005.webp',cat:'food',title:'HAPPY Ice Cream — Brand Identity Mockup',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_waffle_cone_study_202605280006.webp',cat:'food',title:'HAPPY Ice Cream — Waffle Cone Study',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_macro_drip_closeup_202605280007.webp',cat:'food',title:'HAPPY Ice Cream — Macro Drip Close-Up',tag:'Image'},
+  {type:'img',src:'assets/images/happy_ice_cream_campaign_strip_202605280008.webp',cat:'food',title:'HAPPY Ice Cream — Campaign Strip',tag:'Image'},
   {type:'img',src:'assets/images/EMBER_luxury_cinematic_burger_campaign_202605271444.webp',cat:'food',title:'EMBER Cinematic Burger Campaign I',tag:'Image'},
   {type:'img',src:'assets/images/EMBER_luxury_cinematic_burger_campaign_202605271453.webp',cat:'food',title:'EMBER Cinematic Burger Campaign II',tag:'Image'},
   {type:'img',src:'assets/images/EMBER_luxury_gourmet_burger_campaign_202605271428.webp',cat:'food',title:'EMBER Gourmet Burger Campaign',tag:'Image'},
@@ -788,6 +798,7 @@ function buildGrid(filter='all'){
       const img=document.createElement('img');
       img.alt=m.title;img.loading='lazy';img.decoding='async';
       img.addEventListener('load',()=>img.classList.add('img-loaded'));
+      img.addEventListener('error',()=>el.classList.add('no-img'));
       if(img.complete)img.classList.add('img-loaded');
       /* Use IntersectionObserver for scroll-triggered load */
       img.dataset.src=m.src;
