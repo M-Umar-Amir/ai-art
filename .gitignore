@@ -5,3 +5,10 @@
 /Perfume
 /ep
 /assets/showreel
+node_modules/
+package.json
+package-lock.json
+create-showreel.js
+make_showreel.py
+check_clips.py
+concat_list.txt
