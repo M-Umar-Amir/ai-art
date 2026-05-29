@@ -154,20 +154,28 @@ img{display:block}
 /* ── NAV ── */
 nav{
   position:fixed;top:0;left:0;right:0;z-index:500;
-  display:flex;align-items:center;justify-content:space-between;
-  padding:20px 52px;background:transparent;backdrop-filter:blur(0);
+  display:grid;grid-template-columns:1fr auto 1fr;align-items:center;
+  padding:22px 52px;background:transparent;backdrop-filter:blur(0);
   transition:background .4s,backdrop-filter .4s,padding .3s,border-color .4s;
   border-bottom:1px solid transparent;
 }
-nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:13px 52px;border-bottom-color:var(--border)}
-.nav-logo-img{height:28px;width:auto;mix-blend-mode:lighten;filter:brightness(1.05)}
-.nav-links{display:flex;gap:36px;list-style:none}
-.nav-links a{font-size:.66rem;letter-spacing:3px;text-transform:uppercase;color:rgba(221,216,204,.38);transition:color .3s;position:relative}
+nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:14px 52px;border-bottom-color:var(--border)}
+.nav-brand{display:flex;flex-direction:column;gap:3px}
+.nav-brand-name{font-family:'Orbitron',sans-serif;font-size:.68rem;font-weight:900;letter-spacing:.28em;text-transform:uppercase;color:var(--cream);line-height:1}
+.nav-brand-sub{font-family:'Orbitron',sans-serif;font-size:.42rem;font-weight:500;letter-spacing:.45em;text-transform:uppercase;color:rgba(200,169,110,.5);line-height:1}
+.nav-links{display:flex;gap:32px;list-style:none;justify-content:center}
+.nav-links a{font-size:.62rem;letter-spacing:3px;text-transform:uppercase;color:rgba(221,216,204,.38);transition:color .3s;position:relative}
 .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:1px;background:linear-gradient(to right,var(--gold),var(--silver));transition:width .3s}
 .nav-links a:hover{color:var(--cream)}
 .nav-links a:hover::after{width:100%}
-.nav-order{padding:8px 22px;border:1px solid rgba(200,169,110,.38);border-radius:0;font-family:'Orbitron',sans-serif;font-size:.66rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;color:var(--gold);background:transparent;transition:all .3s}
-.nav-order:hover{background:rgba(200,169,110,.08);color:var(--cream);letter-spacing:4px}
+.nav-socials{display:flex;gap:14px;align-items:center;justify-content:flex-end}
+.nav-soc{color:rgba(221,216,204,.28);font-size:.78rem;transition:color .3s,transform .3s}
+.nav-soc:hover{color:var(--gold);transform:translateY(-2px)}
+@media(max-width:768px){
+  nav{grid-template-columns:1fr 1fr;padding:16px 24px}
+  .nav-links{display:none}
+  .nav-socials{gap:10px}
+}
 
 /* ── HERO ── */
 #hero{
@@ -205,6 +213,7 @@ nav.stuck{background:rgba(4,4,4,.92);backdrop-filter:blur(24px);padding:13px 52p
 }
 .hero-desc{font-size:clamp(.88rem,1.7vw,1rem);color:rgba(221,216,204,.38);max-width:440px;margin:0 auto 44px;line-height:1.82;font-weight:300;letter-spacing:.015em}
 .hero-cta-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.hero-cta-bottom{position:absolute;bottom:clamp(80px,13vh,120px);left:50%;transform:translateX(-50%);z-index:4;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;white-space:nowrap}
 .btn-gold{padding:13px 36px;background:linear-gradient(135deg,rgba(200,169,110,.12),rgba(200,169,110,.06));border:1px solid rgba(200,169,110,.48);border-radius:0;color:var(--gold);font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:all .3s;display:inline-flex;align-items:center;gap:9px}
 .btn-gold:hover{background:rgba(200,169,110,.14);border-color:var(--gold);color:var(--cream);letter-spacing:4px}
 .btn-ghost{padding:12px 34px;background:transparent;border:1px solid rgba(221,216,204,.1);border-radius:0;color:rgba(221,216,204,.4);font-family:'Orbitron',sans-serif;font-size:.7rem;font-weight:500;letter-spacing:3px;text-transform:uppercase;transition:all .3s;display:inline-flex;align-items:center;gap:9px}
@@ -370,6 +379,7 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 
 /* ── SEO VISUALLY-HIDDEN (clip technique, readable by crawlers) ── */
 .seo-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.seo-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;font-size:0}
 
 /* ── TESTIMONIALS ── */
 #testimonials{background:var(--black2)}
@@ -463,7 +473,10 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
 
 <!-- NAV -->
 <nav id="nav" aria-label="Main navigation">
-  <a href="#hero"><img src="assets/e.jpg" class="nav-logo-img" alt="Epical Studio" width="1280" height="853"></a>
+  <a href="#hero" class="nav-brand">
+    <span class="nav-brand-name">Epical Studio</span>
+    <span class="nav-brand-sub">a division of filmworks</span>
+  </a>
   <ul class="nav-links">
     <li><a href="#portfolio">Portfolio</a></li>
     <li><a href="#about">About</a></li>
@@ -472,7 +485,12 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
     <li><a href="#faq">FAQ</a></li>
     <li><a href="#buy">Order</a></li>
   </ul>
-  <button class="nav-order" onclick="document.getElementById('buy').scrollIntoView({behavior:'smooth'})">Order Now</button>
+  <div class="nav-socials">
+    <a class="nav-soc" href="https://www.linkedin.com/company/smarthireai2026" target="_blank" aria-label="LinkedIn"><i class="fab fa-linkedin-in"></i></a>
+    <a class="nav-soc" href="https://wa.me/923002166620" target="_blank" aria-label="WhatsApp"><i class="fab fa-whatsapp"></i></a>
+    <a class="nav-soc" href="https://www.upwork.com/services/product/design-ai-generated-photo-or-video-2056971193430539602?ref=project_share" target="_blank" aria-label="Upwork"><i class="fas fa-briefcase"></i></a>
+    <a class="nav-soc" href="mailto:umaramir.dev@gmail.com" aria-label="Email"><i class="fas fa-envelope"></i></a>
+  </div>
 </nav>
 
 <!-- HERO -->
@@ -485,13 +503,12 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
   <div class="hero-lb hero-lb-bot"></div>
   <div class="hero-content">
     <div class="hero-eyebrow"><span></span>Cinematic Image & Video Production Studio<span></span></div>
-    <h1 class="hero-name">EPICAL<span class="seo-hidden"> Epical Filmworks Studio creates beautiful cinematic images and videos, cultural narratives, historical epics, 3D character art and commercial works</span></h1>
-    <div class="hero-filmworks">a division of filmworks</div>
+    <h1 class="hero-name seo-only">EPICAL<span class="seo-hidden"> Epical Filmworks Studio creates beautiful cinematic images and videos, cultural narratives, historical epics, 3D character art and commercial works</span></h1>
     <p class="hero-desc">Commission cinematic images & videos</p>
-    <div class="hero-cta-row">
-      <a href="#portfolio" class="btn-gold"><i class="fas fa-images"></i>View Portfolio</a>
-      <a href="#featured" class="btn-ghost"><i class="fas fa-film"></i>Featured Works</a>
-    </div>
+  </div>
+  <div class="hero-cta-bottom">
+    <a href="#buy" class="btn-gold"><i class="fas fa-shopping-cart"></i>Order</a>
+    <a href="#portfolio" class="btn-ghost"><i class="fas fa-images"></i>View Portfolio</a>
   </div>
   <div class="scroll-hint"><div class="scroll-bar"></div><span>Scroll</span></div>
 </section>
