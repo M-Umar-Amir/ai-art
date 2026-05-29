@@ -493,23 +493,6 @@ body.has-cursor a,body.has-cursor button{cursor:none}
 #nav-mobile .nm-close:hover{border-color:rgba(200,169,110,.38);color:var(--gold)}
 @media(max-width:768px){.nav-burger{display:flex}.nav-links{display:none!important}}
 
-/* ── SHOWREEL SECTION ── */
-#showreel{background:var(--black);padding:100px 0;position:relative;overflow:hidden}
-#showreel::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 100%,rgba(200,169,110,.045) 0%,transparent 65%);pointer-events:none}
-.reel-stage{position:relative;max-width:900px;margin:50px auto 0;border:1px solid var(--border);overflow:hidden;background:#000;transition:border-color .3s}
-.reel-stage:hover{border-color:rgba(200,169,110,.28)}
-.reel-stage video{width:100%;display:block;max-height:72vh;object-fit:contain;background:#000}
-.reel-strip{display:flex;gap:8px;margin-top:14px;overflow-x:auto;padding-bottom:8px;scrollbar-width:thin;scrollbar-color:rgba(200,169,110,.28) transparent;max-width:900px;margin-left:auto;margin-right:auto}
-.reel-strip::-webkit-scrollbar{height:2px}
-.reel-strip::-webkit-scrollbar-thumb{background:rgba(200,169,110,.3);border-radius:1px}
-.reel-thumb{flex-shrink:0;width:90px;border:1px solid var(--border);cursor:pointer;transition:border-color .3s,transform .3s,box-shadow .3s;position:relative;overflow:hidden;background:#000}
-.reel-thumb video{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;pointer-events:none}
-.reel-thumb:hover{border-color:rgba(200,169,110,.45);transform:translateY(-3px);box-shadow:0 8px 24px rgba(200,169,110,.1)}
-.reel-thumb.active{border-color:var(--gold);box-shadow:0 0 16px rgba(200,169,110,.2)}
-.reel-num{position:absolute;bottom:4px;right:5px;font-family:'Orbitron',sans-serif;font-size:.44rem;color:rgba(200,169,110,.6);letter-spacing:1px}
-.reel-full-btn{display:flex;align-items:center;justify-content:center;gap:8px;margin:28px auto 0;padding:11px 32px;border:1px solid rgba(200,169,110,.28);color:rgba(200,169,110,.65);font-family:'Orbitron',sans-serif;font-size:.62rem;letter-spacing:3px;text-transform:uppercase;transition:all .3s;width:fit-content;background:transparent;cursor:pointer}
-.reel-full-btn:hover{border-color:var(--gold);color:var(--gold);background:rgba(200,169,110,.06);letter-spacing:4px}
-
 /* ── BACK TO TOP ── */
 #back-top{position:fixed;bottom:90px;right:28px;z-index:700;width:40px;height:40px;background:rgba(4,4,4,.88);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:rgba(200,169,110,.45);font-size:.68rem;cursor:pointer;opacity:0;transform:translateY(8px);transition:opacity .35s,transform .35s,border-color .3s,color .3s;pointer-events:none}
 #back-top.vis{opacity:1;transform:none;pointer-events:all}
@@ -541,8 +524,8 @@ body.has-cursor a,body.has-cursor button{cursor:none}
   </a>
   <ul class="nav-links">
     <li><a href="#portfolio">Portfolio</a></li>
-    <li><a href="#showreel">Showreel</a></li>
     <li><a href="#about">About</a></li>
+    <li><a href="#testimonials">Reviews</a></li>
     <li><a href="#plans">Plans</a></li>
     <li><a href="#faq">FAQ</a></li>
     <li><a href="#buy">Order</a></li>
@@ -562,7 +545,6 @@ body.has-cursor a,body.has-cursor button{cursor:none}
 <div id="nav-mobile" role="dialog" aria-label="Navigation menu">
   <button class="nm-close" id="nm-close"><i class="fas fa-times"></i></button>
   <a href="#portfolio" class="nm-link">Portfolio</a>
-  <a href="#showreel" class="nm-link">Showreel</a>
   <a href="#about" class="nm-link">About</a>
   <a href="#testimonials" class="nm-link">Reviews</a>
   <a href="#plans" class="nm-link">Plans</a>
@@ -579,10 +561,6 @@ body.has-cursor a,body.has-cursor button{cursor:none}
   <div class="hero-lb hero-lb-top"></div>
   <div class="hero-lb hero-lb-bot"></div>
   <div class="hero-content">
-    <div class="hero-eyebrow"><span></span>Creative · Cinematic · Directed<span></span></div>
-    <h1 class="hero-name">EPICAL</h1>
-    <div class="hero-filmworks">Studio</div>
-    <p class="hero-tagline">Where imagination becomes cinema</p>
   </div>
   <div class="hero-cta-bottom">
     <a href="#buy" class="btn-gold"><i class="fas fa-shopping-cart"></i>Order</a>
@@ -679,24 +657,6 @@ body.has-cursor a,body.has-cursor button{cursor:none}
         </div>
       </div>
     </div>
-  </div>
-</section>
-
-<div class="grad-div"></div>
-
-<!-- SHOWREEL -->
-<section id="showreel">
-  <div class="wrap">
-    <div style="text-align:center">
-      <div class="sec-eyebrow sr-up">Showreel</div>
-      <h2 class="sec-title sr-up">Watch Our Work</h2>
-      <p class="sec-sub sr-up" style="margin:0 auto">16 cinematic clips — click any thumbnail to preview</p>
-    </div>
-    <div class="reel-stage sr-up">
-      <video id="main-reel" muted loop playsinline preload="none" src="assets/videos/showreel.mp4"></video>
-    </div>
-    <div class="reel-strip sr-up" id="reel-strip"></div>
-    <button class="reel-full-btn sr-up" id="reel-unmute"><i class="fas fa-volume-xmark"></i>Toggle Sound</button>
   </div>
 </section>
 
@@ -1369,61 +1329,7 @@ const backTop=document.getElementById('back-top');
 window.addEventListener('scroll',()=>backTop.classList.toggle('vis',scrollY>700),{passive:true});
 backTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
 
-/* ── SHOWREEL SECTION ── */
-(function initShowreel(){
-  const strip=document.getElementById('reel-strip');
-  const mainReel=document.getElementById('main-reel');
-  const unmuteBtn=document.getElementById('reel-unmute');
-  if(!strip||!mainReel)return;
 
-  const clips=[1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16];
-
-  /* Autoplay main reel when it enters viewport */
-  const reelVpObs=new IntersectionObserver(entries=>{
-    if(entries[0].isIntersecting){mainReel.play().catch(()=>{})}
-    else{mainReel.pause()}
-  },{threshold:.3});
-  reelVpObs.observe(mainReel);
-
-  /* Build thumbnail strip */
-  clips.forEach((n,i)=>{
-    const wrap=document.createElement('div');
-    wrap.className='reel-thumb'+(i===0?' active':'');
-
-    const vid=document.createElement('video');
-    vid.src=`assets/showreel/${n}.mp4`;
-    vid.muted=true;vid.playsInline=true;vid.preload='metadata';
-    vid.style.pointerEvents='none';
-
-    const num=document.createElement('div');
-    num.className='reel-num';num.textContent=String(n).padStart(2,'0');
-
-    wrap.appendChild(vid);wrap.appendChild(num);
-
-    /* Hover: play thumbnail */
-    wrap.addEventListener('mouseenter',()=>vid.play().catch(()=>{}));
-    wrap.addEventListener('mouseleave',()=>{vid.pause();vid.currentTime=0});
-
-    /* Click: load in main player */
-    wrap.addEventListener('click',()=>{
-      document.querySelectorAll('.reel-thumb').forEach(t=>t.classList.remove('active'));
-      wrap.classList.add('active');
-      const wasMuted=mainReel.muted;
-      mainReel.src=`assets/showreel/${n}.mp4`;
-      mainReel.muted=wasMuted;
-      mainReel.play().catch(()=>{});
-    });
-
-    strip.appendChild(wrap);
-  });
-
-  /* Unmute toggle */
-  unmuteBtn.addEventListener('click',()=>{
-    mainReel.muted=!mainReel.muted;
-    const icon=unmuteBtn.querySelector('i');
-    icon.className=mainReel.muted?'fas fa-volume-xmark':'fas fa-volume-high';
-  });
-})();
 </script>
 </body>
 </html>
