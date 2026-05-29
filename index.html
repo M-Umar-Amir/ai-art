@@ -462,13 +462,6 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
 /* ── SCROLL PROGRESS ── */
 #scroll-prog{position:fixed;top:0;left:0;height:2px;background:linear-gradient(to right,var(--gold),var(--silver),var(--gold));z-index:99999;width:0;pointer-events:none;transition:width .08s linear}
 
-/* ── CUSTOM CURSOR ── */
-#cur-ring{position:fixed;pointer-events:none;z-index:99998;width:34px;height:34px;border-radius:50%;border:1px solid rgba(200,169,110,.38);transform:translate(-50%,-50%);top:0;left:0;transition:width .18s,height .18s,border-color .2s,background .2s}
-#cur-dot{position:fixed;pointer-events:none;z-index:99999;width:5px;height:5px;border-radius:50%;background:var(--gold);transform:translate(-50%,-50%);top:0;left:0;transition:opacity .2s}
-body.has-cursor{cursor:none}
-body.has-cursor a,body.has-cursor button{cursor:none}
-#cur-ring.on-link{width:50px;height:50px;border-color:rgba(200,169,110,.65);background:rgba(200,169,110,.06)}
-
 /* ── CLICK RIPPLE ── */
 .click-ripple{position:fixed;border-radius:50%;border:1.5px solid rgba(200,169,110,.55);pointer-events:none;z-index:99996;transform:translate(-50%,-50%);animation:cRipple .65s ease-out forwards}
 @keyframes cRipple{from{width:4px;height:4px;opacity:1}to{width:72px;height:72px;opacity:0;border-color:transparent}}
@@ -504,8 +497,6 @@ body.has-cursor a,body.has-cursor button{cursor:none}
 <body>
 
 <div id="scroll-prog"></div>
-<div id="cur-ring"></div>
-<div id="cur-dot"></div>
 
 <div id="grain"></div>
 
@@ -1249,27 +1240,6 @@ window.addEventListener('scroll',()=>{
   const pct=scrollY/(document.documentElement.scrollHeight-innerHeight)*100;
   progBar.style.width=Math.min(pct,100)+'%';
 },{passive:true});
-
-/* ── CUSTOM CURSOR (desktop only) ── */
-if(!('ontouchstart' in window)){
-  const cRing=document.getElementById('cur-ring');
-  const cDot=document.getElementById('cur-dot');
-  document.body.classList.add('has-cursor');
-  let mx=-200,my=-200,rx=-200,ry=-200;
-  document.addEventListener('mousemove',e=>{
-    mx=e.clientX;my=e.clientY;
-    cDot.style.left=mx+'px';cDot.style.top=my+'px';
-  },{passive:true});
-  (function animRing(){
-    rx+=(mx-rx)*.13;ry+=(my-ry)*.13;
-    cRing.style.left=rx+'px';cRing.style.top=ry+'px';
-    requestAnimationFrame(animRing);
-  })();
-  document.querySelectorAll('a,button').forEach(el=>{
-    el.addEventListener('mouseenter',()=>cRing.classList.add('on-link'));
-    el.addEventListener('mouseleave',()=>cRing.classList.remove('on-link'));
-  });
-}
 
 /* ── CLICK RIPPLE ── */
 document.addEventListener('click',e=>{
