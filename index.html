@@ -1045,9 +1045,11 @@ const imgObs=new IntersectionObserver((entries,obs)=>{
   });
 },{rootMargin:'300px'});
 
+function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
+const MEDIA_SHUFFLED=shuffle([...MEDIA]);
 function buildGrid(filter='all'){
   grid.innerHTML='';visibleItems=[];
-  MEDIA.forEach((m,idx)=>{
+  MEDIA_SHUFFLED.forEach((m,idx)=>{
     if(m.type!=='img')return;
     const show=filter==='all'||filter===m.cat;
     if(!show)return;
