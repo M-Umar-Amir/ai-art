@@ -1,0 +1,35 @@
+[
+  { "brand": "National Foods", "email": "info@nfoods.com", "industry": "food" },
+  { "brand": "Shan Foods", "email": "info@shanfoods.com", "industry": "food" },
+  { "brand": "Ismail Industries (Candyland/Bisconni)", "email": "info@ismailindustries.com", "industry": "food" },
+  { "brand": "Nestlé Pakistan", "email": "customercare@pk.nestle.com", "industry": "food" },
+  { "brand": "Haleeb Foods", "email": "info@haleebfoods.com", "industry": "food" },
+  { "brand": "Shezan International", "email": "shezan@brain.net.pk", "industry": "food" },
+  { "brand": "Pakola", "email": "info@pakola.com.pk", "industry": "food" },
+  { "brand": "KFC Pakistan Marketing", "email": "noor.alam@yum.com", "industry": "food" },
+  { "brand": "PepsiCo Pakistan", "email": "Pakistancorporateaffairs@pepsico.com", "industry": "food" },
+  { "brand": "Engro Foods / FrieslandCampina", "email": "taluq@frieslandcampina.com", "industry": "food" },
+  { "brand": "Gourmet Pakistan", "email": "homedelivery.team@gourmetpakistan.com", "industry": "food" },
+  { "brand": "Saffron Restaurant", "email": "info@saffron.com.pk", "industry": "food" },
+  { "brand": "Sunny Foods", "email": "info@sunnyfoods.com.pk", "industry": "food" },
+  { "brand": "Mondelez Pakistan (Cadbury/Oreo)", "email": "news@mdlz.com", "industry": "food" },
+  { "brand": "Unilever Pakistan", "email": "amir.tagar@unilever.com", "industry": "food" },
+  { "brand": "Coca-Cola Pakistan", "email": "CCBPL.CustomerCare@coca-cola.com", "industry": "food" },
+  { "brand": "Mitchell's Fruit Farms", "email": "info@mitchells.com.pk", "industry": "food" },
+  { "brand": "EBM (Peek Freans)", "email": "customerservices@ebm.com.pk", "industry": "food" },
+  { "brand": "Continental Biscuits", "email": "info@continentalbiscuits.com.pk", "industry": "food" },
+  { "brand": "Olper's / Dairy Omung", "email": "info@olpers.com.pk", "industry": "food" },
+
+  { "brand": "Khaadi", "email": "info@khaadi.com", "industry": "fashion" },
+  { "brand": "Sapphire Pakistan", "email": "info@sapphire.com.pk", "industry": "fashion" },
+  { "brand": "J. (Junaid Jamshed)", "email": "care@junaidjamshed.com", "industry": "fashion" },
+  { "brand": "Sana Safinaz", "email": "customercare@sanasafinaz.com", "industry": "fashion" },
+  { "brand": "Gulahmed Textile", "email": "info@gulahmedtextile.com", "industry": "fashion" },
+
+  { "brand": "Emaar Pakistan (Real Estate)", "email": "info@emaarpakistan.com", "industry": "realestate" },
+  { "brand": "DHA Karachi", "email": "info@dha.karachi.pk", "industry": "realestate" },
+  { "brand": "Bahria Town", "email": "info@bahriatown.com", "industry": "realestate" },
+
+  { "brand": "Jazz Pakistan (Telecom)", "email": "corporate@jazz.com.pk", "industry": "tech" },
+  { "brand": "Telenor Pakistan", "email": "business@telenor.com.pk", "industry": "tech" }
+]

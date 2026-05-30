@@ -13,3 +13,4 @@ make_showreel.py
 make_showreel_h264.js
 check_clips.py
 concat_list.txt
+.env
