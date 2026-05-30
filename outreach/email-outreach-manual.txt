@@ -1,0 +1,220 @@
+================================================================
+EPICAL STUDIO — MANUAL EMAIL OUTREACH (VERIFIED)
+================================================================
+Last verified: 2026-05-30
+Changes from first draft marked with [FIXED]
+================================================================
+
+
+================================================================
+FOOD (20 brands)
+================================================================
+
+TO (paste all at once — use BCC):
+info@nfoods.com, info@shanfoods.com, info@ismailindustries.com, rahat.hussain@pk.nestle.com, info@haleebfoods.com, contact@shezan.com, info@pakola.com.pk, noor.alam@yum.com, PakistanCorporateAffairs@pepsico.com, taluq@frieslandcampina.com, partnership@gourmetpakistan.com, info@saffron.com.pk, info@sunnyfoods.com.pk, news@mdlz.com, amir.tagar@unilever.com, CCBPL.CustomerCare@coca-cola.com, ho@mitchells.com.pk, info@ebm.com.pk, info@cbl.com.pk, taluq@frieslandcampina.com
+
+CHANGES FROM PREVIOUS LIST:
+  [FIXED] Nestlé: customercare@pk.nestle.com → rahat.hussain@pk.nestle.com (Media & Corporate Affairs)
+  [FIXED] Shezan: shezan@brain.net.pk → contact@shezan.com (old ISP email replaced)
+  [FIXED] Gourmet: homedelivery.team@ → partnership@gourmetpakistan.com (operations → business)
+  [FIXED] Mitchell's: info@ → ho@mitchells.com.pk (Head Office — info@ not on site)
+  [FIXED] EBM: customerservices@ → info@ebm.com.pk (customerservices@ not on site)
+  [FIXED] Continental Biscuits: info@continentalbiscuits.com.pk → info@cbl.com.pk (correct domain)
+  [FIXED] Olpers: info@olpers.com.pk → taluq@frieslandcampina.com (olpers.com.pk does not exist)
+  [RISKY] KFC: noor.alam@yum.com — personal CMO email, may have changed roles
+  [RISKY] Unilever: amir.tagar@unilever.com — personal sales employee, not marketing
+  [CAUTION] Coca-Cola: no verified marketing email exists publicly — will reach customer care
+
+SUBJECT:
+Cinematic AI Campaign Visuals for Your Brand — Epical Studio, Karachi
+
+BODY:
+Dear Marketing Team,
+
+My name is Umar Amir, founder of Epical Studio — a Karachi-based AI cinematic production studio specialising in commercial-grade visuals for Pakistani food and beverage brands.
+
+We recently completed a full cinematic campaign for a premium burger brand — delivering 10 product images and 3 cinematic brand videos, all AI-crafted, at a fraction of traditional production costs. The results were dramatic, film-quality visuals with no studio, no crew, no delays.
+
+We believe your brand deserves visuals that match global standards — at local pricing.
+
+What we offer:
+• Commercial product imagery — from 2,000 PKR per image
+• Cinematic brand videos — from 2,000 PKR per video
+• Full campaign packages — custom quote
+• Social media visual packs — custom quote
+
+View our portfolio (including food, commercial, and cultural work):
+https://epical.art
+
+If you're open to exploring a collaboration or want a custom quote for your next campaign, reply to this email or reach me on WhatsApp:
+https://wa.me/923002166620
+
+Best regards,
+Umar Amir
+Founder, Epical Studio · M-UAY Firm
+Karachi, Pakistan
++92 300 216 6620
+umaramir.dev@gmail.com
+https://epical.art
+
+
+================================================================
+FASHION (5 brands)
+================================================================
+
+TO (use BCC):
+welisten@khaadi.com, info@sapphire.com.pk, corporate@junaidjamshed.com, sales@sanasafinaz.com, info@gulahmed.com
+
+CHANGES FROM PREVIOUS LIST:
+  [FIXED] Khaadi: info@khaadi.com → welisten@khaadi.com (info@ not published on site)
+  [FIXED] J. Junaid Jamshed: care@ → corporate@junaidjamshed.com (B2B/corporate email)
+  [FIXED] Sana Safinaz: customercare@ → sales@sanasafinaz.com (customercare@ not on site)
+  [FIXED] Gulahmed: info@gulahmedtextile.com → info@gulahmed.com (wrong domain fixed)
+
+SUBJECT:
+Cinematic Campaign Imagery & Brand Films for Your Label — Epical Studio
+
+BODY:
+Dear Marketing Team,
+
+I'm Umar Amir, founder of Epical Studio — a Karachi-based AI cinematic studio creating luxury-grade visuals for Pakistani fashion and lifestyle brands.
+
+Fashion labels need more than product shots. They need visuals that carry cultural weight, cinematic beauty, and aspirational energy. We specialise in exactly that — AI-crafted campaign imagery and short brand films that look like they were produced by a high-end studio.
+
+What we offer:
+• Editorial campaign imagery — from 2,000 PKR per image
+• Cinematic lookbook & brand films — from 2,000 PKR per video
+• Full seasonal campaign packages — custom quote
+
+Our portfolio spans cultural, historical, 3D character, and commercial work:
+https://epical.art
+
+If you'd like to explore a collaboration for your next season or campaign, reply here or reach me on WhatsApp:
+https://wa.me/923002166620
+
+Best regards,
+Umar Amir
+Founder, Epical Studio · M-UAY Firm
+Karachi, Pakistan
++92 300 216 6620
+umaramir.dev@gmail.com
+https://epical.art
+
+
+================================================================
+REAL ESTATE (3 brands)
+================================================================
+
+TO (use BCC):
+dha@dhakarachi.org, sales@bahriatown.com, info@emaarpakistan.com
+
+CHANGES FROM PREVIOUS LIST:
+  [FIXED] DHA Karachi: info@dha.karachi.pk → dha@dhakarachi.org (correct domain)
+  [FIXED] Bahria Town: info@ → sales@bahriatown.com (confirmed on official site)
+  [CAUTION] Emaar Pakistan: no verified marketing email found — info@emaarpakistan.com
+             may not work, official site is pk.emaar.com — consider using contact form
+
+SUBJECT:
+Cinematic Property Visuals & Brand Films — Epical Studio, Karachi
+
+BODY:
+Dear Marketing Team,
+
+I'm Umar Amir, founder of Epical Studio — a Karachi-based AI cinematic production studio creating high-impact visuals for real estate developers and property brands.
+
+We produce cinematic property imagery, aerial-style visual narratives, and short brand films — all AI-crafted, delivered fast, with no traditional production overhead. Ideal for project launches, investor decks, hoardings, and digital campaigns.
+
+What we offer:
+• Cinematic property & lifestyle imagery — from 2,000 PKR per image
+• Project launch / brand films — from 2,000 PKR per video
+• Full launch campaign packages — custom quote
+
+View our portfolio:
+https://epical.art
+
+To discuss a project or get a custom quote, reply here or contact me on WhatsApp:
+https://wa.me/923002166620
+
+Best regards,
+Umar Amir
+Founder, Epical Studio · M-UAY Firm
+Karachi, Pakistan
++92 300 216 6620
+umaramir.dev@gmail.com
+https://epical.art
+
+
+================================================================
+TELECOM / TECH (2 brands)
+================================================================
+
+TO:
+corporate@jazz.com.pk, telenor345@telenor.com.pk
+
+CHANGES FROM PREVIOUS LIST:
+  [FIXED] Telenor: business@telenor.com.pk → telenor345@telenor.com.pk
+  [WARNING] Telenor Pakistan was acquired by PTCL in Dec 2025 and is merging
+            with Ufone — this email may soon be defunct. Consider skipping.
+
+SUBJECT:
+AI-Crafted Brand Visuals & Campaign Content — Epical Studio, Karachi
+
+BODY:
+Dear Marketing Team,
+
+I'm Umar Amir, founder of Epical Studio — a Karachi-based AI cinematic studio producing commercial-grade imagery and brand films for corporate and technology brands.
+
+We deliver high-impact visual content — product campaigns, brand identity films, social media visual packs — all AI-crafted at a fraction of traditional agency costs, with fast turnaround.
+
+What we offer:
+• Commercial imagery — from 2,000 PKR per image
+• Brand & campaign films — from 2,000 PKR per video
+• Corporate visual packages — custom quote
+
+View our portfolio:
+https://epical.art
+
+Reply here or reach me on WhatsApp to discuss:
+https://wa.me/923002166620
+
+Best regards,
+Umar Amir
+Founder, Epical Studio · M-UAY Firm
+Karachi, Pakistan
++92 300 216 6620
+umaramir.dev@gmail.com
+https://epical.art
+
+
+================================================================
+TIPS FOR SENDING MANUALLY
+================================================================
+
+• Use BCC (not To/CC) when sending to multiple recipients
+• Send each category as a separate email
+• Best send times: Tuesday–Thursday, 10am–12pm PKR
+• Use Gmail "Schedule Send" to space batches 30 min apart
+• Skip or use contact forms for: Coca-Cola, Emaar Pakistan
+• Skip Telenor — brand dissolving into Ufone after PTCL acquisition
+• Total verified: 28 contacts across 4 categories
+
+================================================================
+FULL CHANGE LOG (14 emails fixed)
+================================================================
+
+1.  Nestlé Pakistan        customercare@pk.nestle.com      → rahat.hussain@pk.nestle.com
+2.  Shezan International   shezan@brain.net.pk             → contact@shezan.com
+3.  Gourmet Pakistan       homedelivery.team@gourmet...    → partnership@gourmetpakistan.com
+4.  Mitchell's Fruit Farms info@mitchells.com.pk           → ho@mitchells.com.pk
+5.  EBM (Peek Freans)      customerservices@ebm.com.pk     → info@ebm.com.pk
+6.  Continental Biscuits   info@continentalbiscuits.com.pk → info@cbl.com.pk
+7.  Olpers                 info@olpers.com.pk              → taluq@frieslandcampina.com
+8.  Khaadi                 info@khaadi.com                 → welisten@khaadi.com
+9.  J. Junaid Jamshed      care@junaidjamshed.com          → corporate@junaidjamshed.com
+10. Sana Safinaz           customercare@sanasafinaz.com    → sales@sanasafinaz.com
+11. Gulahmed Textile       info@gulahmedtextile.com        → info@gulahmed.com
+12. DHA Karachi            info@dha.karachi.pk             → dha@dhakarachi.org
+13. Bahria Town            info@bahriatown.com             → sales@bahriatown.com
+14. Telenor Pakistan       business@telenor.com.pk         → telenor345@telenor.com.pk
+
+================================================================
