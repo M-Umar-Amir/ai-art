@@ -1104,12 +1104,10 @@ function buildGrid(filter='all'){
       /* Show poster thumbnail, swap to video on hover */
       const thumb=document.createElement('img');
       thumb.className='vid-thumb';thumb.alt=m.title;thumb.loading='lazy';thumb.decoding='async';
+      thumb.src=m.poster||'';
       thumb.addEventListener('load',()=>thumb.classList.add('img-loaded'));
       thumb.addEventListener('error',()=>el.classList.add('no-img'));
       if(thumb.complete)thumb.classList.add('img-loaded');
-      /* Use IntersectionObserver for scroll-triggered load */
-      thumb.dataset.src=m.poster||'';
-      imgObs.observe(thumb);
       el.appendChild(thumb);
       el.insertAdjacentHTML('beforeend',`<div class="vid-badge-play"><i class="fas fa-play"></i></div>${ov}`);
       let vid=null;
