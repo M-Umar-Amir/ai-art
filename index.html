@@ -1057,6 +1057,7 @@ function initHeroVideo(){
 /* ── PORTFOLIO GRID ── */
 const grid=document.getElementById('port-grid');
 let visibleItems=[];
+let currentMedia=[];
 
 /* IntersectionObserver: load images when scrolled near */
 const imgObs=new IntersectionObserver((entries,obs)=>{
@@ -1071,15 +1072,16 @@ const imgObs=new IntersectionObserver((entries,obs)=>{
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
 const MEDIA_SHUFFLED=shuffle([...MEDIA]);
 function buildGrid(filter='all'){
-  grid.innerHTML='';visibleItems=[];
-  
+  grid.innerHTML='';visibleItems=[];currentMedia=[];
+
   /* Lazy load videos only when videos category is clicked */
   if(filter==='videos'){
     loadVideos();
   }
-  
+
   /* Combine MEDIA and VIDEOS if videos are loaded */
   const allMedia = VIDEOS !== null ? [...MEDIA, ...VIDEOS] : MEDIA;
+  currentMedia = allMedia;
   const MEDIA_SHUFFLED_FULL = shuffle([...allMedia]);
   
   MEDIA_SHUFFLED_FULL.forEach((m,idx)=>{
@@ -1147,7 +1149,7 @@ const lbCap=document.getElementById('lb-caption');
 let lbIdx=0;
 function openLB(mediaIdx){lbIdx=visibleItems.indexOf(mediaIdx);if(lbIdx===-1)lbIdx=0;showLB();lb.classList.add('open');document.body.style.overflow='hidden'}
 function showLB(){
-  const m=MEDIA[visibleItems[lbIdx]];lbContent.innerHTML='';
+  const m=currentMedia[visibleItems[lbIdx]];lbContent.innerHTML='';
   if(m.type==='img'){const img=document.createElement('img');img.src=m.src;img.alt=m.title;lbContent.appendChild(img)}
   else{const v=document.createElement('video');v.src=m.src;v.controls=true;v.autoplay=true;v.loop=true;v.style.width='min(90vw,1200px)';lbContent.appendChild(v)}
   lbCap.textContent=m.title+' · '+m.tag;
