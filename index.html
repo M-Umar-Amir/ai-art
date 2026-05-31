@@ -312,7 +312,7 @@ section{padding:100px 0}
 .port-item.no-img{background:linear-gradient(160deg,#141209 0%,#1f1a10 45%,#0e0c08 100%);min-height:280px}
 .port-item.no-img .port-ov{opacity:1}
 /* ── VIDEO THUMBNAIL POSTER ── */
-.vid-thumb{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;opacity:1;position:relative;z-index:1}
+.vid-thumb{width:100%;aspect-ratio:9/16;object-fit:cover;display:block;opacity:1;position:relative;z-index:1;background:#141209}
 .vid-badge-play{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:3;width:48px;height:48px;border-radius:0;background:rgba(4,4,4,.68);backdrop-filter:blur(8px);border:1px solid rgba(200,169,110,.4);display:flex;align-items:center;justify-content:center;color:var(--gold);font-size:.9rem;transition:all .3s;pointer-events:none}
 .port-item:hover .vid-badge-play{background:rgba(200,169,110,.15);border-color:var(--gold);transform:translate(-50%,-50%) scale(1.1)}
 
@@ -1104,10 +1104,13 @@ function buildGrid(filter='all'){
       el.insertAdjacentHTML('beforeend',ov);
     } else {
       /* Show poster thumbnail, swap to video on hover */
-      const thumb=document.createElement('img');
+      const thumb=document.createElement('video');
       thumb.className='vid-thumb';thumb.alt=m.title;
-      thumb.src=m.poster||'';
-      thumb.onerror=function(){console.error('Failed to load thumbnail:',m.poster);el.classList.add('no-img')};
+      thumb.poster=m.poster||'';
+      thumb.muted=true;thumb.loop=true;thumb.setAttribute('playsinline','');
+      thumb.style.cssText='display:block;width:100%;aspect-ratio:9/16;object-fit:cover;';
+      thumb.addEventListener('loadeddata',()=>console.log('Video thumbnail loaded:',m.poster));
+      thumb.addEventListener('error',()=>{console.error('Failed to load thumbnail:',m.poster);el.classList.add('no-img')});
       el.appendChild(thumb);
       el.insertAdjacentHTML('beforeend',`<div class="vid-badge-play"><i class="fas fa-play"></i></div>${ov}`);
       let vid=null;
@@ -1116,9 +1119,9 @@ function buildGrid(filter='all'){
           vid=document.createElement('video');
           vid.src=m.src;vid.muted=true;vid.loop=true;vid.setAttribute('playsinline','');
           vid.style.cssText='display:block;width:100%;height:auto;aspect-ratio:9/16;object-fit:cover;';
+          vid.play();
           thumb.replaceWith(vid);
         }
-        vid.play();
       });
       el.addEventListener('mouseleave',()=>{if(vid){vid.pause();vid.currentTime=0}});
     }
