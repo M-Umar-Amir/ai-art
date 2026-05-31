@@ -570,7 +570,7 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
   <div class="wrap">
     <div class="stats-grid">
       <div class="stat-item sr-up"><div class="stat-num" data-target="63">0</div><div class="stat-label">Images</div></div>
-      <div class="stat-item sr-up"><div class="stat-num" data-target="16">0</div><div class="stat-label">Videos</div></div>
+      <div class="stat-item sr-up"><div class="stat-num" data-target="14">0</div><div class="stat-label">Videos</div></div>
       <div class="stat-item sr-up"><div class="stat-num" data-target="6" data-suffix="+">0</div><div class="stat-label">Categories</div></div>
       <div class="stat-item sr-up"><div class="stat-num" data-target="48" data-suffix="h">0</div><div class="stat-label">Turnaround</div></div>
     </div>
@@ -588,11 +588,12 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
       <div>
         <div class="sec-eyebrow sr-up">Our Work</div>
         <h2 class="sec-title sr-up">Portfolio</h2>
-        <p class="sec-sub sr-up">63 cinematic images and 16 videos — hover to explore</p>
+        <p class="sec-sub sr-up">63 cinematic images and 14 videos — hover to explore</p>
       </div>
     </div>
     <div class="filters sr-up">
       <button class="f-btn active" data-cat="all">All <span id="cnt-all"></span></button>
+      <button class="f-btn" data-cat="videos">Videos</button>
       <button class="f-btn" data-cat="commercial">Commercial</button>
       <button class="f-btn" data-cat="cultural">Cultural</button>
       <button class="f-btn" data-cat="historical">Historical</button>
@@ -942,6 +943,28 @@ const MEDIA = [
   {type:'img',src:'assets/images/stkmedia_whimsical_cinematic_dessert_world_handcrafted_detail_b3df6646-0bdf-43ca-81dc-85b6aaf32f10_1.webp',cat:'3dart',title:'Whimsical Cinematic Dessert World II',tag:'Image'}
 ];
 
+/* ── LAZY-LOADED VIDEOS ── */
+let VIDEOS = null;
+function loadVideos(){
+  if(VIDEOS !== null) return;
+  VIDEOS = [
+    {type:'vid',src:'assets/showreel/1.mp4',cat:'videos',title:'Showreel Clip 1',tag:'Video'},
+    {type:'vid',src:'assets/showreel/2.mp4',cat:'videos',title:'Showreel Clip 2',tag:'Video'},
+    {type:'vid',src:'assets/showreel/4.mp4',cat:'videos',title:'Showreel Clip 4',tag:'Video'},
+    {type:'vid',src:'assets/showreel/6.mp4',cat:'videos',title:'Showreel Clip 6',tag:'Video'},
+    {type:'vid',src:'assets/showreel/7.mp4',cat:'videos',title:'Showreel Clip 7',tag:'Video'},
+    {type:'vid',src:'assets/showreel/8.mp4',cat:'videos',title:'Showreel Clip 8',tag:'Video'},
+    {type:'vid',src:'assets/showreel/9.mp4',cat:'videos',title:'Showreel Clip 9',tag:'Video'},
+    {type:'vid',src:'assets/showreel/10.mp4',cat:'videos',title:'Showreel Clip 10',tag:'Video'},
+    {type:'vid',src:'assets/showreel/11.mp4',cat:'videos',title:'Showreel Clip 11',tag:'Video'},
+    {type:'vid',src:'assets/showreel/12.mp4',cat:'videos',title:'Showreel Clip 12',tag:'Video'},
+    {type:'vid',src:'assets/showreel/13.mp4',cat:'videos',title:'Showreel Clip 13',tag:'Video'},
+    {type:'vid',src:'assets/showreel/14.mp4',cat:'videos',title:'Showreel Clip 14',tag:'Video'},
+    {type:'vid',src:'assets/showreel/15.mp4',cat:'videos',title:'Showreel Clip 15',tag:'Video'},
+    {type:'vid',src:'assets/showreel/16.mp4',cat:'videos',title:'Showreel Clip 16',tag:'Video'}
+  ];
+}
+
 /* ── MARQUEE ── */
 const WORDS = ['Epical Studio','The Art of Cinematic Production','Images','Cinematic Videos','Cultural','Historical','3D Art','Cinematic AI','Premium Quality','Cinematic'];
 const track = document.getElementById('marquee-track');
@@ -1049,8 +1072,17 @@ function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.ra
 const MEDIA_SHUFFLED=shuffle([...MEDIA]);
 function buildGrid(filter='all'){
   grid.innerHTML='';visibleItems=[];
-  MEDIA_SHUFFLED.forEach((m,idx)=>{
-    if(m.type!=='img')return;
+  
+  /* Lazy load videos only when videos category is clicked */
+  if(filter==='videos'){
+    loadVideos();
+  }
+  
+  /* Combine MEDIA and VIDEOS if videos are loaded */
+  const allMedia = VIDEOS !== null ? [...MEDIA, ...VIDEOS] : MEDIA;
+  const MEDIA_SHUFFLED_FULL = shuffle([...allMedia]);
+  
+  MEDIA_SHUFFLED_FULL.forEach((m,idx)=>{
     const show=filter==='all'||filter===m.cat;
     if(!show)return;
     visibleItems.push(idx);
