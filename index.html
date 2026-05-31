@@ -1105,11 +1105,13 @@ function buildGrid(filter='all'){
     } else {
       /* Show poster thumbnail, swap to video on hover */
       const thumb=document.createElement('img');
-      thumb.className='vid-thumb';thumb.alt=m.title;thumb.loading='lazy';thumb.decoding='async';
+      thumb.className='vid-thumb';thumb.alt=m.title;
       thumb.src=m.poster||'';
       thumb.style.opacity='1';
-      thumb.addEventListener('load',()=>thumb.classList.add('img-loaded'));
-      thumb.addEventListener('error',()=>el.classList.add('no-img'));
+      thumb.style.display='block';
+      thumb.style.width='100%';
+      thumb.style.aspectRatio='9/16';
+      thumb.style.objectFit='cover';
       el.appendChild(thumb);
       el.insertAdjacentHTML('beforeend',`<div class="vid-badge-play"><i class="fas fa-play"></i></div>${ov}`);
       let vid=null;
