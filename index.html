@@ -1111,6 +1111,7 @@ function buildGrid(filter='all'){
       thumb.style.width='100%';
       thumb.style.aspectRatio='9/16';
       thumb.style.objectFit='cover';
+      thumb.onerror=function(){console.error('Failed to load thumbnail:',m.poster);el.classList.add('no-img')};
       el.appendChild(thumb);
       el.insertAdjacentHTML('beforeend',`<div class="vid-badge-play"><i class="fas fa-play"></i></div>${ov}`);
       let vid=null;
