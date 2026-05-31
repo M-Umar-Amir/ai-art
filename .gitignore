@@ -4,7 +4,6 @@
 .claude
 /Perfume
 /ep
-/assets/showreel
 node_modules/
 package.json
 package-lock.json
