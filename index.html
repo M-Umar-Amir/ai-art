@@ -249,6 +249,7 @@ section{padding:100px 0}
 .stat-item:last-child{border-right:none}
 .stat-item:hover{background:var(--smoke)}
 .stat-num{font-family:'Orbitron',sans-serif;font-size:clamp(2.8rem,5.5vw,4.5rem);background:linear-gradient(180deg,var(--cream) 0%,var(--gold) 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1;margin-bottom:8px}
+.stat-num.stat-word{font-size:clamp(1rem,2vw,1.55rem);letter-spacing:3px;line-height:1.25}
 .stat-label{font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:rgba(200,169,110,.42)}
 
 
@@ -568,10 +569,10 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
 <section id="stats">
   <div class="wrap">
     <div class="stats-grid">
-      <div class="stat-item sr-up"><div class="stat-num" data-target="63">0</div><div class="stat-label">Images</div></div>
-      <div class="stat-item sr-up"><div class="stat-num" data-target="14">0</div><div class="stat-label">Videos</div></div>
-      <div class="stat-item sr-up"><div class="stat-num" data-target="6" data-suffix="+">0</div><div class="stat-label">Categories</div></div>
-      <div class="stat-item sr-up"><div class="stat-num" data-target="48" data-suffix="h">0</div><div class="stat-label">Turnaround</div></div>
+      <div class="stat-item sr-up"><div class="stat-num stat-word">Bespoke</div><div class="stat-label">Creative Direction</div></div>
+      <div class="stat-item sr-up"><div class="stat-num stat-word">Cinematic</div><div class="stat-label">Visual Storytelling</div></div>
+      <div class="stat-item sr-up"><div class="stat-num stat-word">Versatile</div><div class="stat-label">Multi-Format Production</div></div>
+      <div class="stat-item sr-up"><div class="stat-num stat-word">Polished</div><div class="stat-label">Delivery-Ready Assets</div></div>
     </div>
   </div>
 </section>
@@ -587,7 +588,7 @@ details.faq-item[open] .faq-icon{border-color:rgba(200,169,110,.38);color:var(--
       <div>
         <div class="sec-eyebrow sr-up">Our Work</div>
         <h2 class="sec-title sr-up">Portfolio</h2>
-        <p class="sec-sub sr-up">63 cinematic images and 14 videos — hover to explore</p>
+        <p class="sec-sub sr-up">Selected cinematic images and videos — choose a category to explore</p>
       </div>
     </div>
     <div class="filters sr-up">
@@ -1069,7 +1070,6 @@ const imgObs=new IntersectionObserver((entries,obs)=>{
 },{rootMargin:'300px'});
 
 function shuffle(arr){for(let i=arr.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[arr[i],arr[j]]=[arr[j],arr[i]]}return arr}
-const MEDIA_SHUFFLED=shuffle([...MEDIA]);
 function buildGrid(filter='all'){
   grid.innerHTML='';visibleItems=[];currentMedia=[];
 
@@ -1078,15 +1078,13 @@ function buildGrid(filter='all'){
     loadVideos();
   }
 
-  /* Combine MEDIA and VIDEOS if videos are loaded */
-  const allMedia = VIDEOS !== null ? [...MEDIA, ...VIDEOS] : MEDIA;
-  currentMedia = allMedia;
-  /* Don't shuffle videos - keep them in order */
-  const MEDIA_SHUFFLED_FULL = filter==='videos' ? allMedia : shuffle([...allMedia]);
+  /* Keep All image-only and use the rendered order for lightbox navigation. */
+  const sourceMedia = filter==='videos' ? VIDEOS : MEDIA;
+  const filteredMedia = filter==='all' ? sourceMedia : sourceMedia.filter(m=>m.cat===filter);
+  const renderedMedia = filter==='videos' ? [...filteredMedia] : shuffle([...filteredMedia]);
+  currentMedia = renderedMedia;
   
-  MEDIA_SHUFFLED_FULL.forEach((m,idx)=>{
-    const show=filter==='all'||filter===m.cat;
-    if(!show)return;
+  renderedMedia.forEach((m,idx)=>{
     visibleItems.push(idx);
     const el=document.createElement('div');
     el.className='port-item';el.dataset.idx=idx;
