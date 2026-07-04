@@ -1,0 +1,95 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/01.webp",
+    "title": "Clifftop Horizon Pavilion",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/02.webp",
+    "title": "Coastal Escarpment Residence",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/03.webp",
+    "title": "Reflecting Court at Sunrise",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/04.webp",
+    "title": "Mirror Pool Terrace",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/05.webp",
+    "title": "Observatory Chamber",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/06.webp",
+    "title": "Brutalist Light Chamber",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/07.webp",
+    "title": "Zen Skylight Room",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/08.webp",
+    "title": "Floating Staircase Atrium",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/09.webp",
+    "title": "Sculpture Court Lobby",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/10.webp",
+    "title": "Desert Range Residence",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/11.webp",
+    "title": "Wellness Sanctuary Pool",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/horizon/img/12.webp",
+    "title": "Bronze Door Approach",
+    "tag": "Image"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/horizon/vid/01.mp4",
+    "poster": "/assets/projects/horizon/poster/01.jpg",
+    "title": "Slow Cinematic Pass I",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/horizon/vid/02.mp4",
+    "poster": "/assets/projects/horizon/poster/02.jpg",
+    "title": "Slow Cinematic Pass II",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/horizon/vid/03.mp4",
+    "poster": "/assets/projects/horizon/poster/03.jpg",
+    "title": "Coastline Skyline at Sunrise",
+    "tag": "Video"
+  }
+]

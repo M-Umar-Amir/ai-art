@@ -1,0 +1,88 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/01.webp",
+    "title": "Threshold at Dusk",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/02.webp",
+    "title": "Reflection Walk",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/03.webp",
+    "title": "Ivory Courtyard",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/04.webp",
+    "title": "Golden Hour Gaze",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/05.webp",
+    "title": "Mandarin Collar Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/06.webp",
+    "title": "Sunset Terrace",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/07.webp",
+    "title": "Windswept Serenity",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/08.webp",
+    "title": "Mountain Villa Editorial",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/09.webp",
+    "title": "Reflecting Pool Walk",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/10.webp",
+    "title": "Olive Grove Wrap",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/11.webp",
+    "title": "Navy and Cream",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-subcontinent/img/12.webp",
+    "title": "Tailoring Detail",
+    "tag": "Image"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/aura-subcontinent/vid/01.mp4",
+    "poster": "/assets/projects/aura-subcontinent/poster/01.jpg",
+    "title": "Slow Cinematic Motion I",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/aura-subcontinent/vid/02.mp4",
+    "poster": "/assets/projects/aura-subcontinent/poster/02.jpg",
+    "title": "Slow Cinematic Motion II",
+    "tag": "Video"
+  }
+]

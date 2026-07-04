@@ -1,0 +1,102 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/01.webp",
+    "title": "EMBER Fire Crafted Hero Campaign",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/02.webp",
+    "title": "EMBER Premium Gourmet Burger Poster",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/03.webp",
+    "title": "EMBER Deconstructed Ingredients",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/04.webp",
+    "title": "Smoked Cheeseburger on Slate",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/05.webp",
+    "title": "Burger Ingredients in Motion",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/06.webp",
+    "title": "Burger at the Table, Restaurant Ambiance",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/07.webp",
+    "title": "Chef's Final Garnish",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/08.webp",
+    "title": "Strawberry Yoghurt Swirl Splash",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/09.webp",
+    "title": "Strawberry Yoghurt Texture Macro",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/10.webp",
+    "title": "Traditional Faluda Dessert",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/11.webp",
+    "title": "KitKat Chocolate Milkshake",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/ember/img/12.webp",
+    "title": "Strawberry Ice Cream Scoop",
+    "tag": "Image"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/ember/vid/01.mp4",
+    "poster": "/assets/projects/ember/poster/01.jpg",
+    "title": "Gourmet Burger Commercial End Shot",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/ember/vid/02.mp4",
+    "poster": "/assets/projects/ember/poster/02.jpg",
+    "title": "Top Bun Descending Slow Motion",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/ember/vid/03.mp4",
+    "poster": "/assets/projects/ember/poster/03.jpg",
+    "title": "Macro Sauce Drip Detail",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/ember/vid/04.mp4",
+    "poster": "/assets/projects/ember/poster/04.jpg",
+    "title": "Strawberry Yoghurt Advertising Motion",
+    "tag": "Video"
+  }
+]

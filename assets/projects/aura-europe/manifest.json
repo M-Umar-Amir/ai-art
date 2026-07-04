@@ -1,0 +1,102 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/01.webp",
+    "title": "Dusk Horizon",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/02.webp",
+    "title": "Olive Courtyard, Night",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/03.webp",
+    "title": "Light Beam Corridor",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/04.webp",
+    "title": "Monochrome Walk",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/05.webp",
+    "title": "Avant-Garde Silhouette",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/06.webp",
+    "title": "Negative Space",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/07.webp",
+    "title": "Structured Tailoring",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/08.webp",
+    "title": "Craft Detail",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/09.webp",
+    "title": "Emotional Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/10.webp",
+    "title": "Atelier Workshop",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/11.webp",
+    "title": "Concrete Stillness",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aura-europe/img/12.webp",
+    "title": "Timeless Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/aura-europe/vid/01.mp4",
+    "poster": "/assets/projects/aura-europe/poster/01.jpg",
+    "title": "Motion Study I",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/aura-europe/vid/02.mp4",
+    "poster": "/assets/projects/aura-europe/poster/02.jpg",
+    "title": "Motion Study II",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/aura-europe/vid/03.mp4",
+    "poster": "/assets/projects/aura-europe/poster/03.jpg",
+    "title": "Film Still I",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/aura-europe/vid/04.mp4",
+    "poster": "/assets/projects/aura-europe/poster/04.jpg",
+    "title": "Film Still II",
+    "tag": "Video"
+  }
+]

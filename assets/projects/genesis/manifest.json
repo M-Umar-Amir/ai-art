@@ -1,0 +1,93 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/01.webp",
+    "title": "Direct Gaze Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/02.webp",
+    "title": "Cinematic Letterboxed Profile",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/03.webp",
+    "title": "Windswept City Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/04.webp",
+    "title": "Restrained Emotion Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/05.webp",
+    "title": "Window Light Profile",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/06.webp",
+    "title": "Golden Hour Close-Up",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/genesis/img/07.webp",
+    "title": "Eyes in Shadow",
+    "tag": "Image"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/01.mp4",
+    "poster": "/assets/projects/genesis/poster/01.jpg",
+    "title": "Signature Portrait Reel",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/02.mp4",
+    "poster": "/assets/projects/genesis/poster/02.jpg",
+    "title": "Emotional Close-Up Motion I",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/03.mp4",
+    "poster": "/assets/projects/genesis/poster/03.jpg",
+    "title": "Emotional Close-Up Motion II",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/04.mp4",
+    "poster": "/assets/projects/genesis/poster/04.jpg",
+    "title": "Emotional Close-Up Motion III",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/05.mp4",
+    "poster": "/assets/projects/genesis/poster/05.jpg",
+    "title": "Emotional Close-Up Motion IV",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/06.mp4",
+    "poster": "/assets/projects/genesis/poster/06.jpg",
+    "title": "Emotional Close-Up Motion V",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/genesis/vid/07.mp4",
+    "poster": "/assets/projects/genesis/poster/07.jpg",
+    "title": "Emotional Close-Up Motion VI",
+    "tag": "Video"
+  }
+]

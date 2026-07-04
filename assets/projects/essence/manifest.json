@@ -1,0 +1,102 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/01.webp",
+    "title": "ESSENCE — Kaleidoscope Podium",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/02.webp",
+    "title": "Teardrop Silhouette in Light Rays",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/03.webp",
+    "title": "Golden Halo Ring",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/04.webp",
+    "title": "Minimalist Studio Portrait",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/05.webp",
+    "title": "The Maison Atelier",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/06.webp",
+    "title": "Amber Vessel Macro",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/07.webp",
+    "title": "Gold Dust Bloom",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/08.webp",
+    "title": "Faceted Cube, Black Podium",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/09.webp",
+    "title": "Label Macro Detail",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/10.webp",
+    "title": "Set Within Stone",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/11.webp",
+    "title": "The Reach",
+    "tag": "Image"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/essence/img/12.webp",
+    "title": "EPICAL Edition",
+    "tag": "Image"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/essence/vid/01.mp4",
+    "poster": "/assets/projects/essence/poster/01.jpg",
+    "title": "ESSENCE — TVC Cut 1",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/essence/vid/02.mp4",
+    "poster": "/assets/projects/essence/poster/02.jpg",
+    "title": "ESSENCE — TVC Cut 2",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/essence/vid/03.mp4",
+    "poster": "/assets/projects/essence/poster/03.jpg",
+    "title": "Macro Reveal — Take A",
+    "tag": "Video"
+  },
+  {
+    "type": "vid",
+    "src": "/assets/projects/essence/vid/04.mp4",
+    "poster": "/assets/projects/essence/poster/04.jpg",
+    "title": "Macro Reveal — Take B",
+    "tag": "Video"
+  }
+]
