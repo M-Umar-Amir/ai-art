@@ -198,6 +198,7 @@
       <p class="sec-sub sr-up">Nine signature worlds, endless possibilities — real commercial work spanning food, beverage, perfume, automotive, architecture, fashion, brand identity and portraiture.</p>
     </div>
     <div class="project-grid" id="project-grid"></div>
+    <div class="port-cta"><a href="/#portfolio" class="btn-ghost">Explore All Work<i class="fas fa-arrow-right"></i></a></div>
   </div>
 </section>
 
@@ -243,21 +244,21 @@
   <div class="wrap">
     <div class="founder-grid">
       <div class="founder-panel sr-up"><img src="/assets/founder-amir.jpg" alt="M. Amir Y. Ansari, Founder of Epical Studio" loading="lazy"></div>
-      <div class="sr-up">
+      <div class="founder-bio-block sr-up">
         <div class="sec-eyebrow">The Founder</div>
         <div class="founder-name">M. Amir Y. Ansari</div>
         <div class="founder-role">Founder &amp; Creative Technology Director</div>
         <div class="founder-role2">Generative AI Specialist · Founder, Filmworks · Founder, Epical Studio</div>
         <p class="founder-bio">With over 33 years in the industry, Amir has led creative for some of Pakistan's most iconic brands and produced hundreds of commercials, corporate films and documentaries. Today, he combines traditional filmmaking mastery with generative AI to create the future of visual storytelling.</p>
-        <ul class="founder-checks">
-          <li><i class="fas fa-check-circle"></i>Creative Direction</li>
-          <li><i class="fas fa-check-circle"></i>Motion Graphics</li>
-          <li><i class="fas fa-check-circle"></i>Broadcast Production</li>
-          <li><i class="fas fa-check-circle"></i>Post Production</li>
-          <li><i class="fas fa-check-circle"></i>AI Content Creation</li>
-        </ul>
         <a href="/#contact" class="btn-gold"><i class="fas fa-user"></i>Meet the Founder</a>
       </div>
+      <ul class="founder-checks sr-up">
+        <li><i class="fas fa-check-circle"></i>Creative Direction</li>
+        <li><i class="fas fa-check-circle"></i>Motion Graphics</li>
+        <li><i class="fas fa-check-circle"></i>Broadcast Production</li>
+        <li><i class="fas fa-check-circle"></i>Post Production</li>
+        <li><i class="fas fa-check-circle"></i>AI Content Creation</li>
+      </ul>
     </div>
   </div>
 </section>
@@ -267,28 +268,30 @@
 <!-- CONTACT -->
 <section id="contact">
   <div class="wrap">
-    <div class="contact-head">
-      <div class="sec-eyebrow sr-up" style="justify-content:center">Get In Touch</div>
-      <h2 class="sec-title sr-up">Let's Build Something Extraordinary</h2>
-      <p class="sec-sub sr-up" style="margin:0 auto">Tell us about your project — we usually reply within a few hours</p>
-    </div>
-    <div class="contact-grid">
-      <a class="clink sr-up" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20discuss%20a%20project%20with%20Epical%20Studio." target="_blank">
-        <div class="clink-ico"><i class="fab fa-whatsapp"></i></div>
-        <div><strong>WhatsApp</strong><span>+92 300 2166620</span></div>
-      </a>
-      <a class="clink sr-up" href="mailto:umaramir.dev@gmail.com?subject=Project%20Inquiry%20-%20Epical%20Studio">
-        <div class="clink-ico"><i class="fas fa-envelope"></i></div>
-        <div><strong>Email</strong><span>contact@epical.art</span></div>
-      </a>
-      <a class="clink sr-up" href="https://wa.me/923002166620?text=Hi!%20I'd%20like%20to%20schedule%20a%20discovery%20call." target="_blank">
-        <div class="clink-ico"><i class="fas fa-phone"></i></div>
-        <div><strong>Discovery Call</strong><span>Schedule a free call</span></div>
-      </a>
-      <a class="clink sr-up" href="mailto:umaramir.dev@gmail.com?subject=Project%20Brief%20-%20Epical%20Studio">
-        <div class="clink-ico"><i class="fas fa-file-lines"></i></div>
-        <div><strong>Project Brief</strong><span>Tell us about your project</span></div>
-      </a>
+    <div class="contact-inner">
+      <div class="contact-head">
+        <div class="sec-eyebrow sr-up">Get In Touch</div>
+        <h2 class="sec-title sr-up">Let's Build Something Extraordinary</h2>
+        <p class="sec-sub sr-up">Tell us about your project — we usually reply within a few hours</p>
+      </div>
+      <div class="contact-grid">
+        <a class="clink sr-up" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20discuss%20a%20project%20with%20Epical%20Studio." target="_blank">
+          <div class="clink-ico"><i class="fab fa-whatsapp"></i></div>
+          <div><strong>WhatsApp</strong><span>+92 300 2166620</span></div>
+        </a>
+        <a class="clink sr-up" href="mailto:umaramir.dev@gmail.com?subject=Project%20Inquiry%20-%20Epical%20Studio">
+          <div class="clink-ico"><i class="fas fa-envelope"></i></div>
+          <div><strong>Email</strong><span>contact@epical.art</span></div>
+        </a>
+        <a class="clink sr-up" href="https://wa.me/923002166620?text=Hi!%20I'd%20like%20to%20schedule%20a%20discovery%20call." target="_blank">
+          <div class="clink-ico"><i class="fas fa-phone"></i></div>
+          <div><strong>Discovery Call</strong><span>Schedule a free call</span></div>
+        </a>
+        <a class="clink sr-up" href="mailto:umaramir.dev@gmail.com?subject=Project%20Brief%20-%20Epical%20Studio">
+          <div class="clink-ico"><i class="fas fa-file-lines"></i></div>
+          <div><strong>Project Brief</strong><span>Tell us about your project</span></div>
+        </a>
+      </div>
     </div>
   </div>
 </section>
@@ -328,8 +331,20 @@
 <script type="module">
 import {initChrome, initEnterOverlay, createParticles, initLensFlare, initHeroCarousel, openLightbox} from '/assets/js/site.js';
 
-document.getElementById('hero-play')?.addEventListener('click', ()=>{
-  openLightbox([{type:'video', src:'/assets/videos/showreel.mp4', title:'Epical Studio — Showreel'}], 0);
+let showreelMedia = null;
+document.getElementById('hero-play')?.addEventListener('click', async ()=>{
+  if(!showreelMedia){
+    const perProject = await Promise.all(PROJECTS.map(async p=>{
+      try{
+        const res = await fetch(`/assets/projects/${p.slug}/manifest.json`);
+        if(!res.ok)return[];
+        const items = await res.json();
+        return items.map(m=>({type:m.type==='video'?'video':'img', src:m.src, title:m.title, tag:p.name}));
+      }catch{return[]}
+    }));
+    showreelMedia = perProject.flat();
+  }
+  if(showreelMedia.length)openLightbox(showreelMedia, 0);
 });
 
 const PROJECTS = [
@@ -351,8 +366,9 @@ carouselRoot.innerHTML = PROJECTS.map(p=>`
     <div class="hero-slide-inner"></div>
   </div>`).join('');
 
-/* build the 8 portfolio project-card blocks */
+/* build the portfolio project-card blocks (column count matches project count on wide screens) */
 const grid = document.getElementById('project-grid');
+grid.style.setProperty('--proj-count', PROJECTS.length);
 grid.innerHTML = PROJECTS.map((p,i)=>`
   <a class="project-card sr-up" href="/projects/${p.slug}.html">
     <div class="project-card-media">
@@ -391,9 +407,14 @@ document.querySelectorAll('.client-logo img').forEach(img=>{
 initChrome();
 initEnterOverlay(()=>{
   document.getElementById('hero').classList.add('hero-revealed');
-  createParticles(document.getElementById('particles-hero'),{density:90});
-  initLensFlare(document.getElementById('hero'), document.getElementById('hero-flare'));
-  initHeroCarousel(document.getElementById('hero'), PROJECTS);
+  /* let the browser paint the entrance CSS animations before running heavier
+     synchronous setup (canvas creation, manifest fetch/build) so they don't
+     share a frame with the transition start and cause it to stutter */
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    createParticles(document.getElementById('particles-hero'),{density:90});
+    initLensFlare(document.getElementById('hero'), document.getElementById('hero-flare'));
+    initHeroCarousel(document.getElementById('hero'), PROJECTS);
+  }));
 });
 </script>
 </body>
