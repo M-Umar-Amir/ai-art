@@ -88,8 +88,9 @@
 <!-- ENTER OVERLAY -->
 <div id="enter-overlay" role="presentation" aria-hidden="true">
   <div class="eo-bar eo-bar-top"></div>
-  <img src="/assets/e.jpg" class="eo-logo" alt="" width="1280" height="853">
+  <video class="eo-logo" src="/assets/EPICAL-LOGO-ANIMATION-16x9.mp4" autoplay muted playsinline></video>
   <div class="eo-bar eo-bar-bot"></div>
+  <button id="eo-skip" aria-label="Skip intro">Skip Intro</button>
 </div>
 
 <!-- NAV -->
@@ -142,7 +143,7 @@
       <div id="hero-carousel"></div>
       <div class="hero-media-vignette"></div>
       <button class="hero-play" id="hero-play" aria-label="Play showreel"><span class="hero-play-ico"><i class="fas fa-play"></i></span><span>Play Showreel</span></button>
-      <div class="hero-slide-tag"><span class="hs-num">01 / 08</span><span class="hs-name">Ember</span></div>
+      <div class="hero-slide-tag"><span class="hs-num">01 / 09</span><span class="hs-name">Ember</span></div>
       <div class="hero-dots"></div>
       <div class="hero-arrows"><button class="hero-arrow prev" aria-label="Previous project"><i class="fas fa-chevron-left"></i></button><button class="hero-arrow next" aria-label="Next project"><i class="fas fa-chevron-right"></i></button></div>
     </div>
@@ -195,8 +196,8 @@
   <div class="wrap">
     <div class="port-head">
       <div class="sec-eyebrow sr-up" style="justify-content:center">The Epical Experience</div>
-      <h2 class="sec-title sr-up">Eight Signature Worlds</h2>
-      <p class="sec-sub sr-up">Eight signature worlds, endless possibilities — real commercial work spanning food, beverage, perfume, automotive, architecture, fashion and portraiture.</p>
+      <h2 class="sec-title sr-up">Signature Worlds</h2>
+      <p class="sec-sub sr-up">Nine signature worlds, endless possibilities — real commercial work spanning food, beverage, perfume, automotive, architecture, fashion, brand identity and portraiture.</p>
     </div>
     <div class="project-grid" id="project-grid"></div>
   </div>
@@ -334,14 +335,15 @@ document.getElementById('hero-play')?.addEventListener('click', ()=>{
 });
 
 const PROJECTS = [
-  {slug:'ember', name:'Ember', category:'Food & Beverage'},
+  {slug:'ember', name:'Ember', category:'Food & Beverage', heroSkip:3},
   {slug:'oreva', name:'Oreva', category:'Beverage'},
   {slug:'essence', name:'Essence', category:'Perfume'},
   {slug:'ascend', name:'Ascend', category:'Automotive'},
   {slug:'horizon', name:'Horizon', category:'Architecture'},
   {slug:'aura-europe', name:'Aura — Europe', category:'Fashion'},
   {slug:'aura-subcontinent', name:'Aura — Sub-Continent', category:'Fashion'},
-  {slug:'genesis', name:'Genesis', category:'Signature Portraits'}
+  {slug:'genesis', name:'Genesis', category:'Signature Portraits'},
+  {slug:'aurelia-dumont', name:'Aurelia Dumont', category:'Brand Identity'}
 ];
 
 /* build hero carousel slide shells */

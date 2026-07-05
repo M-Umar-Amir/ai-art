@@ -1,0 +1,44 @@
+[
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/01.webp",
+    "title": "Elegance Refined — The Modern Uniform",
+    "tag": "Campaign"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/02.webp",
+    "title": "Redefining Modern Elegance",
+    "tag": "Campaign"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/03.webp",
+    "title": "The Metropolitan Collection",
+    "tag": "Campaign"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/04.webp",
+    "title": "Architecture in Motion — Brochure",
+    "tag": "Print"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/05.webp",
+    "title": "The New Classic — Brochure",
+    "tag": "Print"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/06.webp",
+    "title": "Brand Mark Exploration",
+    "tag": "Identity"
+  },
+  {
+    "type": "img",
+    "src": "/assets/projects/aurelia-dumont/img/07.webp",
+    "title": "Final Wordmark",
+    "tag": "Identity"
+  }
+]

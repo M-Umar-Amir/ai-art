@@ -353,26 +353,27 @@ export function createGallery({container,media,shuffleOrder=false}){
   return {media:list};
 }
 
-/* ── ENTER OVERLAY (splash logo) ── */
+/* ── ENTER OVERLAY (splash logo-animation video) ── */
 export function initEnterOverlay(onDone){
   let entryDone=false;
   function triggerEntry(){
     if(entryDone)return; entryDone=true;
     const ov=document.getElementById('enter-overlay');
     if(!ov){onDone();return}
-    const logo=ov.querySelector('.eo-logo');
-    if(logo){
-      logo.style.opacity='1';logo.style.transform='scale(1)';logo.style.animation='none';logo.offsetHeight;
-    }
     ov.classList.add('eclipse-out');
     onDone();
-    setTimeout(()=>{ov.style.display='none'},REDUCED_MOTION?0:2200);
+    setTimeout(()=>{ov.style.display='none'},REDUCED_MOTION?0:1300);
   }
   function scheduleEntry(){
-    const logo=document.querySelector('.eo-logo');
-    if(REDUCED_MOTION){triggerEntry();return}
-    if(logo){logo.addEventListener('animationend',()=>setTimeout(triggerEntry,500),{once:true})}
-    setTimeout(triggerEntry,4500);
+    const ov=document.getElementById('enter-overlay');
+    const video=ov?.querySelector('.eo-logo');
+    const skip=document.getElementById('eo-skip');
+    skip?.addEventListener('click',triggerEntry);
+    if(REDUCED_MOTION||!video){triggerEntry();return}
+    video.addEventListener('ended',triggerEntry,{once:true});
+    video.play?.().catch(()=>{});
+    /* safety fallback in case the video fails to load/play or 'ended' never fires */
+    setTimeout(triggerEntry,16000);
   }
   if(document.readyState==='complete'){scheduleEntry()}
   else{window.addEventListener('load',scheduleEntry)}
@@ -408,9 +409,10 @@ export function initHeroCarousel(root,projects){
     return manifestCache[slug];
   }
 
-  async function activateInner(slideEl,slug){
+  async function activateInner(slideEl,slug,skip){
     clearInterval(innerTimer);
-    const media=(await loadManifest(slug)).filter(m=>m.type==='img').slice(0,6);
+    const s=skip||0;
+    const media=(await loadManifest(slug)).filter(m=>m.type==='img').slice(s,s+6);
     const layer=slideEl.querySelector('.hero-slide-inner');
     if(!layer)return;
     if(!media.length)return;
@@ -435,7 +437,7 @@ export function initHeroCarousel(root,projects){
     if(tagName)tagName.textContent=p.name;
     if(tagNum)tagNum.textContent=String(active+1).padStart(2,'0')+' / '+String(projects.length).padStart(2,'0');
     dots();
-    activateInner(slide,p.slug);
+    activateInner(slide,p.slug,p.heroSkip);
     /* preload next project's manifest */
     loadManifest(projects[(active+1)%projects.length].slug);
     if(manual)restartAutoplay();
@@ -447,14 +449,9 @@ export function initHeroCarousel(root,projects){
     outerTimer=setInterval(()=>goTo((active+1)%projects.length),7000);
   }
 
-  const mediaBox=root.querySelector('.hero-media')||root;
-  let paused=false;
-  mediaBox.addEventListener('mouseenter',()=>{paused=true;clearInterval(outerTimer)});
-  mediaBox.addEventListener('mouseleave',()=>{paused=false;restartAutoplay()});
-  mediaBox.addEventListener('touchstart',()=>{clearInterval(outerTimer)},{passive:true});
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)clearInterval(outerTimer);
-    else if(!paused)restartAutoplay();
+    else restartAutoplay();
   });
   root.querySelector('.hero-arrow.prev')?.addEventListener('click',()=>goTo((active-1+projects.length)%projects.length,true));
   root.querySelector('.hero-arrow.next')?.addEventListener('click',()=>goTo((active+1)%projects.length,true));
