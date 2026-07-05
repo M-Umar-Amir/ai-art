@@ -447,10 +447,11 @@ export function initHeroCarousel(root,projects){
     outerTimer=setInterval(()=>goTo((active+1)%projects.length),7000);
   }
 
+  const mediaBox=root.querySelector('.hero-media')||root;
   let paused=false;
-  root.addEventListener('mouseenter',()=>{paused=true;clearInterval(outerTimer)});
-  root.addEventListener('mouseleave',()=>{paused=false;restartAutoplay()});
-  root.addEventListener('touchstart',()=>{clearInterval(outerTimer)},{passive:true});
+  mediaBox.addEventListener('mouseenter',()=>{paused=true;clearInterval(outerTimer)});
+  mediaBox.addEventListener('mouseleave',()=>{paused=false;restartAutoplay()});
+  mediaBox.addEventListener('touchstart',()=>{clearInterval(outerTimer)},{passive:true});
   document.addEventListener('visibilitychange',()=>{
     if(document.hidden)clearInterval(outerTimer);
     else if(!paused)restartAutoplay();
