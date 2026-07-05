@@ -289,6 +289,11 @@ function ensureLightbox(){
   return lbState;
 }
 
+/* ── OPEN LIGHTBOX (external entry point, e.g. hero "play showreel") ── */
+export function openLightbox(media,idx=0){
+  ensureLightbox().open(media,idx);
+}
+
 /* ── GALLERY FACTORY: independent instance per container, shared lightbox ── */
 export function createGallery({container,media,shuffleOrder=false}){
   if(!container)return null;

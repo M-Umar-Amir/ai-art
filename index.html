@@ -127,26 +127,31 @@
 
 <!-- HERO -->
 <section id="hero">
-  <div id="hero-carousel"></div>
   <div id="particles-hero"></div>
   <div class="hero-vignette"></div>
   <div class="hero-flare" id="hero-flare"></div>
-  <div class="hero-lb hero-lb-top"></div>
-  <div class="hero-lb hero-lb-bot"></div>
 
-  <div class="hero-content">
-    <div class="hero-eyebrow"><span></span>AI-Powered Creative Production<span></span></div>
-    <h1 class="hero-name">Cinematic Storytelling.<br><em>Reimagined.</em></h1>
-    <p class="hero-desc">Commercial storytelling, branded content and creative production powered by over three decades of industry experience and cutting-edge AI technologies.</p>
-    <div class="hero-cta-row">
-      <a href="/#portfolio" class="btn-gold"><i class="fas fa-images"></i>View Our Work</a>
-      <a href="/#contact" class="btn-ghost"><i class="fas fa-calendar-check"></i>Schedule Consultation</a>
+  <div class="wrap hero-inner">
+    <div class="hero-content">
+      <div class="hero-eyebrow"><span></span>AI-Powered Creative Production<span></span></div>
+      <h1 class="hero-name">Cinematic Storytelling.<br><em>Reimagined.</em></h1>
+      <p class="hero-desc">Commercial storytelling, branded content and creative production powered by over three decades of industry experience and cutting-edge AI technologies.</p>
+      <div class="hero-cta-row">
+        <a href="/#portfolio" class="btn-gold"><i class="fas fa-images"></i>View Our Work</a>
+        <a href="/#contact" class="btn-ghost"><i class="fas fa-calendar-check"></i>Schedule Consultation</a>
+      </div>
+    </div>
+
+    <div class="hero-media">
+      <div id="hero-carousel"></div>
+      <div class="hero-media-vignette"></div>
+      <button class="hero-play" id="hero-play" aria-label="Play showreel"><span class="hero-play-ico"><i class="fas fa-play"></i></span><span>Play Showreel</span></button>
+      <div class="hero-slide-tag"><span class="hs-num">01 / 08</span><span class="hs-name">Ember</span></div>
+      <div class="hero-dots"></div>
+      <div class="hero-arrows"><button class="hero-arrow prev" aria-label="Previous project"><i class="fas fa-chevron-left"></i></button><button class="hero-arrow next" aria-label="Next project"><i class="fas fa-chevron-right"></i></button></div>
     </div>
   </div>
 
-  <div class="hero-slide-tag"><span class="hs-num">01 / 08</span><span class="hs-name">Ember</span></div>
-  <div class="hero-dots"></div>
-  <div class="hero-arrows"><button class="hero-arrow prev" aria-label="Previous project"><i class="fas fa-chevron-left"></i></button><button class="hero-arrow next" aria-label="Next project"><i class="fas fa-chevron-right"></i></button></div>
   <div class="scroll-hint"><div class="scroll-bar"></div><span>Scroll</span></div>
 </section>
 
@@ -154,11 +159,11 @@
 <section id="stats">
   <div class="wrap">
     <div class="stats-grid">
-      <div class="stat-item"><div class="stat-num" data-target="33" data-suffix="+">0</div><div class="stat-label">Years of Creative Experience</div></div>
-      <div class="stat-item"><div class="stat-num" data-target="100" data-suffix="+">0</div><div class="stat-label">Commercial Projects</div></div>
-      <div class="stat-item"><div class="stat-num stat-word">Founder Filmworks</div><div class="stat-label">Production House</div></div>
-      <div class="stat-item"><div class="stat-num" data-target="15" data-suffix="+">0</div><div class="stat-label">Years as Head of Creative</div></div>
-      <div class="stat-item"><div class="stat-num stat-word">AI Specialist</div><div class="stat-label">Generative AI</div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-calendar-days"></i></div><div class="stat-text"><div class="stat-num" data-target="33" data-suffix="+">0</div><div class="stat-label">Years of Creative Experience</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-clapperboard"></i></div><div class="stat-text"><div class="stat-num" data-target="100" data-suffix="+">0</div><div class="stat-label">Commercial Projects</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-film"></i></div><div class="stat-text"><div class="stat-num stat-word">Founder Filmworks</div><div class="stat-label">Production House</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-lightbulb"></i></div><div class="stat-text"><div class="stat-num" data-target="15" data-suffix="+">0</div><div class="stat-label">Years as Head of Creative</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-brain"></i></div><div class="stat-text"><div class="stat-num stat-word">AI Specialist</div><div class="stat-label">Generative AI</div></div></div>
     </div>
   </div>
 </section>
@@ -167,19 +172,19 @@
 <div class="client-strip">
   <div class="wrap">
     <div class="client-strip-label">Founder's Experience Includes Work For</div>
-    <div class="client-grid">
-      <span class="client-chip">UBL</span>
-      <span class="client-chip">Meezan Bank</span>
-      <span class="client-chip">PSO</span>
-      <span class="client-chip">Zong 4G</span>
-      <span class="client-chip">K-Electric</span>
-      <span class="client-chip">Toyota</span>
-      <span class="client-chip">Suzuki</span>
-      <span class="client-chip">Shan</span>
-      <span class="client-chip">Hamdard</span>
-      <span class="client-chip">Shaukat Khanum</span>
-      <span class="client-chip">PIA</span>
-      <span class="client-chip">Carrefour</span>
+    <div class="client-grid" id="client-grid">
+      <div class="client-logo" data-name="UBL"><img src="/assets/logos/ubl.svg" alt="UBL" loading="lazy"></div>
+      <div class="client-logo" data-name="Meezan Bank"><img src="/assets/logos/meezan-bank.png" alt="Meezan Bank" loading="lazy"></div>
+      <div class="client-logo" data-name="PSO"><img src="/assets/logos/pso.svg" alt="PSO" loading="lazy"></div>
+      <div class="client-logo" data-name="Zong 4G"><img src="/assets/logos/zong.png" alt="Zong 4G" loading="lazy"></div>
+      <div class="client-logo" data-name="K-Electric"><img src="/assets/logos/k-electric.png" alt="K-Electric" loading="lazy"></div>
+      <div class="client-logo" data-name="Toyota"><img src="/assets/logos/toyota.svg" alt="Toyota" loading="lazy"></div>
+      <div class="client-logo" data-name="Suzuki"><img src="/assets/logos/suzuki.svg" alt="Suzuki" loading="lazy"></div>
+      <div class="client-logo" data-name="Shan"><img src="/assets/logos/shan.png" alt="Shan" loading="lazy"></div>
+      <div class="client-logo" data-name="Hamdard"><img src="/assets/logos/hamdard.png" alt="Hamdard" loading="lazy"></div>
+      <div class="client-logo" data-name="Shaukat Khanum"><img src="/assets/logos/shaukat-khanum.png" alt="Shaukat Khanum" loading="lazy"></div>
+      <div class="client-logo" data-name="PIA"><img src="/assets/logos/pia.svg" alt="PIA" loading="lazy"></div>
+      <div class="client-logo" data-name="Carrefour"><img src="/assets/logos/carrefour.svg" alt="Carrefour" loading="lazy"></div>
     </div>
     <p class="client-strip-note">Logos represent brands and organisations the founder has worked with during his 33+ years in the industry.</p>
   </div>
@@ -312,7 +317,7 @@
       </a>
       <a class="clink sr-up" href="mailto:umaramir.dev@gmail.com?subject=Project%20Inquiry%20-%20Epical%20Studio">
         <div class="clink-ico"><i class="fas fa-envelope"></i></div>
-        <div><strong>Email</strong><span>hello@epical.art</span></div>
+        <div><strong>Email</strong><span>contact@epical.art</span></div>
       </a>
       <a class="clink sr-up" href="https://wa.me/923002166620?text=Hi!%20I'd%20like%20to%20schedule%20a%20discovery%20call." target="_blank">
         <div class="clink-ico"><i class="fas fa-phone"></i></div>
@@ -360,7 +365,11 @@
 <a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20place%20an%20order." target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <script type="module">
-import {initChrome, initEnterOverlay, createParticles, initLensFlare, initHeroCarousel} from '/assets/js/site.js';
+import {initChrome, initEnterOverlay, createParticles, initLensFlare, initHeroCarousel, openLightbox} from '/assets/js/site.js';
+
+document.getElementById('hero-play')?.addEventListener('click', ()=>{
+  openLightbox([{type:'video', src:'/assets/videos/showreel.mp4', title:'Epical Studio — Showreel'}], 0);
+});
 
 const PROJECTS = [
   {slug:'ember', name:'Ember', category:'Food & Beverage'},
@@ -384,12 +393,14 @@ carouselRoot.innerHTML = PROJECTS.map(p=>`
 const grid = document.getElementById('project-grid');
 grid.innerHTML = PROJECTS.map((p,i)=>`
   <a class="project-card sr-up" href="/projects/${p.slug}.html">
-    <img data-src="/assets/projects/${p.slug}/img/01.webp" alt="${p.name} — ${p.category}">
-    <div class="project-card-num">${String(i+1).padStart(2,'0')}</div>
-    <div class="project-card-ov">
-      <div class="project-card-cat">${p.category}</div>
+    <div class="project-card-media">
+      <img data-src="/assets/projects/${p.slug}/img/01.webp" alt="${p.name} — ${p.category}">
+      <div class="project-card-num">${String(i+1).padStart(2,'0')}</div>
+      <div class="project-card-play"><i class="fas fa-play"></i></div>
+    </div>
+    <div class="project-card-info">
       <div class="project-card-name">${p.name}</div>
-      <span class="project-card-link">View Project <i class="fas fa-arrow-right"></i></span>
+      <div class="project-card-cat">${p.category}</div>
     </div>
   </a>`).join('');
 grid.querySelectorAll('img[data-src]').forEach(img=>{
@@ -402,6 +413,17 @@ grid.querySelectorAll('img[data-src]').forEach(img=>{
     });
   },{rootMargin:'300px'});
   io.observe(img);
+});
+
+/* fall back to a text chip if a logo image is missing/broken (tries .svg then .png before giving up) */
+document.querySelectorAll('.client-logo img').forEach(img=>{
+  img.addEventListener('error',()=>{
+    if(img.src.endsWith('.svg')){ img.src = img.src.replace(/\.svg$/, '.png'); return; }
+    const chip = document.createElement('span');
+    chip.className = 'client-chip';
+    chip.textContent = img.closest('.client-logo').dataset.name;
+    img.closest('.client-logo').replaceWith(chip);
+  }, {once:false});
 });
 
 initChrome();
