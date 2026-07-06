@@ -353,30 +353,63 @@ export function createGallery({container,media,shuffleOrder=false}){
   return {media:list};
 }
 
-/* ── ENTER OVERLAY (splash logo-animation video) ── */
+/* ── ENTER OVERLAY (splash logo-animation video, once per browser session) ── */
+const ENTERED_KEY='epicalEntered';
 export function initEnterOverlay(onDone){
   let entryDone=false;
-  function triggerEntry(){
+  function triggerEntry(skipFade){
     if(entryDone)return; entryDone=true;
+    sessionStorage.setItem(ENTERED_KEY,'1');
     const ov=document.getElementById('enter-overlay');
     if(!ov){onDone();return}
+    if(skipFade){ov.style.display='none';onDone();return}
     ov.classList.add('eclipse-out');
     onDone();
     setTimeout(()=>{ov.style.display='none'},REDUCED_MOTION?0:1300);
   }
+  if(sessionStorage.getItem(ENTERED_KEY)==='1'){triggerEntry(true);return}
   function scheduleEntry(){
     const ov=document.getElementById('enter-overlay');
     const video=ov?.querySelector('.eo-logo');
     const skip=document.getElementById('eo-skip');
-    skip?.addEventListener('click',triggerEntry);
-    if(REDUCED_MOTION||!video){triggerEntry();return}
-    video.addEventListener('ended',triggerEntry,{once:true});
+    skip?.addEventListener('click',()=>triggerEntry(false));
+    if(REDUCED_MOTION||!video){triggerEntry(false);return}
+    video.addEventListener('ended',()=>triggerEntry(false),{once:true});
     video.play?.().catch(()=>{});
     /* safety fallback in case the video fails to load/play or 'ended' never fires */
-    setTimeout(triggerEntry,16000);
+    setTimeout(()=>triggerEntry(false),16000);
   }
   if(document.readyState==='complete'){scheduleEntry()}
   else{window.addEventListener('load',scheduleEntry)}
+}
+
+/* ── PAGE TRANSITIONS (eclipse fade between internal page navigations) ── */
+export function initPageTransitions(){
+  let el=document.getElementById('page-fade');
+  if(!el){
+    el=document.createElement('div');
+    el.id='page-fade';
+    el.innerHTML='<span class="pf-eclipse"></span>';
+    document.body.appendChild(el);
+  }
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    el.classList.add('pf-anim');
+    el.classList.add('pf-in');
+  }));
+  if(REDUCED_MOTION)return;
+  document.addEventListener('click',e=>{
+    if(e.defaultPrevented||e.button!==0||e.metaKey||e.ctrlKey||e.shiftKey||e.altKey)return;
+    const a=e.target.closest('a[href]');
+    if(!a||a.target==='_blank')return;
+    const href=a.getAttribute('href');
+    if(!href||href.startsWith('#')||href.startsWith('mailto:')||href.startsWith('tel:'))return;
+    let url;
+    try{url=new URL(href,location.href)}catch{return}
+    if(url.origin!==location.origin||url.pathname===location.pathname)return;
+    e.preventDefault();
+    el.classList.remove('pf-in');
+    setTimeout(()=>{location.href=url.href},480);
+  });
 }
 
 /* ── NESTED HERO CAROUSEL: outer = projects, inner = per-project media loop ── */

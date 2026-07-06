@@ -28,22 +28,37 @@
 <div id="grain"></div>
 
 <nav id="nav" aria-label="Main navigation">
-  <a href="/#hero" class="nav-brand"><span class="nav-brand-name">Epical Studio</span><span class="nav-brand-sub">a division of filmworks</span></a>
+  <a href="/#hero" class="nav-brand">
+    <svg class="nav-brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+      <mask id="navEclipseMask"><rect width="40" height="40" fill="#fff"/><circle cx="24" cy="20" r="12" fill="#000"/></mask>
+      <circle cx="18" cy="20" r="12" fill="currentColor" mask="url(#navEclipseMask)"/>
+      <line x1="18" y1="4" x2="18" y2="36" stroke="currentColor" stroke-width="1" opacity=".6"/>
+    </svg>
+    <span class="nav-brand-text">
+      <span class="nav-brand-name">Epical Studio</span>
+      <span class="nav-brand-sub">a division of filmworks</span>
+    </span>
+  </a>
   <ul class="nav-links">
     <li><a href="/#hero">Home</a></li>
     <li><a href="/#portfolio" class="active">Work</a></li>
-    <li><a href="/#why">Services</a></li>
+    <li><a href="/#services">Services</a></li>
     <li><a href="/#founder">Founder</a></li>
     <li><a href="/#contact">Contact</a></li>
   </ul>
   <div class="nav-cta">
+    <div class="nav-socials">
+      <a class="nav-soc" href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a class="nav-soc" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+      <a class="nav-soc" href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+    </div>
     <button class="nav-burger" id="nav-burger" aria-label="Menu"><span></span><span></span><span></span></button>
     <a href="/#contact" class="nav-talk">Let's Talk</a>
   </div>
 </nav>
 <div id="nav-mobile" role="dialog" aria-label="Navigation menu">
   <button class="nm-close" id="nm-close"><i class="fas fa-times"></i></button>
-  <a href="/#hero">Home</a><a href="/#portfolio">Work</a><a href="/#why">Services</a><a href="/#founder">Founder</a><a href="/#contact">Contact</a>
+  <a href="/#hero">Home</a><a href="/#portfolio">Work</a><a href="/#services">Services</a><a href="/#founder">Founder</a><a href="/#contact">Contact</a>
 </div>
 
 <section class="proj-hero">
@@ -84,12 +99,15 @@
     <div class="foot-inner">
       <img src="/assets/e.jpg" class="foot-logo-img" alt="Epical Studio" width="1280" height="853">
       <div class="socials">
+        <a class="soc" href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a class="soc" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a class="soc" href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
         <a class="soc" href="https://www.linkedin.com/company/smarthireai2026" target="_blank"><i class="fab fa-linkedin-in"></i></a>
         <a class="soc" href="https://wa.me/923002166620" target="_blank"><i class="fab fa-whatsapp"></i></a>
         <a class="soc" href="https://www.upwork.com/services/product/design-ai-generated-photo-or-video-2056971193430539602?ref=project_share" target="_blank"><i class="fas fa-briefcase"></i></a>
         <a class="soc" href="mailto:umaramir.dev@gmail.com"><i class="fas fa-envelope"></i></a>
       </div>
-      <div class="foot-links"><a href="/#portfolio">Work</a><a href="/#why">Services</a><a href="/#founder">Founder</a><a href="/#contact">Contact</a></div>
+      <div class="foot-links"><a href="/#portfolio">Work</a><a href="/#services">Services</a><a href="/#founder">Founder</a><a href="/#contact">Contact</a></div>
       <div class="foot-copy">© 2026 Epical Studio — The Art of Cinematic Production</div>
     </div>
   </div>
@@ -104,12 +122,13 @@
 <a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I'm%20interested%20in%20a%20project%20like%20Ascend." target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <script type="module">
-import {initChrome, createGallery, initParallaxLayer} from '/assets/js/site.js';
+import {initChrome, createGallery, initParallaxLayer, initPageTransitions} from '/assets/js/site.js';
 (function loadFA(){const l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';document.head.appendChild(l)})();
 fetch('/assets/projects/ascend/manifest.json').then(r=>r.ok?r.json():[]).then(media=>{
   createGallery({container:document.getElementById('gallery-grid'), media});
 }).catch(()=>{});
 initChrome();
+initPageTransitions();
 initParallaxLayer(document.querySelector('.proj-hero-bg'),{speed:.25});
 </script>
 </body>

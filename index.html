@@ -96,17 +96,29 @@
 <!-- NAV -->
 <nav id="nav" aria-label="Main navigation">
   <a href="/#hero" class="nav-brand">
-    <span class="nav-brand-name">Epical Studio</span>
-    <span class="nav-brand-sub">a division of filmworks</span>
+    <svg class="nav-brand-mark" viewBox="0 0 40 40" aria-hidden="true">
+      <mask id="navEclipseMask"><rect width="40" height="40" fill="#fff"/><circle cx="24" cy="20" r="12" fill="#000"/></mask>
+      <circle cx="18" cy="20" r="12" fill="currentColor" mask="url(#navEclipseMask)"/>
+      <line x1="18" y1="4" x2="18" y2="36" stroke="currentColor" stroke-width="1" opacity=".6"/>
+    </svg>
+    <span class="nav-brand-text">
+      <span class="nav-brand-name">Epical Studio</span>
+      <span class="nav-brand-sub">a division of filmworks</span>
+    </span>
   </a>
   <ul class="nav-links">
     <li><a href="/#hero">Home</a></li>
     <li><a href="/#portfolio">Work</a></li>
-    <li><a href="/#why">Services</a></li>
+    <li><a href="/#services">Services</a></li>
     <li><a href="/#founder">Founder</a></li>
     <li><a href="/#contact">Contact</a></li>
   </ul>
   <div class="nav-cta">
+    <div class="nav-socials">
+      <a class="nav-soc" href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+      <a class="nav-soc" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+      <a class="nav-soc" href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
+    </div>
     <button class="nav-burger" id="nav-burger" aria-label="Menu"><span></span><span></span><span></span></button>
     <a href="/#contact" class="nav-talk">Let's Talk</a>
   </div>
@@ -117,7 +129,7 @@
   <button class="nm-close" id="nm-close"><i class="fas fa-times"></i></button>
   <a href="/#hero">Home</a>
   <a href="/#portfolio">Work</a>
-  <a href="/#why">Services</a>
+  <a href="/#services">Services</a>
   <a href="/#founder">Founder</a>
   <a href="/#contact">Contact</a>
 </div>
@@ -150,18 +162,60 @@
   </div>
 </section>
 
-<!-- STATS -->
-<section id="stats">
+<!-- SERVICES -->
+<section id="services">
   <div class="wrap">
-    <div class="stats-grid">
-      <div class="stat-item"><div class="stat-ico"><i class="fas fa-calendar-days"></i></div><div class="stat-text"><div class="stat-num" data-target="33" data-suffix="+">0</div><div class="stat-label">Years of Creative Experience</div></div></div>
-      <div class="stat-item"><div class="stat-ico"><i class="fas fa-clapperboard"></i></div><div class="stat-text"><div class="stat-num" data-target="100" data-suffix="+">0</div><div class="stat-label">Commercial Projects</div></div></div>
-      <div class="stat-item"><div class="stat-ico"><i class="fas fa-film"></i></div><div class="stat-text"><div class="stat-num stat-word">Founder Filmworks</div><div class="stat-label">Production House</div></div></div>
-      <div class="stat-item"><div class="stat-ico"><i class="fas fa-lightbulb"></i></div><div class="stat-text"><div class="stat-num" data-target="15" data-suffix="+">0</div><div class="stat-label">Years as Head of Creative</div></div></div>
-      <div class="stat-item"><div class="stat-ico"><i class="fas fa-brain"></i></div><div class="stat-text"><div class="stat-num stat-word">AI Specialist</div><div class="stat-label">Generative AI</div></div></div>
+    <div style="text-align:center">
+      <div class="sec-eyebrow sr-up" style="justify-content:center">What We Offer</div>
+      <h2 class="sec-title sr-up">Our Services</h2>
+      <p class="sec-sub sr-up" style="margin:0 auto">Full-spectrum creative production, from concept to final cut, powered by traditional craft and generative AI</p>
+    </div>
+    <div class="service-grid">
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-clapperboard"></i></div>
+        <h3>Commercial Video Production</h3>
+        <p>Cinematic TVCs and branded video content built for broadcast, digital and social platforms.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-camera-retro"></i></div>
+        <h3>Cinematic Image Production</h3>
+        <p>Commercial-grade AI-generated imagery with the lighting, composition and polish of a real shoot.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-burger"></i></div>
+        <h3>Food &amp; Beverage Campaigns</h3>
+        <p>Macro ingredient shots, packaging visuals and appetite-driving imagery for food and drink brands.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-car"></i></div>
+        <h3>Automotive Visualization</h3>
+        <p>Showroom-quality automotive imagery and cinematic vehicle reveals.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-building"></i></div>
+        <h3>Architecture &amp; Interiors</h3>
+        <p>Photoreal architectural visualization for real estate, hospitality and interior brands.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-shirt"></i></div>
+        <h3>Fashion &amp; Portrait Campaigns</h3>
+        <p>Editorial-grade fashion and portrait imagery across global and regional style directions.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-icons"></i></div>
+        <h3>Brand Identity &amp; Design</h3>
+        <p>Logo systems, brand worlds and visual identity built to carry a campaign end-to-end.</p>
+      </div>
+      <div class="service-card sr-up">
+        <div class="service-ico"><i class="fas fa-wand-magic-sparkles"></i></div>
+        <h3>Motion Graphics &amp; Post Production</h3>
+        <p>Editing, grading, VFX and motion design that bring every frame to final polish.</p>
+      </div>
     </div>
   </div>
 </section>
+
+<div class="grad-div"></div>
 
 <!-- CLIENT STRIP -->
 <div class="client-strip">
@@ -185,7 +239,18 @@
   </div>
 </div>
 
-<div class="grad-div"></div>
+<!-- STATS -->
+<section id="stats">
+  <div class="wrap">
+    <div class="stats-grid">
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-calendar-days"></i></div><div class="stat-text"><div class="stat-num" data-target="33" data-suffix="+">0</div><div class="stat-label">Years of Creative Experience</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-clapperboard"></i></div><div class="stat-text"><div class="stat-num" data-target="100" data-suffix="+">0</div><div class="stat-label">Commercial Projects</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-film"></i></div><div class="stat-text"><div class="stat-num stat-word">Founder Filmworks</div><div class="stat-label">Production House</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-lightbulb"></i></div><div class="stat-text"><div class="stat-num" data-target="15" data-suffix="+">0</div><div class="stat-label">Years as Head of Creative</div></div></div>
+      <div class="stat-item"><div class="stat-ico"><i class="fas fa-brain"></i></div><div class="stat-text"><div class="stat-num stat-word">AI Specialist</div><div class="stat-label">Generative AI</div></div></div>
+    </div>
+  </div>
+</section>
 
 <!-- PORTFOLIO -->
 <section id="portfolio">
@@ -199,41 +264,6 @@
     </div>
     <div class="project-grid" id="project-grid"></div>
     <div class="port-cta"><a href="/#portfolio" class="btn-ghost">Explore All Work<i class="fas fa-arrow-right"></i></a></div>
-  </div>
-</section>
-
-<div class="grad-div"></div>
-
-<!-- WHY US / SERVICES -->
-<section id="why">
-  <div class="wrap">
-    <div style="text-align:center">
-      <div class="sec-eyebrow sr-up" style="justify-content:center">Services</div>
-      <h2 class="sec-title sr-up">Why Epical Studio</h2>
-      <p class="sec-sub sr-up" style="margin:0 auto">A rare combination of decades of traditional production craft and cutting-edge generative AI</p>
-    </div>
-    <div class="why-grid">
-      <div class="why-card sr-up">
-        <div class="why-ico"><i class="fas fa-camera-retro"></i></div>
-        <h3>Traditional Production Experience</h3>
-        <p>33+ years of hands-on experience in commercial filmmaking, broadcast and post production.</p>
-      </div>
-      <div class="why-card sr-up">
-        <div class="why-ico"><i class="fas fa-microchip"></i></div>
-        <h3>AI-Powered Efficiency</h3>
-        <p>Cutting-edge generative AI technologies for faster production, superior visuals and smart solutions.</p>
-      </div>
-      <div class="why-card sr-up">
-        <div class="why-ico"><i class="fas fa-bullseye"></i></div>
-        <h3>Commercial Thinking</h3>
-        <p>We understand brands, audiences and markets. Everything we create is built for impact.</p>
-      </div>
-      <div class="why-card sr-up">
-        <div class="why-ico"><i class="fas fa-user-pen"></i></div>
-        <h3>Human Creative Direction</h3>
-        <p>Every frame is guided by human creativity, taste and storytelling expertise.</p>
-      </div>
-    </div>
   </div>
 </section>
 
@@ -302,6 +332,9 @@
     <div class="foot-inner">
       <img src="/assets/e.jpg" class="foot-logo-img" alt="Epical Studio" width="1280" height="853">
       <div class="socials">
+        <a class="soc" href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a class="soc" href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
+        <a class="soc" href="#" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
         <a class="soc" href="https://www.linkedin.com/company/smarthireai2026" target="_blank"><i class="fab fa-linkedin-in"></i></a>
         <a class="soc" href="https://wa.me/923002166620" target="_blank"><i class="fab fa-whatsapp"></i></a>
         <a class="soc" href="https://www.upwork.com/services/product/design-ai-generated-photo-or-video-2056971193430539602?ref=project_share" target="_blank"><i class="fas fa-briefcase"></i></a>
@@ -309,7 +342,7 @@
       </div>
       <div class="foot-links">
         <a href="/#portfolio">Work</a>
-        <a href="/#why">Services</a>
+        <a href="/#services">Services</a>
         <a href="/#founder">Founder</a>
         <a href="/#contact">Contact</a>
       </div>
@@ -329,7 +362,7 @@
 <a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I%20want%20to%20place%20an%20order." target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <script type="module">
-import {initChrome, initEnterOverlay, createParticles, initLensFlare, initHeroCarousel, openLightbox} from '/assets/js/site.js';
+import {initChrome, initEnterOverlay, createParticles, initLensFlare, initHeroCarousel, openLightbox, initPageTransitions} from '/assets/js/site.js';
 
 let showreelMedia = null;
 document.getElementById('hero-play')?.addEventListener('click', async ()=>{
@@ -366,9 +399,8 @@ carouselRoot.innerHTML = PROJECTS.map(p=>`
     <div class="hero-slide-inner"></div>
   </div>`).join('');
 
-/* build the portfolio project-card blocks (column count matches project count on wide screens) */
+/* build the portfolio project-card blocks (fixed 3x3 grid) */
 const grid = document.getElementById('project-grid');
-grid.style.setProperty('--proj-count', PROJECTS.length);
 grid.innerHTML = PROJECTS.map((p,i)=>`
   <a class="project-card sr-up" href="/projects/${p.slug}.html">
     <div class="project-card-media">
@@ -405,6 +437,7 @@ document.querySelectorAll('.client-logo img').forEach(img=>{
 });
 
 initChrome();
+initPageTransitions();
 initEnterOverlay(()=>{
   document.getElementById('hero').classList.add('hero-revealed');
   /* let the browser paint the entrance CSS animations before running heavier
