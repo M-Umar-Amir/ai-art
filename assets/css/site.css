@@ -85,7 +85,7 @@ nav.stuck{background:rgba(0,0,0,.92);backdrop-filter:blur(24px);padding:14px 52p
 }
 
 /* ── SECTION COMMONS ── */
-section{padding:100px 0}
+section{padding:100px 0;scroll-margin-top:90px}
 .wrap{max-width:1320px;margin:0 auto;padding:0 40px}
 .sec-eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
 .sec-eyebrow::before{content:'';display:block;width:26px;height:1px;background:linear-gradient(to right,var(--gold),var(--silver))}
@@ -383,4 +383,13 @@ footer{padding:34px 0 22px;border-top:1px solid var(--border);background:var(--b
 /* ── RESPONSIVE ── */
 @media(max-width:960px){
   .foot-inner{flex-direction:column;text-align:center}
+}
+
+/* ── MOBILE PERFORMANCE (lighter blur = cheaper compositing on phone GPUs) ── */
+@media(max-width:768px){
+  nav.stuck{backdrop-filter:blur(10px)}
+  #nav-mobile{backdrop-filter:blur(12px)}
+  #lightbox{backdrop-filter:blur(10px)}
+  #music-widget{backdrop-filter:blur(8px)}
+  .project-card-play,.vid-badge-play{backdrop-filter:none}
 }

@@ -75,7 +75,8 @@
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700;800;900&display=swap"></noscript>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
 <noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap"></noscript>
-<link rel="preload" as="video" href="/assets/EPICAL-LOGO-ANIMATION-16x9.mp4" fetchpriority="high">
+<link rel="preload" as="video" href="/assets/EPICAL-LOGO-ANIMATION-9X16.mp4" media="(max-width:768px)" fetchpriority="high">
+<link rel="preload" as="video" href="/assets/EPICAL-LOGO-ANIMATION-16x9.mp4" media="(min-width:769px)" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/site.css">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
 <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
@@ -88,7 +89,10 @@
 <!-- ENTER OVERLAY -->
 <div id="enter-overlay" role="presentation" aria-hidden="true">
   <div class="eo-bar eo-bar-top"></div>
-  <video class="eo-logo" src="/assets/EPICAL-LOGO-ANIMATION-16x9.mp4" autoplay muted playsinline preload="auto"></video>
+  <video class="eo-logo" autoplay muted playsinline preload="auto">
+    <source src="/assets/EPICAL-LOGO-ANIMATION-9X16.mp4" media="(max-width:768px)">
+    <source src="/assets/EPICAL-LOGO-ANIMATION-16x9.mp4">
+  </video>
   <div class="eo-bar eo-bar-bot"></div>
   <button id="eo-skip" aria-label="Skip intro">Skip Intro</button>
 </div>

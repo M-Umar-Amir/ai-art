@@ -66,7 +66,7 @@ export function initChrome(){
       setTimeout(()=>r.remove(),700);
     });
     const hero=document.getElementById('hero')||document.querySelector('.proj-hero');
-    if(hero){
+    if(hero && !IS_TOUCH){
       (function shootLoop(){
         const s=document.createElement('div');
         s.className='shooting-star';
