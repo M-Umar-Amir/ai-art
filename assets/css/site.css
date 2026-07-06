@@ -154,8 +154,8 @@ section{padding:100px 0;scroll-margin-top:90px}
 .hero-arrow{pointer-events:all;width:38px;height:38px;border:1px solid rgba(196,138,70,.22);background:rgba(0,0,0,.4);color:rgba(221,216,204,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .3s;opacity:0;font-size:.7rem}
 .hero-media:hover .hero-arrow{opacity:1}
 @media(max-width:960px){
-  /* dots move to the top-right so they never collide with the bottom-left project name tag */
-  .hero-dots{top:14px;right:14px;bottom:auto}
+  /* dots move to the top-left so they never collide with the bottom-left project name tag */
+  .hero-dots{top:14px;left:14px;right:auto;bottom:auto}
 }
 .hero-arrow:hover{border-color:var(--gold);color:var(--gold)}
 
