@@ -115,15 +115,19 @@ export function initChrome(){
   initMusicWidget();
 }
 
-/* ── GENERATIVE AMBIENT AUDIO WIDGET ── */
+/* ── GENERATIVE AMBIENT AUDIO WIDGET ──
+   Note: audioCtx is only ever created inside a genuine user-gesture event
+   handler (click/touchstart/keydown). Safari/iOS refuse to run an
+   AudioContext started from passive events like 'mousemove' or 'scroll' —
+   that was the previous Mac playback bug. */
 function initMusicWidget(){
   const toggle=document.getElementById('m-toggle');
   if(!toggle)return;
   let audioCtx,masterGain,musicOn=false;
-  async function startMusic(){
+  function startMusic(){
     if(audioCtx)return;
     audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    await audioCtx.resume();
+    audioCtx.resume();
     const t=audioCtx.currentTime;
     const comp=audioCtx.createDynamicsCompressor();
     comp.threshold.value=-18;comp.knee.value=12;comp.ratio.value=4;comp.attack.value=.02;comp.release.value=.4;
@@ -133,45 +137,67 @@ function initMusicWidget(){
     const rBuf=audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
     for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,4)}
     conv.buffer=rBuf;
+    const filt=audioCtx.createBiquadFilter();
+    filt.type='lowpass';filt.frequency.value=1400;filt.Q.value=.5;
     const dry=audioCtx.createGain();dry.gain.value=.80;
-    const wet=audioCtx.createGain();wet.gain.value=.20;
-    dry.connect(comp);conv.connect(wet);wet.connect(comp);
+    const wet=audioCtx.createGain();wet.gain.value=.24;
+    filt.connect(dry);filt.connect(conv);dry.connect(comp);conv.connect(wet);wet.connect(comp);
+    /* slow LFO breathing the filter cutoff, so the pad feels alive instead of static */
+    const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=.045;
+    const lfoGain=audioCtx.createGain();lfoGain.gain.value=340;
+    lfo.connect(lfoGain);lfoGain.connect(filt.frequency);lfo.start(t);
     masterGain=audioCtx.createGain();
     masterGain.gain.setValueAtTime(0,t);
     masterGain.gain.linearRampToValueAtTime(.10,t+10);
-    masterGain.connect(dry);masterGain.connect(conv);
+    masterGain.connect(filt);
+    /* warm detuned pad: two slightly-detuned oscillators per note (chorus-like richness) */
     const PAD=[261.63,329.63,392.00,493.88];
-    const PAD_VOL=[.11,.09,.08,.06];
+    const PAD_VOL=[.1,.085,.075,.055];
     PAD.forEach((freq,i)=>{
-      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-      o.type='sine';o.frequency.value=freq;
+      const g=audioCtx.createGain();
       g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(PAD_VOL[i],t+5+i*2.5);
-      o.connect(g);g.connect(masterGain);o.start(t);
+      g.connect(masterGain);
+      [-4,4].forEach(cents=>{
+        const o=audioCtx.createOscillator();
+        o.type='triangle';o.frequency.value=freq;o.detune.value=cents;
+        const pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():null;
+        if(pan){pan.pan.value=cents/16;o.connect(pan);pan.connect(g)}else{o.connect(g)}
+        o.start(t);
+      });
     });
-    const PENTA=[261.63,329.63,392.00,440.00,523.25,659.25];
+    /* sparse, more musical melody: pentatonic phrase with an occasional fifth-harmony note */
+    const PENTA=[261.63,293.66,329.63,392.00,440.00,523.25];
     function melodNote(){
-      const freq=PENTA[Math.floor(Math.random()*PENTA.length)];
+      const idx=Math.floor(Math.random()*PENTA.length);
+      const freq=PENTA[idx];
       const now=audioCtx.currentTime;
-      const atk=1.5+Math.random()*2;const hold=3+Math.random()*5;const rel=2+Math.random()*2.5;
-      const vol=.05+Math.random()*.06;
+      const atk=1.8+Math.random()*2.2;const hold=3+Math.random()*5;const rel=2.5+Math.random()*3;
+      const vol=.045+Math.random()*.05;
       const o=audioCtx.createOscillator(),g=audioCtx.createGain();
       o.type='sine';o.frequency.value=freq;
       g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(vol,now+atk);
       g.gain.setValueAtTime(vol,now+atk+hold);g.gain.linearRampToValueAtTime(0,now+atk+hold+rel);
       o.connect(g);g.connect(masterGain);o.start(now);o.stop(now+atk+hold+rel+.1);
-      setTimeout(melodNote,(2.5+Math.random()*5)*1000);
+      if(Math.random()<.3){
+        const o2=audioCtx.createOscillator(),g2=audioCtx.createGain();
+        o2.type='sine';o2.frequency.value=freq*1.5;
+        g2.gain.setValueAtTime(0,now);g2.gain.linearRampToValueAtTime(vol*.4,now+atk+.3);
+        g2.gain.setValueAtTime(vol*.4,now+atk+hold);g2.gain.linearRampToValueAtTime(0,now+atk+hold+rel);
+        o2.connect(g2);g2.connect(masterGain);o2.start(now);o2.stop(now+atk+hold+rel+.1);
+      }
+      setTimeout(melodNote,(2.8+Math.random()*5)*1000);
     }
     setTimeout(melodNote,3000);
     musicOn=true;
     document.getElementById('m-icon').className='fas fa-pause';
     document.getElementById('m-eq').classList.remove('off');
   }
-  const EVENTS=['click','mousemove','scroll','touchstart','keydown'];
+  const EVENTS=['click','touchstart','keydown'];
   function onFirst(){
     EVENTS.forEach(e=>document.removeEventListener(e,onFirst,{capture:true}));
     startMusic();
   }
-  EVENTS.forEach(e=>document.addEventListener(e,onFirst,{capture:true,once:false,passive:true}));
+  EVENTS.forEach(e=>document.addEventListener(e,onFirst,{capture:true,once:false}));
   toggle.addEventListener('click',()=>{
     if(!audioCtx){startMusic();return}
     const now=audioCtx.currentTime;
@@ -200,7 +226,7 @@ export function createParticles(container,{density=90}={}){
   canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%';
   container.appendChild(canvas);
   let W,H,pts=[];
-  const C=['rgba(200,169,110,','rgba(168,158,140,','rgba(226,192,128,','rgba(255,250,240,'];
+  const C=['rgba(201,201,206,','rgba(168,168,168,','rgba(232,232,232,','rgba(255,255,255,'];
   function resize(){W=canvas.width=container.offsetWidth;H=canvas.height=container.offsetHeight}
   class P{
     constructor(){this.init();this.y=Math.random()*H}
@@ -222,7 +248,7 @@ export function initLensFlare(heroEl,flareEl){
     const r=heroEl.getBoundingClientRect();
     const x=((e.clientX-r.left)/r.width*100).toFixed(1)+'%';
     const y=((e.clientY-r.top)/r.height*100).toFixed(1)+'%';
-    flareEl.style.background=`radial-gradient(circle 340px at ${x} ${y},rgba(200,169,110,.07) 0%,transparent 70%)`;
+    flareEl.style.background=`radial-gradient(circle 340px at ${x} ${y},rgba(201,201,206,.07) 0%,transparent 70%)`;
   });
 }
 

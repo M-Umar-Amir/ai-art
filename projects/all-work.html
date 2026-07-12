@@ -3,20 +3,17 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Horizon — Architecture | Epical Studio</title>
-<meta name="description" content="Horizon — monumental and modern architectural imagery. Brutalist chambers, futuristic structures and cinematic light studies by Epical Studio.">
+<title>All Work — Epical Studio</title>
+<meta name="description" content="The complete Epical Studio archive — every commercial project across food, beverage, perfume, automotive, architecture, fashion, brand identity, portraiture, cosmetics and jewelry, in one showcase.">
 <meta name="robots" content="index, follow">
-<link rel="canonical" href="https://www.epical.art/projects/horizon.html">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://www.epical.art/projects/horizon.html">
-<meta property="og:title" content="Horizon — Architecture | Epical Studio">
-<meta property="og:description" content="Monumental and modern architectural imagery by Epical Studio.">
-<meta property="og:image" content="https://www.epical.art/assets/projects/horizon/img/01.webp">
+<link rel="canonical" href="https://www.epical.art/projects/all-work.html">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.epical.art/projects/all-work.html">
+<meta property="og:title" content="All Work — Epical Studio">
+<meta property="og:description" content="The complete Epical Studio archive — every commercial project in one showcase.">
+<meta property="og:image" content="https://www.epical.art/assets/e.jpg">
 <link rel="icon" type="image/x-icon" href="/favicon.ico">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"CreativeWork","name":"Horizon — Architecture","about":"Monumental and modern architectural imagery","creator":{"@id":"https://www.epical.art/#organization"},"image":"https://www.epical.art/assets/projects/horizon/img/01.webp"}
-</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;600;700;800;900&display=swap">
@@ -57,27 +54,19 @@
   <a href="/#hero">Home</a><a href="/#portfolio">Work</a><a href="/#services">Services</a><a href="/#founder">Team</a><a href="/#contact">Contact</a>
 </div>
 
-<section class="proj-hero">
-  <img class="proj-hero-bg" src="/assets/projects/horizon/img/01.webp" alt="Horizon — Architecture cover">
-  <div class="proj-hero-vignette"></div>
+<section class="proj-hero" style="min-height:46vh">
+  <div class="proj-hero-vignette" style="background:linear-gradient(180deg,rgba(0,0,0,.9),rgba(0,0,0,.55))"></div>
   <div class="proj-hero-content">
-    <a href="/#portfolio" class="proj-back sr-up"><i class="fas fa-arrow-left"></i>All Work</a>
-    <div class="proj-cat sr-up">05 · Architecture</div>
-    <h1 class="proj-title sr-up">Horizon</h1>
-    <p class="proj-desc sr-up">Monumental and modern architectural imagery — brutalist chambers, futuristic structures and cinematic light studies for architecture and real-estate storytelling.</p>
+    <a href="/#portfolio" class="proj-back sr-up"><i class="fas fa-arrow-left"></i>Back Home</a>
+    <div class="proj-cat sr-up">The Complete Archive</div>
+    <h1 class="proj-title sr-up">All Work</h1>
+    <p class="proj-desc sr-up">Every signature world in one place — 200+ commercial projects spanning food, beverage, perfume, automotive, architecture, fashion, brand identity, portraiture, cosmetics and jewelry, shown in no particular order.</p>
   </div>
 </section>
 
 <section id="gallery">
   <div class="wrap">
     <div class="gallery-grid" id="gallery-grid"></div>
-  </div>
-</section>
-
-<section id="proj-nav">
-  <div class="proj-nav-grid">
-    <a class="proj-nav-link" href="/projects/ascend.html"><span class="proj-nav-label"><i class="fas fa-arrow-left"></i> Previous</span><span class="proj-nav-name">Ascend</span></a>
-    <a class="proj-nav-link next" href="/projects/aura-europe.html"><span class="proj-nav-label">Next <i class="fas fa-arrow-right"></i></span><span class="proj-nav-name">Aura — Europe</span></a>
   </div>
 </section>
 
@@ -115,17 +104,42 @@
   <div class="m-label"><div class="m-name">Epical Ambient</div><div class="m-sub">Generative Score</div></div>
   <button class="m-toggle" id="m-toggle"><i class="fas fa-play" id="m-icon"></i></button>
 </div>
-<a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I'm%20interested%20in%20a%20project%20like%20Horizon." target="_blank"><i class="fab fa-whatsapp"></i></a>
+<a id="wa-float" href="https://wa.me/923002166620?text=Hi!%20I'd%20like%20to%20contact%20you%20about%20a%20project." target="_blank"><i class="fab fa-whatsapp"></i></a>
 
 <script type="module">
-import {initChrome, createGallery, initParallaxLayer, initPageTransitions} from '/assets/js/site.js';
-(function loadFA(){const l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';document.head.appendChild(l)})();
-fetch('/assets/projects/horizon/manifest.json').then(r=>r.ok?r.json():[]).then(media=>{
-  createGallery({container:document.getElementById('gallery-grid'), media});
-}).catch(()=>{});
+import {initChrome, createGallery, initPageTransitions} from '/assets/js/site.js';
+loadFA();
+function loadFA(){const l=document.createElement('link');l.rel='stylesheet';l.href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css';document.head.appendChild(l)}
+
+const PROJECTS = [
+  {slug:'ember', name:'Ember', category:'Food & Beverage'},
+  {slug:'oreva', name:'Oreva', category:'Beverage'},
+  {slug:'essence', name:'Essence', category:'Perfume'},
+  {slug:'ascend', name:'Ascend', category:'Automotive'},
+  {slug:'horizon', name:'Horizon', category:'Architecture'},
+  {slug:'aura-europe', name:'Aura — Europe', category:'Fashion'},
+  {slug:'aura-subcontinent', name:'Aura — Sub-Continent', category:'Fashion'},
+  {slug:'genesis', name:'Genesis', category:'Signature Portraits'},
+  {slug:'aurelia-dumont', name:'Aurelia Dumont', category:'Brand Identity'},
+  {slug:'aura-fashion', name:'Aura — Fashion', category:'Fashion'},
+  {slug:'eclat-cosmetics', name:'Éclat Cosmetics', category:'Cosmetics'},
+  {slug:'lumina-jewels', name:'Lumina Jewels', category:'Jewelry'}
+];
+
+Promise.all(PROJECTS.map(async p=>{
+  try{
+    const res = await fetch(`/assets/projects/${p.slug}/manifest.json`);
+    if(!res.ok)return[];
+    const items = await res.json();
+    return items.map(m=>({type:m.type==='video'?'video':'img', src:m.src, poster:m.poster, title:m.title, cat:p.category}));
+  }catch{return[]}
+})).then(perProject=>{
+  const media = perProject.flat();
+  createGallery({container:document.getElementById('gallery-grid'), media, shuffleOrder:true});
+});
+
 initChrome();
 initPageTransitions();
-initParallaxLayer(document.querySelector('.proj-hero-bg'),{speed:.25});
 </script>
 </body>
 </html>
