@@ -89,7 +89,7 @@ section{padding:100px 0;scroll-margin-top:90px}
 .wrap{max-width:1320px;margin:0 auto;padding:0 40px}
 .sec-eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:.6rem;letter-spacing:4px;text-transform:uppercase;color:var(--gold);margin-bottom:14px}
 .sec-eyebrow::before{content:'';display:block;width:26px;height:1px;background:linear-gradient(to right,var(--gold),var(--silver))}
-.sec-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.7rem,3.2vw,2.7rem);font-weight:700;margin-bottom:14px;line-height:1.15;text-transform:uppercase;background:linear-gradient(135deg,var(--cream),var(--silver));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.sec-title{font-family:'Orbitron',sans-serif;font-size:clamp(1.7rem,3.2vw,2.7rem);font-weight:700;margin-bottom:14px;line-height:1.15;text-transform:uppercase;background:linear-gradient(135deg,var(--cream),var(--silver));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;overflow-wrap:break-word}
 .sec-sub{color:rgba(221,221,221,.52);font-size:.92rem;max-width:560px;line-height:1.8;font-weight:300}
 .grad-div{height:1px;background:linear-gradient(to right,transparent,var(--gold) 30%,var(--silver) 50%,var(--gold) 70%,transparent);opacity:.2}
 
@@ -203,8 +203,8 @@ section{padding:100px 0;scroll-margin-top:90px}
 .project-card-media img.img-loaded{opacity:1}
 .project-card:hover .project-card-media img{transform:scale(1.045)}
 .project-card-num{position:absolute;top:18px;left:18px;z-index:2;font-family:'Orbitron',sans-serif;font-size:.72rem;color:rgba(232,232,232,.6);letter-spacing:1px}
-.project-card-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:3;width:66px;height:66px;border-radius:50%;border:1px solid rgba(201,201,206,.45);background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1.1rem;transition:all .3s}
-.project-card:hover .project-card-play{background:rgba(201,201,206,.2);border-color:var(--gold);transform:translate(-50%,-50%) scale(1.08)}
+.project-card-play{position:absolute;right:16px;bottom:16px;z-index:3;width:56px;height:56px;border-radius:50%;border:1px solid rgba(201,201,206,.45);background:rgba(0,0,0,.55);backdrop-filter:blur(4px);color:var(--gold);display:flex;align-items:center;justify-content:center;font-size:1rem;transition:all .3s}
+.project-card:hover .project-card-play{background:rgba(201,201,206,.2);border-color:var(--gold);transform:scale(1.08)}
 .project-card-info{padding:28px 20px 22px;text-align:center}
 .project-card-cat{font-size:.62rem;letter-spacing:2.5px;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
 .project-card-name{font-family:'Orbitron',sans-serif;font-size:1.05rem;font-weight:700;color:var(--cream);letter-spacing:.4px}
@@ -240,7 +240,7 @@ section{padding:100px 0;scroll-margin-top:90px}
 /* ── CONTACT STRIP ── */
 #contact{background:var(--black);position:relative}
 .contact-inner{display:flex;align-items:center;justify-content:space-between;gap:44px;flex-wrap:wrap}
-.contact-head{text-align:left;max-width:420px}
+.contact-head{text-align:left;max-width:480px}
 .contact-head .sec-sub{margin:0}
 .contact-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;flex:1 1 580px;min-width:280px}
 @media(max-width:900px){
