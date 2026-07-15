@@ -115,106 +115,36 @@ export function initChrome(){
   initMusicWidget();
 }
 
-/* ── GENERATIVE AMBIENT AUDIO WIDGET ──
-   Note: audioCtx is only ever created inside a genuine user-gesture event
-   handler (click/touchstart/keydown). Safari/iOS refuse to run an
-   AudioContext started from passive events like 'mousemove' or 'scroll' —
-   that was the previous Mac playback bug. */
+/* ── AMBIENT AUDIO WIDGET ──
+   Plays/pauses a real <audio> track, driven only by the toggle button click —
+   that's the only user gesture browsers require, so there's no need (and no
+   benefit) to hook a separate document-wide "first interaction" listener. The
+   earlier version did both: a capture-phase listener on the whole document
+   auto-started playback on ANY first click, and the toggle button had its own
+   click handler. Since the document listener fired first, clicking the toggle
+   itself started the track and then immediately told it to stop in the same
+   click — audibly nothing happened. */
 function initMusicWidget(){
   const toggle=document.getElementById('m-toggle');
-  if(!toggle)return;
-  let audioCtx,masterGain,musicOn=false;
-  function startMusic(){
-    if(audioCtx)return;
-    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
-    audioCtx.resume();
-    const t=audioCtx.currentTime;
-    const comp=audioCtx.createDynamicsCompressor();
-    comp.threshold.value=-18;comp.knee.value=12;comp.ratio.value=4;comp.attack.value=.02;comp.release.value=.4;
-    comp.connect(audioCtx.destination);
-    const conv=audioCtx.createConvolver();
-    const rLen=audioCtx.sampleRate*3;
-    const rBuf=audioCtx.createBuffer(2,rLen,audioCtx.sampleRate);
-    for(let c=0;c<2;c++){const d=rBuf.getChannelData(c);for(let i=0;i<rLen;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rLen,4)}
-    conv.buffer=rBuf;
-    const filt=audioCtx.createBiquadFilter();
-    filt.type='lowpass';filt.frequency.value=1400;filt.Q.value=.5;
-    const dry=audioCtx.createGain();dry.gain.value=.80;
-    const wet=audioCtx.createGain();wet.gain.value=.24;
-    filt.connect(dry);filt.connect(conv);dry.connect(comp);conv.connect(wet);wet.connect(comp);
-    /* slow LFO breathing the filter cutoff, so the pad feels alive instead of static */
-    const lfo=audioCtx.createOscillator();lfo.type='sine';lfo.frequency.value=.045;
-    const lfoGain=audioCtx.createGain();lfoGain.gain.value=340;
-    lfo.connect(lfoGain);lfoGain.connect(filt.frequency);lfo.start(t);
-    masterGain=audioCtx.createGain();
-    masterGain.gain.setValueAtTime(0,t);
-    masterGain.gain.linearRampToValueAtTime(.10,t+10);
-    masterGain.connect(filt);
-    /* warm detuned pad: two slightly-detuned oscillators per note (chorus-like richness) */
-    const PAD=[261.63,329.63,392.00,493.88];
-    const PAD_VOL=[.1,.085,.075,.055];
-    PAD.forEach((freq,i)=>{
-      const g=audioCtx.createGain();
-      g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(PAD_VOL[i],t+5+i*2.5);
-      g.connect(masterGain);
-      [-4,4].forEach(cents=>{
-        const o=audioCtx.createOscillator();
-        o.type='triangle';o.frequency.value=freq;o.detune.value=cents;
-        const pan=audioCtx.createStereoPanner?audioCtx.createStereoPanner():null;
-        if(pan){pan.pan.value=cents/16;o.connect(pan);pan.connect(g)}else{o.connect(g)}
-        o.start(t);
-      });
-    });
-    /* sparse, more musical melody: pentatonic phrase with an occasional fifth-harmony note */
-    const PENTA=[261.63,293.66,329.63,392.00,440.00,523.25];
-    function melodNote(){
-      const idx=Math.floor(Math.random()*PENTA.length);
-      const freq=PENTA[idx];
-      const now=audioCtx.currentTime;
-      const atk=1.8+Math.random()*2.2;const hold=3+Math.random()*5;const rel=2.5+Math.random()*3;
-      const vol=.045+Math.random()*.05;
-      const o=audioCtx.createOscillator(),g=audioCtx.createGain();
-      o.type='sine';o.frequency.value=freq;
-      g.gain.setValueAtTime(0,now);g.gain.linearRampToValueAtTime(vol,now+atk);
-      g.gain.setValueAtTime(vol,now+atk+hold);g.gain.linearRampToValueAtTime(0,now+atk+hold+rel);
-      o.connect(g);g.connect(masterGain);o.start(now);o.stop(now+atk+hold+rel+.1);
-      if(Math.random()<.3){
-        const o2=audioCtx.createOscillator(),g2=audioCtx.createGain();
-        o2.type='sine';o2.frequency.value=freq*1.5;
-        g2.gain.setValueAtTime(0,now);g2.gain.linearRampToValueAtTime(vol*.4,now+atk+.3);
-        g2.gain.setValueAtTime(vol*.4,now+atk+hold);g2.gain.linearRampToValueAtTime(0,now+atk+hold+rel);
-        o2.connect(g2);g2.connect(masterGain);o2.start(now);o2.stop(now+atk+hold+rel+.1);
-      }
-      setTimeout(melodNote,(2.8+Math.random()*5)*1000);
-    }
-    setTimeout(melodNote,3000);
-    musicOn=true;
-    document.getElementById('m-icon').className='fas fa-pause';
-    document.getElementById('m-eq').classList.remove('off');
-  }
-  const EVENTS=['click','touchstart','keydown'];
-  function onFirst(){
-    EVENTS.forEach(e=>document.removeEventListener(e,onFirst,{capture:true}));
-    startMusic();
-  }
-  EVENTS.forEach(e=>document.addEventListener(e,onFirst,{capture:true,once:false}));
+  const audio=document.getElementById('m-audio');
+  const icon=document.getElementById('m-icon');
+  const eq=document.getElementById('m-eq');
+  if(!toggle||!audio)return;
+  audio.volume=.55;
   toggle.addEventListener('click',()=>{
-    if(!audioCtx){startMusic();return}
-    const now=audioCtx.currentTime;
-    masterGain.gain.cancelScheduledValues(now);
-    masterGain.gain.setValueAtTime(masterGain.gain.value,now);
-    if(musicOn){
-      masterGain.gain.linearRampToValueAtTime(0,now+1.5);
-      musicOn=false;
-      document.getElementById('m-icon').className='fas fa-play';
-      document.getElementById('m-eq').classList.add('off');
+    if(audio.paused){
+      audio.play().catch(()=>{});
     } else {
-      if(audioCtx.state==='suspended')audioCtx.resume();
-      masterGain.gain.linearRampToValueAtTime(.10,now+2);
-      musicOn=true;
-      document.getElementById('m-icon').className='fas fa-pause';
-      document.getElementById('m-eq').classList.remove('off');
+      audio.pause();
     }
+  });
+  audio.addEventListener('play',()=>{
+    icon.className='fas fa-pause';
+    eq.classList.remove('off');
+  });
+  audio.addEventListener('pause',()=>{
+    icon.className='fas fa-play';
+    eq.classList.add('off');
   });
 }
 
