@@ -116,14 +116,15 @@ export function initChrome(){
 }
 
 /* ── AMBIENT AUDIO WIDGET ──
-   Plays/pauses a real <audio> track, driven only by the toggle button click —
-   that's the only user gesture browsers require, so there's no need (and no
-   benefit) to hook a separate document-wide "first interaction" listener. The
-   earlier version did both: a capture-phase listener on the whole document
-   auto-started playback on ANY first click, and the toggle button had its own
-   click handler. Since the document listener fired first, clicking the toggle
-   itself started the track and then immediately told it to stop in the same
-   click — audibly nothing happened. */
+   Plays/pauses a real <audio> track. Also tries to autoplay on load; browsers
+   block unmuted autoplay until the site has some engagement, so if the
+   immediate attempt is rejected we retry once on the visitor's first
+   click/scroll/keypress anywhere on the page — the closest thing to true
+   autoplay that's actually allowed. (The toggle button no longer needs its
+   own separate "first interaction" hack — see the note this replaced: a
+   document-wide listener and the toggle's own handler used to race each
+   other, so pressing play started and immediately silenced the track in the
+   same click.) */
 function initMusicWidget(){
   const toggle=document.getElementById('m-toggle');
   const audio=document.getElementById('m-audio');
@@ -131,6 +132,16 @@ function initMusicWidget(){
   const eq=document.getElementById('m-eq');
   if(!toggle||!audio)return;
   audio.volume=.55;
+
+  audio.play().catch(()=>{
+    const EVENTS=['click','touchstart','keydown','scroll'];
+    const retry=()=>{
+      EVENTS.forEach(e=>document.removeEventListener(e,retry));
+      audio.play().catch(()=>{});
+    };
+    EVENTS.forEach(e=>document.addEventListener(e,retry,{once:true,passive:true}));
+  });
+
   toggle.addEventListener('click',()=>{
     if(audio.paused){
       audio.play().catch(()=>{});
