@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Buy Oréva</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<style>
+  :root{
+    --ink:#0a0a0a;
+    --ink-soft:#1c1a17;
+    --cream:#f7f4ee;
+    --cream-2:#efe9df;
+    --amber:#c9822b;
+    --amber-dark:#a3671e;
+    --amber-bright:#e8580c;
+    --muted:#8a8578;
+    --line:#ddd6c9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    background:#fff;color:var(--ink-soft);
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:86px; /* room for sticky bag bar */
+  }
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  button{font:inherit;cursor:pointer;}
+
+  /* ---------- NAV (Apple buy-flow style: minimal) ---------- */
+  nav{
+    position:sticky;top:0;z-index:1000;
+    height:52px;
+    background:rgba(255,255,255,0.86);
+    backdrop-filter:saturate(180%) blur(20px);
+    -webkit-backdrop-filter:saturate(180%) blur(20px);
+    border-bottom:1px solid var(--line);
+    display:flex;align-items:center;
+  }
+  .nav-inner{
+    width:100%;max-width:1000px;margin:0 auto;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 22px;
+  }
+  .nav-back{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--ink-soft);opacity:.85;}
+  .nav-back:hover{opacity:1;}
+  .nav-brand{
+    display:flex;align-items:center;gap:8px;
+    font-size:14px;font-weight:600;letter-spacing:.2em;color:var(--ink);
+    position:absolute;left:50%;transform:translateX(-50%);
+  }
+  .nav-brand svg{width:16px;height:16px;}
+  .nav-brand svg path{fill:var(--ink);}
+  .nav-mini-bag{
+    display:flex;align-items:center;gap:10px;
+    opacity:0;transform:translateY(-6px);pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+  }
+  .nav-mini-bag.visible{opacity:1;transform:translateY(0);pointer-events:auto;}
+  .nav-mini-bag .mini-dot{width:9px;height:9px;border-radius:50%;flex:none;}
+  .nav-mini-bag .mini-price{font-size:13px;font-weight:600;}
+  .nav-mini-bag .mini-cta{
+    background:var(--ink);color:#fff;padding:7px 16px;border-radius:980px;
+    font-size:12px;font-weight:500;border:none;
+  }
+
+  /* ---------- HEADER ---------- */
+  .buy-header{max-width:640px;margin:0 auto;padding:56px 22px 8px;text-align:center;}
+  .buy-kicker{font-size:13px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--amber);margin-bottom:10px;}
+  .buy-header h1{font-size:clamp(32px,5vw,48px);font-weight:700;letter-spacing:-0.02em;margin-bottom:8px;transition:opacity .2s ease;}
+  .buy-price{font-size:20px;color:var(--muted);font-weight:500;transition:opacity .2s ease;}
+
+  /* ---------- HERO IMAGE ---------- */
+  .buy-image-wrap{
+    max-width:520px;margin:32px auto 0;padding:0 22px;
+  }
+  .buy-image-card{
+    border-radius:28px;overflow:hidden;background:var(--ink);
+    aspect-ratio:4/5;box-shadow:0 40px 80px -30px rgba(0,0,0,.35);
+  }
+  .buy-image-card img{width:100%;height:100%;object-fit:cover;transition:opacity .25s ease;}
+
+  /* ---------- STEPS ---------- */
+  .steps{max-width:640px;margin:0 auto;padding:0 22px;}
+  .step{padding:52px 0;border-bottom:1px solid var(--line);}
+  .step:last-of-type{border-bottom:none;}
+  .step-head{display:flex;align-items:center;gap:12px;margin-bottom:28px;}
+  .step-num{
+    width:26px;height:26px;border-radius:50%;background:var(--ink);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex:none;
+  }
+  .step-head h2{font-size:22px;font-weight:600;letter-spacing:-0.01em;}
+
+  /* Flavor swatches */
+  .flavor-row{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;}
+  .flavor-opt{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .flavor-swatch-btn{
+    width:52px;height:52px;border-radius:50%;border:none;position:relative;cursor:pointer;
+    box-shadow:inset 0 0 0 1px rgba(0,0,0,.08);
+  }
+  .flavor-swatch-btn::after{
+    content:"";position:absolute;inset:-6px;border-radius:50%;
+    border:2px solid transparent;transition:border-color .2s ease;
+  }
+  .flavor-opt.selected .flavor-swatch-btn::after{border-color:var(--ink);}
+  .flavor-opt span{font-size:13px;font-weight:500;color:var(--ink-soft);}
+
+  /* Pack cards */
+  .pack-row{display:flex;flex-direction:column;gap:12px;}
+  .pack-card{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 20px;border-radius:16px;border:1.5px solid var(--line);
+    background:#fff;text-align:left;transition:border-color .2s ease, box-shadow .2s ease;
+  }
+  .pack-card:hover{box-shadow:0 8px 20px -14px rgba(0,0,0,.3);}
+  .pack-card.selected{border-color:var(--ink);box-shadow:0 8px 20px -14px rgba(0,0,0,.3);}
+  .pack-radio{
+    width:20px;height:20px;border-radius:50%;border:1.5px solid var(--line);flex:none;
+    display:flex;align-items:center;justify-content:center;transition:border-color .2s ease;
+  }
+  .pack-card.selected .pack-radio{border-color:var(--ink);}
+  .pack-radio::after{content:"";width:10px;height:10px;border-radius:50%;background:var(--ink);transform:scale(0);transition:transform .15s ease;}
+  .pack-card.selected .pack-radio::after{transform:scale(1);}
+  .pack-main{display:flex;align-items:center;gap:14px;}
+  .pack-name{font-size:16px;font-weight:600;}
+  .pack-count{font-size:13px;color:var(--muted);}
+  .pack-price{font-size:16px;font-weight:600;}
+  .pack-unit{font-size:12px;color:var(--muted);}
+
+  /* Quantity */
+  .qty-row{display:flex;justify-content:center;}
+  .qty-stepper{
+    display:inline-flex;align-items:center;border:1.5px solid var(--line);border-radius:980px;overflow:hidden;
+  }
+  .qty-stepper button{width:46px;height:46px;background:#fff;border:none;font-size:20px;color:var(--ink);transition:background .2s ease;}
+  .qty-stepper button:hover{background:var(--cream-2);}
+  .qty-stepper span{width:52px;text-align:center;font-size:16px;font-weight:600;}
+
+  /* Review */
+  .review-rows{margin-bottom:26px;}
+  .review-rows .row{display:flex;justify-content:space-between;font-size:15px;padding:8px 0;color:var(--muted);}
+  .review-rows .row span:last-child{color:var(--ink-soft);font-weight:500;}
+  .review-rows .row.total{border-top:1px solid var(--line);margin-top:6px;padding-top:14px;font-size:18px;font-weight:700;}
+  .review-rows .row.total span{color:var(--ink);}
+
+  .checkout-cta{
+    position:relative;overflow:hidden;display:block;width:100%;text-align:center;
+    background:var(--ink);color:#fff;padding:16px 20px;border-radius:980px;border:none;
+    font-size:17px;font-weight:500;transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .checkout-cta::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 45%, transparent 60%);
+    transform:translateX(-120%);
+  }
+  .checkout-cta:hover::after{transform:translateX(120%);transition:transform .7s ease;}
+  .checkout-cta:hover{transform:translateY(-2px);box-shadow:0 14px 26px -12px rgba(0,0,0,.4);}
+  .review-note{font-size:12px;color:var(--muted);text-align:center;margin-top:14px;}
+
+  /* ---------- STICKY BOTTOM BAG BAR ---------- */
+  .bag-bar{
+    position:fixed;left:0;right:0;bottom:0;z-index:900;
+    background:rgba(247,244,238,.92);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);
+    border-top:1px solid var(--line);
+    transform:translateY(100%);transition:transform .3s ease;
+  }
+  .bag-bar.visible{transform:translateY(0);}
+  .bag-bar-inner{
+    max-width:1000px;margin:0 auto;padding:14px 22px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .bag-info{display:flex;align-items:center;gap:10px;font-size:14px;}
+  .bag-info .bag-dot{width:10px;height:10px;border-radius:50%;flex:none;}
+  .bag-info .bag-total{font-weight:700;}
+  .bag-bar .checkout-cta{width:auto;padding:12px 26px;font-size:14px;}
+
+  /* ---------- FOOTER ---------- */
+  footer{background:var(--cream-2);border-top:1px solid var(--line);padding:44px 22px;margin-top:60px;}
+  .footer-inner{max-width:1040px;margin:0 auto;font-size:12px;color:var(--muted);}
+  .footer-logo{display:flex;align-items:center;gap:8px;margin-bottom:22px;color:var(--ink);font-weight:600;letter-spacing:.2em;font-size:14px;}
+  .footer-logo svg{width:18px;height:18px;}
+  .footer-logo svg path{fill:var(--ink);}
+  .footer-links{display:flex;flex-wrap:wrap;gap:0;border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:22px;}
+  .footer-links a{margin-right:16px;padding-right:16px;border-right:1px solid var(--line);line-height:1;transition:color .2s ease;}
+  .footer-links a:last-child{border-right:none;}
+  .footer-links a:hover{color:var(--ink);text-decoration:underline;}
+
+  @media (max-width:520px){
+    .flavor-row{gap:16px;}
+    .pack-main{gap:10px;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-back" href="/product#flavors">‹ Oréva</a>
+    <a class="nav-brand" href="/product#overview">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 14a36 36 0 1 0 25.5 61.5 4 4 0 0 0-5.7-5.6A28 28 0 1 1 78 50a4 4 0 0 0 8 0A36 36 0 0 0 50 14z"/>
+        <path d="M78 50c0 8-3 14-8 19-3 3-2 8 2 9 7 2 14-3 17-11 2-6 2-12-1-18-2-4-10-3-10 1z"/>
+      </svg>
+      ORÉVA
+    </a>
+    <div class="nav-mini-bag" id="miniBag">
+      <span class="mini-dot" id="miniDot"></span>
+      <span class="mini-price" id="miniPrice">$34.00</span>
+    </div>
+  </div>
+</nav>
+
+<div class="buy-header">
+  <div class="buy-kicker">Buy</div>
+  <h1 id="liveTitle">Oréva Citrus</h1>
+  <div class="buy-price" id="livePrice">From $28.00</div>
+</div>
+
+<div class="buy-image-wrap">
+  <div class="buy-image-card">
+    <img id="heroImg" src="/assets/projects/oreva/img/02.webp" alt="Oréva Citrus bottle">
+  </div>
+</div>
+
+<div class="steps">
+
+  <div class="step">
+    <div class="step-head"><span class="step-num">1</span><h2>Choose a Flavor</h2></div>
+    <div class="flavor-row" id="flavorRow"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-num">2</span><h2>Choose a Pack Size</h2></div>
+    <div class="pack-row" id="packRow"></div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-num">3</span><h2>Quantity</h2></div>
+    <div class="qty-row">
+      <div class="qty-stepper">
+        <button id="qtyMinus" aria-label="Decrease quantity">−</button>
+        <span id="qtyVal">1</span>
+        <button id="qtyPlus" aria-label="Increase quantity">+</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="step">
+    <div class="step-head"><span class="step-num">4</span><h2>Review</h2></div>
+    <div class="review-rows">
+      <div class="row"><span>Flavor</span><span id="revFlavor">Citrus</span></div>
+      <div class="row"><span>Pack</span><span id="revPack">6-Pack · 1 case</span></div>
+      <div class="row"><span>Shipping</span><span id="revShipping">$6.00</span></div>
+      <div class="row total"><span>Total</span><span id="revTotal">$34.00</span></div>
+    </div>
+    <a class="checkout-cta" id="checkoutCta" href="/product/checkout">Check Out →</a>
+    <p class="review-note">Free shipping on orders over $60.</p>
+  </div>
+
+</div>
+
+<div class="bag-bar" id="bagBar">
+  <div class="bag-bar-inner">
+    <div class="bag-info">
+      <span class="bag-dot" id="bagDot"></span>
+      <span id="bagLabel">Citrus · 6-Pack × 1</span>
+      <span class="bag-total" id="bagTotal">$34.00</span>
+    </div>
+    <a class="checkout-cta" id="bagCta" href="/product/checkout">Check Out →</a>
+  </div>
+</div>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-logo">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 14a36 36 0 1 0 25.5 61.5 4 4 0 0 0-5.7-5.6A28 28 0 1 1 78 50a4 4 0 0 0 8 0A36 36 0 0 0 50 14z"/>
+        <path d="M78 50c0 8-3 14-8 19-3 3-2 8 2 9 7 2 14-3 17-11 2-6 2-12-1-18-2-4-10-3-10 1z"/>
+      </svg>
+      ORÉVA
+    </div>
+    <div class="footer-links">
+      <a href="/product#overview">Shop Oréva</a>
+      <a href="/product#ingredients">Ingredients</a>
+      <a href="#">Wholesale</a>
+      <a href="#">Support</a>
+    </div>
+    <p>This is a demo product configurator inspired by Apple.com's buy-flow layout, built for evaluation purposes only, using Oréva brand photography by Epical Studio.</p>
+    <p style="margin-top:8px;">Copyright © 2026 Oréva. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+  const flavors = [
+    {key:'citrus', name:'Citrus', color:'#e8b923', img:'/assets/projects/oreva/img/02.webp', alt:'Oréva Citrus bottle among fresh oranges'},
+    {key:'lemon', name:'Lemon', color:'#f4d13a', img:'/assets/projects/oreva/img/01.webp', alt:'Oréva Lemon bottle on the Amalfi Coast'},
+    {key:'blood', name:'Blood Orange', color:'#a3221b', img:'/assets/projects/oreva/img/09.webp', alt:'Oréva Blood Orange bottle in bright studio light'},
+    {key:'grapefruit', name:'Grapefruit', color:'#ef7f8f', img:'/assets/projects/oreva/img/05.webp', alt:'Oréva Grapefruit bottle on spa marble'},
+    {key:'lime', name:'Lime', color:'#a9c23f', img:'/assets/projects/oreva/img/07.webp', alt:'Oréva Lime bottle among crystal ice'},
+  ];
+  const packs = [
+    {key:'6', label:'6-Pack', bottles:6, price:28},
+    {key:'12', label:'12-Pack', bottles:12, price:52},
+    {key:'24', label:'24-Pack', bottles:24, price:96},
+  ];
+
+  const state = { flavor:'citrus', pack:'6', qty:1 };
+
+  const flavorRow = document.getElementById('flavorRow');
+  flavors.forEach(f=>{
+    const wrap = document.createElement('div');
+    wrap.className = 'flavor-opt';
+    wrap.dataset.key = f.key;
+    wrap.innerHTML = `<button class="flavor-swatch-btn" style="background:${f.color}" aria-label="${f.name}"></button><span>${f.name}</span>`;
+    wrap.addEventListener('click', ()=>{ state.flavor = f.key; render(); });
+    flavorRow.appendChild(wrap);
+  });
+
+  const packRow = document.getElementById('packRow');
+  packs.forEach(p=>{
+    const btn = document.createElement('button');
+    btn.className = 'pack-card';
+    btn.dataset.key = p.key;
+    const unit = (p.price / p.bottles).toFixed(2);
+    btn.innerHTML = `
+      <div class="pack-main">
+        <span class="pack-radio"></span>
+        <div><div class="pack-name">${p.label}</div><div class="pack-count">${p.bottles} bottles · $${unit}/bottle</div></div>
+      </div>
+      <div class="pack-price">$${p.price.toFixed(2)}</div>`;
+    btn.addEventListener('click', ()=>{ state.pack = p.key; render(); });
+    packRow.appendChild(btn);
+  });
+
+  const qtyVal = document.getElementById('qtyVal');
+  document.getElementById('qtyMinus').addEventListener('click', ()=>{ state.qty = Math.max(1, state.qty - 1); render(); });
+  document.getElementById('qtyPlus').addEventListener('click', ()=>{ state.qty = Math.min(20, state.qty + 1); render(); });
+
+  const heroImg = document.getElementById('heroImg');
+  const liveTitle = document.getElementById('liveTitle');
+  const livePrice = document.getElementById('livePrice');
+  const revFlavor = document.getElementById('revFlavor');
+  const revPack = document.getElementById('revPack');
+  const revShipping = document.getElementById('revShipping');
+  const revTotal = document.getElementById('revTotal');
+  const checkoutCta = document.getElementById('checkoutCta');
+  const miniDot = document.getElementById('miniDot');
+  const miniPrice = document.getElementById('miniPrice');
+  const bagDot = document.getElementById('bagDot');
+  const bagLabel = document.getElementById('bagLabel');
+  const bagTotal = document.getElementById('bagTotal');
+  const bagCta = document.getElementById('bagCta');
+
+  function money(n){ return '$' + n.toFixed(2); }
+
+  function render(){
+    const flavor = flavors.find(f=>f.key === state.flavor);
+    const pack = packs.find(p=>p.key === state.pack);
+
+    document.querySelectorAll('.flavor-opt').forEach(el=>el.classList.toggle('selected', el.dataset.key === state.flavor));
+    document.querySelectorAll('.pack-card').forEach(el=>el.classList.toggle('selected', el.dataset.key === state.pack));
+    qtyVal.textContent = state.qty;
+
+    if(heroImg.getAttribute('src') !== flavor.img){
+      heroImg.style.opacity = 0;
+      setTimeout(()=>{ heroImg.src = flavor.img; heroImg.alt = flavor.alt; heroImg.style.opacity = 1; }, 180);
+    }
+    liveTitle.textContent = `Oréva ${flavor.name}`;
+
+    const subtotal = pack.price * state.qty;
+    const shipping = subtotal >= 60 ? 0 : 6;
+    const total = subtotal + shipping;
+
+    livePrice.textContent = `From ${money(pack.price)}`;
+    revFlavor.textContent = flavor.name;
+    revPack.textContent = `${pack.label} · ${state.qty} case${state.qty > 1 ? 's' : ''}`;
+    revShipping.textContent = shipping === 0 ? 'Free' : money(shipping);
+    revTotal.textContent = money(total);
+
+    miniDot.style.background = flavor.color;
+    miniPrice.textContent = money(total);
+    bagDot.style.background = flavor.color;
+    bagLabel.textContent = `${flavor.name} · ${pack.label} × ${state.qty}`;
+    bagTotal.textContent = money(total);
+
+    const query = `?flavor=${state.flavor}&pack=${state.pack}&qty=${state.qty}`;
+    checkoutCta.href = '/product/checkout' + query;
+    bagCta.href = '/product/checkout' + query;
+  }
+  render();
+
+  // Reveal mini-bag in nav + sticky bottom bar once scrolled past the header
+  const miniBag = document.getElementById('miniBag');
+  const bagBar = document.getElementById('bagBar');
+  const sentinel = document.querySelector('.buy-image-wrap');
+  const io = new IntersectionObserver(([entry])=>{
+    const past = !entry.isIntersecting && entry.boundingClientRect.top < 0;
+    miniBag.classList.toggle('visible', past);
+    bagBar.classList.toggle('visible', past);
+  }, {threshold:0});
+  io.observe(sentinel);
+</script>
+
+</body>
+</html>

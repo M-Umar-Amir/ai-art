@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout — Oréva</title>
+<link rel="icon" type="image/x-icon" href="/favicon.ico">
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png">
+<style>
+  :root{
+    --ink:#0a0a0a;
+    --ink-soft:#1c1a17;
+    --cream:#f7f4ee;
+    --cream-2:#efe9df;
+    --amber:#c9822b;
+    --amber-bright:#e8580c;
+    --muted:#8a8578;
+    --line:#ddd6c9;
+    --error:#b3261e;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","SF Pro Text","Helvetica Neue",Helvetica,Arial,sans-serif;
+    background:var(--cream);color:var(--ink-soft);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:inherit;text-decoration:none;}
+  img{display:block;max-width:100%;}
+  button{font:inherit;cursor:pointer;}
+  input,select{font:inherit;}
+
+  /* ---------- NAV (Apple checkout style: minimal, secure) ---------- */
+  nav{
+    height:52px;background:#fff;border-bottom:1px solid var(--line);
+    display:flex;align-items:center;
+  }
+  .nav-inner{
+    width:100%;max-width:1120px;margin:0 auto;padding:0 22px;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .nav-back{font-size:13px;color:var(--ink-soft);opacity:.85;}
+  .nav-back:hover{opacity:1;}
+  .nav-brand{
+    display:flex;align-items:center;gap:8px;
+    font-size:14px;font-weight:600;letter-spacing:.2em;color:var(--ink);
+    position:absolute;left:50%;transform:translateX(-50%);
+  }
+  .nav-brand svg{width:16px;height:16px;}
+  .nav-brand svg path{fill:var(--ink);}
+  .nav-secure{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--muted);}
+
+  /* ---------- LAYOUT ---------- */
+  .checkout-wrap{
+    max-width:1120px;margin:0 auto;padding:44px 22px 100px;
+    display:grid;grid-template-columns:1fr 380px;gap:48px;align-items:start;
+  }
+  h1.co-title{font-size:28px;font-weight:700;letter-spacing:-0.01em;margin-bottom:32px;}
+
+  .co-section{
+    background:#fff;border:1px solid var(--line);border-radius:20px;
+    padding:26px 26px 30px;margin-bottom:22px;
+  }
+  .co-section h2{font-size:16px;font-weight:600;margin-bottom:18px;letter-spacing:-0.005em;}
+  .co-section h2 .step-n{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;
+    font-size:11px;font-weight:600;margin-right:8px;
+  }
+
+  .field-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .field{margin-bottom:14px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{display:block;font-size:12px;font-weight:500;color:var(--muted);margin-bottom:6px;}
+  .field input, .field select{
+    width:100%;padding:12px 14px;border-radius:10px;border:1px solid var(--line);
+    background:var(--cream);font-size:14px;color:var(--ink);
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .field input:focus, .field select:focus{
+    outline:none;border-color:var(--ink);background:#fff;
+  }
+
+  .delivery-opt, .pay-opt{
+    display:flex;align-items:center;gap:12px;
+    padding:14px 16px;border-radius:12px;border:1.5px solid var(--line);
+    margin-bottom:10px;cursor:pointer;transition:border-color .2s ease;
+  }
+  .delivery-opt:hover, .pay-opt:hover{border-color:#c9c2b2;}
+  .delivery-opt input, .pay-opt input{accent-color:var(--ink);width:16px;height:16px;flex:none;}
+  .delivery-opt .d-main{flex:1;display:flex;justify-content:space-between;font-size:14px;}
+  .delivery-opt .d-sub{font-size:12px;color:var(--muted);}
+  .pay-opt span{font-size:14px;font-weight:500;}
+
+  .card-fields{margin-top:16px;padding-top:16px;border-top:1px solid var(--line);}
+
+  .co-disclaimer{
+    font-size:12px;color:var(--muted);background:var(--cream-2);
+    border-radius:12px;padding:12px 16px;margin-top:6px;line-height:1.5;
+  }
+
+  /* ---------- ORDER SUMMARY ---------- */
+  .order-summary{
+    position:sticky;top:22px;
+    background:#fff;border:1px solid var(--line);border-radius:20px;padding:24px;
+    box-shadow:0 30px 60px -34px rgba(0,0,0,.25);
+  }
+  .os-product{display:flex;gap:14px;margin-bottom:18px;}
+  .os-thumb{width:64px;height:80px;border-radius:12px;overflow:hidden;background:var(--ink);flex:none;}
+  .os-thumb img{width:100%;height:100%;object-fit:cover;}
+  .os-info .os-name{font-size:15px;font-weight:600;display:flex;align-items:center;gap:7px;}
+  .os-info .os-dot{width:9px;height:9px;border-radius:50%;}
+  .os-info .os-meta{font-size:13px;color:var(--muted);margin-top:3px;}
+
+  .os-rows{border-top:1px solid var(--line);padding-top:16px;margin-bottom:20px;}
+  .os-rows .row{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);padding:5px 0;}
+  .os-rows .row.total{border-top:1px solid var(--line);margin-top:8px;padding-top:12px;font-size:17px;font-weight:700;color:var(--ink);}
+
+  .place-order-btn{
+    position:relative;overflow:hidden;display:block;width:100%;text-align:center;
+    background:var(--ink);color:#fff;padding:15px 20px;border-radius:980px;border:none;
+    font-size:16px;font-weight:500;transition:transform .2s ease, box-shadow .2s ease;
+  }
+  .place-order-btn::after{
+    content:"";position:absolute;inset:0;
+    background:linear-gradient(120deg, transparent 30%, rgba(255,255,255,.35) 45%, transparent 60%);
+    transform:translateX(-120%);
+  }
+  .place-order-btn:hover::after{transform:translateX(120%);transition:transform .7s ease;}
+  .place-order-btn:hover{transform:translateY(-2px);box-shadow:0 14px 26px -12px rgba(0,0,0,.4);}
+  .os-lock{font-size:11px;color:var(--muted);text-align:center;margin-top:12px;}
+
+  /* ---------- CONFIRMATION ---------- */
+  #confirmPanel{
+    display:none;max-width:520px;margin:80px auto;text-align:center;padding:0 22px 100px;
+  }
+  #confirmPanel .check{
+    width:64px;height:64px;border-radius:50%;background:#1c7a45;color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 22px;
+  }
+  #confirmPanel h1{font-size:28px;font-weight:700;margin-bottom:10px;}
+  #confirmPanel p{font-size:15px;color:var(--muted);line-height:1.5;margin-bottom:26px;}
+  #confirmPanel .order-no{font-size:13px;color:var(--ink-soft);background:var(--cream-2);border-radius:10px;padding:10px 16px;display:inline-block;margin-bottom:26px;}
+  #confirmPanel a.back-link{
+    display:inline-block;background:var(--ink);color:#fff;padding:13px 26px;border-radius:980px;font-size:15px;
+  }
+
+  @media (max-width:860px){
+    .checkout-wrap{grid-template-columns:1fr;}
+    .order-summary{position:relative;top:0;order:-1;}
+    .field-grid{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a class="nav-back" href="/product/buy">‹ Back to Bag</a>
+    <a class="nav-brand" href="/product#overview">
+      <svg viewBox="0 0 100 100" aria-hidden="true">
+        <path d="M50 14a36 36 0 1 0 25.5 61.5 4 4 0 0 0-5.7-5.6A28 28 0 1 1 78 50a4 4 0 0 0 8 0A36 36 0 0 0 50 14z"/>
+        <path d="M78 50c0 8-3 14-8 19-3 3-2 8 2 9 7 2 14-3 17-11 2-6 2-12-1-18-2-4-10-3-10 1z"/>
+      </svg>
+      ORÉVA
+    </a>
+    <div class="nav-secure">🔒 Secure Checkout</div>
+  </div>
+</nav>
+
+<form id="checkoutForm">
+<div class="checkout-wrap" id="checkoutWrap">
+  <div class="co-main">
+    <h1 class="co-title">Checkout</h1>
+
+    <div class="co-section">
+      <h2><span class="step-n">1</span>Contact Information</h2>
+      <div class="field-grid">
+        <div class="field full"><label for="email">Email</label><input id="email" type="email" placeholder="you@example.com" required></div>
+        <div class="field full"><label for="phone">Phone</label><input id="phone" type="tel" placeholder="+1 (555) 000-0000" required></div>
+      </div>
+    </div>
+
+    <div class="co-section">
+      <h2><span class="step-n">2</span>Shipping Address</h2>
+      <div class="field-grid">
+        <div class="field full"><label for="fullname">Full Name</label><input id="fullname" type="text" placeholder="Jane Appleseed" required></div>
+        <div class="field full"><label for="addr1">Address Line 1</label><input id="addr1" type="text" placeholder="Street address" required></div>
+        <div class="field full"><label for="addr2">Address Line 2 (optional)</label><input id="addr2" type="text" placeholder="Apartment, suite, etc."></div>
+        <div class="field"><label for="city">City</label><input id="city" type="text" required></div>
+        <div class="field"><label for="state">State / Province</label><input id="state" type="text" required></div>
+        <div class="field"><label for="zip">ZIP / Postal Code</label><input id="zip" type="text" required></div>
+        <div class="field">
+          <label for="country">Country</label>
+          <select id="country" required>
+            <option>United States</option>
+            <option>Pakistan</option>
+            <option>United Kingdom</option>
+            <option>Canada</option>
+            <option>Other</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="co-section">
+      <h2><span class="step-n">3</span>Delivery Method</h2>
+      <label class="delivery-opt">
+        <input type="radio" name="delivery" value="standard" checked>
+        <div class="d-main"><span>Standard Shipping <span class="d-sub">5–7 business days</span></span><span id="stdPrice">Free</span></div>
+      </label>
+      <label class="delivery-opt">
+        <input type="radio" name="delivery" value="express">
+        <div class="d-main"><span>Express Shipping <span class="d-sub">2–3 business days</span></span><span>$12.00</span></div>
+      </label>
+    </div>
+
+    <div class="co-section">
+      <h2><span class="step-n">4</span>Payment</h2>
+      <label class="pay-opt"><input type="radio" name="payment" checked><span>Credit / Debit Card</span></label>
+      <div class="card-fields">
+        <div class="field-grid">
+          <div class="field full"><label for="cardName">Name on Card</label><input id="cardName" type="text" autocomplete="off" required></div>
+          <div class="field full"><label for="cardNumber">Card Number</label><input id="cardNumber" type="text" inputmode="numeric" maxlength="19" placeholder="•••• •••• •••• ••••" autocomplete="off" required></div>
+          <div class="field"><label for="cardExpiry">Expiry (MM/YY)</label><input id="cardExpiry" type="text" maxlength="5" placeholder="MM/YY" autocomplete="off" required></div>
+          <div class="field"><label for="cardCvc">CVC</label><input id="cardCvc" type="text" inputmode="numeric" maxlength="4" placeholder="•••" autocomplete="off" required></div>
+        </div>
+      </div>
+      <p class="co-disclaimer">This is a design demo — no real payment is processed and no data leaves your browser.</p>
+    </div>
+  </div>
+
+  <aside class="order-summary">
+    <div class="os-product">
+      <div class="os-thumb"><img id="osImg" src="/assets/projects/oreva/img/02.webp" alt=""></div>
+      <div class="os-info">
+        <div class="os-name"><span class="os-dot" id="osDot"></span><span id="osFlavor">Citrus</span></div>
+        <div class="os-meta" id="osMeta">6-Pack · Qty 1</div>
+      </div>
+    </div>
+    <div class="os-rows">
+      <div class="row"><span>Subtotal</span><span id="osSubtotal">$28.00</span></div>
+      <div class="row"><span>Shipping</span><span id="osShipping">Free</span></div>
+      <div class="row"><span>Estimated Tax</span><span id="osTax">$2.24</span></div>
+      <div class="row total"><span>Total</span><span id="osTotal">$30.24</span></div>
+    </div>
+    <button type="submit" class="place-order-btn">Place Order</button>
+    <p class="os-lock">🔒 Your information is only used for this demo preview.</p>
+  </aside>
+</div>
+</form>
+
+<div id="confirmPanel">
+  <div class="check">✓</div>
+  <h1>Order Confirmed</h1>
+  <p>Thanks for trying the Oréva demo checkout. This is a design mockup — no order was actually placed and no payment was processed.</p>
+  <div class="order-no" id="orderNo">Order #ORV-000000</div>
+  <br>
+  <a class="back-link" href="/product#overview">Continue Browsing</a>
+</div>
+
+<script>
+  const flavors = {
+    citrus:{name:'Citrus', color:'#e8b923', img:'/assets/projects/oreva/img/02.webp'},
+    lemon:{name:'Lemon', color:'#f4d13a', img:'/assets/projects/oreva/img/01.webp'},
+    blood:{name:'Blood Orange', color:'#a3221b', img:'/assets/projects/oreva/img/09.webp'},
+    grapefruit:{name:'Grapefruit', color:'#ef7f8f', img:'/assets/projects/oreva/img/05.webp'},
+    lime:{name:'Lime', color:'#a9c23f', img:'/assets/projects/oreva/img/07.webp'},
+  };
+  const packPrices = { '6':28, '12':52, '24':96 };
+  const packLabels = { '6':'6-Pack', '12':'12-Pack', '24':'24-Pack' };
+
+  const params = new URLSearchParams(window.location.search);
+  const flavorKey = flavors[params.get('flavor')] ? params.get('flavor') : 'citrus';
+  const packKey = packPrices[params.get('pack')] ? params.get('pack') : '6';
+  const qty = Math.max(1, parseInt(params.get('qty'), 10) || 1);
+
+  const flavor = flavors[flavorKey];
+  const subtotal = packPrices[packKey] * qty;
+
+  function money(n){ return '$' + n.toFixed(2); }
+
+  document.getElementById('osImg').src = flavor.img;
+  document.getElementById('osImg').alt = 'Oréva ' + flavor.name + ' bottle';
+  document.getElementById('osDot').style.background = flavor.color;
+  document.getElementById('osFlavor').textContent = flavor.name;
+  document.getElementById('osMeta').textContent = `${packLabels[packKey]} · Qty ${qty}`;
+  document.getElementById('osSubtotal').textContent = money(subtotal);
+
+  function recalc(){
+    const express = document.querySelector('input[name="delivery"]:checked').value === 'express';
+    const shipping = express ? 12 : (subtotal >= 60 ? 0 : 6);
+    const tax = subtotal * 0.08;
+    const total = subtotal + shipping + tax;
+    document.getElementById('osShipping').textContent = shipping === 0 ? 'Free' : money(shipping);
+    document.getElementById('osTax').textContent = money(tax);
+    document.getElementById('osTotal').textContent = money(total);
+  }
+  document.querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener('change', recalc));
+  recalc();
+
+  document.getElementById('checkoutForm').addEventListener('submit', (e)=>{
+    e.preventDefault();
+    const orderNo = 'ORV-' + Math.floor(100000 + Math.random()*899999);
+    document.getElementById('orderNo').textContent = 'Order #' + orderNo;
+    document.getElementById('checkoutWrap').style.display = 'none';
+    document.getElementById('confirmPanel').style.display = 'block';
+    window.scrollTo({top:0, behavior:'smooth'});
+  });
+</script>
+
+</body>
+</html>
