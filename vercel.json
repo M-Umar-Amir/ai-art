@@ -6,6 +6,7 @@
   ],
   "routes": [
     { "handle": "filesystem" },
+    { "src": "/product", "dest": "/product.html" },
     { "src": "/(.*)", "dest": "/index.html" }
   ]
 }
