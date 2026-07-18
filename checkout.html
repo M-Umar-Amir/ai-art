@@ -7,7 +7,7 @@
 <link rel="icon" type="image/x-icon" href="/favicon-oreva.ico">
 <link rel="icon" type="image/svg+xml" href="/favicon-oreva.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-oreva-192.png">
-<script src="https://unpkg.com/@sfpy/checkout-components@0.1.0/dist/sfpy-checkout.js"></script>
+<script src="https://unpkg.com/@sfpy/checkout-components@1.0.1/dist/sfpy-checkout.js"></script>
 <style>
   :root{
     --ink:#0a0a0a;
@@ -309,38 +309,29 @@
     placeOrderBtn.textContent = 'Preparing payment…';
 
     try {
-      const [configRes, orderRes] = await Promise.all([
-        fetch('/api/config'),
-        fetch('/api/create-order', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ pack: packKey, qty, delivery })
-        })
-      ]);
-      if (!configRes.ok) throw new Error('Could not load Safepay config');
+      const orderRes = await fetch('/api/create-order', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pack: packKey, qty, delivery })
+      });
       if (!orderRes.ok) throw new Error('Could not create order');
 
-      const { publicKey } = await configRes.json();
       const order = await orderRes.json();
 
-      if (order.trackerError) {
-        console.warn('[safepay] session.setup (secret key) did not complete:', order.trackerError);
-      } else {
-        console.log('[safepay] session.setup (secret key) succeeded:', order.tracker);
+      if (order.trackerError || !order.tracker) {
+        throw new Error('Could not start Safepay session: ' + (order.trackerError || 'unknown error'));
       }
+      console.log('[safepay] session.setup (secret key) succeeded:', order.tracker);
 
       placeOrderBtn.style.display = 'none';
       const container = document.getElementById('safepayButtonContainer');
       container.style.display = 'block';
 
-      safepay.Button({
+      safepay.Checkout({
         env: 'sandbox',
-        client: { sandbox: publicKey },
-        style: { mode: 'light', size: 'large', variant: 'primary' },
-        orderId: order.orderId,
-        source: 'website',
-        payment: { currency: order.currency, amount: order.amount },
-        onPayment: async function(data){
+        tracker: order.tracker.session.tracker.token,
+        tbt: order.tracker.token,
+        onSuccess: async function(data){
           await fetch('/api/mark-paid', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
