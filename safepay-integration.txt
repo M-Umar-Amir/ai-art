@@ -1,0 +1,153 @@
+SAFEPAY INTEGRATION — PROCESS NOTES
+For: Oreva checkout page (checkout.html / /product/checkout)
+Site: static Vercel deployment (@vercel/static, see vercel.json) — currently no backend/api folder.
+
+Safepay pricing recap: no setup/monthly fee. 2.9% + Rs 30 per successful domestic
+transaction (3.2% + Rs 30 international). Pay-per-transaction only.
+
+------------------------------------------------------------
+WHY A BACKEND IS REQUIRED
+------------------------------------------------------------
+checkout.html today is 100% client-side (see script at the bottom of the file) —
+it fakes a confirmation screen and never talks to a server. Safepay's secret key
+must never be exposed in frontend JS, so a real integration needs at least one
+server-side endpoint. This repo currently has no /api folder or serverless
+functions — that has to be added.
+
+------------------------------------------------------------
+STEP 1 — ACCOUNTS & KEYS
+------------------------------------------------------------
+1. Create a sandbox account: https://sandbox.api.getsafepay.com/
+   (email, password, store name)
+2. Create a separate production account: https://www.getsafepay.com/
+3. Grab keys:
+   - Sandbox: dashboard > Developers > API (public key + secret key)
+   - Production: dashboard > Account > Developers (public key + secret key)
+4. Store secret keys as Vercel environment variables (never in client code):
+   - SAFEPAY_SECRET_KEY
+   - SAFEPAY_PUBLIC_KEY (can be exposed to frontend, it's public by design)
+   Use `vercel env add` or the Vercel dashboard, per environment
+   (Development / Preview / Production).
+
+------------------------------------------------------------
+STEP 2 — ADD A SERVERLESS BACKEND TO THIS STATIC SITE
+------------------------------------------------------------
+Vercel supports adding an /api directory alongside @vercel/static builds
+without switching the whole project to a framework. Needed:
+
+  /api/create-session.js   -> creates a Safepay payment session (Tracker)
+  /api/verify-payment.js   -> (optional) server-side verification endpoint
+  /api/webhook.js          -> receives async payment status from Safepay
+
+Update vercel.json builds array to also build the api/*.js files
+(Vercel auto-detects /api as Node serverless functions in most setups —
+confirm this still works alongside the existing "@vercel/static" builds entry,
+since this project uses the older explicit `builds` config rather than
+zero-config).
+
+Install the Safepay Node SDK for these functions:
+  npm install @sfpy/node-core
+
+------------------------------------------------------------
+STEP 3 — CREATE PAYMENT SESSION (BACKEND, before "Place Order")
+------------------------------------------------------------
+Server-side (api/create-session.js), using the secret key:
+
+  const safepay = require('@sfpy/node-core')(process.env.SAFEPAY_SECRET_KEY, {
+    authType: 'secret',
+    host: 'https://sandbox.api.getsafepay.com' // switch to production host later
+  });
+
+  const session = await safepay.payments.session.setup({
+    merchant_api_key: process.env.SAFEPAY_PUBLIC_KEY,
+    intent: 'CYBERSOURCE',
+    mode: 'payment',
+    entry_mode: 'raw',
+    currency: 'PKR',
+    amount: totalInPaisaOrCents, // computed server-side from cart, NOT trusted from client
+    metadata: { order_id: generatedOrderId }
+  });
+
+Also generate a short-lived client token for the frontend call:
+  const passport = await safepay.auth.passport.create();
+  // token expires in 1 hour
+
+Return { session, passport } to the frontend as JSON.
+
+IMPORTANT: recompute price/total on the backend from known product data —
+do not trust the subtotal/total the current checkout.html computes purely in
+the browser (flavor/pack/qty come from URL params today, which is fine for the
+demo but not safe to charge against directly).
+
+------------------------------------------------------------
+STEP 4 — FRONTEND CHANGES TO checkout.html
+------------------------------------------------------------
+Replace the current fake submit handler (around line 302, the
+`checkoutForm` submit listener that just shows #confirmPanel) with:
+
+1. On "Place Order" click: POST cart details (flavor, pack, qty, delivery
+   method) to /api/create-session.
+2. Receive back the session + passport token.
+3. Load Safepay's checkout SDK on the page:
+     npm i @sfpy/checkout-components  (or load their hosted script per docs)
+4. Initialize the Safepay Checkout component/button with the session token,
+   let it collect card details and run 3DS/bank redirect.
+5. On success callback from the SDK, redirect to a real confirmation page
+   (or show #confirmPanel) — but treat this client-side "success" as
+   provisional only; the webhook is the source of truth (see Step 5).
+
+------------------------------------------------------------
+STEP 5 — WEBHOOK (SOURCE OF TRUTH FOR PAYMENT STATUS)
+------------------------------------------------------------
+Configure a webhook URL in the Safepay dashboard pointing to:
+  https://<your-domain>/api/webhook
+
+/api/webhook.js should:
+  - Verify the webhook signature (per Safepay docs) before trusting payload.
+  - On a successful payment event, mark the order paid in your own storage
+    (this repo has no database/order storage yet — would need one, e.g.
+    a simple KV store or spreadsheet, since this is currently a static demo
+    with no backend data layer at all).
+  - Never rely solely on the browser redirect to confirm payment — customers
+    can close the tab mid-flow.
+
+------------------------------------------------------------
+STEP 6 — TESTING
+------------------------------------------------------------
+1. Point everything at the sandbox host + sandbox keys.
+2. Use Safepay's documented dummy/test card numbers to run through the full
+   flow: create session -> checkout SDK -> 3DS -> webhook -> order marked paid.
+3. Confirm sandbox dashboard shows matching order records.
+
+------------------------------------------------------------
+STEP 7 — GO LIVE
+------------------------------------------------------------
+1. Complete the Merchant Onboarding Form in the production Safepay account.
+2. Wait for approval (Safepay targets ~48 hours).
+3. Swap SAFEPAY_SECRET_KEY / SAFEPAY_PUBLIC_KEY env vars to production values
+   in Vercel, and swap host from sandbox.api.getsafepay.com to the production
+   API host.
+4. Re-test the full flow once with a small real transaction before announcing.
+
+------------------------------------------------------------
+OPEN GAPS FOR THIS REPO SPECIFICALLY (not yet solved by this doc)
+------------------------------------------------------------
+- No /api folder exists yet — needs to be created and vercel.json builds
+  config extended.
+- No order/data storage exists — currently checkout.html has no backend
+  persistence at all (order numbers are just random client-side strings).
+- Pricing is currently computed entirely client-side from URL query params
+  (flavor/pack/qty) — must be revalidated server-side before charging.
+- checkout.html explicitly markets itself as "a design demo" — decide whether
+  this becomes a real store or the integration lives on a different/new page.
+
+------------------------------------------------------------
+REFERENCES
+------------------------------------------------------------
+- Safepay pricing: https://getsafepay.pk/pricing
+- Fee breakdown: https://safepay.helpscoutdocs.com/article/131-safepay-fee-breakdown
+- Step-by-step account setup: https://safepay.helpscoutdocs.com/article/50-starting-with-safepay-step-by-step-guide
+- Advanced/custom checkout integration guide: https://safepay-docs.netlify.app/build-your-integration/advanced-checkout/introduction/
+- Full API reference: https://apidocs.getsafepay.com/
+- Checkout components (npm/GitHub): https://github.com/getsafepay/safepay-checkout-components
+- Integration walkthrough (blog): https://medium.com/safepay/safepay-checkout-integration-guide-78831226ccf8

@@ -5,8 +5,6 @@
 /Perfume
 /ep
 node_modules/
-package.json
-package-lock.json
 create-showreel.js
 make_showreel.py
 make_showreel_h264.js
@@ -30,4 +28,18 @@ archive-1.html
 /manifests
 /assets/from TAYA
 _pw_*.js
+
+# agentic systems — secrets, local state, generated media
+agents/**/.env
+agents/**/*.db
+agents/**/token.json
+agents/**/client_secret*.json
+agents/**/service_account*.json
+agents/**/credentials*.json
+agents/**/logs/
+agents/**/output/
+agents/**/__pycache__/
+agents/**/*.pyc
+agents/**/venv/
+agents/**/.venv/
 

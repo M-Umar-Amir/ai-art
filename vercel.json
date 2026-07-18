@@ -1,14 +1,10 @@
 {
   "version": 2,
   "name": "epical-studio",
-  "builds": [
-    { "src": "**", "use": "@vercel/static" }
-  ],
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/product", "dest": "/product.html" },
-    { "src": "/product/buy", "dest": "/buy.html" },
-    { "src": "/product/checkout", "dest": "/checkout.html" },
-    { "src": "/(.*)", "dest": "/index.html" }
+  "rewrites": [
+    { "source": "/product", "destination": "/product.html" },
+    { "source": "/product/buy", "destination": "/buy.html" },
+    { "source": "/product/checkout", "destination": "/checkout.html" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

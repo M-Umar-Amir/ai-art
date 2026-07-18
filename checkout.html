@@ -7,6 +7,7 @@
 <link rel="icon" type="image/x-icon" href="/favicon-oreva.ico">
 <link rel="icon" type="image/svg+xml" href="/favicon-oreva.svg">
 <link rel="icon" type="image/png" sizes="192x192" href="/favicon-oreva-192.png">
+<script src="https://unpkg.com/@sfpy/checkout-components@0.1.0/dist/sfpy-checkout.js"></script>
 <style>
   :root{
     --ink:#0a0a0a;
@@ -217,16 +218,8 @@
 
     <div class="co-section">
       <h2><span class="step-n">4</span>Payment</h2>
-      <label class="pay-opt"><input type="radio" name="payment" checked><span>Credit / Debit Card</span></label>
-      <div class="card-fields">
-        <div class="field-grid">
-          <div class="field full"><label for="cardName">Name on Card</label><input id="cardName" type="text" autocomplete="off" required></div>
-          <div class="field full"><label for="cardNumber">Card Number</label><input id="cardNumber" type="text" inputmode="numeric" maxlength="19" placeholder="•••• •••• •••• ••••" autocomplete="off" required></div>
-          <div class="field"><label for="cardExpiry">Expiry (MM/YY)</label><input id="cardExpiry" type="text" maxlength="5" placeholder="MM/YY" autocomplete="off" required></div>
-          <div class="field"><label for="cardCvc">CVC</label><input id="cardCvc" type="text" inputmode="numeric" maxlength="4" placeholder="•••" autocomplete="off" required></div>
-        </div>
-      </div>
-      <p class="co-disclaimer">This is a design demo — no real payment is processed and no data leaves your browser.</p>
+      <label class="pay-opt"><input type="radio" name="payment" checked><span>Credit / Debit Card, JazzCash & Easypaisa (via Safepay)</span></label>
+      <p class="co-disclaimer">Click "Place Order" below, then complete payment in the Safepay window that opens. This is Safepay's sandbox — use their test card numbers, no real charge occurs.</p>
     </div>
   </div>
 
@@ -244,8 +237,9 @@
       <div class="row"><span>Estimated Tax</span><span id="osTax">$2.24</span></div>
       <div class="row total"><span>Total</span><span id="osTotal">$30.24</span></div>
     </div>
-    <button type="submit" class="place-order-btn">Place Order</button>
-    <p class="os-lock">🔒 Your information is only used for this demo preview.</p>
+    <button type="submit" id="placeOrderBtn" class="place-order-btn">Place Order</button>
+    <div id="safepayButtonContainer" style="display:none;margin-top:4px;"></div>
+    <p class="os-lock">🔒 Payments are processed by Safepay (sandbox).</p>
   </aside>
 </div>
 </form>
@@ -299,13 +293,73 @@
   document.querySelectorAll('input[name="delivery"]').forEach(r=>r.addEventListener('change', recalc));
   recalc();
 
-  document.getElementById('checkoutForm').addEventListener('submit', (e)=>{
-    e.preventDefault();
-    const orderNo = 'ORV-' + Math.floor(100000 + Math.random()*899999);
-    document.getElementById('orderNo').textContent = 'Order #' + orderNo;
+  function showConfirmation(orderId){
+    document.getElementById('orderNo').textContent = 'Order #' + orderId;
     document.getElementById('checkoutWrap').style.display = 'none';
     document.getElementById('confirmPanel').style.display = 'block';
     window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  document.getElementById('checkoutForm').addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const placeOrderBtn = document.getElementById('placeOrderBtn');
+    const delivery = document.querySelector('input[name="delivery"]:checked').value;
+
+    placeOrderBtn.disabled = true;
+    placeOrderBtn.textContent = 'Preparing payment…';
+
+    try {
+      const [configRes, orderRes] = await Promise.all([
+        fetch('/api/config'),
+        fetch('/api/create-order', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ pack: packKey, qty, delivery })
+        })
+      ]);
+      if (!configRes.ok) throw new Error('Could not load Safepay config');
+      if (!orderRes.ok) throw new Error('Could not create order');
+
+      const { publicKey } = await configRes.json();
+      const order = await orderRes.json();
+
+      if (order.trackerError) {
+        console.warn('[safepay] session.setup (secret key) did not complete:', order.trackerError);
+      } else {
+        console.log('[safepay] session.setup (secret key) succeeded:', order.tracker);
+      }
+
+      placeOrderBtn.style.display = 'none';
+      const container = document.getElementById('safepayButtonContainer');
+      container.style.display = 'block';
+
+      safepay.Button({
+        env: 'sandbox',
+        client: { sandbox: publicKey },
+        style: { mode: 'light', size: 'large', variant: 'primary' },
+        orderId: order.orderId,
+        source: 'website',
+        payment: { currency: order.currency, amount: order.amount },
+        onPayment: async function(data){
+          await fetch('/api/mark-paid', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: order.orderId, flavor: flavorKey, pack: packKey, qty, delivery, amount: order.amount, safepay: data })
+          });
+          showConfirmation(order.orderId);
+        },
+        onCancel: function(){
+          container.style.display = 'none';
+          placeOrderBtn.style.display = 'block';
+          placeOrderBtn.disabled = false;
+          placeOrderBtn.textContent = 'Place Order';
+        }
+      }).render('#safepayButtonContainer');
+    } catch (err) {
+      alert('Payment setup failed: ' + err.message);
+      placeOrderBtn.disabled = false;
+      placeOrderBtn.textContent = 'Place Order';
+    }
   });
 </script>
 
