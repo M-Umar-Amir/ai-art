@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IGEC Global — Study in Australia | Education &amp; Visa Consultants</title>
+<meta name="description" content="IGEC Global helps students study in Australia — university selection, applications, scholarships, student visas and pre-departure support from an education consultancy with 30+ years of experience.">
+<meta name="theme-color" content="#0B2A4A">
+<meta property="og:title" content="IGEC Global — Study in Australia">
+<meta property="og:description" content="University admissions, scholarships and student visa guidance for Australia, from an education consultancy with 30+ years of experience.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/logo-transparent.png">
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --navy-900:#081B31;
+    --navy-800:#0B2A4A;
+    --navy-700:#123A63;
+    --navy-600:#1E5089;
+    --orange-500:#F6821F;
+    --orange-600:#D96C0A;
+    --orange-text:#B85200;
+    --ink:#101828;
+    --muted:#5B6472;
+    --line:#E4E8EE;
+    --bg-soft:#F5F7FB;
+    --white:#FFFFFF;
+    --radius-lg:22px;
+    --radius-md:14px;
+    --radius-sm:10px;
+    --shadow-sm:0 2px 10px rgba(11,42,74,.08);
+    --shadow-md:0 10px 30px rgba(11,42,74,.12);
+    --shadow-lg:0 24px 60px rgba(11,42,74,.18);
+    --container:1200px;
+    --font:'Plus Jakarta Sans', system-ui, -apple-system, Segoe UI, sans-serif;
+  }
+
+  *,*::before,*::after{box-sizing:border-box;}
+  html{scroll-behavior:smooth; -webkit-text-size-adjust:100%;}
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto;}
+    *,*::before,*::after{animation-duration:.001ms !important; animation-iteration-count:1 !important; transition-duration:.001ms !important; scroll-behavior:auto !important;}
+  }
+  body{
+    margin:0;
+    font-family:var(--font);
+    color:var(--ink);
+    background:var(--white);
+    line-height:1.55;
+    -webkit-font-smoothing:antialiased;
+  }
+  img{max-width:100%; display:block;}
+  a{color:inherit;}
+  h1,h2,h3,h4{line-height:1.15; margin:0 0 .5em; font-weight:800; letter-spacing:-.01em;}
+  p{margin:0 0 1em; color:var(--muted);}
+  ul{margin:0; padding:0; list-style:none;}
+  button{font-family:inherit;}
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, summary:focus-visible{
+    outline:3px solid var(--orange-500);
+    outline-offset:3px;
+    border-radius:4px;
+  }
+
+  .skip-link{
+    position:absolute; left:12px; top:-60px;
+    background:var(--navy-900); color:var(--white);
+    padding:12px 18px; border-radius:8px; z-index:1000;
+    font-weight:700; transition:top .2s ease;
+  }
+  .skip-link:focus{ top:12px; }
+
+  .container{ max-width:var(--container); margin:0 auto; padding:0 24px; }
+  .visually-hidden{
+    position:absolute !important; width:1px; height:1px; padding:0; margin:-1px;
+    overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
+  }
+
+  section{ padding:88px 0; }
+  @media (max-width:768px){ section{ padding:56px 0; } }
+
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--orange-text); margin-bottom:14px;
+  }
+  .eyebrow::before{ content:""; width:22px; height:3px; background:var(--orange-500); border-radius:2px; display:inline-block; }
+
+  .section-head{ max-width:680px; margin:0 0 48px; }
+  .section-head.center{ margin-inline:auto; text-align:center; }
+  .section-head h2{ font-size:clamp(28px,4vw,38px); color:var(--navy-900); }
+  .section-head p{ font-size:17px; }
+
+  /* ---------- Buttons ---------- */
+  .btn{
+    display:inline-flex; align-items:center; justify-content:center; gap:8px;
+    padding:14px 26px; border-radius:999px; font-weight:700; font-size:15px;
+    text-decoration:none; cursor:pointer; border:2px solid transparent;
+    min-height:48px; transition:transform .15s ease, box-shadow .15s ease, background .15s ease, color .15s ease;
+    white-space:nowrap;
+  }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn-primary{ background:var(--orange-500); color:var(--navy-900); box-shadow:var(--shadow-sm); }
+  .btn-primary:hover{ background:var(--orange-600); box-shadow:var(--shadow-md); }
+  .btn-navy{ background:var(--navy-800); color:var(--white); }
+  .btn-navy:hover{ background:var(--navy-900); box-shadow:var(--shadow-md); }
+  .btn-outline-light{ background:transparent; color:var(--white); border-color:rgba(255,255,255,.55); }
+  .btn-outline-light:hover{ background:rgba(255,255,255,.12); border-color:#fff; }
+  .btn-outline-navy{ background:transparent; color:var(--navy-800); border-color:var(--navy-800); }
+  .btn-outline-navy:hover{ background:var(--navy-800); color:#fff; }
+  .btn-block{ width:100%; }
+
+  /* ---------- Header ---------- */
+  header.site-header{
+    position:sticky; top:0; z-index:500;
+    background:rgba(255,255,255,.98);
+    border-bottom:1px solid var(--line);
+  }
+  .nav-row{ display:flex; align-items:center; justify-content:space-between; gap:20px; padding:12px 24px; }
+  .brand{ display:flex; align-items:center; gap:10px; text-decoration:none; }
+  .brand img{ height:42px; width:auto; }
+  .brand-text{ font-weight:800; color:var(--navy-900); font-size:15px; line-height:1.15; }
+  .brand-text small{ display:block; font-weight:600; color:var(--muted); font-size:10.5px; letter-spacing:.03em; }
+
+  nav#primary-nav{ display:flex; align-items:center; gap:28px; }
+  nav#primary-nav a{
+    font-weight:600; font-size:15px; color:var(--navy-900); text-decoration:none;
+    padding:6px 2px; border-bottom:2px solid transparent;
+  }
+  nav#primary-nav a:hover{ border-color:var(--orange-500); }
+
+  .nav-actions{ display:flex; align-items:center; gap:12px; }
+  .nav-toggle{
+    display:none; align-items:center; justify-content:center;
+    width:44px; height:44px; border-radius:10px; border:1px solid var(--line);
+    background:#fff; cursor:pointer;
+  }
+  .nav-toggle span, .nav-toggle span::before, .nav-toggle span::after{
+    content:""; display:block; width:20px; height:2px; background:var(--navy-900); border-radius:2px;
+    position:relative; transition:transform .2s ease, opacity .2s ease;
+  }
+  .nav-toggle span::before{ position:absolute; top:-6px; }
+  .nav-toggle span::after{ position:absolute; top:6px; }
+  .nav-toggle[aria-expanded="true"] span{ background:transparent; }
+  .nav-toggle[aria-expanded="true"] span::before{ top:0; transform:rotate(45deg); background:var(--navy-900); }
+  .nav-toggle[aria-expanded="true"] span::after{ top:0; transform:rotate(-45deg); background:var(--navy-900); }
+
+  @media (max-width:960px){
+    nav#primary-nav{
+      position:fixed; inset:73px 0 0 0; background:#fff; flex-direction:column;
+      align-items:stretch; gap:0; padding:12px 24px 24px; overflow-y:auto;
+      transform:translateX(100%); transition:transform .25s ease; border-top:1px solid var(--line);
+    }
+    nav#primary-nav.open{ transform:translateX(0); }
+    nav#primary-nav a{ padding:16px 4px; border-bottom:1px solid var(--line); font-size:17px; }
+    .nav-toggle{ display:inline-flex; }
+    .nav-actions .btn-primary{ display:none; }
+    nav#primary-nav .nav-cta{ display:block; margin-top:16px; }
+  }
+  @media (min-width:961px){ .nav-cta{ display:none; } }
+
+  /* ---------- Hero ---------- */
+  .hero{
+    position:relative; overflow:hidden; color:#fff;
+    background:radial-gradient(1100px 600px at 85% -10%, rgba(246,130,31,.28), transparent 60%),
+               linear-gradient(160deg, var(--navy-900) 0%, var(--navy-800) 55%, var(--navy-700) 100%);
+    padding:80px 0 170px;
+  }
+  .hero::before, .hero::after{
+    content:""; position:absolute; border-radius:50%; filter:blur(10px); opacity:.5; pointer-events:none;
+  }
+  .hero::before{ width:420px; height:420px; background:radial-gradient(circle, rgba(246,130,31,.35), transparent 70%); top:-160px; right:-120px; }
+  .hero::after{ width:340px; height:340px; background:radial-gradient(circle, rgba(30,80,137,.55), transparent 70%); bottom:-140px; left:-100px; }
+  .hero-inner{ position:relative; z-index:2; display:grid; grid-template-columns:1.15fr .85fr; gap:48px; align-items:center; }
+  @media (max-width:960px){ .hero-inner{ grid-template-columns:1fr; } }
+
+  .hero-badge{
+    display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.12);
+    border:1px solid rgba(255,255,255,.28); padding:8px 16px; border-radius:999px;
+    font-weight:700; font-size:13px; letter-spacing:.02em; margin-bottom:20px;
+  }
+  .hero h1{ font-size:clamp(34px,5.2vw,56px); color:#fff; margin-bottom:20px; }
+  .hero h1 .accent{ color:var(--orange-500); }
+  .hero p.lead{ font-size:18px; color:rgba(255,255,255,.86); max-width:520px; margin-bottom:32px; }
+  .hero-ctas{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:44px; }
+
+  .hero-stats{ display:grid; grid-template-columns:repeat(4,auto); gap:28px 36px; }
+  @media (max-width:640px){ .hero-stats{ grid-template-columns:repeat(2,1fr); } }
+  .hero-stats .stat-num{ font-size:26px; font-weight:800; color:var(--orange-500); }
+  .hero-stats .stat-label{ font-size:12.5px; color:rgba(255,255,255,.78); font-weight:600; }
+
+  .hero-art{ position:relative; }
+  .hero-art .art-card{
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.22);
+    border-radius:var(--radius-lg); padding:26px; backdrop-filter:blur(6px);
+  }
+  .hero-art h3{ color:#fff; font-size:17px; margin-bottom:6px; }
+  .hero-art p{ color:rgba(255,255,255,.78); font-size:14px; margin-bottom:18px; }
+  .checklist{ display:grid; gap:12px; }
+  .checklist li{ display:flex; gap:10px; align-items:flex-start; color:#fff; font-size:14.5px; font-weight:600; }
+  .checklist svg{ flex:none; width:20px; height:20px; color:var(--orange-500); margin-top:1px; }
+
+  /* Course finder widget bridging hero -> next section */
+  .finder{
+    position:relative; z-index:3; background:#fff; color:var(--ink);
+    border-radius:var(--radius-lg); box-shadow:var(--shadow-lg);
+    padding:28px; margin-top:-108px; display:grid; gap:18px;
+    grid-template-columns:1fr 1fr 1fr auto; align-items:end;
+  }
+  @media (max-width:860px){ .finder{ grid-template-columns:1fr 1fr; margin-top:-88px;} }
+  @media (max-width:520px){ .finder{ grid-template-columns:1fr; margin-top:-64px; padding:22px;} }
+  .finder h3{ grid-column:1/-1; font-size:18px; color:var(--navy-900); margin-bottom:-4px; }
+  .field{ display:flex; flex-direction:column; gap:6px; }
+  .field label{ font-size:13px; font-weight:700; color:var(--navy-900); }
+  .field select, .field input, .field textarea{
+    width:100%; border:1.5px solid var(--line); border-radius:var(--radius-sm);
+    padding:12px 14px; font-size:15px; font-family:inherit; color:var(--ink); background:#fff;
+    min-height:48px;
+  }
+  .field select:focus, .field input:focus, .field textarea:focus{ border-color:var(--orange-500); }
+  .finder .btn{ min-width:170px; }
+
+  /* ---------- Trust / accreditation strip ---------- */
+  .trust-strip{ padding:56px 0 40px; }
+  .trust-strip .trust-head{ text-align:center; color:var(--muted); font-weight:700; font-size:13px; letter-spacing:.06em; text-transform:uppercase; margin-bottom:26px; }
+  .badge-row{ display:flex; flex-wrap:wrap; justify-content:center; gap:14px; }
+  .cred-badge{
+    display:flex; align-items:center; gap:8px; border:1.5px solid var(--line); border-radius:999px;
+    padding:10px 18px; font-weight:700; font-size:13.5px; color:var(--navy-800); background:var(--bg-soft);
+  }
+  .cred-badge svg{ width:18px; height:18px; color:var(--orange-500); flex:none; }
+
+  /* ---------- Cards / grids ---------- */
+  .grid{ display:grid; gap:24px; }
+  .grid-3{ grid-template-columns:repeat(3,1fr); }
+  .grid-2{ grid-template-columns:repeat(2,1fr); }
+  .grid-6{ grid-template-columns:repeat(6,1fr); }
+  @media (max-width:960px){ .grid-3{ grid-template-columns:repeat(2,1fr);} .grid-6{grid-template-columns:repeat(3,1fr);} }
+  @media (max-width:640px){ .grid-3, .grid-2, .grid-6{ grid-template-columns:1fr; } }
+
+  .feature-card{
+    background:#fff; border:1px solid var(--line); border-radius:var(--radius-md);
+    padding:28px; box-shadow:var(--shadow-sm); transition:transform .18s ease, box-shadow .18s ease;
+  }
+  .feature-card:hover{ transform:translateY(-4px); box-shadow:var(--shadow-md); }
+  .icon-tile{
+    width:52px; height:52px; border-radius:14px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(145deg, var(--navy-800), var(--navy-700)); margin-bottom:18px;
+  }
+  .icon-tile svg{ width:26px; height:26px; color:var(--orange-500); }
+  .feature-card h3{ font-size:18px; color:var(--navy-900); margin-bottom:8px; }
+  .feature-card p{ font-size:14.5px; margin-bottom:0; }
+
+  .section-alt{ background:var(--bg-soft); }
+
+  /* ---------- How it works ---------- */
+  .steps{ display:grid; grid-template-columns:repeat(3,1fr); gap:28px 24px; counter-reset:step; }
+  @media (max-width:860px){ .steps{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:560px){ .steps{ grid-template-columns:1fr; } }
+  .step{ position:relative; padding:26px 22px 22px; background:#fff; border:1px solid var(--line); border-radius:var(--radius-md); }
+  .step .step-num{
+    display:inline-flex; align-items:center; justify-content:center; width:40px; height:40px;
+    border-radius:12px; background:var(--orange-500); color:var(--navy-900); font-weight:800; font-size:16px; margin-bottom:16px;
+  }
+  .step h3{ font-size:16.5px; color:var(--navy-900); margin-bottom:6px; }
+  .step p{ font-size:14px; margin-bottom:0; }
+
+  /* ---------- Universities ---------- */
+  .uni-chip{
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    background:#fff; border:1.5px solid var(--line); border-radius:var(--radius-sm);
+    padding:20px 14px; font-weight:700; color:var(--navy-800); font-size:14.5px; min-height:78px;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .uni-chip:hover{ border-color:var(--orange-500); transform:translateY(-3px); }
+  .uni-note{ text-align:center; margin-top:24px; color:var(--muted); font-size:14.5px; }
+
+  /* ---------- Destinations ---------- */
+  .city-card{
+    position:relative; border-radius:var(--radius-md); overflow:hidden; color:#fff;
+    padding:26px 22px; min-height:190px; display:flex; flex-direction:column; justify-content:flex-end;
+    background:linear-gradient(155deg, var(--navy-800), var(--navy-600));
+  }
+  .city-card.alt{ background:linear-gradient(155deg, var(--navy-700), var(--orange-600)); }
+  .city-card h3{ font-size:19px; margin-bottom:6px; color:#fff; }
+  .city-card p{ font-size:13.5px; color:rgba(255,255,255,.85); margin-bottom:0; }
+  .office-tag{
+    position:absolute; top:16px; right:16px; background:var(--orange-500); color:var(--navy-900);
+    font-size:11px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; padding:5px 10px; border-radius:999px;
+  }
+
+  /* ---------- Testimonials ---------- */
+  .testi-track{ display:grid; grid-template-columns:repeat(3,1fr); gap:24px; }
+  @media (max-width:960px){ .testi-track{ grid-template-columns:repeat(2,1fr); } }
+  @media (max-width:640px){ .testi-track{ grid-template-columns:1fr; } }
+  .testi-card{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-md); padding:26px; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; gap:16px; }
+  .testi-card svg.quote{ width:30px; height:30px; color:var(--orange-500); }
+  .testi-card p.quote-text{ color:var(--ink); font-size:15px; font-style:italic; margin:0; }
+  .testi-person{ display:flex; align-items:center; gap:12px; margin-top:auto; }
+  .avatar{
+    width:44px; height:44px; border-radius:50%; background:var(--navy-800); color:var(--orange-500);
+    display:flex; align-items:center; justify-content:center; font-weight:800; font-size:14px; flex:none;
+  }
+  .testi-person strong{ display:block; font-size:14.5px; color:var(--navy-900); }
+  .testi-person span{ font-size:12.5px; color:var(--muted); }
+
+  /* ---------- Team spotlight ---------- */
+  .team-card{
+    display:grid; grid-template-columns:auto 1fr; gap:26px; align-items:center;
+    background:linear-gradient(155deg, var(--navy-900), var(--navy-700)); color:#fff;
+    border-radius:var(--radius-lg); padding:36px; max-width:760px; margin:0 auto;
+  }
+  @media (max-width:560px){ .team-card{ grid-template-columns:1fr; text-align:center; } }
+  .team-avatar{
+    width:96px; height:96px; border-radius:50%; background:var(--orange-500); color:var(--navy-900);
+    display:flex; align-items:center; justify-content:center; font-size:30px; font-weight:800; margin:0 auto;
+  }
+  .team-card h3{ color:#fff; font-size:20px; margin-bottom:4px; }
+  .team-card .role{ color:var(--orange-500); font-weight:700; font-size:13.5px; margin-bottom:12px; }
+  .team-card p{ color:rgba(255,255,255,.82); font-size:14.5px; margin-bottom:0; }
+
+  /* ---------- FAQ ---------- */
+  .faq-list{ display:grid; gap:14px; max-width:820px; margin:0 auto; }
+  details.faq-item{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-md); overflow:hidden; }
+  details.faq-item summary{
+    list-style:none; cursor:pointer; padding:20px 22px; display:flex; align-items:center;
+    justify-content:space-between; gap:16px; font-weight:700; color:var(--navy-900); font-size:15.5px;
+  }
+  details.faq-item summary::-webkit-details-marker{ display:none; }
+  details.faq-item summary .chev{ flex:none; width:22px; height:22px; color:var(--orange-500); transition:transform .2s ease; }
+  details.faq-item[open] summary .chev{ transform:rotate(180deg); }
+  details.faq-item .faq-body{ padding:0 22px 22px; color:var(--muted); font-size:14.5px; }
+
+  /* ---------- CTA banner ---------- */
+  .cta-banner{
+    background:linear-gradient(135deg, var(--orange-600), var(--orange-500) 60%, #ffab5c);
+    border-radius:var(--radius-lg); padding:56px 44px; text-align:center; color:var(--navy-900);
+  }
+  .cta-banner h2{ font-size:clamp(24px,3.6vw,34px); margin-bottom:10px; }
+  .cta-banner p{ color:rgba(16,24,40,.78); font-size:16px; margin-bottom:26px; }
+  .cta-banner .btn-navy{ box-shadow:0 12px 30px rgba(11,42,74,.28); }
+
+  /* ---------- Consultation form ---------- */
+  .consult-wrap{ display:grid; grid-template-columns:.9fr 1.1fr; gap:48px; align-items:start; }
+  @media (max-width:900px){ .consult-wrap{ grid-template-columns:1fr; } }
+  .consult-form{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-md); }
+  .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
+  @media (max-width:520px){ .form-grid{ grid-template-columns:1fr; } }
+  .form-grid .full{ grid-column:1/-1; }
+  .required-note{ font-size:12.5px; color:var(--muted); margin-bottom:18px; }
+  .form-success{
+    display:none; align-items:flex-start; gap:12px; background:#EFF7F0; border:1px solid #BFE3C3;
+    color:#1E5B2A; padding:16px 18px; border-radius:var(--radius-sm); font-weight:600; font-size:14.5px; margin-bottom:18px;
+  }
+  .form-success svg{ flex:none; width:22px; height:22px; }
+  .form-success.show{ display:flex; }
+  .consult-form form.hidden{ display:none; }
+
+  .consult-side h2{ color:var(--navy-900); font-size:clamp(26px,3.6vw,32px); }
+  .consult-points{ display:grid; gap:16px; margin-top:24px; }
+  .consult-points li{ display:flex; gap:12px; align-items:flex-start; }
+  .consult-points svg{ flex:none; width:22px; height:22px; color:var(--orange-500); margin-top:1px; }
+  .consult-points strong{ display:block; color:var(--navy-900); font-size:15px; }
+  .consult-points span{ font-size:13.5px; color:var(--muted); }
+
+  /* ---------- Footer ---------- */
+  footer.site-footer{ background:var(--navy-900); color:rgba(255,255,255,.82); padding:64px 0 28px; }
+  .footer-grid{ display:grid; grid-template-columns:1.4fr 1fr 1fr 1fr; gap:36px; margin-bottom:48px; }
+  @media (max-width:860px){ .footer-grid{ grid-template-columns:1fr 1fr; } }
+  @media (max-width:520px){ .footer-grid{ grid-template-columns:1fr; } }
+  .footer-brand img{ height:40px; width:auto; margin-bottom:14px; }
+  .footer-brand p{ color:rgba(255,255,255,.68); font-size:14px; max-width:320px; }
+  .social-row{ display:flex; gap:10px; margin-top:16px; }
+  .social-row a{
+    width:38px; height:38px; border-radius:50%; border:1px solid rgba(255,255,255,.25);
+    display:flex; align-items:center; justify-content:center; text-decoration:none; transition:background .15s ease, border-color .15s ease;
+  }
+  .social-row a:hover{ background:var(--orange-500); border-color:var(--orange-500); }
+  .social-row svg{ width:17px; height:17px; color:#fff; }
+  footer h4{ color:#fff; font-size:14px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:18px; }
+  footer ul li{ margin-bottom:12px; }
+  footer ul a{ color:rgba(255,255,255,.72); text-decoration:none; font-size:14.5px; }
+  footer ul a:hover{ color:var(--orange-500); }
+  .footer-bottom{
+    border-top:1px solid rgba(255,255,255,.14); padding-top:24px; display:flex; flex-wrap:wrap;
+    gap:16px; align-items:center; justify-content:space-between; font-size:13px; color:rgba(255,255,255,.55);
+  }
+  .footer-bottom .accreds{ display:flex; gap:10px; flex-wrap:wrap; }
+  .footer-bottom .accreds span{ border:1px solid rgba(255,255,255,.2); padding:4px 10px; border-radius:999px; font-size:11.5px; }
+
+  /* ---------- Sticky mobile CTA ---------- */
+  .mobile-cta{
+    position:fixed; left:0; right:0; bottom:0; z-index:400; display:none;
+    background:#fff; border-top:1px solid var(--line); padding:10px 16px;
+    box-shadow:0 -8px 24px rgba(11,42,74,.14);
+  }
+  @media (max-width:720px){ .mobile-cta{ display:block; } body{ padding-bottom:70px; } }
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">Skip to main content</a>
+
+<header class="site-header">
+  <div class="nav-row container">
+    <a class="brand" href="#home" aria-label="IGEC Global home">
+      <img src="assets/logo-transparent.png" alt="IGEC Global — International Group for Educational Consultancy">
+    </a>
+
+    <nav id="primary-nav" aria-label="Primary">
+      <a href="#why-australia">Why Australia</a>
+      <a href="#services">Services</a>
+      <a href="#how-it-works">How It Works</a>
+      <a href="#universities">Universities</a>
+      <a href="#destinations">Destinations</a>
+      <a href="#testimonials">Success Stories</a>
+      <a href="#faq">FAQ</a>
+      <a class="btn btn-primary nav-cta" href="#consultation">Book Free Consultation</a>
+    </nav>
+
+    <div class="nav-actions">
+      <a class="btn btn-primary" href="#consultation">Book Free Consultation</a>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primary-nav">
+        <span></span>
+        <span class="visually-hidden">Toggle menu</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main id="main">
+
+  <!-- ================= HERO ================= -->
+  <section class="hero" id="home">
+    <div class="container hero-inner">
+      <div>
+        <span class="hero-badge">🎓 Australia Education Specialists · 30+ Years Worldwide</span>
+        <h1>Study in Australia. <span class="accent">We'll Get You There.</span></h1>
+        <p class="lead">From choosing the right course to landing your student visa, IGEC Global's Australia specialists guide you through every step of your application — free of charge.</p>
+        <div class="hero-ctas">
+          <a class="btn btn-primary" href="#consultation">Book a Free Consultation</a>
+          <a class="btn btn-outline-light" href="#universities">Explore Universities</a>
+        </div>
+        <div class="hero-stats">
+          <div><div class="stat-num">30+</div><div class="stat-label">Years of Experience</div></div>
+          <div><div class="stat-num">600+</div><div class="stat-label">Partner Institutes</div></div>
+          <div><div class="stat-num">110,000+</div><div class="stat-label">Students Assisted</div></div>
+          <div><div class="stat-num">50,000+</div><div class="stat-label">Successful Enrolments</div></div>
+        </div>
+      </div>
+
+      <div class="hero-art">
+        <div class="art-card">
+          <h3>What you get, at no cost</h3>
+          <p>Every consultation with an IGEC counsellor includes:</p>
+          <ul class="checklist">
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg> Course &amp; university shortlist matched to your goals</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg> Application &amp; documentation support</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg> Student visa guidance, start to finish</li>
+            <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg> Scholarship &amp; funding options</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Course finder widget, bridges into next section -->
+    <div class="container">
+      <form class="finder" id="finderForm" action="#consultation" method="get">
+        <h3>Find your course in Australia</h3>
+        <div class="field">
+          <label for="studyLevel">Study level</label>
+          <select id="studyLevel" name="level">
+            <option value="">Any level</option>
+            <option>English Language</option>
+            <option>Vocational / TAFE</option>
+            <option>Foundation</option>
+            <option>Undergraduate</option>
+            <option>Postgraduate</option>
+            <option>PhD / Research</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="studyField">Field of study</label>
+          <select id="studyField" name="field">
+            <option value="">Any field</option>
+            <option>Business &amp; Management</option>
+            <option>Engineering &amp; IT</option>
+            <option>Health &amp; Nursing</option>
+            <option>Arts &amp; Design</option>
+            <option>Science</option>
+            <option>Hospitality &amp; Tourism</option>
+            <option>Law</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="studyCity">Preferred city</label>
+          <select id="studyCity" name="city">
+            <option value="">Anywhere in Australia</option>
+            <option>Sydney</option>
+            <option>Melbourne</option>
+            <option>Brisbane</option>
+            <option>Perth</option>
+            <option>Adelaide</option>
+            <option>Canberra</option>
+            <option>Gold Coast</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary">Search &amp; Get Matched</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- ================= TRUST STRIP ================= -->
+  <section class="trust-strip">
+    <div class="container">
+      <p class="trust-head">Certified &amp; recognised by</p>
+      <div class="badge-row">
+        <span class="cred-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m12 2 8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> British Council Certified</span>
+        <span class="cred-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m12 2 8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> QEAC Accredited Agent</span>
+        <span class="cred-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m12 2 8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> AIRC Certified</span>
+        <span class="cred-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m12 2 8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> ICEF Certified Agency</span>
+        <span class="cred-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m12 2 8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg> Premier International Education Award</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= WHY AUSTRALIA ================= -->
+  <section id="why-australia" class="section-alt">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Why Australia</span>
+        <h2>A world-class education, and a life to go with it</h2>
+        <p>Australia consistently ranks among the world's top study destinations — here's what that means for you.</p>
+      </div>
+      <div class="grid grid-3">
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1.7 2.7 3 6 3s6-1.3 6-3v-5"/></svg></div>
+          <h3>World-class universities</h3>
+          <p>Home to several of the world's top-ranked universities, with strong industry links across every major field.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M12 2v20M2 12h20"/><circle cx="12" cy="12" r="9"/></svg></div>
+          <h3>Post-study work pathways</h3>
+          <p>Eligible graduates can access post-study work visa options — we'll help you understand what applies to your course.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M12 21s-7-4.5-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.5-9.5 9-9.5 9Z"/></svg></div>
+          <h3>Safe, welcoming cities</h3>
+          <p>Multicultural campuses and cities that consistently rank among the most liveable in the world.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M8 2v4M16 2v4"/></svg></div>
+          <h3>Work while you study</h3>
+          <p>Most student visa holders can work part-time during term, helping offset your living costs.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M12 3v18M4 9l8-6 8 6M4 9v10h16V9"/></svg></div>
+          <h3>Vibrant student life</h3>
+          <p>From Sydney's harbour to Melbourne's laneways, campus life comes with genuinely great cities attached.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="5"/><path d="m8.5 13-2 8 5.5-3 5.5 3-2-8"/></svg></div>
+          <h3>Scholarships available</h3>
+          <p>University, government and country-specific scholarships can significantly reduce your costs — we'll help you find them.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SERVICES ================= -->
+  <section id="services">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">How We Help</span>
+        <h2>Everything you need, under one roof</h2>
+        <p>IGEC Global handles the full journey — so you can focus on getting ready, not on paperwork.</p>
+      </div>
+      <div class="grid grid-3">
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M4 19.5V6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v14"/><path d="M6.5 19.5H19"/></svg></div>
+          <h3>University &amp; course selection</h3>
+          <p>Personalised shortlists based on your grades, budget and career goals — not a one-size-fits-all list.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M9 12h6M9 16h6M9 8h2M6 4h12a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z"/></svg></div>
+          <h3>Applications &amp; admissions</h3>
+          <p>End-to-end help with forms, essays and documentation so nothing slips through the cracks.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="2"/><path d="M5.5 16c.5-1.8 1.8-2.5 3-2.5s2.5.7 3 2.5M14 9h5M14 12.5h5M14 16h3"/></svg></div>
+          <h3>Student visa assistance</h3>
+          <p>Clear, current guidance through the Australian student visa process, tailored to your situation.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="8" r="5"/><path d="m8.5 13-2 8 5.5-3 5.5 3-2-8"/></svg></div>
+          <h3>Scholarships &amp; financial aid</h3>
+          <p>We help you identify and apply for funding that lowers the real cost of studying abroad.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M4 19.5V5a2 2 0 0 1 2-2h9l5 5v11.5a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2Z"/><path d="M14 3v5h5"/></svg></div>
+          <h3>IELTS / PTE test prep</h3>
+          <p>Guidance on meeting the English proficiency requirements your target universities set.</p>
+        </article>
+        <article class="feature-card">
+          <div class="icon-tile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg></div>
+          <h3>Pre-departure &amp; arrival support</h3>
+          <p>Accommodation, travel and settling-in guidance so your first weeks in Australia feel manageable.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= HOW IT WORKS ================= -->
+  <section id="how-it-works" class="section-alt">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Your Journey</span>
+        <h2>How it works</h2>
+        <p>A clear, six-step path from first conversation to landing in Australia.</p>
+      </div>
+      <div class="steps">
+        <div class="step"><span class="step-num">01</span><h3>Free consultation</h3><p>We learn about your goals, budget and academic background.</p></div>
+        <div class="step"><span class="step-num">02</span><h3>Course &amp; university shortlist</h3><p>A personalised shortlist from our 600+ partner institutions.</p></div>
+        <div class="step"><span class="step-num">03</span><h3>Application support</h3><p>We help you prepare and submit a strong, complete application.</p></div>
+        <div class="step"><span class="step-num">04</span><h3>Offer &amp; enrolment</h3><p>Review your offer, confirm your place, and plan the finances.</p></div>
+        <div class="step"><span class="step-num">05</span><h3>Visa application</h3><p>Step-by-step guidance through your student visa application.</p></div>
+        <div class="step"><span class="step-num">06</span><h3>Pre-departure &amp; arrival</h3><p>Accommodation, travel and orientation support before you fly.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= UNIVERSITIES ================= -->
+  <section id="universities">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Our Network</span>
+        <h2>Partner universities in Australia</h2>
+        <p>We work directly with leading Australian institutions to place students with confidence.</p>
+      </div>
+      <div class="grid grid-6">
+        <div class="uni-chip">University of Melbourne</div>
+        <div class="uni-chip">UNSW Sydney</div>
+        <div class="uni-chip">Australian National University</div>
+        <div class="uni-chip">Monash University</div>
+        <div class="uni-chip">RMIT University</div>
+        <div class="uni-chip">UTS Sydney</div>
+        <div class="uni-chip">Curtin University</div>
+        <div class="uni-chip">Deakin University</div>
+        <div class="uni-chip">Bond University</div>
+        <div class="uni-chip">Macquarie University</div>
+        <div class="uni-chip">University of Wollongong</div>
+        <div class="uni-chip">Swinburne University</div>
+        <div class="uni-chip">Australian Catholic University</div>
+        <div class="uni-chip">Edith Cowan University</div>
+        <div class="uni-chip">Western Sydney University</div>
+        <div class="uni-chip">QUT</div>
+      </div>
+      <p class="uni-note">Plus 40+ partner vocational and English-language colleges across Australia, including TAFE and Kaplan English.</p>
+    </div>
+  </section>
+
+  <!-- ================= DESTINATIONS ================= -->
+  <section id="destinations" class="section-alt">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Where You Could Study</span>
+        <h2>Australian cities to call home</h2>
+        <p>Every city has its own character — we'll help you find the one that fits your course and lifestyle.</p>
+      </div>
+      <div class="grid grid-3">
+        <div class="city-card"><span class="office-tag">IGEC Office</span><h3>Sydney</h3><p>Australia's largest city — harbour-side campuses and the country's biggest graduate job market.</p></div>
+        <div class="city-card alt"><span class="office-tag">IGEC Office</span><h3>Melbourne</h3><p>Consistently rated among the world's most liveable cities, with a huge international student community.</p></div>
+        <div class="city-card"><h3>Brisbane</h3><p>A subtropical climate and a fast-growing tech and health-sciences scene.</p></div>
+        <div class="city-card"><h3>Perth</h3><p>Close-knit campuses on Australia's west coast, with strong ties to engineering and resources industries.</p></div>
+        <div class="city-card"><h3>Adelaide</h3><p>Compact, affordable, and known for food, wine and research-strong universities.</p></div>
+        <div class="city-card"><h3>Canberra</h3><p>Australia's capital and home to the Australian National University — ideal for research and public policy.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TESTIMONIALS ================= -->
+  <section id="testimonials">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Success Stories</span>
+        <h2>What our students say</h2>
+        <p>Real feedback from students IGEC Global has guided through their study-abroad journey.</p>
+      </div>
+      <div class="testi-track">
+        <article class="testi-card">
+          <svg class="quote" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 7c-2.8 0-5 2.2-5 5v5h5v-5H4.5C4.5 9.5 5.6 8.3 7 8V7Zm10 0c-2.8 0-5 2.2-5 5v5h5v-5h-2.5c0-2.5 1.1-3.7 2.5-4V7Z"/></svg>
+          <p class="quote-text">"The consultancy services provided by IGEC were instrumental in guiding me through the process of choosing the right career path."</p>
+          <div class="testi-person">
+            <div class="avatar">AK</div>
+            <div><strong>Ahmed Khateeb</strong><span>Undergraduate Student</span></div>
+          </div>
+        </article>
+        <article class="testi-card">
+          <svg class="quote" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 7c-2.8 0-5 2.2-5 5v5h5v-5H4.5C4.5 9.5 5.6 8.3 7 8V7Zm10 0c-2.8 0-5 2.2-5 5v5h5v-5h-2.5c0-2.5 1.1-3.7 2.5-4V7Z"/></svg>
+          <p class="quote-text">"I was struggling to find internships that aligned with my interests and career goals until I reached out to IGEC."</p>
+          <div class="testi-person">
+            <div class="avatar">BA</div>
+            <div><strong>Bilal Ahmed</strong><span>Foundation Student</span></div>
+          </div>
+        </article>
+        <article class="testi-card">
+          <svg class="quote" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 7c-2.8 0-5 2.2-5 5v5h5v-5H4.5C4.5 9.5 5.6 8.3 7 8V7Zm10 0c-2.8 0-5 2.2-5 5v5h5v-5h-2.5c0-2.5 1.1-3.7 2.5-4V7Z"/></svg>
+          <p class="quote-text">"From selecting the right universities to crafting application essays, their consultants were there every step of the way."</p>
+          <div class="testi-person">
+            <div class="avatar">KH</div>
+            <div><strong>Khaled Ahmed Haidar</strong><span>Undergraduate Student</span></div>
+          </div>
+        </article>
+        <article class="testi-card">
+          <svg class="quote" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 7c-2.8 0-5 2.2-5 5v5h5v-5H4.5C4.5 9.5 5.6 8.3 7 8V7Zm10 0c-2.8 0-5 2.2-5 5v5h5v-5h-2.5c0-2.5 1.1-3.7 2.5-4V7Z"/></svg>
+          <p class="quote-text">"As an international student, I faced unique challenges when applying to universities — IGEC made it manageable."</p>
+          <div class="testi-person">
+            <div class="avatar">MA</div>
+            <div><strong>Meral Khaled Alotebe</strong><span>Postgraduate Student</span></div>
+          </div>
+        </article>
+        <article class="testi-card">
+          <svg class="quote" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 7c-2.8 0-5 2.2-5 5v5h5v-5H4.5C4.5 9.5 5.6 8.3 7 8V7Zm10 0c-2.8 0-5 2.2-5 5v5h5v-5h-2.5c0-2.5 1.1-3.7 2.5-4V7Z"/></svg>
+          <p class="quote-text">"Studying abroad was a dream I wasn't sure I could achieve until I found IGEC."</p>
+          <div class="testi-person">
+            <div class="avatar">TA</div>
+            <div><strong>Taleb Khaled T Almarri</strong><span>Graduate Student</span></div>
+          </div>
+        </article>
+        <article class="testi-card">
+          <svg class="quote" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M7 7c-2.8 0-5 2.2-5 5v5h5v-5H4.5C4.5 9.5 5.6 8.3 7 8V7Zm10 0c-2.8 0-5 2.2-5 5v5h5v-5h-2.5c0-2.5 1.1-3.7 2.5-4V7Z"/></svg>
+          <p class="quote-text">"Thanks to IGEC, my study abroad experience exceeded all expectations."</p>
+          <div class="testi-person">
+            <div class="avatar">SA</div>
+            <div><strong>Sarah Khaled O Alharbi</strong><span>Research Student</span></div>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= TEAM SPOTLIGHT ================= -->
+  <section class="section-alt">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Meet Your Counsellor</span>
+        <h2>A dedicated point of contact in Australia</h2>
+      </div>
+      <div class="team-card">
+        <div class="team-avatar">AN</div>
+        <div>
+          <h3>Ali Nadi</h3>
+          <div class="role">Branch Manager — Sydney</div>
+          <p>Leading IGEC Global's Australia team, Ali and the Sydney office work directly with students throughout the admissions and visa process — from first enquiry to arrival.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= FAQ ================= -->
+  <section id="faq">
+    <div class="container">
+      <div class="section-head center">
+        <span class="eyebrow">Questions</span>
+        <h2>Frequently asked questions</h2>
+      </div>
+      <div class="faq-list">
+        <details class="faq-item">
+          <summary>Do I need IELTS or PTE to study in Australia?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="faq-body">Most universities require proof of English proficiency such as IELTS, PTE Academic or TOEFL. Exact score requirements vary by course and institution — our counsellors will confirm exactly what your target universities need.</div>
+        </details>
+        <details class="faq-item">
+          <summary>How long does the student visa process take?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="faq-body">Processing times vary by nationality, application volume and how complete your documents are. We'll walk you through the checklist and give you a realistic, personalised timeline.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can I work while studying in Australia?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="faq-body">Most student visa holders are permitted to work part-time during term and additional hours during scheduled breaks, under current Department of Home Affairs rules. We'll confirm the latest limits that apply to your visa.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What does it cost to study and live in Australia?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="faq-body">Tuition and living costs vary widely by city, course level and lifestyle. We'll help you build a realistic budget and explore scholarship options to help offset the cost.</div>
+        </details>
+        <details class="faq-item">
+          <summary>Can IGEC help me find scholarships?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="faq-body">Yes — our counsellors help you identify university, government and country-specific scholarships you may be eligible for, as part of your overall application strategy.</div>
+        </details>
+        <details class="faq-item">
+          <summary>What happens after I graduate — can I stay and work?<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true" focusable="false"><path d="m6 9 6 6 6-6"/></svg></summary>
+          <div class="faq-body">Australia offers post-study work visa pathways for eligible graduates. Eligibility depends on your course, provider and visa subclass — our team will map out your options as part of your planning.</div>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CTA BANNER ================= -->
+  <section>
+    <div class="container">
+      <div class="cta-banner">
+        <h2>Ready to start your Australian journey?</h2>
+        <p>Speak with an IGEC Global counsellor today — it's completely free.</p>
+        <a class="btn btn-navy" href="#consultation">Book a Free Consultation</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= CONSULTATION FORM ================= -->
+  <section id="consultation" class="section-alt">
+    <div class="container consult-wrap">
+      <div class="consult-side">
+        <span class="eyebrow">Get Started</span>
+        <h2>Book your free consultation</h2>
+        <p>Tell us a little about yourself and an Australia specialist will get back to you.</p>
+        <ul class="consult-points">
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><div><strong>No cost, no obligation</strong><span>Our consultations are free for every student.</span></div></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><div><strong>Personalised guidance</strong><span>Advice matched to your grades, budget and goals.</span></div></li>
+          <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg><div><strong>30+ years of experience</strong><span>Backed by a team that has helped 110,000+ students.</span></div></li>
+        </ul>
+      </div>
+
+      <div class="consult-form">
+        <div class="form-success" id="formSuccess" role="status">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true" focusable="false"><path d="M20 6 9 17l-5-5"/></svg>
+          <span>Thanks — your details have been received. An IGEC counsellor will be in touch shortly.</span>
+        </div>
+        <form id="consultForm" novalidate>
+          <p class="required-note">Fields marked * are required.</p>
+          <div class="form-grid">
+            <div class="field">
+              <label for="fullName">Full name *</label>
+              <input type="text" id="fullName" name="fullName" autocomplete="name" required>
+            </div>
+            <div class="field">
+              <label for="email">Email address *</label>
+              <input type="email" id="email" name="email" autocomplete="email" required>
+            </div>
+            <div class="field">
+              <label for="phone">Phone number *</label>
+              <input type="tel" id="phone" name="phone" autocomplete="tel" required>
+            </div>
+            <div class="field">
+              <label for="level2">Study level</label>
+              <select id="level2" name="level">
+                <option value="">Select a level</option>
+                <option>English Language</option>
+                <option>Vocational / TAFE</option>
+                <option>Foundation</option>
+                <option>Undergraduate</option>
+                <option>Postgraduate</option>
+                <option>PhD / Research</option>
+              </select>
+            </div>
+            <div class="field full">
+              <label for="message">Tell us about your goals</label>
+              <textarea id="message" name="message" rows="4"></textarea>
+            </div>
+          </div>
+          <br>
+          <button type="submit" class="btn btn-primary btn-block">Book My Free Consultation</button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- ================= FOOTER ================= -->
+<footer class="site-footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <img src="assets/logo-transparent.png" alt="IGEC Global — International Group for Educational Consultancy">
+        <p>IGEC is a company of educational experts dedicated to optimising human potential and creating opportunities for personal growth through quality international education and unparalleled student support.</p>
+        <div class="social-row">
+          <a href="https://twitter.com/igecglobal" aria-label="IGEC Global on Twitter"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.6 11.6 0 0 1 3.4 4.6a4 4 0 0 0 1.3 5.5c-.6 0-1.3-.2-1.8-.5v.1c0 2 1.4 3.6 3.3 4a4.2 4.2 0 0 1-1.8.1 4.1 4.1 0 0 0 3.9 2.9A8.3 8.3 0 0 1 2 18.4a11.6 11.6 0 0 0 6.3 1.9c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.2Z"/></svg></a>
+          <a href="https://facebook.com/igecglobal" aria-label="IGEC Global on Facebook"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M13.5 21v-7.5H16l.5-3H13.5V8.3c0-.9.3-1.5 1.6-1.5H16.6V4.2C16.3 4.2 15.3 4 14.2 4c-2.3 0-3.9 1.4-3.9 4v2.5H7.8v3h2.5V21Z"/></svg></a>
+          <a href="https://instagram.com/igecglobal" aria-label="IGEC Global on Instagram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true" focusable="false"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1"/></svg></a>
+          <a href="https://youtube.com/@igecglobal" aria-label="IGEC Global on YouTube"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M22 12s0-3.3-.4-4.8a3 3 0 0 0-2.1-2.1C17.9 4.7 12 4.7 12 4.7s-5.9 0-7.5.4A3 3 0 0 0 2.4 7.2C2 8.7 2 12 2 12s0 3.3.4 4.8a3 3 0 0 0 2.1 2.1c1.6.4 7.5.4 7.5.4s5.9 0 7.5-.4a3 3 0 0 0 2.1-2.1c.4-1.5.4-4.8.4-4.8Z"/><path d="m10 9.3 5 2.7-5 2.7Z" fill="#0B2A4A"/></svg></a>
+        </div>
+      </div>
+      <div>
+        <h4>Explore</h4>
+        <ul>
+          <li><a href="#why-australia">Why Australia</a></li>
+          <li><a href="#services">Services</a></li>
+          <li><a href="#universities">Universities</a></li>
+          <li><a href="#testimonials">Success Stories</a></li>
+          <li><a href="#faq">FAQ</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Destinations</h4>
+        <ul>
+          <li><a href="#destinations">Sydney</a></li>
+          <li><a href="#destinations">Melbourne</a></li>
+          <li><a href="#destinations">Brisbane</a></li>
+          <li><a href="#destinations">Perth</a></li>
+          <li><a href="#destinations">Adelaide</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4>Our Offices</h4>
+        <ul>
+          <li>Sydney, Australia</li>
+          <li>Melbourne, Australia</li>
+          <li>Part of IGEC Global's network across 10 countries</li>
+          <li><a href="#consultation">Contact an office &rarr;</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>&copy; <span id="year"></span> IGEC Global. All rights reserved.</span>
+      <div class="accreds">
+        <span>British Council</span><span>QEAC</span><span>AIRC</span><span>ICEF</span>
+      </div>
+    </div>
+  </div>
+</footer>
+
+<div class="mobile-cta">
+  <a class="btn btn-primary btn-block" href="#consultation">Book a Free Consultation</a>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // Mobile nav toggle
+  var toggle = document.getElementById('navToggle');
+  var nav = document.getElementById('primary-nav');
+  if (toggle && nav) {
+    toggle.addEventListener('click', function(){
+      var open = toggle.getAttribute('aria-expanded') === 'true';
+      toggle.setAttribute('aria-expanded', String(!open));
+      nav.classList.toggle('open', !open);
+      if (!open) {
+        var firstLink = nav.querySelector('a');
+        if (firstLink) firstLink.focus();
+      }
+    });
+    nav.addEventListener('click', function(e){
+      if (e.target.tagName === 'A') {
+        toggle.setAttribute('aria-expanded', 'false');
+        nav.classList.remove('open');
+      }
+    });
+    document.addEventListener('keydown', function(e){
+      if (e.key === 'Escape' && toggle.getAttribute('aria-expanded') === 'true') {
+        toggle.setAttribute('aria-expanded', 'false');
+        nav.classList.remove('open');
+        toggle.focus();
+      }
+    });
+  }
+
+  // Course finder: progressively enhance, scroll smoothly to consultation form
+  var finder = document.getElementById('finderForm');
+  if (finder) {
+    finder.addEventListener('submit', function(e){
+      e.preventDefault();
+      var target = document.getElementById('consultation');
+      if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      var msg = document.getElementById('message');
+      if (msg) {
+        var level = document.getElementById('studyLevel').value;
+        var field = document.getElementById('studyField').value;
+        var city = document.getElementById('studyCity').value;
+        var parts = [];
+        if (level) parts.push(level);
+        if (field) parts.push(field);
+        if (city) parts.push('in ' + city);
+        if (parts.length) msg.value = "I'm interested in: " + parts.join(', ') + '.';
+      }
+      var nameField = document.getElementById('fullName');
+      if (nameField) nameField.focus();
+    });
+  }
+
+  // Consultation form: client-side only success state (no backend wired up yet)
+  var form = document.getElementById('consultForm');
+  var success = document.getElementById('formSuccess');
+  if (form && success) {
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var valid = form.checkValidity();
+      if (!valid) {
+        form.reportValidity();
+        return;
+      }
+      form.classList.add('hidden');
+      success.classList.add('show');
+      success.setAttribute('tabindex', '-1');
+      success.focus();
+    });
+  }
+
+  var yearEl = document.getElementById('year');
+  if (yearEl) yearEl.textContent = new Date().getFullYear();
+})();
+</script>
+</body>
+</html>
