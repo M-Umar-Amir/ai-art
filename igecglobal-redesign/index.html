@@ -9,8 +9,8 @@
 <meta property="og:title" content="IGEC Global — Study in Australia">
 <meta property="og:description" content="University admissions, scholarships and student visa guidance for Australia, from an education consultancy with 30+ years of experience.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="assets/logo-transparent.png">
-<link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
+<meta property="og:image" content="https://www.epical.art/igecglobal-redesign/assets/logo-transparent.png">
+<link rel="icon" href="/igecglobal-redesign/assets/favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800;1,500&display=swap" rel="stylesheet">
@@ -95,6 +95,12 @@
   .section-head h2{ font-size:clamp(28px,4vw,38px); color:var(--navy-900); }
   .section-head p{ font-size:17px; }
 
+  .photo-banner{
+    border-radius:var(--radius-lg); overflow:hidden; margin-bottom:44px; box-shadow:var(--shadow-md);
+    max-height:360px;
+  }
+  .photo-banner img{ width:100%; height:100%; max-height:360px; object-fit:cover; }
+
   /* ---------- Buttons ---------- */
   .btn{
     display:inline-flex; align-items:center; justify-content:center; gap:8px;
@@ -166,8 +172,9 @@
   /* ---------- Hero ---------- */
   .hero{
     position:relative; overflow:hidden; color:#fff;
-    background:radial-gradient(1100px 600px at 85% -10%, rgba(246,130,31,.28), transparent 60%),
-               linear-gradient(160deg, var(--navy-900) 0%, var(--navy-800) 55%, var(--navy-700) 100%);
+    background:radial-gradient(1100px 600px at 85% -10%, rgba(246,130,31,.30), transparent 60%),
+               linear-gradient(160deg, rgba(8,27,49,.92) 0%, rgba(11,42,74,.85) 45%, rgba(18,58,99,.72) 100%),
+               url('https://images.unsplash.com/photo-1760111085279-6c4b6d831acc?auto=format&fit=crop&w=2200&q=80') center 30%/cover no-repeat;
     padding:80px 0 170px;
   }
   .hero::before, .hero::after{
@@ -282,10 +289,10 @@
   /* ---------- Destinations ---------- */
   .city-card{
     position:relative; border-radius:var(--radius-md); overflow:hidden; color:#fff;
-    padding:26px 22px; min-height:190px; display:flex; flex-direction:column; justify-content:flex-end;
-    background:linear-gradient(155deg, var(--navy-800), var(--navy-600));
+    padding:26px 22px; min-height:210px; display:flex; flex-direction:column; justify-content:flex-end;
+    background:linear-gradient(180deg, rgba(8,27,49,.12) 0%, rgba(8,27,49,.55) 60%, rgba(8,27,49,.92) 100%), var(--bg-image) center/cover no-repeat;
+    background-color:var(--navy-800);
   }
-  .city-card.alt{ background:linear-gradient(155deg, var(--navy-700), var(--orange-600)); }
   .city-card h3{ font-size:19px; margin-bottom:6px; color:#fff; }
   .city-card p{ font-size:13.5px; color:rgba(255,255,255,.85); margin-bottom:0; }
   .office-tag{
@@ -407,7 +414,7 @@
 <header class="site-header">
   <div class="nav-row container">
     <a class="brand" href="#home" aria-label="IGEC Global home">
-      <img src="assets/logo-transparent.png" alt="IGEC Global — International Group for Educational Consultancy">
+      <img src="/igecglobal-redesign/assets/logo-transparent.png" alt="IGEC Global — International Group for Educational Consultancy">
     </a>
 
     <nav id="primary-nav" aria-label="Primary">
@@ -534,6 +541,9 @@
         <span class="eyebrow">Why Australia</span>
         <h2>A world-class education, and a life to go with it</h2>
         <p>Australia consistently ranks among the world's top study destinations — here's what that means for you.</p>
+      </div>
+      <div class="photo-banner">
+        <img src="https://images.unsplash.com/photo-1758270705290-62b6294dd044?auto=format&fit=crop&w=2000&q=80" alt="A diverse group of international students collaborating around a laptop on campus" loading="lazy">
       </div>
       <div class="grid grid-3">
         <article class="feature-card">
@@ -671,12 +681,12 @@
         <p>Every city has its own character — we'll help you find the one that fits your course and lifestyle.</p>
       </div>
       <div class="grid grid-3">
-        <div class="city-card"><span class="office-tag">IGEC Office</span><h3>Sydney</h3><p>Australia's largest city — harbour-side campuses and the country's biggest graduate job market.</p></div>
-        <div class="city-card alt"><span class="office-tag">IGEC Office</span><h3>Melbourne</h3><p>Consistently rated among the world's most liveable cities, with a huge international student community.</p></div>
-        <div class="city-card"><h3>Brisbane</h3><p>A subtropical climate and a fast-growing tech and health-sciences scene.</p></div>
-        <div class="city-card"><h3>Perth</h3><p>Close-knit campuses on Australia's west coast, with strong ties to engineering and resources industries.</p></div>
-        <div class="city-card"><h3>Adelaide</h3><p>Compact, affordable, and known for food, wine and research-strong universities.</p></div>
-        <div class="city-card"><h3>Canberra</h3><p>Australia's capital and home to the Australian National University — ideal for research and public policy.</p></div>
+        <div class="city-card" style="--bg-image:url('https://images.unsplash.com/photo-1744476381749-e4090481c85f?auto=format&fit=crop&w=900&q=80')"><span class="office-tag">IGEC Office</span><h3>Sydney</h3><p>Australia's largest city — harbour-side campuses and the country's biggest graduate job market.</p></div>
+        <div class="city-card" style="--bg-image:url('https://images.unsplash.com/photo-1754732278198-98efcb555d61?auto=format&fit=crop&w=900&q=80')"><span class="office-tag">IGEC Office</span><h3>Melbourne</h3><p>Consistently rated among the world's most liveable cities, with a huge international student community.</p></div>
+        <div class="city-card" style="--bg-image:url('https://images.unsplash.com/photo-1728923067888-07bd0c155838?auto=format&fit=crop&w=900&q=80')"><h3>Brisbane</h3><p>A subtropical climate and a fast-growing tech and health-sciences scene.</p></div>
+        <div class="city-card" style="--bg-image:url('https://images.unsplash.com/photo-1582224266049-4e6839d9aa45?auto=format&fit=crop&w=900&q=80')"><h3>Perth</h3><p>Close-knit campuses on Australia's west coast, with strong ties to engineering and resources industries.</p></div>
+        <div class="city-card" style="--bg-image:url('https://images.unsplash.com/photo-1677893111398-0ebb0ed2aa85?auto=format&fit=crop&w=900&q=80')"><h3>Adelaide</h3><p>Compact, affordable, and known for food, wine and research-strong universities.</p></div>
+        <div class="city-card" style="--bg-image:url('https://images.unsplash.com/photo-1672264597620-d792bb6de88d?auto=format&fit=crop&w=900&q=80')"><h3>Canberra</h3><p>Australia's capital and home to the Australian National University — ideal for research and public policy.</p></div>
       </div>
     </div>
   </section>
@@ -872,7 +882,7 @@
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
-        <img src="assets/logo-transparent.png" alt="IGEC Global — International Group for Educational Consultancy">
+        <img src="/igecglobal-redesign/assets/logo-transparent.png" alt="IGEC Global — International Group for Educational Consultancy">
         <p>IGEC is a company of educational experts dedicated to optimising human potential and creating opportunities for personal growth through quality international education and unparalleled student support.</p>
         <div class="social-row">
           <a href="https://twitter.com/igecglobal" aria-label="IGEC Global on Twitter"><svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" focusable="false"><path d="M22 5.9c-.7.3-1.5.6-2.3.7.8-.5 1.5-1.3 1.8-2.3-.8.5-1.7.8-2.6 1a4.1 4.1 0 0 0-7 3.7A11.6 11.6 0 0 1 3.4 4.6a4 4 0 0 0 1.3 5.5c-.6 0-1.3-.2-1.8-.5v.1c0 2 1.4 3.6 3.3 4a4.2 4.2 0 0 1-1.8.1 4.1 4.1 0 0 0 3.9 2.9A8.3 8.3 0 0 1 2 18.4a11.6 11.6 0 0 0 6.3 1.9c7.5 0 11.7-6.3 11.7-11.7v-.5c.8-.6 1.5-1.3 2-2.2Z"/></svg></a>
@@ -912,7 +922,7 @@
       </div>
     </div>
     <div class="footer-bottom">
-      <span>&copy; <span id="year"></span> IGEC Global. All rights reserved.</span>
+      <span>&copy; <span id="year"></span> IGEC Global. All rights reserved. Photography via Unsplash.</span>
       <div class="accreds">
         <span>British Council</span><span>QEAC</span><span>AIRC</span><span>ICEF</span>
       </div>
