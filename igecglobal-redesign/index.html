@@ -524,6 +524,7 @@
   .chat-msg{ max-width:88%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.45; }
   .chat-msg.bot{ align-self:flex-start; background:var(--bg-soft); color:var(--ink); border-bottom-left-radius:4px; }
   .chat-msg.user{ align-self:flex-end; background:var(--navy-800); color:#fff; border-bottom-right-radius:4px; }
+  .chat-msg p{ color:inherit; margin:0; }
   .chat-msg .btn{ margin-top:8px; padding:8px 16px; font-size:13px; min-height:auto; }
   .chat-quick-replies{ display:flex; flex-wrap:wrap; gap:8px; padding:0 18px 12px; flex:none; }
   .chat-quick-replies button{
@@ -1277,7 +1278,8 @@
   (function () {
     var STORE_KEY = 'igecA11yPrefs';
     var html = document.documentElement;
-    var fontLevels = [100, 112, 125, 137, 150];
+    var fontLevels = [85, 92, 100, 112, 125, 137, 150];
+    var DEFAULT_FONT_INDEX = fontLevels.indexOf(100);
 
     function loadPrefs() {
       try {
@@ -1289,7 +1291,7 @@
     }
 
     var prefs = loadPrefs();
-    var fontIndex = typeof prefs.fontIndex === 'number' ? prefs.fontIndex : 0;
+    var fontIndex = typeof prefs.fontIndex === 'number' ? prefs.fontIndex : DEFAULT_FONT_INDEX;
 
     function applyFontLevel() {
       html.style.zoom = fontLevels[fontIndex] + '%';
@@ -1333,7 +1335,7 @@
       prefs.fontIndex = fontIndex; savePrefs(prefs); applyFontLevel();
     });
     if (resetFontBtn) resetFontBtn.addEventListener('click', function () {
-      fontIndex = 0; prefs.fontIndex = fontIndex; savePrefs(prefs); applyFontLevel();
+      fontIndex = DEFAULT_FONT_INDEX; prefs.fontIndex = fontIndex; savePrefs(prefs); applyFontLevel();
     });
 
     [['a11yContrast', 'contrast'], ['a11yReadable', 'readable'], ['a11yUnderline', 'underline'], ['a11yMotion', 'motion']].forEach(function (pair) {
@@ -1348,7 +1350,7 @@
 
     var resetAllBtn = document.getElementById('a11yResetAll');
     if (resetAllBtn) resetAllBtn.addEventListener('click', function () {
-      prefs = {}; fontIndex = 0; savePrefs(prefs); applyAll();
+      prefs = {}; fontIndex = DEFAULT_FONT_INDEX; savePrefs(prefs); applyAll();
     });
   })();
 
