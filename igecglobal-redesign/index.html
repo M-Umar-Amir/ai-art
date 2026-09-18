@@ -80,7 +80,7 @@
     overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; border:0;
   }
 
-  section{ padding:88px 0; }
+  section{ padding:88px 0; scroll-margin-top:88px; }
   @media (max-width:768px){ section{ padding:56px 0; } }
 
   .eyebrow{
@@ -456,6 +456,105 @@
     box-shadow:0 -8px 24px rgba(11,42,74,.14);
   }
   @media (max-width:720px){ .mobile-cta{ display:block; } body{ padding-bottom:70px; } }
+
+  /* ---------- Floating widgets (chat + accessibility) ---------- */
+  .widget-fab{
+    position:fixed; bottom:24px; z-index:900; width:56px; height:56px; border-radius:50%;
+    display:flex; align-items:center; justify-content:center; border:none; cursor:pointer;
+    box-shadow:0 10px 28px rgba(11,42,74,.28); transition:transform .15s ease, box-shadow .15s ease;
+  }
+  .widget-fab:hover{ transform:translateY(-3px); }
+  .widget-fab svg{ width:26px; height:26px; }
+  .chat-fab{ right:24px; background:var(--orange-500); color:var(--navy-900); }
+  .a11y-fab{ left:24px; background:var(--navy-800); color:#fff; }
+  @media (max-width:720px){
+    .widget-fab{ bottom:calc(70px + 16px); width:50px; height:50px; }
+    .widget-fab svg{ width:23px; height:23px; }
+  }
+
+  .widget-panel{
+    position:fixed; bottom:92px; z-index:901; width:360px; max-width:calc(100vw - 32px);
+    max-height:min(70vh, 560px); background:#fff; border-radius:var(--radius-lg);
+    box-shadow:var(--shadow-lg); border:1px solid var(--line); display:flex; flex-direction:column;
+    overflow:hidden; animation:widgetIn .18s ease;
+  }
+  @keyframes widgetIn{ from{ opacity:0; transform:translateY(10px); } to{ opacity:1; transform:translateY(0); } }
+  @media (prefers-reduced-motion: reduce){ .widget-panel{ animation:none; } }
+  .widget-panel[hidden]{ display:none; }
+  .chat-panel{ right:24px; }
+  .a11y-panel{ left:24px; }
+  @media (max-width:720px){ .widget-panel{ bottom:calc(70px + 74px); } }
+  @media (max-width:420px){
+    .chat-panel{ right:16px; }
+    .a11y-panel{ left:16px; }
+  }
+
+  .widget-panel-header{
+    display:flex; align-items:flex-start; justify-content:space-between; gap:12px;
+    padding:18px 18px 14px; border-bottom:1px solid var(--line); flex:none;
+  }
+  .widget-panel-header h2{ font-size:16px; color:var(--navy-900); margin-bottom:2px; }
+  .chat-subtitle{ font-size:12px; color:var(--muted); font-weight:600; }
+  .widget-close{
+    flex:none; width:32px; height:32px; border-radius:8px; border:1px solid var(--line);
+    background:#fff; color:var(--navy-900); font-size:18px; line-height:1; cursor:pointer;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .widget-close:hover{ background:var(--bg-soft); }
+
+  /* --- Accessibility settings panel --- */
+  .a11y-panel-body{ padding:16px 18px 18px; overflow-y:auto; display:grid; gap:14px; }
+  .a11y-row{ display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .a11y-row > span{ font-size:14.5px; font-weight:700; color:var(--navy-900); }
+  .a11y-stepper{ display:flex; gap:6px; }
+  .a11y-stepper button{
+    width:34px; height:34px; border-radius:8px; border:1.5px solid var(--line); background:#fff;
+    font-weight:700; font-size:13px; color:var(--navy-900); cursor:pointer;
+  }
+  .a11y-stepper button:hover{ border-color:var(--orange-500); }
+  .a11y-toggle-row{
+    display:flex; align-items:center; gap:10px; font-size:14.5px; font-weight:600; color:var(--navy-900);
+    cursor:pointer;
+  }
+  .a11y-toggle-row input{ width:18px; height:18px; flex:none; accent-color:var(--orange-500); }
+  .a11y-note{ font-size:12px; color:var(--muted); margin:2px 0 0; }
+
+  /* --- Chat panel --- */
+  .chat-log{ flex:1; overflow-y:auto; padding:16px 18px; display:flex; flex-direction:column; gap:10px; }
+  .chat-msg{ max-width:88%; padding:10px 14px; border-radius:14px; font-size:14px; line-height:1.45; }
+  .chat-msg.bot{ align-self:flex-start; background:var(--bg-soft); color:var(--ink); border-bottom-left-radius:4px; }
+  .chat-msg.user{ align-self:flex-end; background:var(--navy-800); color:#fff; border-bottom-right-radius:4px; }
+  .chat-msg .btn{ margin-top:8px; padding:8px 16px; font-size:13px; min-height:auto; }
+  .chat-quick-replies{ display:flex; flex-wrap:wrap; gap:8px; padding:0 18px 12px; flex:none; }
+  .chat-quick-replies button{
+    border:1.5px solid var(--line); background:#fff; color:var(--navy-800); border-radius:999px;
+    padding:7px 13px; font-size:12.5px; font-weight:700; cursor:pointer;
+  }
+  .chat-quick-replies button:hover{ border-color:var(--orange-500); }
+  .chat-form{ flex:none; display:flex; gap:8px; padding:12px 14px; border-top:1px solid var(--line); }
+  .chat-form input{
+    flex:1; border:1.5px solid var(--line); border-radius:999px; padding:10px 16px; font-size:14px;
+    font-family:inherit; min-height:40px;
+  }
+  .chat-form input:focus{ border-color:var(--orange-500); }
+  .chat-form button{
+    flex:none; width:40px; height:40px; border-radius:50%; border:none; background:var(--orange-500);
+    color:var(--navy-900); display:flex; align-items:center; justify-content:center; cursor:pointer;
+  }
+  .chat-form button svg{ width:18px; height:18px; }
+
+  /* --- Accessibility preference states (toggled on <html>) --- */
+  html.a11y-contrast{ --ink:#000; --muted:#333; --line:#7a7a7a; --orange-text:#8a3d00; }
+  html.a11y-contrast body{ background:#fff; }
+  html.a11y-contrast .feature-card, html.a11y-contrast .step, html.a11y-contrast .testi-card,
+  html.a11y-contrast details.faq-item, html.a11y-contrast .uni-chip{ border-width:2px; }
+  html.a11y-readable body{ font-family:Arial, Helvetica, sans-serif; letter-spacing:.01em; line-height:1.75; }
+  html.a11y-readable p, html.a11y-readable li{ max-width:68ch; }
+  html.a11y-underline-links a{ text-decoration:underline !important; text-underline-offset:3px; }
+  html.a11y-reduce-motion *, html.a11y-reduce-motion *::before, html.a11y-reduce-motion *::after{
+    animation-duration:.001ms !important; animation-iteration-count:1 !important;
+    transition-duration:.001ms !important; scroll-behavior:auto !important;
+  }
 </style>
 </head>
 <body>
@@ -1017,6 +1116,56 @@
   <a class="btn btn-primary btn-block" href="#consultation">Book a Free Consultation</a>
 </div>
 
+<!-- ================= ACCESSIBILITY SETTINGS WIDGET ================= -->
+<button type="button" class="widget-fab a11y-fab" id="a11yToggle" aria-expanded="false" aria-controls="a11yPanel" aria-label="Accessibility settings">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><circle cx="12" cy="5" r="2"/><path d="M19 8.5c-2.2.8-4.7 1.2-7 1.2s-4.8-.4-7-1.2M12 9.7V22M8 14l-2.5 8M16 14l2.5 8M9 13.5h6"/></svg>
+</button>
+<div class="widget-panel a11y-panel" id="a11yPanel" role="region" aria-label="Accessibility settings" hidden>
+  <div class="widget-panel-header">
+    <div><h2>Accessibility Settings</h2><span class="chat-subtitle">Your choices are saved on this device</span></div>
+    <button type="button" class="widget-close" id="a11yClose" aria-label="Close accessibility settings">✕</button>
+  </div>
+  <div class="a11y-panel-body">
+    <div class="a11y-row">
+      <span>Text size</span>
+      <div class="a11y-stepper">
+        <button type="button" id="a11yFontDec" aria-label="Decrease text size">A−</button>
+        <button type="button" id="a11yFontReset" aria-label="Reset text size">A</button>
+        <button type="button" id="a11yFontInc" aria-label="Increase text size">A+</button>
+      </div>
+    </div>
+    <label class="a11y-toggle-row"><input type="checkbox" id="a11yContrast"> High contrast</label>
+    <label class="a11y-toggle-row"><input type="checkbox" id="a11yReadable"> Easy-read font &amp; spacing</label>
+    <label class="a11y-toggle-row"><input type="checkbox" id="a11yUnderline"> Underline all links</label>
+    <label class="a11y-toggle-row"><input type="checkbox" id="a11yMotion"> Reduce motion</label>
+    <button type="button" class="btn btn-outline-navy btn-block" id="a11yResetAll">Reset all</button>
+    <p class="a11y-note">These settings adjust how this site displays. Your browser's own zoom and screen reader also work as normal alongside them.</p>
+  </div>
+</div>
+
+<!-- ================= CHAT ASSISTANT WIDGET ================= -->
+<button type="button" class="widget-fab chat-fab" id="chatToggle" aria-expanded="false" aria-controls="chatPanel" aria-label="Open chat assistant">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="M4 5h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9l-4 4v-4H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"/></svg>
+</button>
+<div class="widget-panel chat-panel" id="chatPanel" role="region" aria-label="Chat assistant" hidden>
+  <div class="widget-panel-header">
+    <div><h2>IGEC Assistant</h2><span class="chat-subtitle">Automated · answers basic questions</span></div>
+    <button type="button" class="widget-close" id="chatClose" aria-label="Close chat">✕</button>
+  </div>
+  <div class="chat-log" id="chatLog" role="log" aria-live="polite" aria-label="Conversation"></div>
+  <div class="chat-quick-replies" id="chatQuickReplies">
+    <button type="button" data-q="ielts">IELTS/PTE requirements?</button>
+    <button type="button" data-q="cost">What does it cost?</button>
+    <button type="button" data-q="visa">Visa help?</button>
+    <button type="button" data-q="human">Talk to a person</button>
+  </div>
+  <form class="chat-form" id="chatForm">
+    <label for="chatInput" class="visually-hidden">Type your question</label>
+    <input type="text" id="chatInput" placeholder="Ask a question…" autocomplete="off">
+    <button type="submit" aria-label="Send message"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true" focusable="false"><path d="m3 11 18-8-8 18-2-8-8-2Z"/></svg></button>
+  </form>
+</div>
+
 <script>
 (function(){
   "use strict";
@@ -1092,6 +1241,211 @@
 
   var yearEl = document.getElementById('year');
   if (yearEl) yearEl.textContent = new Date().getFullYear();
+
+  // ---- Shared widget open/close/focus behaviour (chat + accessibility panels) ----
+  function setupWidget(toggleBtn, panel, closeBtn, focusTarget) {
+    if (!toggleBtn || !panel) return { open: function(){}, close: function(){} };
+
+    function open() {
+      panel.hidden = false;
+      toggleBtn.setAttribute('aria-expanded', 'true');
+      (focusTarget || closeBtn || panel).focus();
+      document.addEventListener('keydown', onKeydown);
+      document.addEventListener('click', onOutsideClick, true);
+    }
+    function close() {
+      panel.hidden = true;
+      toggleBtn.setAttribute('aria-expanded', 'false');
+      toggleBtn.focus();
+      document.removeEventListener('keydown', onKeydown);
+      document.removeEventListener('click', onOutsideClick, true);
+    }
+    function onKeydown(e) { if (e.key === 'Escape') close(); }
+    function onOutsideClick(e) {
+      if (!panel.contains(e.target) && e.target !== toggleBtn && !toggleBtn.contains(e.target)) close();
+    }
+
+    toggleBtn.addEventListener('click', function () {
+      if (panel.hidden) open(); else close();
+    });
+    if (closeBtn) closeBtn.addEventListener('click', close);
+
+    return { open: open, close: close };
+  }
+
+  // ---- Accessibility settings panel ----
+  (function () {
+    var STORE_KEY = 'igecA11yPrefs';
+    var html = document.documentElement;
+    var fontLevels = [100, 112, 125, 137, 150];
+
+    function loadPrefs() {
+      try {
+        return JSON.parse(localStorage.getItem(STORE_KEY)) || {};
+      } catch (e) { return {}; }
+    }
+    function savePrefs(prefs) {
+      try { localStorage.setItem(STORE_KEY, JSON.stringify(prefs)); } catch (e) { /* storage unavailable, ignore */ }
+    }
+
+    var prefs = loadPrefs();
+    var fontIndex = typeof prefs.fontIndex === 'number' ? prefs.fontIndex : 0;
+
+    function applyFontLevel() {
+      html.style.zoom = fontLevels[fontIndex] + '%';
+    }
+    function applyToggle(key, className) {
+      html.classList.toggle(className, !!prefs[key]);
+    }
+    function applyAll() {
+      applyFontLevel();
+      applyToggle('contrast', 'a11y-contrast');
+      applyToggle('readable', 'a11y-readable');
+      applyToggle('underline', 'a11y-underline-links');
+      applyToggle('motion', 'a11y-reduce-motion');
+      var cContrast = document.getElementById('a11yContrast');
+      var cReadable = document.getElementById('a11yReadable');
+      var cUnderline = document.getElementById('a11yUnderline');
+      var cMotion = document.getElementById('a11yMotion');
+      if (cContrast) cContrast.checked = !!prefs.contrast;
+      if (cReadable) cReadable.checked = !!prefs.readable;
+      if (cUnderline) cUnderline.checked = !!prefs.underline;
+      if (cMotion) cMotion.checked = !!prefs.motion;
+    }
+    applyAll();
+
+    var toggleBtn = document.getElementById('a11yToggle');
+    var panel = document.getElementById('a11yPanel');
+    var closeBtn = document.getElementById('a11yClose');
+    var panelHeading = panel ? panel.querySelector('h2') : null;
+    if (panelHeading) panelHeading.setAttribute('tabindex', '-1');
+    setupWidget(toggleBtn, panel, closeBtn, panelHeading);
+
+    var decBtn = document.getElementById('a11yFontDec');
+    var incBtn = document.getElementById('a11yFontInc');
+    var resetFontBtn = document.getElementById('a11yFontReset');
+    if (decBtn) decBtn.addEventListener('click', function () {
+      fontIndex = Math.max(0, fontIndex - 1);
+      prefs.fontIndex = fontIndex; savePrefs(prefs); applyFontLevel();
+    });
+    if (incBtn) incBtn.addEventListener('click', function () {
+      fontIndex = Math.min(fontLevels.length - 1, fontIndex + 1);
+      prefs.fontIndex = fontIndex; savePrefs(prefs); applyFontLevel();
+    });
+    if (resetFontBtn) resetFontBtn.addEventListener('click', function () {
+      fontIndex = 0; prefs.fontIndex = fontIndex; savePrefs(prefs); applyFontLevel();
+    });
+
+    [['a11yContrast', 'contrast'], ['a11yReadable', 'readable'], ['a11yUnderline', 'underline'], ['a11yMotion', 'motion']].forEach(function (pair) {
+      var el = document.getElementById(pair[0]);
+      if (!el) return;
+      el.addEventListener('change', function () {
+        prefs[pair[1]] = el.checked;
+        savePrefs(prefs);
+        applyAll();
+      });
+    });
+
+    var resetAllBtn = document.getElementById('a11yResetAll');
+    if (resetAllBtn) resetAllBtn.addEventListener('click', function () {
+      prefs = {}; fontIndex = 0; savePrefs(prefs); applyAll();
+    });
+  })();
+
+  // ---- Chat assistant (rule-based; answers pulled from this page's own content) ----
+  (function () {
+    var toggleBtn = document.getElementById('chatToggle');
+    var panel = document.getElementById('chatPanel');
+    var closeBtn = document.getElementById('chatClose');
+    var log = document.getElementById('chatLog');
+    var form = document.getElementById('chatForm');
+    var input = document.getElementById('chatInput');
+    var quickReplies = document.getElementById('chatQuickReplies');
+    if (!toggleBtn || !panel || !log || !form || !input) return;
+
+    var widget = setupWidget(toggleBtn, panel, closeBtn, input);
+    var greeted = false;
+
+    var replies = [
+      { keys: ['ielts', 'pte', 'english', 'toefl', 'language test'],
+        text: "Most universities need proof of English proficiency (IELTS, PTE Academic or TOEFL). The exact score depends on your course and university, so a counsellor will confirm the specific number for your target list." },
+      { keys: ['cost', 'price', 'fee', 'tuition', 'expensive', 'afford', 'budget', 'money'],
+        text: "Tuition and living costs vary a lot by city, course level and lifestyle. We'll help you build a realistic budget and look at scholarships to help offset it." },
+      { keys: ['visa', 'subclass 500', 'immigration'],
+        text: "We guide you through the Australian student visa (subclass 500) process end to end. Processing time depends on your nationality and documents, so we'll give you a personalised timeline." },
+      { keys: ['work', 'job', 'part time', 'part-time'],
+        text: "Most student visa holders can work part-time during term and more during scheduled breaks, under current Department of Home Affairs rules. We'll confirm the current limits for your visa." },
+      { keys: ['scholarship', 'financial aid', 'funding', 'grant'],
+        text: "Yes — our counsellors help you find university, government and country-specific scholarships you may be eligible for as part of your application." },
+      { keys: ['university', 'universities', 'college', 'course', 'degree', 'study'],
+        text: "We're partnered with 600+ institutions across Australia, including Melbourne, UNSW, ANU, Monash, RMIT and many more. Tell us your field of interest and we'll shortlist courses for you." },
+      { keys: ['office', 'location', 'sydney', 'melbourne', 'branch', 'address'],
+        text: "Our Australia team is based in Sydney and Melbourne, part of IGEC Global's network across 10 countries." },
+      { keys: ['post study', 'post-study', 'pr', 'permanent residency', 'stay', 'graduate'],
+        text: "Australia offers post-study work visa pathways for eligible graduates. Eligibility depends on your course, provider and visa subclass — we'll map out your options." },
+      { keys: ['human', 'person', 'agent', 'counsellor', 'talk', 'call', 'contact'],
+        text: "Of course — the fastest way is to book a free consultation and an IGEC counsellor will follow up with you directly.", cta: true }
+    ];
+
+    function addMessage(text, sender, withCta) {
+      var msg = document.createElement('div');
+      msg.className = 'chat-msg ' + sender;
+      var p = document.createElement('p');
+      p.style.margin = '0';
+      p.textContent = text;
+      msg.appendChild(p);
+      if (withCta) {
+        var a = document.createElement('a');
+        a.href = '#consultation';
+        a.className = 'btn btn-primary';
+        a.textContent = 'Book a Free Consultation';
+        a.style.display = 'inline-block';
+        a.addEventListener('click', function () { widget.close(); });
+        msg.appendChild(a);
+      }
+      log.appendChild(msg);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    function respond(userText) {
+      var lower = userText.toLowerCase();
+      var match = replies.find(function (r) { return r.keys.some(function (k) { return lower.indexOf(k) !== -1; }); });
+      setTimeout(function () {
+        if (match) {
+          addMessage(match.text, 'bot', !!match.cta);
+        } else {
+          addMessage("I don't have a specific answer for that yet, but a real IGEC counsellor can help directly.", 'bot', true);
+        }
+      }, 450);
+    }
+
+    toggleBtn.addEventListener('click', function () {
+      if (!greeted && !panel.hidden) {
+        greeted = true;
+        addMessage("Hi! I'm IGEC's automated assistant — I can answer basic questions about universities, visas, costs and scholarships. Ask me anything, or say “human” to book a free consultation.", 'bot');
+      }
+    });
+
+    if (quickReplies) {
+      quickReplies.addEventListener('click', function (e) {
+        var btn = e.target.closest('button[data-q]');
+        if (!btn) return;
+        var map = { ielts: 'What are the IELTS/PTE requirements?', cost: 'What does it cost?', visa: 'Can you help with my visa?', human: 'I want to talk to a person' };
+        var text = map[btn.getAttribute('data-q')] || btn.textContent;
+        addMessage(text, 'user');
+        respond(text);
+      });
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      var text = input.value.trim();
+      if (!text) return;
+      addMessage(text, 'user');
+      input.value = '';
+      respond(text);
+    });
+  })();
 })();
 </script>
 </body>
