@@ -151,9 +151,9 @@
   .brand-text{ font-weight:800; color:var(--navy-text); font-size:15px; line-height:1.15; }
   .brand-text small{ display:block; font-weight:600; color:var(--muted); font-size:10.5px; letter-spacing:.03em; }
 
-  nav#primary-nav{ display:flex; align-items:center; gap:28px; }
+  nav#primary-nav{ display:flex; align-items:center; gap:22px; }
   nav#primary-nav a{
-    font-weight:600; font-size:15px; color:var(--navy-text); text-decoration:none;
+    font-weight:600; font-size:15px; color:var(--navy-text); text-decoration:none; white-space:nowrap;
     padding:6px 2px; border-bottom:2px solid transparent;
   }
   nav#primary-nav a:hover{ border-color:var(--orange-500); }
@@ -174,7 +174,7 @@
   .nav-toggle[aria-expanded="true"] span::before{ top:0; transform:rotate(45deg); background:var(--navy-900); }
   .nav-toggle[aria-expanded="true"] span::after{ top:0; transform:rotate(-45deg); background:var(--navy-900); }
 
-  @media (max-width:960px){
+  @media (max-width:1180px){
     nav#primary-nav{
       position:fixed; inset:73px 0 0 0; background:#fff; flex-direction:column;
       align-items:stretch; gap:0; padding:12px 24px 24px; overflow-y:auto;
@@ -186,14 +186,14 @@
     .nav-actions .btn-primary{ display:none; }
     nav#primary-nav .nav-cta{ display:flex; margin-top:16px; }
   }
-  @media (min-width:961px){ .nav-cta{ display:none; } }
+  @media (min-width:1181px){ .nav-cta{ display:none; } }
 
   /* ---------- Hero ---------- */
   .hero{
     position:relative; overflow:hidden; color:#fff;
     background:radial-gradient(1100px 600px at 85% -10%, rgba(246,130,31,.30), transparent 60%),
-               linear-gradient(160deg, rgba(38,38,42,.90) 0%, rgba(58,58,62,.82) 45%, rgba(84,84,88,.68) 100%),
-               url('/igecglobal-redesign/assets/aistylized_images/photo-1.png') center 30%/cover no-repeat;
+               linear-gradient(100deg, rgba(30,30,34,.86) 0%, rgba(44,44,48,.72) 50%, rgba(64,64,68,.48) 100%),
+               url('/igecglobal-redesign/assets/images/hero-bg.jpg') center 40%/cover no-repeat;
     padding:80px 0 210px;
   }
   .hero::before, .hero::after{
@@ -202,15 +202,51 @@
   .hero::before{ width:420px; height:420px; background:radial-gradient(circle, rgba(246,130,31,.35), transparent 70%); top:-160px; right:-120px; }
   .hero::after{ width:340px; height:340px; background:radial-gradient(circle, rgba(120,120,125,.5), transparent 70%); bottom:-140px; left:-100px; }
   .hero-inner{ position:relative; z-index:2; display:grid; grid-template-columns:1.15fr .85fr; gap:48px; align-items:center; }
-  @media (max-width:960px){ .hero-inner{ grid-template-columns:1fr; } }
+  @media (max-width:1100px){ .hero-inner{ grid-template-columns:1fr; gap:32px; }
+    .hero-art{ display:grid; grid-template-columns:auto 1fr; gap:28px; align-items:center; }
+    .years-badge{ margin:0; } }
+  @media (max-width:640px){ .hero-art{ grid-template-columns:1fr; gap:18px; } .years-badge{ margin:0 auto; }
+    .hero-topbar{ justify-content:flex-start; margin:-56px auto 16px; } .hero{ padding-top:88px; } .hero-tagline{ border-radius:24px; } }
 
-  .hero-badge{
-    display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.12);
-    border:1px solid rgba(255,255,255,.28); padding:8px 16px; border-radius:999px;
-    font-weight:700; font-size:13px; letter-spacing:.02em; margin-bottom:20px;
+  .hero-topbar{ position:relative; z-index:2; display:flex; justify-content:flex-end; margin:-40px auto 28px; }
+  .social-list{ display:flex; align-items:center; gap:6px; }
+  .social-list a{
+    display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px;
+    border-radius:50%; color:#fff; transition:background .15s ease, color .15s ease, transform .15s ease;
   }
-  .hero h1{ font-size:clamp(34px,5.2vw,56px); color:#fff; margin-bottom:20px; }
+  .social-list a:hover{ background:rgba(255,255,255,.18); color:var(--orange-500); transform:translateY(-2px); }
+  .social-list svg{ width:22px; height:22px; fill:currentColor; }
+
+  .hero h1{
+    font-size:clamp(28px,4.4vw,50px); color:#fff; margin-bottom:22px;
+    text-transform:uppercase; letter-spacing:.01em; line-height:1.14;
+    text-shadow:0 2px 14px rgba(0,0,0,.35);
+  }
   .hero h1 .accent{ color:var(--orange-500); }
+  .hero h1 .nw{ white-space:nowrap; }
+  .hero h1 .almost{
+    font-size:.62em; color:#fff; padding-bottom:2px; border-bottom:.09em solid #FFC21A; display:inline-block; line-height:1.1;
+  }
+  .hero-tagline{
+    display:inline-block; max-width:100%; margin:0 0 24px; padding:12px 26px; border-radius:999px;
+    background:#000; color:#fff; border:3px solid #fff; box-shadow:0 6px 20px rgba(0,0,0,.35);
+    font-weight:800; font-size:clamp(14px,1.9vw,20px); text-transform:uppercase; letter-spacing:.03em; line-height:1.25;
+  }
+  .hero-tagline .accent, .hero-tagline .q{ color:var(--orange-500); }
+
+  .years-badge{ display:flex; flex-direction:column; align-items:center; text-align:center; margin:0 auto 22px; max-width:240px; }
+  .years-badge svg{ width:150px; height:auto; filter:drop-shadow(0 4px 12px rgba(0,0,0,.4)); }
+  .years-badge p{ margin:8px 0 0; color:#fff; font-weight:700; font-size:16px; line-height:1.3; text-shadow:0 1px 8px rgba(0,0,0,.5); }
+
+  .lang-switch{ display:flex; align-items:center; gap:4px; }
+  .lang-switch button{
+    display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px; padding:0;
+    background:transparent; border:2px solid transparent; border-radius:10px; cursor:pointer; opacity:.7;
+    transition:opacity .15s ease, border-color .15s ease;
+  }
+  .lang-switch button:hover{ opacity:1; }
+  .lang-switch button[aria-pressed="true"]{ opacity:1; border-color:var(--orange-500); }
+  .lang-switch svg{ width:30px; height:auto; border-radius:3px; box-shadow:0 0 0 1px rgba(0,0,0,.15); }
   .hero p.lead{ font-size:18px; color:rgba(255,255,255,.86); max-width:520px; margin-bottom:32px; }
   .hero-ctas{ display:flex; flex-wrap:wrap; gap:14px; margin-bottom:44px; }
 
@@ -406,7 +442,8 @@
 
   /* ---------- Consultation form ---------- */
   .consult-wrap{ display:grid; grid-template-columns:.9fr 1.1fr; gap:48px; align-items:start; }
-  @media (max-width:900px){ .consult-wrap{ grid-template-columns:1fr; } }
+  @media (max-width:900px){ .consult-wrap{ grid-template-columns:minmax(0,1fr); } }
+  .consult-wrap > *{ min-width:0; }
   .consult-form{ background:#fff; border:1px solid var(--line); border-radius:var(--radius-lg); padding:32px; box-shadow:var(--shadow-md); }
   .form-grid{ display:grid; grid-template-columns:1fr 1fr; gap:18px; }
   @media (max-width:520px){ .form-grid{ grid-template-columns:1fr; } }
@@ -582,6 +619,10 @@
     </nav>
 
     <div class="nav-actions">
+      <div class="lang-switch" role="group" aria-label="Language">
+        <button type="button" data-lang="ar" aria-pressed="false" aria-label="Arabic" title="العربية"><svg viewBox="0 0 30 20" aria-hidden="true" focusable="false"><rect width="30" height="20" fill="#0B7A3E"/><path d="M6 8.5q1.5-3 3-.5t3-.5 3 .5 3-.5 3 .5M7 10.5h16" stroke="#fff" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M7 14.2h16M22.500 14.200l-1.500 1M7.500 14.200" stroke="#fff" stroke-width="1" fill="none"/></svg></button>
+        <button type="button" data-lang="en" aria-pressed="true" aria-label="English" title="English"><svg viewBox="0 0 60 40" aria-hidden="true" focusable="false"><rect width="60" height="40" fill="#012169"/><path d="M0 0 60 40M60 0 0 40" stroke="#fff" stroke-width="8"/><path d="M0 0 60 40M60 0 0 40" stroke="#C8102E" stroke-width="3"/><path d="M30 0v40M0 20h60" stroke="#fff" stroke-width="13"/><path d="M30 0v40M0 20h60" stroke="#C8102E" stroke-width="8"/></svg></button>
+      </div>
       <a class="btn btn-primary" href="#consultation">Book Free Consultation</a>
       <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="primary-nav">
         <span></span>
@@ -595,10 +636,20 @@
 
   <!-- ================= HERO ================= -->
   <section class="hero" id="home">
+    <div class="container hero-topbar">
+      <ul class="social-list" aria-label="IGEC Global on social media">
+        <li><a href="https://youtube.com/@igecglobal" target="_blank" rel="noopener" aria-label="YouTube"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8zM9.6 15.6V8.4l6.2 3.6-6.2 3.6z"/></svg></a></li>
+        <li><a href="#" target="_blank" rel="noopener" aria-label="LinkedIn"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20.4 20.5h-3.6v-5.6c0-1.3 0-3-1.8-3s-2.1 1.4-2.1 2.9v5.7H9.4V9h3.4v1.6h.1a3.7 3.7 0 0 1 3.4-1.9c3.6 0 4.3 2.4 4.3 5.5v6.3zM5.3 7.4a2.1 2.1 0 1 1 0-4.2 2.1 2.1 0 0 1 0 4.2zM7.1 20.5H3.6V9h3.5v11.5zM22.2 0H1.8C.8 0 0 .8 0 1.7v20.6c0 .9.8 1.7 1.8 1.7h20.4c1 0 1.8-.8 1.8-1.7V1.7C24 .8 23.2 0 22.2 0z"/></svg></a></li>
+        <li><a href="https://facebook.com/igecglobal" target="_blank" rel="noopener" aria-label="Facebook"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13.5 22v-8.2h2.8l.4-3.2h-3.2V8.5c0-.9.3-1.6 1.6-1.6h1.7V4.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.3H7.3v3.2h2.8V22h3.4z"/></svg></a></li>
+        <li><a href="https://twitter.com/igecglobal" target="_blank" rel="noopener" aria-label="X (Twitter)"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M18.2 2.2h3.3l-7.2 8.3 8.5 11.3h-6.7l-5.2-6.9-6 6.9H1.6l7.7-8.9L1.2 2.2H8l4.7 6.3 5.5-6.3zm-1.2 17.6h1.8L7.1 4.1H5.2L17 19.8z"/></svg></a></li>
+        <li><a href="https://instagram.com/igecglobal" target="_blank" rel="noopener" aria-label="Instagram"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 2.2c3.2 0 3.6 0 4.8.1 3.3.1 4.8 1.7 4.9 4.9.1 1.3.1 1.6.1 4.8s0 3.6-.1 4.8c-.1 3.2-1.7 4.8-4.9 4.9-1.3.1-1.6.1-4.8.1s-3.6 0-4.8-.1c-3.3-.1-4.8-1.7-4.9-4.9C2.2 15.6 2.2 15.2 2.2 12s0-3.6.1-4.8C2.4 3.9 4 2.4 7.2 2.3 8.4 2.2 8.8 2.2 12 2.2zM12 0C8.7 0 8.3 0 7.1.1 2.7.3.3 2.7.1 7.1 0 8.3 0 8.7 0 12s0 3.7.1 4.9c.2 4.4 2.6 6.8 7 7C8.3 24 8.7 24 12 24s3.7 0 4.9-.1c4.4-.2 6.8-2.6 7-7 .1-1.2.1-1.6.1-4.9s0-3.7-.1-4.9c-.2-4.4-2.6-6.8-7-7C15.7 0 15.3 0 12 0zm0 5.8a6.2 6.2 0 1 0 0 12.4 6.2 6.2 0 0 0 0-12.4zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.4-11.8a1.4 1.4 0 1 0 0 2.9 1.4 1.4 0 0 0 0-2.9z"/></svg></a></li>
+        <li><a href="#" target="_blank" rel="noopener" aria-label="Pinterest"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 0a12 12 0 0 0-4.4 23.2c-.1-.9-.2-2.4 0-3.4l1.4-6s-.4-.7-.4-1.8c0-1.7 1-2.9 2.2-2.9 1 0 1.5.8 1.5 1.7 0 1-.7 2.6-1 4-.3 1.2.6 2.2 1.8 2.2 2.1 0 3.8-2.3 3.8-5.5 0-2.9-2.1-4.9-5-4.9-3.4 0-5.4 2.6-5.4 5.2 0 1 .4 2.1.9 2.7.1.1.1.2.1.4l-.3 1.4c-.1.2-.2.3-.4.2-1.5-.7-2.4-2.9-2.4-4.6 0-3.8 2.8-7.3 8-7.3 4.2 0 7.4 3 7.4 6.9 0 4.1-2.6 7.5-6.2 7.5-1.2 0-2.4-.6-2.8-1.4l-.8 2.9c-.3 1-1 2.3-1.5 3.1A12 12 0 1 0 12 0z"/></svg></a></li>
+      </ul>
+    </div>
     <div class="container hero-inner">
       <div>
-        <span class="hero-badge">🎓 Australia Education Specialists · 30+ Years Worldwide</span>
-        <h1>Study in Australia.<br><span class="accent">We will get you there.</span></h1>
+        <h1>Premium Educational Guidance &amp; Student Mentoring <span class="accent">Since <span class="almost">Almost</span> <span class="nw">30 Years</span></span></h1>
+        <p class="hero-tagline"><span class="q" aria-hidden="true">“</span>Where Dreams Meet <span class="accent">Direction</span><span class="q" aria-hidden="true">”</span></p>
         <p class="lead">From choosing the right course to landing your student visa, IGEC Global's Australia specialists guide you through every step of your application — free of charge.</p>
         <div class="hero-ctas">
           <a class="btn btn-primary" href="#consultation">Book a Free Consultation</a>
@@ -613,6 +664,15 @@
       </div>
 
       <div class="hero-art">
+        <div class="years-badge">
+          <svg viewBox="0 0 120 120" role="img" aria-label="30 years">
+            <g fill="#fff"><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(47.8 103.4) rotate(-105) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(35.2 97.9) rotate(-122) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(24.7 89.0) rotate(-139) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(17.2 77.4) rotate(-156) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(13.4 64.1) rotate(-172) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(13.6 50.3) rotate(-189) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(17.8 37.2) rotate(-206) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(25.7 25.9) rotate(-223) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(36.5 17.3) rotate(-240) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(72.2 103.4) rotate(105) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(84.8 97.9) rotate(122) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(95.3 89.0) rotate(139) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(102.8 77.4) rotate(156) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(106.6 64.1) rotate(172) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(106.4 50.3) rotate(189) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(102.2 37.2) rotate(206) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(94.3 25.9) rotate(223) scale(.85)"/><path d="M0-10C5-4 5 4 0 10 -5 4-5-4 0-10Z" transform="translate(83.5 17.3) rotate(240) scale(.85)"/></g><path d="M60 108c-2 4-6 6-10 7M60 108c2 4 6 6 10 7" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/>
+            <path d="M38 34h44M38 88h44" stroke="#F6821F" stroke-width="1.6"/>
+            <text x="60" y="66" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="34" font-weight="700" fill="#F6821F">30</text>
+            <text x="60" y="80" text-anchor="middle" font-family="Georgia,'Times New Roman',serif" font-size="12" font-weight="700" fill="#fff" letter-spacing=".5">YEARS</text>
+          </svg>
+          <p>Converting Dreams into Degrees</p>
+        </div>
         <div class="art-card">
           <h3>What you get, at no cost</h3>
           <p>Every consultation with an IGEC counsellor includes:</p>
@@ -1173,6 +1233,13 @@
 <script>
 (function(){
   "use strict";
+
+  // Language switch (UI state only; Arabic content not yet provided)
+  document.querySelectorAll('.lang-switch button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      document.querySelectorAll('.lang-switch button').forEach(function(b){ b.setAttribute('aria-pressed', String(b === btn)); });
+    });
+  });
 
   // Mobile nav toggle
   var toggle = document.getElementById('navToggle');
