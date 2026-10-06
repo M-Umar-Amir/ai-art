@@ -1,0 +1,571 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#160a1e" />
+    <title>Dallas Dash — a Dallas runner with a fried-chicken menu</title>
+    <meta property="og:title" content="Dallas Dash" />
+    <meta
+      property="og:description"
+      content="A Dallas-inspired runner: sprint downtown past Reunion Tower and the Margaret Hunt Hill Bridge, collect a fried-chicken menu, and turn verified points into a 15% food coupon."
+    />
+    <style>
+      :root {
+        color-scheme: dark;
+        /* Big D Fried — the fictional restaurant brand the game is set around */
+        --brand: #0e7c86;
+        --brand-deep: #075c63;
+        --cream: #fff4e6;
+        --dusk: #160a1e;
+        --dusk-2: #241033;
+        --amber: #ffa23a;
+        --green: #7ee08a;
+        --dim: #cbb6d6;
+        --line: rgba(255, 244, 230, 0.16);
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+      }
+      * { box-sizing: border-box; }
+      html, body { height: 100%; }
+      body {
+        margin: 0;
+        background: var(--dusk);
+        color: var(--cream);
+        font: 15px/1.45 ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+        overscroll-behavior: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      #view {
+        position: fixed;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        display: block;
+        touch-action: none;
+      }
+      .hidden { display: none !important; }
+
+      /* ── top bar ───────────────────────────────────────────────────── */
+      #topbar {
+        position: fixed;
+        inset: 0 0 auto 0;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+        padding: 0.6rem 0.75rem;
+        background: linear-gradient(180deg, rgba(22, 10, 30, 0.85), rgba(22, 10, 30, 0));
+        pointer-events: none;
+        z-index: 5;
+      }
+      .brand { display: flex; align-items: center; gap: 0.5rem; }
+      .bmark {
+        background: var(--brand);
+        color: #fff;
+        font: 800 0.8rem/1 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.06em;
+        padding: 0.42rem 0.5rem;
+        border-radius: 0.4rem;
+        box-shadow: inset 0 0 0 2px #fff;
+      }
+      .bname {
+        font: 900 1rem/1 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
+      }
+      #topbar .right {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        pointer-events: auto;
+      }
+      #netstat { font-size: 0.7rem; color: var(--dim); }
+      #netstat.bad { color: #ff8b8b; }
+
+      button {
+        font: 700 0.8rem/1 ui-sans-serif, system-ui, sans-serif;
+        color: var(--cream);
+        background: rgba(255, 244, 230, 0.1);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.5rem 0.8rem;
+        cursor: pointer;
+      }
+      button:active { transform: translateY(1px); }
+      button.primary {
+        background: var(--brand);
+        border-color: #fff;
+        box-shadow: 0 6px 0 var(--brand-deep);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      button.primary:active { box-shadow: 0 3px 0 var(--brand-deep); transform: translateY(3px); }
+      /* a testing control must not look like a real one */
+      button.test {
+        border: 1px dashed var(--amber);
+        color: var(--amber);
+        background: rgba(255, 162, 58, 0.08);
+        text-transform: none;
+      }
+      button.test:disabled { opacity: 0.5; cursor: default; }
+
+      /* ── run HUD ───────────────────────────────────────────────────── */
+      #hud {
+        position: fixed;
+        top: 3.4rem;
+        left: 0;
+        right: 0;
+        z-index: 4;
+        pointer-events: none;
+        padding: 0 0.75rem;
+      }
+      .hudrow { display: flex; gap: 0.9rem; align-items: flex-end; }
+      .stat { display: flex; flex-direction: column; line-height: 1.05; }
+      .stat b {
+        font: 900 1.35rem/1 ui-sans-serif, system-ui, sans-serif;
+        text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+      }
+      .stat span {
+        font-size: 0.62rem;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--dim);
+      }
+      .stat.big b { font-size: 2.1rem; color: #fff; }
+      .stat.flare b { color: var(--amber); animation: pop 320ms ease-out; }
+      @keyframes pop {
+        0% { transform: scale(1); }
+        45% { transform: scale(1.45); }
+        100% { transform: scale(1); }
+      }
+      .pill {
+        margin-top: 0.5rem;
+        max-width: 26rem;
+        background: rgba(22, 10, 30, 0.5);
+        border: 1px solid var(--line);
+        border-radius: 0.9rem;
+        padding: 0.5rem 0.65rem;
+      }
+      .pill .bar { margin-top: 0; }
+      #runactions { position: fixed; right: 0.75rem; top: 7.2rem; z-index: 6; pointer-events: auto; }
+      #countdown {
+        position: fixed;
+        inset: 0;
+        z-index: 9;
+        display: grid;
+        place-content: center;
+        font: 900 6.5rem/1 ui-sans-serif, system-ui, sans-serif;
+        color: #fff;
+        text-shadow: 0 6px 0 var(--brand-deep), 0 0 45px rgba(0, 0, 0, 0.65);
+        pointer-events: none;
+      }
+      #countdown.go { color: var(--amber); }
+      .hearts { margin-top: 0.5rem; display: flex; gap: 0.3rem; }
+      .heart {
+        width: 0.75rem;
+        height: 0.75rem;
+        border-radius: 0.2rem;
+        background: var(--brand);
+        box-shadow: inset 0 0 0 2px #fff;
+        transform: rotate(45deg);
+      }
+      .heart.gone { background: rgba(255, 244, 230, 0.18); box-shadow: inset 0 0 0 2px rgba(255, 244, 230, 0.3); }
+      .bar {
+        margin-top: 0.55rem;
+        height: 0.55rem;
+        border-radius: 999px;
+        background: rgba(22, 10, 30, 0.6);
+        border: 1px solid var(--line);
+        overflow: hidden;
+        max-width: 26rem;
+      }
+      #vBar {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--amber), var(--brand));
+        transition: width 240ms ease;
+      }
+      .barlabel {
+        display: flex;
+        justify-content: space-between;
+        gap: 0.5rem;
+        max-width: 26rem;
+        margin-top: 0.3rem;
+        font-size: 0.7rem;
+        color: var(--dim);
+      }
+
+      #toast {
+        position: fixed;
+        left: 50%;
+        bottom: 30%;
+        transform: translateX(-50%);
+        z-index: 6;
+        background: rgba(22, 10, 30, 0.82);
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.45rem 0.9rem;
+        font: 700 0.8rem/1 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.06em;
+        white-space: nowrap;
+      }
+      #hint {
+        position: fixed;
+        left: 50%;
+        bottom: 1rem;
+        transform: translateX(-50%);
+        z-index: 6;
+        font-size: 0.72rem;
+        color: var(--dim);
+        background: rgba(22, 10, 30, 0.7);
+        border-radius: 999px;
+        padding: 0.35rem 0.8rem;
+      }
+
+      #touch {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 7;
+        display: none;
+        justify-content: space-between;
+        padding: 0 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
+      }
+      #touch .pad { display: flex; gap: 0.6rem; }
+      #touch button {
+        width: 4.2rem;
+        height: 3.2rem;
+        font-size: 1.2rem;
+        background: rgba(255, 244, 230, 0.14);
+        backdrop-filter: blur(4px);
+      }
+      @media (pointer: coarse) { #touch { display: flex; } #hint { display: none; } }
+
+      /* ── panels ────────────────────────────────────────────────────── */
+      .panel {
+        position: fixed;
+        z-index: 8;
+        inset: auto 0 0 0;
+        max-height: 92dvh;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+        background: linear-gradient(180deg, rgba(36, 16, 51, 0.96), rgba(22, 10, 30, 0.99));
+        border-top: 3px solid var(--brand);
+        border-radius: 1.1rem 1.1rem 0 0;
+        box-shadow: var(--shadow);
+        padding: 1rem 1rem calc(1.4rem + env(safe-area-inset-bottom));
+      }
+      @media (min-width: 760px) {
+        .panel {
+          inset: 50% auto auto 50%;
+          transform: translate(-50%, -50%);
+          width: min(46rem, 94vw);
+          border: 3px solid var(--brand);
+          border-radius: 1.4rem;
+          max-height: 88dvh;
+        }
+      }
+      .panel h1 {
+        margin: 0.1rem 0 0.2rem;
+        font: 900 2rem/1 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        text-shadow: 0 3px 0 var(--brand-deep);
+      }
+      .panel h2 {
+        margin: 1.1rem 0 0.4rem;
+        font: 800 0.78rem/1 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--amber);
+      }
+      .panel p { margin: 0.35rem 0; color: var(--dim); }
+      .lede { color: var(--cream) !important; }
+      .tagrow { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0 0.2rem; }
+      .tag {
+        font: 700 0.66rem/1 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.35rem 0.6rem;
+        color: var(--dim);
+      }
+      .tag.hot { border-color: var(--brand); color: #fff; background: rgba(14, 124, 134, 0.28); }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+      }
+      .cell {
+        background: rgba(255, 244, 230, 0.06);
+        border: 1px solid var(--line);
+        border-radius: 0.7rem;
+        padding: 0.55rem 0.65rem;
+      }
+      .cell b { display: block; font: 900 1.15rem/1.1 ui-sans-serif, system-ui, sans-serif; }
+      .cell span { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+      .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+      ul.steps { margin: 0.3rem 0 0; padding-left: 1.1rem; color: var(--dim); }
+      ul.steps li { margin: 0.25rem 0; }
+      ul.steps b { color: var(--cream); }
+      .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.45rem; }
+      .chip {
+        font-size: 0.7rem;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        padding: 0.28rem 0.55rem;
+        color: var(--dim);
+      }
+      .chip.on { border-color: var(--amber); color: #fff; background: rgba(255, 162, 58, 0.16); }
+      .chip.locked { opacity: 0.45; }
+      .code {
+        font: 800 1.35rem/1.3 ui-monospace, "SFMono-Regular", Menlo, monospace;
+        letter-spacing: 0.14em;
+        background: rgba(0, 0, 0, 0.32);
+        border: 1px dashed var(--amber);
+        border-radius: 0.6rem;
+        padding: 0.7rem 0.8rem;
+        text-align: center;
+        margin: 0.5rem 0;
+      }
+      .receipt {
+        margin-top: 0.5rem;
+        background: rgba(255, 244, 230, 0.94);
+        color: #2a1330;
+        border-radius: 0.8rem;
+        padding: 0.8rem 0.9rem;
+        font: 500 0.85rem/1.6 ui-sans-serif, system-ui, sans-serif;
+      }
+      .receipt .row { display: flex; justify-content: space-between; gap: 0.5rem; }
+      .receipt .row.total { border-top: 1px solid rgba(42, 19, 48, 0.25); margin-top: 0.4rem; padding-top: 0.4rem; font-weight: 800; }
+      .receipt .row .save { color: var(--brand-deep); font-weight: 800; }
+      .note { font-size: 0.72rem; color: var(--dim); margin-top: 0.6rem; }
+      #banner {
+        position: fixed;
+        inset: auto 0 0 0;
+        z-index: 3;
+        background: var(--brand);
+        color: #fff;
+        padding: 0.35rem 0.75rem calc(0.35rem + env(safe-area-inset-bottom));
+        font: 700 0.64rem/1.4 ui-sans-serif, system-ui, sans-serif;
+        letter-spacing: 0.04em;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.15rem 0.6rem;
+        justify-content: center;
+        text-align: center;
+      }
+      #banner span { opacity: 0.92; }
+      #stats {
+        position: fixed;
+        right: 0.6rem;
+        bottom: 2.4rem;
+        z-index: 6;
+        font: 600 0.66rem/1.3 ui-monospace, Menlo, monospace;
+        color: var(--dim);
+        background: rgba(22, 10, 30, 0.6);
+        border-radius: 0.4rem;
+        padding: 0.3rem 0.45rem;
+        pointer-events: none;
+        white-space: pre;
+      }
+      #fatal {
+        position: fixed;
+        inset: 0;
+        z-index: 20;
+        display: grid;
+        place-content: center;
+        gap: 0.5rem;
+        text-align: center;
+        padding: 2rem;
+        background: var(--dusk);
+      }
+      @media (prefers-reduced-motion: reduce) { #vBar { transition: none; } }
+    </style>
+  </head>
+  <body>
+    <canvas id="view"></canvas>
+
+    <header id="topbar">
+      <div class="brand">
+        <span class="bmark">BDF</span>
+        <span class="bname">Dallas Dash</span>
+      </div>
+      <div class="right">
+        <span id="netstat">connecting…</span>
+        <button id="btnMute" type="button">sound off</button>
+        <button id="btnStats" type="button">stats</button>
+      </div>
+    </header>
+
+    <section id="hud" class="hidden">
+      <div class="hudrow">
+        <div class="stat big"><b id="vThisRun">0</b><span>this run</span></div>
+        <div class="stat"><b id="vCombo">x1</b><span>combo</span></div>
+        <div class="stat"><b id="vSpeed">0</b><span>pace</span></div>
+        <div class="stat"><b id="vBest">0</b><span>best</span></div>
+      </div>
+      <div class="hearts" id="vHits"></div>
+      <div class="pill">
+        <div class="bar"><div id="vBar"></div></div>
+        <div class="barlabel"><span id="vPoints">0 verified points</span><span id="vNeed"></span></div>
+      </div>
+      <div id="runactions"><button id="btnQuit" type="button">menu</button></div>
+    </section>
+
+    <div id="toast" class="hidden"></div>
+    <div id="countdown" class="hidden">3</div>
+    <div id="hint" class="hidden">
+      <b>← →</b> lanes · <b>↑</b> jump · <b>↓</b> slide · <b>esc</b> menu
+    </div>
+    <div id="stats" class="hidden"></div>
+
+    <nav id="touch" class="hidden">
+      <div class="pad">
+        <button type="button" data-act="1">◀</button>
+        <button type="button" data-act="2">▶</button>
+      </div>
+      <div class="pad">
+        <button type="button" data-act="4">▼</button>
+        <button type="button" data-act="3">▲</button>
+      </div>
+    </nav>
+
+    <section id="menu" class="panel">
+      <h1>Dallas Dash</h1>
+      <p class="lede">
+        Run downtown Dallas. Collect the menu. Every verified point counts toward a real
+        15% food coupon.
+      </p>
+      <div class="tagrow">
+        <span class="tag hot">Crispy chicken, boxes &amp; bowls</span>
+        <span class="tag">Reunion Tower</span>
+        <span class="tag">Margaret Hunt Hill Bridge</span>
+        <span class="tag">100,000 points = 15% off</span>
+      </div>
+
+      <div class="actions">
+        <button id="btnStart" class="primary" type="button">Start run</button>
+        <button id="btnHow" type="button">How the reward works</button>
+      </div>
+
+      <h2>Your account</h2>
+      <div class="grid">
+        <div class="cell"><b id="vMenuPoints">0</b><span>verified points</span></div>
+        <div class="cell"><b id="vMenuBest">0</b><span>best run</span></div>
+        <div class="cell"><b id="vMenuRuns">0</b><span>runs credited</span></div>
+        <div class="cell"><b id="vMenuDistance">0</b><span>metres run</span></div>
+        <div class="cell"><b id="vMenuStores">0</b><span>storefronts passed</span></div>
+        <div class="cell"><b id="vMenuAccount">…</b><span>account</span></div>
+      </div>
+      <p class="note hidden" id="vRuntimeNote"></p>
+
+      <h2>Dallas landmarks seen</h2>
+      <p><span id="vLandmarkCount">0 of 10</span> — pass a landmark on the route to log it.</p>
+      <div class="chips" id="vLandmarks"></div>
+
+      <h2>Outfits (free)</h2>
+      <div class="chips" id="vOutfits"></div>
+
+      <h2>Your coupons</h2>
+      <div id="vCoupons"></div>
+      <div class="actions">
+        <button id="btnClaim" class="primary" type="button" disabled>Claim 15% coupon</button>
+      </div>
+      <p class="note" id="vTerms"></p>
+      <div class="actions">
+        <button id="btnTestGrant" class="test" type="button">Test mode: top up to 100,000 points</button>
+      </div>
+      <p class="note" id="vTestNote">
+        Test mode is on: this shortcut exists to check the coupon, not as part of the reward
+        mechanic. Points that count are still only ever created by a verified run.
+      </p>
+
+      <h2>How the reward works</h2>
+      <ul class="steps">
+        <li><b>Play and make progress.</b> Each run is verified server-side before the points land. Progress builds across sessions.</li>
+        <li><b>Claim the reward.</b> At 100,000 points, claim once: the points are deducted and a code is issued in the same step.</li>
+        <li><b>Choose food and enter the code.</b> Use the same account in the food app and type the code at checkout.</li>
+        <li><b>Place the order.</b> The restaurant funds the discount and fulfils the order.</li>
+        <li><b>Handle problems fairly.</b> If the restaurant cancels, the coupon returns with its original expiry.</li>
+      </ul>
+      <div class="receipt" id="vCheckout">
+        <div class="row"><span>Food subtotal</span><span>$30.00</span></div>
+        <div class="row"><span>Game coupon</span><span class="save">−$4.50</span></div>
+        <div class="row"><span>Delivery</span><span>$2.00</span></div>
+        <div class="row"><span>Tax (illustrative)</span><span>$2.10</span></div>
+        <div class="row total"><span>Total</span><span>$29.60</span></div>
+      </div>
+      <p class="note">
+        Illustrative checkout only: $30.00 − $4.50 + $2.00 + $2.10 = $29.60. Example terms
+        min $25 / max $5 off. Actual tax, fees, menu, payment methods and offer conditions
+        come from the restaurant.
+      </p>
+      <p class="note">
+        Concept build for testing: Big D Fried is a fictional restaurant brand and every
+        asset here is drawn in code, so no real brand assets are involved. Menus, prices
+        and terms are illustrative, and points, coupons and the account live in this test
+        build only.
+      </p>
+    </section>
+
+    <section id="results" class="panel hidden">
+      <h1 id="vResTitle">Run credited</h1>
+      <p class="lede" id="vResNote"></p>
+      <div class="grid">
+        <div class="cell"><b id="vResScore">0</b><span>run score</span></div>
+        <div class="cell"><b id="vResAward">0</b><span>verified points</span></div>
+        <div class="cell"><b id="vResDistance">0</b><span>metres</span></div>
+        <div class="cell"><b id="vResPickups">0</b><span>items collected</span></div>
+        <div class="cell"><b id="vResCombo">x1</b><span>best combo</span></div>
+        <div class="cell"><b id="vResHits">0</b><span>hits taken</span></div>
+      </div>
+      <h2>Landmarks on this run</h2>
+      <div class="chips" id="vResLandmarks"></div>
+      <div class="actions">
+        <button id="btnAgain" class="primary" type="button">Run again</button>
+        <button id="btnMenu" type="button">Account</button>
+        <button id="btnResClaim" type="button" class="hidden">Claim 15% coupon</button>
+      </div>
+    </section>
+
+    <section id="reward" class="panel hidden">
+      <h1>Coupon issued</h1>
+      <p class="lede">Show this code in the food app at checkout. It is tied to your account.</p>
+      <div class="code" id="vCode">DLS-0000-0000-0000</div>
+      <div class="actions">
+        <button id="btnCopy" type="button">Copy code</button>
+        <button id="btnRewardClose" class="primary" type="button">Back to the game</button>
+      </div>
+      <p class="note" id="vRewardTerms"></p>
+      <div class="receipt" id="vRewardMath">
+        <div class="row"><span>Food subtotal</span><span>$30.00</span></div>
+        <div class="row"><span>Game coupon 15%</span><span class="save">−$4.50</span></div>
+        <div class="row"><span>Delivery</span><span>$2.00</span></div>
+        <div class="row"><span>Tax (illustrative)</span><span>$2.10</span></div>
+        <div class="row total"><span>Total</span><span>$29.60</span></div>
+      </div>
+      <p class="note">
+        In the food app the coupon is reserved against the order, redeemed once, and
+        restored if the restaurant cancels. Those rules belong to the food app and the
+        shared service, not this test build.
+      </p>
+    </section>
+
+    <footer id="banner">
+      <span>Concept build · Dallas, TX</span>
+      <span>Fictional fried-chicken brand, drawn in code</span>
+      <span>Runs verified server-side before points are credited</span>
+    </footer>
+
+    <div id="fatal" class="hidden">
+      <h1>The game could not start</h1>
+      <p id="fatalMsg"></p>
+    </div>
+
+    <script src="/dallas-dash/runtime.js"></script>
+    <script type="module" src="/dallas-dash/client.js"></script>
+  </body>
+</html>
