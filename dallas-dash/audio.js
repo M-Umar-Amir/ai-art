@@ -13,6 +13,7 @@ let musicOn = false;
 let musicTimer = null;
 let step = 0;
 let enabled = false;
+let stepMs = 150;
 
 function ac() {
   if (!actx) {
@@ -90,10 +91,23 @@ export const audio = {
   lane() {
     tone(520, 0.06, "sine", 0.1, 620);
   },
-  pickup(combo) {
-    const base = 660 + Math.min(9, combo) * 55;
-    tone(base, 0.09, "square", 0.12);
-    tone(base * 1.5, 0.12, "square", 0.08);
+  pickup() {
+    tone(880, 0.09, "square", 0.12);
+    tone(1320, 0.12, "square", 0.08);
+  },
+  coin() {
+    tone(1568, 0.05, "square", 0.05, 2093);
+  },
+  power() {
+    [523, 784, 1046].forEach((f, i) => setTimeout(() => tone(f, 0.12, "triangle", 0.16), i * 60));
+  },
+  crash() {
+    noise(0.45, 0.42, 380);
+    tone(140, 0.4, "sawtooth", 0.22, 50);
+  },
+  /** The beat speeds up with the run: 150 ms a step at the start, 105 at top speed. */
+  tempo(speed) {
+    stepMs = Math.round(150 - Math.max(0, Math.min(1, (speed - 20) / 26)) * 45);
   },
   hit() {
     noise(0.3, 0.34, 500);
@@ -114,7 +128,7 @@ export const audio = {
   },
 
   /**
-   * A loop of plucked arpeggio over a walking bass, one step every 150 ms. A
+   * A loop of plucked arpeggio over a walking bass, one step every stepMs. A
    * roadmap for the ear, not a soundtrack: it must never fight the pickups.
    */
   startMusic() {
@@ -129,7 +143,7 @@ export const audio = {
       tone(arp[bar], 0.16, "square", 0.045);
       if (step % 4 === 2) noise(0.06, 0.06, 3000);
       step += 1;
-      musicTimer = setTimeout(tick, 150);
+      musicTimer = setTimeout(tick, stepMs);
     };
     tick();
   },

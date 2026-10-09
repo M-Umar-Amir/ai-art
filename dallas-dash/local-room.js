@@ -7,10 +7,9 @@
  * protocol locally: join / action / reset, seating, spectator refusal, and the
  * account ledger persisted in localStorage.
  *
- * The rules are not reimplemented here. `rules.js` is a verbatim copy of
- * src/logic.js, so validateAction, applyAction and viewFor — including the
- * replay check that decides whether a run is credited — are the same code that
- * runs on the server.
+ * The rules are not reimplemented here: `rules.js` is the same module a server
+ * runs, so validateAction, applyAction and viewFor — including the replay check
+ * that decides whether a run is credited — are identical in both places.
  *
  * Honest limit, and it should be said out loud: the ledger lives in the
  * visitor's browser, so a determined visitor can edit it. Points that must be
@@ -40,6 +39,8 @@ export function startLocalRoom({ onState, onError, playerId, storage }) {
       if (raw) {
         const parsed = JSON.parse(raw);
         if (parsed && parsed.v === 1 && Array.isArray(parsed.players) && parsed.state) {
+          // accounts saved by the first build get the new wallet and loadout
+          parsed.state = logic.migrate(parsed.state);
           return parsed;
         }
       }

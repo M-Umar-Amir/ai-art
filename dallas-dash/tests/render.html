@@ -1,0 +1,38 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex" />
+<title>Dallas Dash render check</title>
+<style>html,body{margin:0;height:100%}canvas{width:100%;height:100%;display:block}</style>
+<canvas id="c"></canvas>
+<script type="module">
+  // Visual QA: render one frozen game state per ?scene=… so screenshots can
+  // check props the bot rarely meets. Not linked from the game.
+  import * as SIM from "/dallas-dash/sim.js";
+  import { createRenderer } from "/dallas-dash/scene.js";
+  const p = new URLSearchParams(location.search);
+  const scene = p.get("scene") || "trailer";
+  const run = SIM.createRun(Number(p.get("seed") || 7), {});
+  run.chase = 0;
+  const find = (pred, max = 60 * 120) => {
+    for (let i = 0; i < max; i++) {
+      const o = run.objects.find((o) => pred(o) && o.z - run.distance > 6 && o.z - run.distance < 26);
+      if (o) return o;
+      SIM.stepRun(run, 0);
+      if (run.downed || run.over) { run.downed = ""; run.over = false; run.invuln = 999; }
+    }
+  };
+  if (scene === "trailer") { const o = find((o) => o.k === "trailer" && o.ramp); run.lane = o.l; run.x = SIM.LANE_X[o.l]; }
+  if (scene === "roof") { const o = find((o) => o.k === "trailer"); run.lane = o.l; run.x = SIM.LANE_X[o.l]; run.distance = o.z + 8; run.y = 2.5; run.floor = 2.5; }
+  if (scene === "van") { const o = find((o) => o.k === "van"); }
+  if (scene === "oncoming") { find((o) => o.k === "oncoming", 60 * 300); }
+  if (scene === "gate") { find((o) => o.k === "awning" || o.k === "bar"); }
+  if (scene === "store") { find((o) => o.k === "store"); for (let i = 0; i < Number(p.get("ahead") || 0); i++) SIM.stepRun(run, 0); }
+  if (scene === "jet") { for (let i = 0; i < 300; i++) SIM.stepRun(run, 0); run.jet = 400; run.y = SIM.JET_HEIGHT; run.invuln = 999; }
+  if (scene === "power") { find((o) => o.t === 3); run.board = 600; run.magnet = 300; }
+  if (scene === "chase") { for (let i = 0; i < 200; i++) SIM.stepRun(run, 0); run.chase = 280; run.invuln = 999; }
+  run.invuln = 0;
+  for (const o of run.objects) o.hit = 0;
+  window.__state = { lane: run.lane, x: run.x, y: run.y, d: run.distance, near: run.objects.filter((o) => o.t === 1 && Math.abs(o.z - run.distance) < 30).map((o) => [o.k, o.l, +(o.z - run.distance).toFixed(1), o.len]) };
+  const r = createRenderer(document.getElementById("c"));
+  setTimeout(() => { r.draw(run, { outfit: p.get("outfit") || "classic", now: 1000 }); document.title = "ready"; }, 400);
+</script>

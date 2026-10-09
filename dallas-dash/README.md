@@ -1,40 +1,35 @@
-# Dallas Dash — static export
+# KFC Dallas Dash — static build
 
-Deploy steps, fastest first.
+Live at `epical.art/dallas-dash` (noindex). Plain static files, no build step.
 
-## 1. As its own Vercel project
+## Files
 
-    npm i -g vercel
-    vercel deploy --prod          # run inside this folder
+| File | What it is |
+| --- | --- |
+| `sim.js` | The deterministic course and physics. Shared by the client and the rules, so they can never disagree. No DOM, no timers, no `Math.random` — ports to React Native unchanged. |
+| `rules.js` | Account ledger: replay verification, wallet (drumsticks, keys, hoverboards), shop, missions → multiplier, coupon claim. |
+| `coupon-code.js` | `KFC-XXXX-XXXX-XXXX-C` codes: 60 random bits + a check symbol. Shared with `../coupon-service`. |
+| `scene.js` | Canvas 2D software 3D renderer (KFC palette, logo on signs, near-plane clipping). |
+| `client.js` | Screens, swipe/keyboard/gamepad input, run loop, revive prompt. |
+| `local-room.js` | Runs the rules in the browser for this static build (ledger in localStorage). |
+| `audio.js` | Synthesised sound; music tempo follows run speed. |
+| `assets/kfc-logo.svg` | KFC Colonel roundel (public reference copy from Wikimedia Commons). Replace with the client's official brand-kit file. |
+| `tests/` | `node --test tests/rules.test.mjs`, `node tests/bot.mjs 6 10800` (fairness bot), `tests/render.html?scene=roof` (visual checks). Not deployed. |
 
-Or drag the folder onto https://vercel.com/new. No framework preset, no build
-command, no environment variables: it is plain static files.
+## Gameplay (Subway Surfers model)
 
-## 2. Inside your existing Vercel site (subfolder)
+Endless run, speed 20 → 46. Three lanes; swipe to dodge, jump, roll (roll mid-air to dive). Ride
+KFC trailers up their ramps and along the roofs; vans block a lane and oncoming vans drive at you.
+Small obstacles make you stumble and the health inspector closes in — stumble again
+within 5 s and he catches you. Big obstacles crash you. A hoverboard (double-tap, 30 s) absorbs one
+crash. Keys revive you (1, 2, 4… keys). Power-ups: drumstick magnet, jetpack, super sneakers, 2×
+score, each upgradable five times in the shop. Mission sets of three raise the score multiplier
+(up to x6).
 
-Copy this folder's contents to:
+## What this build proves, and what it doesn't
 
-* `<your-project>/public/dallas-dash/`   (Vite, Next, CRA — anything served from public/)
-* `<your-project>/dallas-dash/`          (a plain static project)
-
-Then it is live at `https://yourdomain.com/dallas-dash/`. The paths in the export
-are relative, so no rewriting is needed.
-
-## 3. Link it
-
-From your site's nav or a button: `<a href="/dallas-dash/">Play Dallas Dash</a>`,
-or embed it with an iframe sized 9:16.
-
-## What this build is, and what it is not
-
-* It is the real game: the same simulation, the same verified-replay reward rule,
-  the same coupon flow.
-* The account and its points live in the visitor's browser (localStorage), per
-  device. Clearing site data starts a fresh account, and a determined visitor
-  can edit it — so a coupon from this build proves nothing to a restaurant.
-* The hosted build is the one that can: there the ledger sits on the server, every
-  submitted run is replayed there, and a fabricated score is refused. Use this
-  export to demo the experience; use the hosted build for anything involving real
-  discounts.
-* No brand assets are used: "Big D Fried" is a fictional restaurant drawn in code.
-  Keep the on-page "concept build" note.
+Every run is replayed by `rules.js` before points count, but in this static build the ledger lives in
+the visitor's browser, so a determined visitor can edit it. Coupons from this build are for testing.
+In production `rules.js` runs on the server, and coupons are issued and redeemed by
+`../coupon-service` against the shared database. `TEST_GRANTS` in `rules.js` must be `false` for
+production.

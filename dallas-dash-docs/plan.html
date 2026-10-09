@@ -1,0 +1,333 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>KFC Dallas Dash — coupons, game upgrade and mobile pathway</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,700;0,800;1,900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet" />
+<style>
+  @page { size: A4; margin: 16mm 15mm 16mm; }
+  :root { --red: #e4002b; --deep: #a40020; --ink: #202124; --dim: #5f6368; --line: #e3e0dc; --cream: #fff6ec; --green: #1f9d55; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 9.7pt/1.45 Inter, system-ui, sans-serif; color: var(--ink); }
+  h1, h2, h3 { font-family: "Barlow Condensed", "Arial Narrow", sans-serif; text-transform: uppercase; line-height: 1.05; margin: 0; }
+  h1 { font-style: italic; font-weight: 900; font-size: 40pt; color: var(--red); }
+  h2 { font-weight: 800; font-size: 21pt; color: var(--red); margin: 0 0 8pt; break-after: avoid; }
+  h3 { font-weight: 800; font-size: 13pt; margin: 14pt 0 4pt; break-after: avoid; }
+  p { margin: 0 0 7pt; }
+  .stripes { height: 9pt; background: repeating-linear-gradient(90deg, var(--red) 0 16pt, #fff 16pt 32pt); border: 1px solid var(--red); }
+  section { break-before: page; }
+  section.cont { break-before: auto; margin-top: 10pt; }
+  section.cont > .stripes, section.cont > .stripes + br { display: none; }
+  section.first { break-before: auto; }
+  .cover { height: 255mm; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover .kicker { font: 800 13pt "Barlow Condensed", sans-serif; letter-spacing: .12em; text-transform: uppercase; color: var(--dim); margin-top: 18pt; }
+  .cover .lede { font-size: 12.5pt; max-width: 135mm; margin-top: 12pt; }
+  .cover .meta { color: var(--dim); font-size: 9.5pt; }
+  .cover .shots { display: flex; gap: 6mm; }
+  .cover .shots img { width: 40mm; border-radius: 4mm; box-shadow: 0 2mm 6mm rgba(0,0,0,.18); }
+  table { width: 100%; border-collapse: collapse; margin: 4pt 0 10pt; font-size: 8.6pt; break-inside: auto; }
+  th { text-align: left; font: 800 9.5pt "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .05em; color: var(--dim); border-bottom: 2px solid var(--ink); padding: 3pt 5pt; }
+  td { border-bottom: 1px solid var(--line); padding: 4pt 5pt; vertical-align: top; }
+  tr { break-inside: avoid; }
+  code { font: 8.6pt ui-monospace, Consolas, monospace; background: #f4f1ee; padding: 0 2pt; border-radius: 2pt; }
+  pre { font: 8.4pt/1.45 ui-monospace, Consolas, monospace; background: #f6f3f0; border-left: 3pt solid var(--red); padding: 6pt 8pt; margin: 4pt 0 9pt; white-space: pre-wrap; break-inside: avoid; }
+  ul, ol { margin: 0 0 8pt; padding-left: 14pt; }
+  li { margin: 2pt 0; }
+  .callout { background: var(--cream); border-left: 4pt solid var(--red); padding: 7pt 10pt; margin: 6pt 0 10pt; break-inside: avoid; }
+  .callout b:first-child { color: var(--deep); }
+  .tag { display: inline-block; font: 800 8pt "Barlow Condensed", sans-serif; text-transform: uppercase; letter-spacing: .05em; padding: 1pt 5pt; border-radius: 3pt; }
+  .built { background: #e3f4ea; color: #11703a; }
+  .next { background: #fff1d6; color: #8a5a00; }
+  .road { background: #ece9f7; color: #4b3d99; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8mm; }
+  .shots { display: flex; gap: 4mm; flex-wrap: wrap; margin: 6pt 0 10pt; break-inside: avoid; }
+  .shots figure { margin: 0; width: 38mm; }
+  .shots img { width: 100%; border-radius: 3mm; border: 1px solid var(--line); }
+  .shots figcaption { font-size: 7.8pt; color: var(--dim); margin-top: 2pt; }
+  svg text { font-family: Inter, sans-serif; }
+  .diagram { margin: 6pt 0 12pt; break-inside: avoid; }
+  .small { font-size: 8.6pt; color: var(--dim); }
+  .toc li { margin: 4pt 0; font-size: 11pt; }
+</style>
+</head>
+<body>
+
+<section class="first cover">
+  <div>
+    <div class="stripes"></div>
+    <div class="kicker">Epical Studio · for KFC · 9 October 2026</div>
+    <h1>Dallas Dash</h1>
+    <h2 style="color:var(--ink);font-size:22pt;margin-top:4pt">Coupons, game upgrade &amp; mobile pathway</h2>
+    <p class="lede">How a coupon earned in the game becomes a discount in the KFC ordering app with one database, single use, and a unique code every time. What we rebuilt in the game after studying Subway Surfers, and the step-by-step route to iOS and Android with React Native, Expo and EAS from a Windows PC.</p>
+    <ol class="toc">
+      <li><b>Summary</b>: what was built and what's next</li>
+      <li><b>Game → app coupons</b>: one database, validation, verification, uniqueness</li>
+      <li><b>Subway Surfers study</b>: feature by feature, and what Dallas Dash now does</li>
+      <li><b>Mobile pathway</b>: React Native + Expo/EAS on Windows, phase by phase</li>
+    </ol>
+  </div>
+  <div class="shots">
+    <img src="img/phone-home.jpg" alt="Home screen" />
+    <img src="img/phone-run2.jpg" alt="Running" />
+    <img src="img/scene-roof.jpg" alt="On a trailer roof" />
+    <img src="img/phone-revive.jpg" alt="Revive prompt" />
+  </div>
+  <div class="meta">Prototype at epical.art/dallas-dash (not indexed). Source in the repo: <code>dallas-dash/</code> (game), <code>coupon-service/</code> (backend). KFC marks belong to KFC.</div>
+</section>
+
+<section>
+  <div class="stripes"></div><br />
+  <h2>1 · Summary</h2>
+  <h3>Delivered in this round</h3>
+  <table>
+    <tr><th style="width:28%">Area</th><th>What changed</th><th style="width:16%">Status</th></tr>
+    <tr><td><b>Coupon backend</b></td><td>A coupon service with its Postgres schema: issue, validate, reserve, redeem, release, restore and expiry. Codes are random, single-use, owner-bound and stored hashed and encrypted. 7 automated tests run against a real Postgres engine, including two checkouts racing for the same code.</td><td><span class="tag built">built &amp; tested</span></td></tr>
+    <tr><td><b>Game mechanics</b></td><td>The run is now endless and faster: speed climbs from 20 to 46 (it was 14 to 30) and the run no longer stops at 44 seconds. New: rideable trailers with ramps, oncoming vans, stumble and the inspector chase, hoverboard, 4 power-ups with 5 upgrade levels, keys to revive, a drumstick currency, a shop, and missions that raise a score multiplier.</td><td><span class="tag built">built &amp; tested</span></td></tr>
+    <tr><td><b>UI / UX</b></td><td>Subway-Surfers-style flow: a tap-to-run home screen, side menu (Missions, Shop, Crew, Coupon), a minimal in-run HUD with power-up timers, a "Save me!" revive prompt with a countdown, and results with mission progress. Swipes fire mid-gesture, double-tap uses the hoverboard, and the screen shakes and vibrates on hits.</td><td><span class="tag built">built</span></td></tr>
+    <tr><td><b>KFC branding</b></td><td>KFC red #E4002B with red-and-white bucket stripes, the Colonel logo on the home screen and on the rotating bucket sign, KFC wordmarks on stores, vans and trailers, menu pickups (Original Recipe Bucket, Famous Bowl, Chicken Sandwich and more) and a KFC crew uniform. Page set to noindex.</td><td><span class="tag next">swap in brand kit</span></td></tr>
+    <tr><td><b>Anti-cheat core</b></td><td>The simulation is now a single shared module. The server replays the same file the phone draws with, so the two can't drift apart. A lookahead bot checks that every course can be beaten.</td><td><span class="tag built">built &amp; tested</span></td></tr>
+    <tr><td><b>Mobile apps</b></td><td>The pathway and stack choice are in section 4. The game logic files carry over to React Native unchanged.</td><td><span class="tag road">plan</span></td></tr>
+  </table>
+  <div class="callout"><b>Honest limits of the current web build.</b> The prototype at epical.art runs the rules in the visitor's browser, so its points and coupons are for testing only: a determined visitor could edit them. Production needs the server pieces in section 2: the game API replaying runs, and the coupon service on the shared database. The logo is a public reference copy (the Colonel roundel from Wikimedia Commons). Please send KFC's official brand kit (current logo files and typeface) so we can swap it in. Barlow Condensed stands in for KFC's own typeface.</div>
+
+  <h3>Decisions we need from KFC</h3>
+  <ul>
+    <li><b>Accounts:</b> which sign-in the KFC app already uses. The game must use the same user IDs, because that is what binds a coupon to a customer.</li>
+    <li><b>Offer terms:</b> 15% off, $25 minimum, $5 cap, 30 days, 100,000 points are placeholders. Who funds the discount (brand or franchisee), and is it delivery only or pickup too?</li>
+    <li><b>Order system hooks:</b> the checkout needs to call <code>validate</code>/<code>reserve</code>, and the payment and cancellation events need to call <code>redeem</code>/<code>release</code>/<code>restore</code>. We need to know who owns the ordering backend.</li>
+    <li><b>Legal review</b> of the reward copy and terms. Dallas Dash is skill-based and needs no purchase, so it is not a sweepstakes, but KFC's counsel should confirm.</li>
+  </ul>
+</section>
+
+<section>
+  <div class="stripes"></div><br />
+  <h2>2 · Game → app coupons</h2>
+  <h3>Yes, one database</h3>
+  <p>One Postgres database (for example Neon, provisioned through the Vercel Marketplace) with two schemas and one owner each. The <b>game API</b> writes <code>game.*</code>: accounts, verified runs and the points ledger. The <b>coupon service</b> writes <code>rewards.*</code>: coupons and their event history. The <b>KFC ordering app never touches the tables</b>. It calls the coupon service. One writer per table is what makes "a code works once" a guarantee rather than a hope.</p>
+  <div class="diagram">
+    <svg viewBox="0 0 720 270" width="100%" role="img" aria-label="Architecture diagram">
+      <defs><marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#202124"/></marker></defs>
+      <g font-size="11">
+        <rect x="10" y="20" width="150" height="60" rx="8" fill="#fff6ec" stroke="#e4002b" stroke-width="2"/><text x="85" y="45" text-anchor="middle" font-weight="700">Dallas Dash app</text><text x="85" y="62" text-anchor="middle" fill="#5f6368">seed + input log</text>
+        <rect x="10" y="190" width="150" height="60" rx="8" fill="#fff6ec" stroke="#e4002b" stroke-width="2"/><text x="85" y="215" text-anchor="middle" font-weight="700">KFC ordering app</text><text x="85" y="232" text-anchor="middle" fill="#5f6368">enters code at checkout</text>
+        <rect x="230" y="20" width="160" height="60" rx="8" fill="#fff" stroke="#202124" stroke-width="1.5"/><text x="310" y="45" text-anchor="middle" font-weight="700">Game API</text><text x="310" y="62" text-anchor="middle" fill="#5f6368">replays run (rules.js)</text>
+        <rect x="230" y="110" width="160" height="60" rx="8" fill="#fff" stroke="#202124" stroke-width="1.5"/><text x="310" y="135" text-anchor="middle" font-weight="700">Coupon service</text><text x="310" y="152" text-anchor="middle" fill="#5f6368">only writer of coupons</text>
+        <rect x="230" y="200" width="160" height="50" rx="8" fill="#fff" stroke="#202124" stroke-width="1.5"/><text x="310" y="222" text-anchor="middle" font-weight="700">Order / payment service</text><text x="310" y="238" text-anchor="middle" fill="#5f6368">webhooks</text>
+        <rect x="470" y="40" width="240" height="190" rx="10" fill="#fff" stroke="#e4002b" stroke-width="2"/><text x="590" y="62" text-anchor="middle" font-weight="700" fill="#e4002b">Postgres (one database)</text>
+        <rect x="485" y="75" width="210" height="62" rx="6" fill="#f6f3f0"/><text x="495" y="94" font-weight="700">game.*</text><text x="495" y="111" fill="#5f6368">accounts · runs · point_ledger</text>
+        <rect x="485" y="148" width="210" height="70" rx="6" fill="#f6f3f0"/><text x="495" y="167" font-weight="700">rewards.*</text><text x="495" y="184" fill="#5f6368">coupons (hash + encrypted)</text><text x="495" y="200" fill="#5f6368">coupon_events · code_attempts</text>
+        <rect x="10" y="105" width="150" height="50" rx="8" fill="#fff" stroke="#5f6368" stroke-dasharray="4 3"/><text x="85" y="127" text-anchor="middle" font-weight="700">Shared sign-in</text><text x="85" y="143" text-anchor="middle" fill="#5f6368">same user_id in both</text>
+      </g>
+      <g stroke="#202124" stroke-width="1.5" fill="none" marker-end="url(#a)">
+        <path d="M160 50H228"/><path d="M390 50H483"/><path d="M310 80V108"/><path d="M160 215C200 215 200 150 228 150"/><path d="M390 140H483"/><path d="M390 225C430 225 440 190 483 190"/>
+      </g>
+      <g font-size="9.5" fill="#5f6368"><text x="168" y="44">submit run</text><text x="398" y="44">credit points</text><text x="318" y="98">claim</text><text x="168" y="196">validate / reserve</text><text x="398" y="134">issue · redeem</text><text x="398" y="222">redeem · release · restore</text></g>
+    </svg>
+  </div>
+
+  <h3>Earning: points nobody can fake</h3>
+  <ol>
+    <li>The server hands each account the seed for its next course. A run on any other seed is refused.</li>
+    <li>The phone plays the course and records only the inputs (tick number + swipe), never a score.</li>
+    <li>The game API replays the input log through the same <code>sim.js</code> with the account's own loadout from the database (multiplier, boards, keys, upgrade levels), and credits only the score the replay produces. A changed score, a reused <code>run_id</code> or more than 6,000 inputs is rejected.</li>
+    <li>Points move only through <code>game.point_ledger</code> (+run, −coupon, +refund), so every balance can be audited back to the runs that earned it.</li>
+  </ol>
+
+  <h3>Issuing: a unique code every time</h3>
+  <ul>
+    <li><b>Atomic.</b> The point deduction and the new coupon are written in one transaction, with the account row locked (<code>SELECT … FOR UPDATE</code>). You can never lose points without getting a coupon, or get a coupon without paying the points.</li>
+    <li><b>Idempotent.</b> The claim carries an <code>issueKey</code>. A double-tap or a network retry returns the same coupon instead of minting two (tested).</li>
+    <li><b>Random, never derived.</b> <code>KFC-7K4Q-9M2P-XW3R-H</code> is 12 symbols from a cryptographic random generator (60 bits, about 1.15 × 10<sup>18</sup> possible codes) plus one check symbol. The alphabet drops I, O, 0 and 1. The code is not computed from the user ID or a counter, so no one can predict the next code. The database's <code>UNIQUE</code> index is the final guarantee: on the (practically impossible) clash, the service mints again.</li>
+    <li><b>Typo-proof.</b> The check symbol rejects every single mistyped character (verified exhaustively), and 30 of 31 adjacent swaps, before any database lookup.</li>
+    <li><b>Stored safely.</b> The service never stores the code in plain text. It keeps a keyed hash (HMAC-SHA256) for lookup, an AES-256-GCM encrypted copy so the owner can see it again in "My coupons", and the last 4 characters for customer support.</li>
+    <li><b>Limits.</b> 100,000 points per code, at most 3 unused coupons per account, 30-day expiry.</li>
+  </ul>
+</section>
+
+<section class="cont">
+  <div class="stripes"></div><br />
+  <h3 style="margin-top:0">Validation and verification at checkout</h3>
+  <div class="diagram">
+    <svg viewBox="0 0 720 150" width="100%" role="img" aria-label="Coupon state machine">
+      <defs><marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#202124"/></marker></defs>
+      <g font-size="11" font-weight="700" text-anchor="middle">
+        <rect x="20" y="50" width="110" height="44" rx="22" fill="#e3f4ea" stroke="#1f9d55"/><text x="75" y="77">active</text>
+        <rect x="300" y="50" width="110" height="44" rx="22" fill="#fff1d6" stroke="#e0a100"/><text x="355" y="77">reserved</text>
+        <rect x="580" y="50" width="120" height="44" rx="22" fill="#fde5ea" stroke="#e4002b"/><text x="640" y="77">redeemed</text>
+        <rect x="20" y="118" width="110" height="28" rx="14" fill="#eee" stroke="#999"/><text x="75" y="137">expired</text>
+      </g>
+      <g stroke="#202124" stroke-width="1.4" fill="none" marker-end="url(#b)">
+        <path d="M130 64H298"/><path d="M410 64H578"/><path d="M298 84H132"/><path d="M640 50C640 10 75 10 75 48"/><path d="M75 94V116"/>
+      </g>
+      <g font-size="9.5" fill="#5f6368" text-anchor="middle">
+        <text x="214" y="58">reserve(order) at checkout</text><text x="494" y="58">redeem(order) payment captured</text><text x="214" y="102">release: payment failed / 30 min timeout</text><text x="358" y="20">restore: restaurant cancelled (original expiry kept)</text><text x="160" y="112">expiry passes</text>
+      </g>
+    </svg>
+  </div>
+  <table>
+    <tr><th style="width:22%">Step</th><th>What the service checks</th></tr>
+    <tr><td><b>Cart preview</b><br /><code>validate</code></td><td>The code is well-formed (check symbol). It exists and belongs to <i>this</i> signed-in user: someone else's code gets the same "not found" answer as a fake one, so the endpoint can't be used to fish for valid codes. It is active and not expired, and the subtotal meets the minimum. Returns the discount, 15% capped at $5 ($30 → −$4.50). Writes nothing.</td></tr>
+    <tr><td><b>Place order</b><br /><code>reserve</code></td><td>Repeats every check, then locks the code to the order with one conditional update (<code>… WHERE status='active'</code>). If two checkouts race for the same code, exactly one wins (tested). Retrying the same order returns the same answer. A partial unique index allows only one game coupon per order.</td></tr>
+    <tr><td><b>Payment captured</b><br /><code>redeem</code></td><td>Called by the order/payment service, not by the phone. Marks the coupon spent and records the discount taken. A webhook delivered twice is harmless.</td></tr>
+    <tr><td><b>Payment failed</b><br /><code>release</code></td><td>Unlocks the code so it can be used again. A cron <code>sweep</code> also frees reservations older than 30 minutes, and expires old codes.</td></tr>
+    <tr><td><b>Restaurant cancels</b><br /><code>restore</code></td><td>The coupon comes back with its original expiry, or a 7-day grace period if that date has passed.</td></tr>
+  </table>
+  <h3>Fraud and abuse controls</h3>
+  <table>
+    <tr><th style="width:30%">Risk</th><th>Control</th></tr>
+    <tr><td>Fake or inflated scores</td><td>Server replay of the input log; the server issues seeds; run IDs are unique; the input count is capped. <span class="tag next">next</span> Plausibility checks (inputs per second, superhuman reaction patterns) and a daily points cap.</td></tr>
+    <tr><td>Bots and modified apps</td><td><span class="tag next">next</span> Apple App Attest / Google Play Integrity tokens on run submission. Also flag accounts whose scores jump sharply.</td></tr>
+    <tr><td>Farming many accounts</td><td>Coupons are bound to the account the KFC app signs in with. <span class="tag next">next</span> Verify a phone number before the first claim, and limit coupons per payment card per month.</td></tr>
+    <tr><td>Guessing or sharing codes</td><td>60-bit random codes; owner-bound; 10 wrong codes in 15 minutes locks code entry; codes are stored hashed.</td></tr>
+    <tr><td>Double spending</td><td>Conditional state transitions, one game coupon per order, and only the order service can redeem.</td></tr>
+    <tr><td>Insider / support</td><td><code>coupon_events</code> logs every change; support works from the last 4 characters; a <code>void</code> status kills a code.</td></tr>
+  </table>
+  <h3>API</h3>
+<pre>POST /coupons/issue      game app     { issueKey }                     → { code, percent, expiresAt, … }
+GET  /coupons            game + app                                    → my coupons
+POST /coupons/validate   KFC app      { code, subtotalCents }          → { discountCents } | 400/404/410/422/429
+POST /coupons/reserve    KFC app      { code, orderId, subtotalCents } → { discountCents } | 409 in_use
+POST /coupons/redeem     order svc    { orderId }   payment captured
+POST /coupons/release    order svc    { orderId }   payment failed / abandoned
+POST /coupons/restore    order svc    { orderId }   restaurant cancelled</pre>
+  <p class="small">Code: <code>coupon-service/schema.sql</code>, <code>src/service.js</code> and <code>src/http.js</code> (web-standard handlers that mount on Vercel Functions, Hono or Express). <code>npm test</code> runs 7 tests on PGlite.</p>
+  <h3>To go live</h3>
+  <ol>
+    <li>Provision Postgres (Neon via the Vercel Marketplace) and run <code>schema.sql</code>. Set <code>COUPON_SECRET</code>.</li>
+    <li>Deploy the game API: the existing <code>rules.js</code> runs server-side unchanged, persisting to <code>game.*</code>. Turn <code>TEST_GRANTS</code> off.</li>
+    <li>Connect sign-in to the KFC app's identity provider, so both apps share user IDs.</li>
+    <li>KFC app: add a code field at checkout that calls <code>validate</code>, then <code>reserve</code> when the order is placed. Order service: call <code>redeem</code>, <code>release</code> and <code>restore</code> from the payment and cancellation webhooks. Schedule <code>sweep</code> every 5 minutes.</li>
+    <li>Finance reporting: use <code>coupon_events</code> to report redemptions and discount dollars per store.</li>
+  </ol>
+</section>
+
+<section>
+  <div class="stripes"></div><br />
+  <h2>3 · Subway Surfers study</h2>
+  <p>Subway Surfers is the reference endless runner: three lanes, swipe to dodge, jump and roll, trains to run on, and the inspector and his dog chasing you. Around that loop sit power-ups, a hoverboard shield, coins as currency, keys to revive, missions that raise a score multiplier, and rotating "World Tour" city themes. We mapped each feature to Dallas Dash. A few numbers deliberately differ, because here points turn into real money off food.</p>
+  <table>
+    <tr><th style="width:21%">Subway Surfers</th><th style="width:35%">How it works there</th><th>Dallas Dash</th></tr>
+    <tr><td>Endless run, rising speed</td><td>No finish line; speed ramps up until you crash.</td><td><span class="tag built">built</span> Endless, with a 10-minute cap to keep server replays cheap. Speed goes from 20 to 46, the music tempo and speed lines rise with it, and the difficulty of patterns ramps up over the first ~40 patterns.</td></tr>
+    <tr><td>Lanes, jump, roll</td><td>Swipe left/right/up/down; rolling in the air drops you fast.</td><td><span class="tag built">built</span> Swipes fire mid-gesture rather than on release, and you can roll mid-air to dive. Keyboard and gamepad also work.</td></tr>
+    <tr><td>Trains</td><td>Parked trains to dodge, trains with ramps to run on top of, moving trains coming at you.</td><td><span class="tag built">built</span> KFC trailers with ramps (run along the roof and collect drumsticks there), parked KFC vans you can land on, and oncoming vans. Oncoming vans only spawn where the meeting point is clear, so they are always escapable.</td></tr>
+    <tr><td>Stumble and the inspector</td><td>Clipping something makes you stumble and the inspector closes in. Stumble again before he backs off and you're caught. A head-on crash ends the run.</td><td><span class="tag built">built</span> The health inspector, with clipboard. Small obstacles and side bumps cause a stumble, and a second within 5 s means caught. Barriers, gates and van fronts cause a crash. The screen edges glow red while he's close.</td></tr>
+    <tr><td>Hoverboard</td><td>Double-tap; lasts 30 s and survives one crash.</td><td><span class="tag built">built</span> Same: 30 s, breaks on the first crash and clears the obstacles just ahead. Bought in the shop for 300 drumsticks; 2 to start.</td></tr>
+    <tr><td>Power-ups</td><td>Coin magnet, jetpack, super sneakers, 2× multiplier, pogo stick. The first four can be upgraded, each level adding 5 s.</td><td><span class="tag built">built</span> Drumstick magnet, jetpack (flies above the traffic over a trail of sky drumsticks), super sneakers (jump onto vans and trailers), 2× score. 5 upgrade levels at +3 s each. <span class="tag road">roadmap</span> Pogo stick.</td></tr>
+    <tr><td>Coins</td><td>Collected currency for upgrades, boards and characters.</td><td><span class="tag built">built</span> Drumsticks, laid in lines and in arcs over obstacles: the arc itself shows you where to jump.</td></tr>
+    <tr><td>Keys and "Save me"</td><td>Spend keys to continue after a crash; the cost doubles each time in a run.</td><td><span class="tag built">built</span> A "Save me!" prompt with a 4-second ring. Costs 1, 2, 4… keys. Keys come from mission sets or cost 1,200 drumsticks. Revives are part of the replayed log, so they are verified too.</td></tr>
+    <tr><td>Missions → multiplier</td><td>Sets of 3 missions; each set raises a permanent score multiplier (up to x30).</td><td><span class="tag built">built</span> 5 rotating sets that get harder each cycle. Each set gives +1 multiplier, +1 key and +250 drumsticks. <b>Capped at x6</b>, because the multiplier speeds up coupon earning.</td></tr>
+    <tr><td>Characters and boards</td><td>Unlockable characters and boards, many seasonal.</td><td><span class="tag built">built</span> 5 KFC crew outfits unlocked by lifetime points. <span class="tag road">roadmap</span> More boards and seasonal crew.</td></tr>
+    <tr><td>Daily challenges and hunts</td><td>Daily word hunt / login rewards; weekly hunts.</td><td><span class="tag road">roadmap</span> "Daily Bucket": spell K-F-C from letters in the run for a daily drumstick bonus. A 7-day streak calendar.</td></tr>
+    <tr><td>Mystery boxes</td><td>Random rewards from missions and hunts.</td><td><span class="tag road">roadmap</span> Only with clearly published odds, and never containing coupon points.</td></tr>
+    <tr><td>World Tour</td><td>Every few weeks a new city theme with its own visuals.</td><td><span class="tag road">roadmap</span> The engine already places named landmarks (10 real Dallas buildings). Next themes could be Houston, Austin or San Antonio for regional KFC campaigns.</td></tr>
+    <tr><td>Leaderboards</td><td>Friends and weekly top scores.</td><td><span class="tag road">roadmap</span> Weekly leaderboard per city. Server-verified scores make it trustworthy.</td></tr>
+  </table>
+  <div class="shots">
+    <figure><img src="img/scene-roof.jpg" alt="" /><figcaption>Running on a trailer roof</figcaption></figure>
+    <figure><img src="img/scene-jet.jpg" alt="" /><figcaption>Jetpack over the traffic</figcaption></figure>
+    <figure><img src="img/scene-power.jpg" alt="" /><figcaption>Hoverboard + sneakers power-up</figcaption></figure>
+    <figure><img src="img/scene-chase.jpg" alt="" /><figcaption>The inspector after a stumble</figcaption></figure>
+  </div>
+</section>
+
+<section class="cont">
+  <div class="stripes"></div><br />
+  <h3 style="margin-top:0">UI/UX changes</h3>
+  <div class="grid2">
+    <ul>
+      <li><b>Home first, not a form.</b> Tap-to-run fills the bottom of the screen, the runner jogs in the scene, the menu sits on the left and currencies on the top right, as in Subway Surfers. The coupon progress bar sits right above the play button, so the reward is always visible.</li>
+      <li><b>Minimal HUD.</b> Score + multiplier, drumsticks, pause, power-up timers that shrink, and a hoverboard button with its count. The old stat rows and the long explanatory copy were removed from the run screen.</li>
+      <li><b>Feel.</b> Faster pace, swipes that fire mid-gesture, screen shake, a white flash and vibration on crashes, a red edge glow during the chase, and pickup toasts named after real menu items.</li>
+    </ul>
+    <ul>
+      <li><b>Second chances.</b> The "Save me!" prompt replaces the old 3-hearts system. That system was forgiving but flat, while one-hit crashes with paid revives create the tension that keeps runners replayable.</li>
+      <li><b>Progress after every run.</b> The results screen shows the score, verified coupon points, best run and live mission bars, so there is always a next goal.</li>
+      <li><b>Accessibility.</b> Keyboard controls everywhere, focus moves to the primary button in each dialog, reduced-motion is respected, and the touch targets are large.</li>
+    </ul>
+  </div>
+  <div class="shots">
+    <figure><img src="img/phone-run2.jpg" alt="" /><figcaption>In-run HUD</figcaption></figure>
+    <figure><img src="img/phone-results.jpg" alt="" /><figcaption>Results + missions</figcaption></figure>
+    <figure><img src="img/phone-shop.jpg" alt="" /><figcaption>Shop</figcaption></figure>
+    <figure><img src="img/phone-rewards.jpg" alt="" /><figcaption>Coupon screen</figcaption></figure>
+  </div>
+  <h3>Quality checks run</h3>
+  <ul>
+    <li><b>Fairness bot:</b> a lookahead bot played 6 different courses for 3 minutes each (to top speed, about 6.6 km) without crashing or being caught, and an earlier 2-minute pass over 8 courses had zero stumbles. If a perfect player can survive, every pattern is escapable. Each run's full input log replayed to the identical score.</li>
+    <li><b>Rules tests (5):</b> verified runs are credited; tampered, replayed and out-of-date runs are refused; revives spend only the keys the account owns; shop prices; coupon threshold, uniqueness and limit; old saves migrate.</li>
+    <li><b>Browser QA</b> on a phone and a desktop viewport: full run → crash → revive prompt → results → "✓ verified", with zero console errors. Visual checks of every prop. These found and fixed two renderer bugs: long trailers vanished as you ran along them (no near-plane clipping), and the bridge deck was drawn as a wall across the road (a bug in the original build).</li>
+  </ul>
+</section>
+
+<section>
+  <div class="stripes"></div><br />
+  <h2>4 · Mobile pathway (Windows + Expo/EAS)</h2>
+  <h3>Recommendation: React Native with Expo</h3>
+  <table>
+    <tr><th style="width:24%"></th><th>React Native + Expo (recommended)</th><th>Flutter</th></tr>
+    <tr><td>Reuse of the game</td><td><code>sim.js</code>, <code>rules.js</code> and <code>coupon-code.js</code> copy over unchanged. The renderer's draw calls map onto React Native Skia's canvas.</td><td>Everything is rewritten in Dart. Worse, the server replays runs with the JavaScript simulation, so you would keep two simulations bit-identical forever, or rewrite the server too.</td></tr>
+    <tr><td>iOS from Windows</td><td>EAS Build compiles and signs iOS in Expo's cloud Macs. Test on a real iPhone via Expo Go or TestFlight.</td><td>Possible with third-party cloud Macs or Codemagic, but less integrated.</td></tr>
+    <tr><td>Updates</td><td><code>eas update</code> ships JavaScript fixes over the air without store review (within store rules).</td><td>Store releases (Shorebird exists as an add-on).</td></tr>
+    <tr><td>Team fit</td><td>Same language as the web build, the coupon service and the KFC web stack.</td><td>New language.</td></tr>
+  </table>
+  <p class="small">Current versions at the time of writing: Expo SDK 57 (released 30 June 2026), which ships React Native 0.86. Check expo.dev/changelog before starting.</p>
+  <h3>Architecture of the app</h3>
+<pre>kfc-dallas-dash/
+  app/                     expo-router screens: (tabs)/home, missions, shop, crew, coupon; run.tsx; results.tsx
+  src/game/sim.js          ← copied unchanged from dallas-dash/
+  src/game/rules.js        ← only needed offline; the server stays authoritative
+  src/game/coupon-code.js  ← unchanged
+  src/render/GameCanvas.tsx  Skia &lt;Canvas&gt; + useFrameCallback (Reanimated) fixed 60 Hz step
+  src/render/scene.ts      scene.js ported: ctx.* calls → Skia Path/Paint (same geometry builders)
+  src/input/swipes.ts      react-native-gesture-handler Pan + double-tap
+  src/api/                 submitRun, claimCoupon, myCoupons (fetch + auth token)
+  src/audio.ts             expo-audio (short SFX files instead of WebAudio synthesis)</pre>
+  <p><b>Rendering options.</b> (A) Port the renderer to <b>@shopify/react-native-skia</b>: recommended, native 60 fps, same look. (B) For a fast MVP, wrap the existing web build in <code>react-native-webview</code>: shippable in about a week, but performance and app-store review are weaker. (C) Later, move to real 3D models with three.js via <code>expo-gl</code> / react-three-fiber if KFC wants character models and lighting.</p>
+</section>
+
+<section class="cont">
+  <div class="stripes"></div><br />
+  <h3 style="margin-top:0">Step by step on a Windows PC</h3>
+  <ol>
+    <li><b>Install:</b> Node.js LTS (22+), Git, VS Code. Optionally Android Studio for the Android emulator. Install <b>Expo Go</b> on a real iPhone and Android phone.</li>
+    <li><b>Accounts:</b> an Expo account (free), an Apple Developer Program membership ($99/year; it must be in KFC's or the franchisee's legal entity name for a branded app), and a Google Play Console account ($25 one-time).</li>
+    <li><b>Create the project:</b>
+<pre>npx create-expo-app@latest kfc-dallas-dash
+cd kfc-dallas-dash
+npx expo install @shopify/react-native-skia react-native-reanimated react-native-gesture-handler \
+  expo-audio expo-haptics expo-secure-store expo-router
+npx expo start          # scan the QR with Expo Go on the phone</pre></li>
+    <li><b>Bring the game logic:</b> copy <code>sim.js</code> and <code>coupon-code.js</code> into <code>src/game/</code>. Port <code>scene.js</code> to Skia and the HUD/menus to React Native components.</li>
+    <li><b>Cloud builds:</b>
+<pre>npm i -g eas-cli
+eas login
+eas build:configure
+eas build --profile development --platform android   # dev build for native modules
+eas build --platform ios          # compiled and signed on Expo's Macs; EAS manages certificates
+eas submit --platform ios         # to App Store Connect → TestFlight
+eas submit --platform android     # to Play Console internal testing
+eas update --branch production    # over-the-air JS fixes later</pre></li>
+    <li><b>Testing without a Mac:</b> real iPhones via Expo Go during development, then TestFlight builds. Expo's cloud-hosted iOS simulator (EAS Simulator) was in limited preview as of September 2026.</li>
+    <li><b>Backend:</b> deploy the game API and the coupon service (section 2), and point the app at it. Sign in with the KFC app's identity provider. Add App Attest / Play Integrity to run submissions.</li>
+    <li><b>Store readiness:</b> privacy policy and data-safety forms, age rating, reward terms in the app, Sign in with Apple if any social login is offered, and haptics/sound settings. Keep drumsticks and keys earnable only: selling them for money brings in Apple/Google in-app purchase rules.</li>
+  </ol>
+  <h3>Phases</h3>
+  <table>
+    <tr><th style="width:20%">Phase</th><th style="width:12%">Time</th><th>Output</th></tr>
+    <tr><td>0 · Decisions</td><td>1 week</td><td>Brand kit, offer terms, identity provider, ordering-backend owner, legal review started.</td></tr>
+    <tr><td>1 · Backend live</td><td>2 weeks</td><td>Neon + game API + coupon service deployed; web build switched to the server ledger; KFC app checkout calls validate/reserve in staging.</td></tr>
+    <tr><td>2 · App MVP</td><td>3–4 weeks</td><td>Expo app with the Skia renderer, swipes, sound, haptics, sign-in, run submission, coupon screen; internal TestFlight / Play testing.</td></tr>
+    <tr><td>3 · Polish &amp; anti-fraud</td><td>2 weeks</td><td>Device attestation, plausibility checks, performance on mid-range Android (60 fps target), analytics, accessibility pass.</td></tr>
+    <tr><td>4 · Store launch</td><td>1–2 weeks</td><td>Store listings, review, phased rollout; daily challenge and leaderboards as the first live update.</td></tr>
+  </table>
+  <p class="small">Estimates assume one experienced React Native developer plus our team, and a responsive KFC ordering-backend owner. Running costs at launch are small: Apple $99/year, Google $25 once, EAS and Neon free or entry tiers (check current pricing), and Vercel hosting for the APIs.</p>
+  <h3>Sources</h3>
+  <ul class="small">
+    <li>Subway Surfers power-ups, hoverboard and upgrade levels: Subway Surfers Wiki, subwaysurf.fandom.com/wiki/Power-Ups</li>
+    <li>Expo SDK 57 / React Native 0.86: expo.dev/changelog/sdk-57</li>
+    <li>Building iOS from Windows with EAS and EAS Simulator: expo.dev/blog/build-ios-apps-on-windows-with-cloud-simulators</li>
+    <li>KFC logo reference: Wikimedia Commons, KFC_logo.svg (to be replaced with the official brand kit)</li>
+  </ul>
+</section>
+</body>
+</html>

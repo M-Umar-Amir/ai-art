@@ -2,563 +2,545 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#160a1e" />
-    <title>Dallas Dash — a Dallas runner with a fried-chicken menu</title>
-    <meta property="og:title" content="Dallas Dash" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="theme-color" content="#e4002b" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>KFC Dallas Dash</title>
+    <meta property="og:title" content="KFC Dallas Dash" />
     <meta
       property="og:description"
-      content="A Dallas-inspired runner: sprint downtown past Reunion Tower and the Margaret Hunt Hill Bridge, collect a fried-chicken menu, and turn verified points into a 15% food coupon."
+      content="Run downtown Dallas, dodge the traffic, grab drumsticks and turn verified points into a 15% KFC coupon."
+    />
+    <link rel="icon" href="/dallas-dash/assets/kfc-logo.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,600;0,800;1,800;1,900&display=swap"
+      rel="stylesheet"
     />
     <style>
       :root {
-        color-scheme: dark;
-        /* Big D Fried — the fictional restaurant brand the game is set around */
-        --brand: #0e7c86;
-        --brand-deep: #075c63;
-        --cream: #fff4e6;
-        --dusk: #160a1e;
-        --dusk-2: #241033;
-        --amber: #ffa23a;
-        --green: #7ee08a;
-        --dim: #cbb6d6;
-        --line: rgba(255, 244, 230, 0.16);
-        --shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+        color-scheme: light;
+        --red: #e4002b;
+        --red-deep: #a40020;
+        --ink: #202124;
+        --white: #ffffff;
+        --cream: #fff6ec;
+        --gold: #ffc43c;
+        --crisp: #ce802c;
+        --green: #1f9d55;
+        --dim: #5f6368;
+        --line: rgba(32, 33, 36, 0.12);
+        --shadow: 0 18px 40px rgba(0, 0, 0, 0.28);
+        --display: "Barlow Condensed", "Arial Narrow", Impact, sans-serif;
       }
       * { box-sizing: border-box; }
       html, body { height: 100%; }
       body {
         margin: 0;
-        background: var(--dusk);
-        color: var(--cream);
-        font: 15px/1.45 ui-rounded, "Segoe UI", system-ui, -apple-system, sans-serif;
+        background: #7fb6ee;
+        color: var(--ink);
+        font: 15px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
         overscroll-behavior: none;
         -webkit-tap-highlight-color: transparent;
+        -webkit-user-select: none;
+        user-select: none;
+        overflow: hidden;
       }
-      #view {
-        position: fixed;
-        inset: 0;
-        width: 100%;
-        height: 100%;
-        display: block;
-        touch-action: none;
-      }
+      #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
       .hidden { display: none !important; }
-
-      /* ── top bar ───────────────────────────────────────────────────── */
-      #topbar {
-        position: fixed;
-        inset: 0 0 auto 0;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 0.5rem;
-        padding: 0.6rem 0.75rem;
-        background: linear-gradient(180deg, rgba(22, 10, 30, 0.85), rgba(22, 10, 30, 0));
-        pointer-events: none;
-        z-index: 5;
-      }
-      .brand { display: flex; align-items: center; gap: 0.5rem; }
-      .bmark {
-        background: var(--brand);
-        color: #fff;
-        font: 800 0.8rem/1 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.06em;
-        padding: 0.42rem 0.5rem;
-        border-radius: 0.4rem;
-        box-shadow: inset 0 0 0 2px #fff;
-      }
-      .bname {
-        font: 900 1rem/1 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.14em;
-        text-transform: uppercase;
-        text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6);
-      }
-      #topbar .right {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-        pointer-events: auto;
-      }
-      #netstat { font-size: 0.7rem; color: var(--dim); }
-      #netstat.bad { color: #ff8b8b; }
+      .display { font-family: var(--display); font-style: italic; font-weight: 900; letter-spacing: 0.01em; text-transform: uppercase; }
 
       button {
-        font: 700 0.8rem/1 ui-sans-serif, system-ui, sans-serif;
-        color: var(--cream);
-        background: rgba(255, 244, 230, 0.1);
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: 0.5rem 0.8rem;
+        font: 800 1rem/1 var(--display);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        color: var(--ink);
+        background: var(--white);
+        border: 0;
+        border-radius: 0.8rem;
+        padding: 0.75rem 1.1rem;
         cursor: pointer;
+        box-shadow: 0 4px 0 rgba(0, 0, 0, 0.18);
+        touch-action: manipulation;
       }
-      button:active { transform: translateY(1px); }
-      button.primary {
-        background: var(--brand);
-        border-color: #fff;
-        box-shadow: 0 6px 0 var(--brand-deep);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-      button.primary:active { box-shadow: 0 3px 0 var(--brand-deep); transform: translateY(3px); }
-      /* a testing control must not look like a real one */
-      button.test {
-        border: 1px dashed var(--amber);
-        color: var(--amber);
-        background: rgba(255, 162, 58, 0.08);
-        text-transform: none;
-      }
-      button.test:disabled { opacity: 0.5; cursor: default; }
+      button:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0, 0, 0, 0.18); }
+      button:disabled { opacity: 0.5; cursor: default; }
+      button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+      button.red { background: var(--red); color: #fff; box-shadow: 0 5px 0 var(--red-deep); }
+      button.red:active { box-shadow: 0 2px 0 var(--red-deep); }
+      button.green { background: var(--green); color: #fff; box-shadow: 0 5px 0 #11703a; }
+      button.test { background: #fff8e6; color: #8a5a00; border: 2px dashed #e0a100; box-shadow: none; font-size: 0.85rem; }
 
-      /* ── run HUD ───────────────────────────────────────────────────── */
-      #hud {
-        position: fixed;
-        top: 3.4rem;
-        left: 0;
-        right: 0;
-        z-index: 4;
-        pointer-events: none;
-        padding: 0 0.75rem;
+      /* stripes: the bucket pattern, used as a brand band */
+      .stripes {
+        background: repeating-linear-gradient(90deg, var(--red) 0 22px, #fff 22px 44px);
+        height: 10px;
       }
-      .hudrow { display: flex; gap: 0.9rem; align-items: flex-end; }
-      .stat { display: flex; flex-direction: column; line-height: 1.05; }
-      .stat b {
-        font: 900 1.35rem/1 ui-sans-serif, system-ui, sans-serif;
-        text-shadow: 0 3px 0 rgba(0, 0, 0, 0.45);
+
+      /* ── currency chips ─────────────────────────────────────────────── */
+      .chips { display: flex; gap: 0.4rem; align-items: center; }
+      .cur {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        background: rgba(32, 33, 36, 0.72);
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.28rem 0.7rem 0.28rem 0.32rem;
+        font: 800 1.05rem/1 var(--display);
       }
-      .stat span {
-        font-size: 0.62rem;
-        letter-spacing: 0.12em;
-        text-transform: uppercase;
-        color: var(--dim);
+      .cur i {
+        font-style: normal;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: grid;
+        place-items: center;
+        border-radius: 50%;
+        background: var(--white);
+        font-size: 0.95rem;
       }
-      .stat.big b { font-size: 2.1rem; color: #fff; }
-      .stat.flare b { color: var(--amber); animation: pop 320ms ease-out; }
-      @keyframes pop {
-        0% { transform: scale(1); }
-        45% { transform: scale(1.45); }
-        100% { transform: scale(1); }
+
+      /* ── home ───────────────────────────────────────────────────────── */
+      #home { position: fixed; inset: 0; z-index: 5; pointer-events: none; }
+      #home > * { pointer-events: auto; }
+      #homeTop {
+        position: absolute;
+        inset: 0 0 auto 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        gap: 0.5rem;
+        padding: calc(0.7rem + env(safe-area-inset-top)) 0.8rem 0;
       }
-      .pill {
-        margin-top: 0.5rem;
-        max-width: 26rem;
-        background: rgba(22, 10, 30, 0.5);
-        border: 1px solid var(--line);
+      .lockup { display: flex; align-items: center; gap: 0.55rem; }
+      .lockup img { width: 3.4rem; height: 3.4rem; border-radius: 50%; background: #fff; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+      .lockup .name { color: #fff; line-height: 0.86; text-shadow: 0 3px 0 var(--red-deep), 0 6px 16px rgba(0,0,0,.3); }
+      .lockup .name small { display: block; font-size: 1rem; letter-spacing: 0.12em; }
+      .lockup .name b { display: block; font-size: 2.3rem; }
+      #homeSide {
+        position: absolute;
+        left: 0.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        display: grid;
+        gap: 0.6rem;
+      }
+      .sidebtn {
+        position: relative;
+        width: 4.6rem;
+        padding: 0.55rem 0.2rem 0.45rem;
+        border-radius: 1rem;
+        display: grid;
+        justify-items: center;
+        gap: 0.2rem;
+        font-size: 0.8rem;
+      }
+      .sidebtn .ico { font-size: 1.6rem; line-height: 1; font-style: normal; }
+      .sidebtn .badge {
+        position: absolute;
+        top: -0.4rem;
+        right: -0.4rem;
+        background: var(--red);
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.18rem 0.42rem;
+        font: 900 0.85rem/1 var(--display);
+        box-shadow: 0 0 0 2px #fff;
+      }
+      #playWrap {
+        position: absolute;
+        left: 50%;
+        bottom: calc(2.6rem + env(safe-area-inset-bottom));
+        transform: translateX(-50%);
+        display: grid;
+        justify-items: center;
+        gap: 0.5rem;
+        width: min(22rem, 86vw);
+      }
+      #btnPlay {
+        width: 100%;
+        font-size: 2.2rem;
+        padding: 1rem 1rem 0.9rem;
+        border-radius: 1.2rem;
+        animation: breathe 1.6s ease-in-out infinite;
+      }
+      @keyframes breathe { 50% { transform: scale(1.04); } }
+      .progress {
+        width: 100%;
+        background: rgba(32, 33, 36, 0.72);
+        color: #fff;
         border-radius: 0.9rem;
-        padding: 0.5rem 0.65rem;
+        padding: 0.5rem 0.7rem;
+        font: 800 0.95rem/1.1 var(--display);
+        letter-spacing: 0.03em;
       }
-      .pill .bar { margin-top: 0; }
-      #runactions { position: fixed; right: 0.75rem; top: 7.2rem; z-index: 6; pointer-events: auto; }
+      .progress .bar { margin-top: 0.35rem; height: 0.55rem; border-radius: 999px; background: rgba(255,255,255,.2); overflow: hidden; }
+      .progress .bar > div { height: 100%; width: 0%; background: linear-gradient(90deg, var(--gold), var(--red)); transition: width 300ms ease; }
+      #legal {
+        position: absolute;
+        inset: auto 0 0 0;
+        padding: 0.3rem 0.8rem calc(0.3rem + env(safe-area-inset-bottom));
+        font-size: 0.66rem;
+        text-align: center;
+        color: #fff;
+        background: rgba(32, 33, 36, 0.55);
+      }
+
+      /* ── run HUD ────────────────────────────────────────────────────── */
+      #hud { position: fixed; inset: 0; z-index: 4; pointer-events: none; }
+      #hudTL { position: absolute; left: 0.8rem; top: calc(0.6rem + env(safe-area-inset-top)); }
+      #vScore { color: #fff; font-size: 2.6rem; line-height: 0.9; text-shadow: 0 3px 0 rgba(0,0,0,.35); }
+      #vMult {
+        display: inline-block;
+        margin-left: 0.3rem;
+        vertical-align: top;
+        background: var(--red);
+        color: #fff;
+        border-radius: 0.5rem;
+        padding: 0.12rem 0.4rem;
+        font-size: 1.2rem;
+        box-shadow: 0 0 0 2px #fff;
+      }
+      #vMult.x2 { background: var(--gold); color: var(--ink); }
+      #hudCoins { margin-top: 0.4rem; }
+      #hudTR { position: absolute; right: 0.8rem; top: calc(0.6rem + env(safe-area-inset-top)); display: grid; justify-items: end; gap: 0.5rem; pointer-events: auto; }
+      #btnPause { width: 2.8rem; height: 2.8rem; padding: 0; border-radius: 50%; font-size: 1.1rem; }
+      .timer { display: flex; align-items: center; gap: 0.35rem; background: rgba(32,33,36,.72); border-radius: 999px; padding: 0.2rem 0.5rem 0.2rem 0.25rem; }
+      .timer i { font-style: normal; width: 1.5rem; height: 1.5rem; border-radius: 50%; display: grid; place-items: center; font: 900 0.8rem/1 var(--display); color: #fff; }
+      .timer .t { width: 4.2rem; height: 0.4rem; border-radius: 999px; background: rgba(255,255,255,.25); overflow: hidden; }
+      .timer .t > div { height: 100%; background: #fff; }
+      #btnBoard {
+        position: absolute;
+        right: 0.8rem;
+        bottom: calc(1rem + env(safe-area-inset-bottom));
+        pointer-events: auto;
+        display: grid;
+        justify-items: center;
+        gap: 0.1rem;
+        padding: 0.5rem 0.7rem;
+        border-radius: 1rem;
+        font-size: 0.8rem;
+      }
+      #btnBoard .ico { font-size: 1.5rem; font-style: normal; }
+      #hint {
+        position: absolute;
+        left: 50%;
+        bottom: calc(5.4rem + env(safe-area-inset-bottom));
+        max-width: calc(100vw - 1.6rem);
+        text-align: center;
+        transform: translateX(-50%);
+        background: rgba(32,33,36,.72);
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.35rem 0.9rem;
+        font: 600 0.95rem/1.2 var(--display);
+        letter-spacing: 0.03em;
+      }
+      .touchonly { display: none; }
+      @media (pointer: coarse) { .touchonly { display: inline; } .keysonly { display: none; } }
+      #chaseWarn {
+        position: fixed;
+        inset: 0;
+        z-index: 3;
+        pointer-events: none;
+        box-shadow: inset 0 0 120px 30px rgba(228, 0, 43, 0.55);
+        opacity: 0;
+        transition: opacity 200ms;
+      }
+      #chaseWarn.on { opacity: 1; animation: throb 0.5s ease-in-out infinite alternate; }
+      @keyframes throb { to { opacity: 0.45; } }
+      #flash { position: fixed; inset: 0; z-index: 3; pointer-events: none; background: #fff; opacity: 0; }
+      #flash.go { animation: flash 260ms ease-out; }
+      @keyframes flash { 0% { opacity: 0.7; } 100% { opacity: 0; } }
+      .shake { animation: shake 260ms; }
+      @keyframes shake { 25% { transform: translate(6px, -3px); } 50% { transform: translate(-5px, 4px); } 75% { transform: translate(3px, 2px); } }
+
+      #toast {
+        position: fixed;
+        left: 50%;
+        top: 22%;
+        transform: translateX(-50%);
+        z-index: 6;
+        color: #fff;
+        font-size: 1.5rem;
+        text-shadow: 0 3px 0 var(--red-deep), 0 0 18px rgba(0,0,0,.35);
+        white-space: nowrap;
+        pointer-events: none;
+      }
+      #toast.pop { animation: rise 900ms ease-out forwards; }
+      @keyframes rise { 0% { opacity: 0; transform: translate(-50%, 10px) scale(.9); } 15% { opacity: 1; transform: translate(-50%, 0) scale(1.05); } 80% { opacity: 1; } 100% { opacity: 0; transform: translate(-50%, -16px); } }
       #countdown {
         position: fixed;
         inset: 0;
         z-index: 9;
         display: grid;
         place-content: center;
-        font: 900 6.5rem/1 ui-sans-serif, system-ui, sans-serif;
+        font-size: 7rem;
         color: #fff;
-        text-shadow: 0 6px 0 var(--brand-deep), 0 0 45px rgba(0, 0, 0, 0.65);
+        text-shadow: 0 6px 0 var(--red-deep), 0 0 40px rgba(0,0,0,.4);
         pointer-events: none;
       }
-      #countdown.go { color: var(--amber); }
-      .hearts { margin-top: 0.5rem; display: flex; gap: 0.3rem; }
-      .heart {
-        width: 0.75rem;
-        height: 0.75rem;
-        border-radius: 0.2rem;
-        background: var(--brand);
-        box-shadow: inset 0 0 0 2px #fff;
-        transform: rotate(45deg);
-      }
-      .heart.gone { background: rgba(255, 244, 230, 0.18); box-shadow: inset 0 0 0 2px rgba(255, 244, 230, 0.3); }
-      .bar {
-        margin-top: 0.55rem;
-        height: 0.55rem;
-        border-radius: 999px;
-        background: rgba(22, 10, 30, 0.6);
-        border: 1px solid var(--line);
-        overflow: hidden;
-        max-width: 26rem;
-      }
-      #vBar {
-        height: 100%;
-        width: 0%;
-        background: linear-gradient(90deg, var(--amber), var(--brand));
-        transition: width 240ms ease;
-      }
-      .barlabel {
-        display: flex;
-        justify-content: space-between;
-        gap: 0.5rem;
-        max-width: 26rem;
-        margin-top: 0.3rem;
-        font-size: 0.7rem;
-        color: var(--dim);
-      }
 
-      #toast {
+      /* ── sheets / modals ────────────────────────────────────────────── */
+      .scrim { position: fixed; inset: 0; z-index: 8; background: rgba(20, 20, 24, 0.45); }
+      .sheet {
         position: fixed;
-        left: 50%;
-        bottom: 30%;
-        transform: translateX(-50%);
-        z-index: 6;
-        background: rgba(22, 10, 30, 0.82);
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: 0.45rem 0.9rem;
-        font: 700 0.8rem/1 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.06em;
-        white-space: nowrap;
-      }
-      #hint {
-        position: fixed;
-        left: 50%;
-        bottom: 1rem;
-        transform: translateX(-50%);
-        z-index: 6;
-        font-size: 0.72rem;
-        color: var(--dim);
-        background: rgba(22, 10, 30, 0.7);
-        border-radius: 999px;
-        padding: 0.35rem 0.8rem;
-      }
-
-      #touch {
-        position: fixed;
+        z-index: 9;
         inset: auto 0 0 0;
-        z-index: 7;
-        display: none;
-        justify-content: space-between;
-        padding: 0 0.75rem calc(0.75rem + env(safe-area-inset-bottom));
-      }
-      #touch .pad { display: flex; gap: 0.6rem; }
-      #touch button {
-        width: 4.2rem;
-        height: 3.2rem;
-        font-size: 1.2rem;
-        background: rgba(255, 244, 230, 0.14);
-        backdrop-filter: blur(4px);
-      }
-      @media (pointer: coarse) { #touch { display: flex; } #hint { display: none; } }
-
-      /* ── panels ────────────────────────────────────────────────────── */
-      .panel {
-        position: fixed;
-        z-index: 8;
-        inset: auto 0 0 0;
-        max-height: 92dvh;
+        max-height: 90dvh;
         overflow-y: auto;
         -webkit-overflow-scrolling: touch;
-        background: linear-gradient(180deg, rgba(36, 16, 51, 0.96), rgba(22, 10, 30, 0.99));
-        border-top: 3px solid var(--brand);
-        border-radius: 1.1rem 1.1rem 0 0;
+        background: var(--cream);
+        border-radius: 1.3rem 1.3rem 0 0;
         box-shadow: var(--shadow);
-        padding: 1rem 1rem calc(1.4rem + env(safe-area-inset-bottom));
+        padding: 0 1rem calc(1.2rem + env(safe-area-inset-bottom));
+        user-select: text;
       }
       @media (min-width: 760px) {
-        .panel {
-          inset: 50% auto auto 50%;
-          transform: translate(-50%, -50%);
-          width: min(46rem, 94vw);
-          border: 3px solid var(--brand);
-          border-radius: 1.4rem;
-          max-height: 88dvh;
-        }
+        .sheet { inset: 50% auto auto 50%; transform: translate(-50%, -50%); width: min(40rem, 94vw); border-radius: 1.4rem; max-height: 88dvh; }
       }
-      .panel h1 {
-        margin: 0.1rem 0 0.2rem;
-        font: 900 2rem/1 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.02em;
-        text-transform: uppercase;
-        text-shadow: 0 3px 0 var(--brand-deep);
-      }
-      .panel h2 {
-        margin: 1.1rem 0 0.4rem;
-        font: 800 0.78rem/1 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--amber);
-      }
-      .panel p { margin: 0.35rem 0; color: var(--dim); }
-      .lede { color: var(--cream) !important; }
-      .tagrow { display: flex; flex-wrap: wrap; gap: 0.35rem; margin: 0.6rem 0 0.2rem; }
-      .tag {
-        font: 700 0.66rem/1 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.1em;
-        text-transform: uppercase;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: 0.35rem 0.6rem;
-        color: var(--dim);
-      }
-      .tag.hot { border-color: var(--brand); color: #fff; background: rgba(14, 124, 134, 0.28); }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr));
-        gap: 0.5rem;
-        margin-top: 0.5rem;
-      }
-      .cell {
-        background: rgba(255, 244, 230, 0.06);
-        border: 1px solid var(--line);
-        border-radius: 0.7rem;
-        padding: 0.55rem 0.65rem;
-      }
-      .cell b { display: block; font: 900 1.15rem/1.1 ui-sans-serif, system-ui, sans-serif; }
-      .cell span { font-size: 0.64rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
-      .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
-      ul.steps { margin: 0.3rem 0 0; padding-left: 1.1rem; color: var(--dim); }
-      ul.steps li { margin: 0.25rem 0; }
-      ul.steps b { color: var(--cream); }
-      .chips { display: flex; flex-wrap: wrap; gap: 0.3rem; margin-top: 0.45rem; }
-      .chip {
-        font-size: 0.7rem;
-        border: 1px solid var(--line);
-        border-radius: 999px;
-        padding: 0.28rem 0.55rem;
-        color: var(--dim);
-      }
-      .chip.on { border-color: var(--amber); color: #fff; background: rgba(255, 162, 58, 0.16); }
-      .chip.locked { opacity: 0.45; }
+      .sheet .stripes { margin: 0 -1rem 0.9rem; border-radius: 1.3rem 1.3rem 0 0; height: 12px; }
+      .sheet header { display: flex; justify-content: space-between; align-items: center; gap: 0.5rem; }
+      .sheet h1 { margin: 0.2rem 0; font-size: 2.2rem; line-height: 1; color: var(--red); }
+      .sheet h2 { margin: 1rem 0 0.4rem; font: 800 1.05rem/1 var(--display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink); }
+      .sheet p { margin: 0.35rem 0; color: var(--dim); }
+      .x { width: 2.4rem; height: 2.4rem; padding: 0; border-radius: 50%; font-size: 1.1rem; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.2rem, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+      .cell { background: #fff; border-radius: 0.8rem; padding: 0.55rem 0.7rem; box-shadow: 0 1px 0 var(--line); }
+      .cell b { display: block; font: 900 1.5rem/1.05 var(--display); font-style: italic; }
+      .cell span { font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--dim); }
+      .row { display: flex; align-items: center; gap: 0.7rem; background: #fff; border-radius: 0.9rem; padding: 0.65rem 0.75rem; margin-top: 0.5rem; }
+      .row .ico { font-size: 1.8rem; width: 2.4rem; text-align: center; font-style: normal; }
+      .row .body { flex: 1; min-width: 0; }
+      .row .body b { display: block; font: 800 1.15rem/1.1 var(--display); text-transform: uppercase; }
+      .row .body small { color: var(--dim); }
+      .pips { display: flex; gap: 0.2rem; margin-top: 0.3rem; }
+      .pips span { width: 1.1rem; height: 0.4rem; border-radius: 999px; background: var(--line); }
+      .pips span.on { background: var(--red); }
+      .mbar { height: 0.45rem; border-radius: 999px; background: var(--line); overflow: hidden; margin-top: 0.3rem; }
+      .mbar > div { height: 100%; background: var(--red); }
+      .done .mbar > div { background: var(--green); }
+      .multi { display: flex; gap: 0.3rem; flex-wrap: wrap; margin-top: 0.4rem; }
+      .multi span { font: 900 1rem/1 var(--display); font-style: italic; padding: 0.3rem 0.5rem; border-radius: 0.4rem; background: var(--line); color: var(--dim); }
+      .multi span.on { background: var(--red); color: #fff; }
+      .chars { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+      .char { background: #fff; border-radius: 0.9rem; padding: 0.7rem; text-align: center; border: 3px solid transparent; cursor: pointer; font: inherit; color: inherit; box-shadow: none; text-transform: none; letter-spacing: 0; }
+      .char.on { border-color: var(--red); }
+      .char.locked { opacity: 0.55; }
+      .char .av { font-size: 2.2rem; }
+      .char b { display: block; font: 800 1.1rem/1.1 var(--display); text-transform: uppercase; }
       .code {
-        font: 800 1.35rem/1.3 ui-monospace, "SFMono-Regular", Menlo, monospace;
-        letter-spacing: 0.14em;
-        background: rgba(0, 0, 0, 0.32);
-        border: 1px dashed var(--amber);
-        border-radius: 0.6rem;
-        padding: 0.7rem 0.8rem;
+        font: 800 1.35rem/1.3 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+        letter-spacing: 0.08em;
+        background: #fff;
+        border: 2px dashed var(--red);
+        border-radius: 0.7rem;
+        padding: 0.7rem;
         text-align: center;
-        margin: 0.5rem 0;
+        margin: 0.5rem 0 0.2rem;
+        color: var(--ink);
       }
-      .receipt {
-        margin-top: 0.5rem;
-        background: rgba(255, 244, 230, 0.94);
-        color: #2a1330;
-        border-radius: 0.8rem;
-        padding: 0.8rem 0.9rem;
-        font: 500 0.85rem/1.6 ui-sans-serif, system-ui, sans-serif;
+      .receipt { margin-top: 0.5rem; background: #fff; border-radius: 0.8rem; padding: 0.8rem 0.9rem; font-size: 0.88rem; line-height: 1.7; }
+      .receipt .r { display: flex; justify-content: space-between; gap: 0.5rem; }
+      .receipt .r.total { border-top: 1px solid var(--line); margin-top: 0.3rem; padding-top: 0.3rem; font-weight: 800; }
+      .receipt .save { color: var(--green); font-weight: 800; }
+      ol.steps { margin: 0.3rem 0 0; padding-left: 1.2rem; color: var(--dim); }
+      ol.steps li { margin: 0.3rem 0; }
+      ol.steps b { color: var(--ink); }
+      .note { font-size: 0.75rem; color: var(--dim); margin-top: 0.6rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 1rem; }
+      .big { color: var(--ink); font-size: 4.2rem; line-height: 0.9; }
+      .ribbon { background: var(--green); color: #fff; border-radius: 0.7rem; padding: 0.5rem 0.7rem; font: 800 1.05rem/1.2 var(--display); text-transform: uppercase; margin-top: 0.6rem; }
+      .verify { font-size: 0.8rem; font-weight: 700; }
+      .verify.ok { color: var(--green); }
+      .verify.bad { color: var(--red); }
+
+      #revive { position: fixed; inset: 0; z-index: 10; display: grid; place-items: center; background: rgba(20,20,24,.55); }
+      .rcard { width: min(20rem, 88vw); background: var(--cream); border-radius: 1.3rem; overflow: hidden; text-align: center; padding: 0 1rem 1rem; box-shadow: var(--shadow); }
+      .rcard .stripes { margin: 0 -1rem 0.8rem; height: 12px; }
+      .rcard h1 { margin: 0; font-size: 2.6rem; color: var(--red); }
+      .ring { --p: 1; width: 6rem; height: 6rem; margin: 0.6rem auto; border-radius: 50%; display: grid; place-items: center; background: conic-gradient(var(--red) calc(var(--p) * 360deg), var(--line) 0); }
+      .ring > div { width: 4.8rem; height: 4.8rem; border-radius: 50%; background: var(--cream); display: grid; place-items: center; font-size: 2.2rem; }
+      #fatal { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; gap: 0.5rem; text-align: center; padding: 2rem; background: var(--cream); }
+      #stats { position: fixed; left: 0.5rem; bottom: 0.4rem; z-index: 6; font: 600 0.66rem/1.3 ui-monospace, Menlo, monospace; color: #fff; background: rgba(0,0,0,.4); border-radius: 0.3rem; padding: 0.2rem 0.4rem; pointer-events: none; }
+      @media (prefers-reduced-motion: reduce) {
+        #btnPlay, #chaseWarn.on { animation: none; }
+        #toast.pop { animation-duration: 1ms; }
       }
-      .receipt .row { display: flex; justify-content: space-between; gap: 0.5rem; }
-      .receipt .row.total { border-top: 1px solid rgba(42, 19, 48, 0.25); margin-top: 0.4rem; padding-top: 0.4rem; font-weight: 800; }
-      .receipt .row .save { color: var(--brand-deep); font-weight: 800; }
-      .note { font-size: 0.72rem; color: var(--dim); margin-top: 0.6rem; }
-      #banner {
-        position: fixed;
-        inset: auto 0 0 0;
-        z-index: 3;
-        background: var(--brand);
-        color: #fff;
-        padding: 0.35rem 0.75rem calc(0.35rem + env(safe-area-inset-bottom));
-        font: 700 0.64rem/1.4 ui-sans-serif, system-ui, sans-serif;
-        letter-spacing: 0.04em;
-        display: flex;
-        flex-wrap: wrap;
-        gap: 0.15rem 0.6rem;
-        justify-content: center;
-        text-align: center;
-      }
-      #banner span { opacity: 0.92; }
-      #stats {
-        position: fixed;
-        right: 0.6rem;
-        bottom: 2.4rem;
-        z-index: 6;
-        font: 600 0.66rem/1.3 ui-monospace, Menlo, monospace;
-        color: var(--dim);
-        background: rgba(22, 10, 30, 0.6);
-        border-radius: 0.4rem;
-        padding: 0.3rem 0.45rem;
-        pointer-events: none;
-        white-space: pre;
-      }
-      #fatal {
-        position: fixed;
-        inset: 0;
-        z-index: 20;
-        display: grid;
-        place-content: center;
-        gap: 0.5rem;
-        text-align: center;
-        padding: 2rem;
-        background: var(--dusk);
-      }
-      @media (prefers-reduced-motion: reduce) { #vBar { transition: none; } }
     </style>
   </head>
   <body>
-    <canvas id="view"></canvas>
+    <canvas id="view" aria-label="Dallas Dash game view"></canvas>
+    <div id="chaseWarn" aria-hidden="true"></div>
+    <div id="flash" aria-hidden="true"></div>
 
-    <header id="topbar">
-      <div class="brand">
-        <span class="bmark">BDF</span>
-        <span class="bname">Dallas Dash</span>
+    <!-- ── home ─────────────────────────────────────────────────────── -->
+    <section id="home" aria-label="Home">
+      <div id="homeTop">
+        <div class="lockup">
+          <img src="/dallas-dash/assets/kfc-logo.svg" alt="KFC" width="54" height="54" />
+          <div class="name display"><small>KFC</small><b>Dallas Dash</b></div>
+        </div>
+        <div class="chips">
+          <span class="cur" title="Drumsticks"><i>🍗</i><span id="vCoins">0</span></span>
+          <span class="cur" title="Keys"><i>🔑</i><span id="vKeys">0</span></span>
+        </div>
       </div>
-      <div class="right">
-        <span id="netstat">connecting…</span>
-        <button id="btnMute" type="button">sound off</button>
-        <button id="btnStats" type="button">stats</button>
+      <nav id="homeSide" aria-label="Menu">
+        <button class="sidebtn" type="button" data-sheet="missions"><i class="ico">🎯</i>Missions<span class="badge" id="vMultBadge">x1</span></button>
+        <button class="sidebtn" type="button" data-sheet="shop"><i class="ico">🛒</i>Shop</button>
+        <button class="sidebtn" type="button" data-sheet="chars"><i class="ico">🧢</i>Crew</button>
+        <button class="sidebtn" type="button" data-sheet="rewards"><i class="ico">🎟️</i>Coupon<span class="badge hidden" id="vClaimBadge">!</span></button>
+      </nav>
+      <div id="playWrap">
+        <div class="progress" id="homeProgress">
+          <div><span id="vPointsLine">0 / 100,000 points to a 15% KFC coupon</span></div>
+          <div class="bar"><div id="vBar"></div></div>
+        </div>
+        <button id="btnPlay" class="red display" type="button">Tap to run</button>
       </div>
-    </header>
-
-    <section id="hud" class="hidden">
-      <div class="hudrow">
-        <div class="stat big"><b id="vThisRun">0</b><span>this run</span></div>
-        <div class="stat"><b id="vCombo">x1</b><span>combo</span></div>
-        <div class="stat"><b id="vSpeed">0</b><span>pace</span></div>
-        <div class="stat"><b id="vBest">0</b><span>best</span></div>
-      </div>
-      <div class="hearts" id="vHits"></div>
-      <div class="pill">
-        <div class="bar"><div id="vBar"></div></div>
-        <div class="barlabel"><span id="vPoints">0 verified points</span><span id="vNeed"></span></div>
-      </div>
-      <div id="runactions"><button id="btnQuit" type="button">menu</button></div>
+      <div id="legal">Prototype by Epical Studio for KFC · KFC marks belong to KFC · points &amp; coupons in this build are for testing</div>
     </section>
 
-    <div id="toast" class="hidden"></div>
-    <div id="countdown" class="hidden">3</div>
-    <div id="hint" class="hidden">
-      <b>← →</b> lanes · <b>↑</b> jump · <b>↓</b> slide · <b>esc</b> menu
-    </div>
+    <!-- ── run HUD ──────────────────────────────────────────────────── -->
+    <section id="hud" class="hidden" aria-live="off">
+      <div id="hudTL">
+        <div><span id="vScore" class="display">0</span><span id="vMult" class="display">x1</span></div>
+        <div id="hudCoins"><span class="cur"><i>🍗</i><span id="vRunCoins">0</span></span></div>
+      </div>
+      <div id="hudTR">
+        <button id="btnPause" type="button" aria-label="Pause">❚❚</button>
+        <div id="timers"></div>
+      </div>
+      <button id="btnBoard" type="button" aria-label="Use hoverboard"><i class="ico">🛹</i><span id="vBoards">×0</span></button>
+      <div id="hint"><span class="touchonly">Swipe to dodge, jump and roll · double-tap for hoverboard</span><span class="keysonly">← → dodge · ↑ / space jump · ↓ roll · B hoverboard · P pause</span></div>
+    </section>
+    <div id="toast" class="display hidden"></div>
+    <div id="countdown" class="display hidden">3</div>
     <div id="stats" class="hidden"></div>
 
-    <nav id="touch" class="hidden">
-      <div class="pad">
-        <button type="button" data-act="1">◀</button>
-        <button type="button" data-act="2">▶</button>
+    <!-- ── revive ───────────────────────────────────────────────────── -->
+    <section id="revive" class="hidden" role="dialog" aria-modal="true" aria-labelledby="reviveTitle">
+      <div class="rcard">
+        <div class="stripes"></div>
+        <h1 id="reviveTitle" class="display">Save me!</h1>
+        <p id="reviveWhy">You crashed.</p>
+        <div class="ring" id="reviveRing"><div>🔑</div></div>
+        <div class="actions" style="justify-content: center">
+          <button id="btnRevive" class="green" type="button">Use 1 key</button>
+          <button id="btnGiveUp" type="button">No thanks</button>
+        </div>
       </div>
-      <div class="pad">
-        <button type="button" data-act="4">▼</button>
-        <button type="button" data-act="3">▲</button>
-      </div>
-    </nav>
-
-    <section id="menu" class="panel">
-      <h1>Dallas Dash</h1>
-      <p class="lede">
-        Run downtown Dallas. Collect the menu. Every verified point counts toward a real
-        15% food coupon.
-      </p>
-      <div class="tagrow">
-        <span class="tag hot">Crispy chicken, boxes &amp; bowls</span>
-        <span class="tag">Reunion Tower</span>
-        <span class="tag">Margaret Hunt Hill Bridge</span>
-        <span class="tag">100,000 points = 15% off</span>
-      </div>
-
-      <div class="actions">
-        <button id="btnStart" class="primary" type="button">Start run</button>
-        <button id="btnHow" type="button">How the reward works</button>
-      </div>
-
-      <h2>Your account</h2>
-      <div class="grid">
-        <div class="cell"><b id="vMenuPoints">0</b><span>verified points</span></div>
-        <div class="cell"><b id="vMenuBest">0</b><span>best run</span></div>
-        <div class="cell"><b id="vMenuRuns">0</b><span>runs credited</span></div>
-        <div class="cell"><b id="vMenuDistance">0</b><span>metres run</span></div>
-        <div class="cell"><b id="vMenuStores">0</b><span>storefronts passed</span></div>
-        <div class="cell"><b id="vMenuAccount">…</b><span>account</span></div>
-      </div>
-      <p class="note hidden" id="vRuntimeNote"></p>
-
-      <h2>Dallas landmarks seen</h2>
-      <p><span id="vLandmarkCount">0 of 10</span> — pass a landmark on the route to log it.</p>
-      <div class="chips" id="vLandmarks"></div>
-
-      <h2>Outfits (free)</h2>
-      <div class="chips" id="vOutfits"></div>
-
-      <h2>Your coupons</h2>
-      <div id="vCoupons"></div>
-      <div class="actions">
-        <button id="btnClaim" class="primary" type="button" disabled>Claim 15% coupon</button>
-      </div>
-      <p class="note" id="vTerms"></p>
-      <div class="actions">
-        <button id="btnTestGrant" class="test" type="button">Test mode: top up to 100,000 points</button>
-      </div>
-      <p class="note" id="vTestNote">
-        Test mode is on: this shortcut exists to check the coupon, not as part of the reward
-        mechanic. Points that count are still only ever created by a verified run.
-      </p>
-
-      <h2>How the reward works</h2>
-      <ul class="steps">
-        <li><b>Play and make progress.</b> Each run is verified server-side before the points land. Progress builds across sessions.</li>
-        <li><b>Claim the reward.</b> At 100,000 points, claim once: the points are deducted and a code is issued in the same step.</li>
-        <li><b>Choose food and enter the code.</b> Use the same account in the food app and type the code at checkout.</li>
-        <li><b>Place the order.</b> The restaurant funds the discount and fulfils the order.</li>
-        <li><b>Handle problems fairly.</b> If the restaurant cancels, the coupon returns with its original expiry.</li>
-      </ul>
-      <div class="receipt" id="vCheckout">
-        <div class="row"><span>Food subtotal</span><span>$30.00</span></div>
-        <div class="row"><span>Game coupon</span><span class="save">−$4.50</span></div>
-        <div class="row"><span>Delivery</span><span>$2.00</span></div>
-        <div class="row"><span>Tax (illustrative)</span><span>$2.10</span></div>
-        <div class="row total"><span>Total</span><span>$29.60</span></div>
-      </div>
-      <p class="note">
-        Illustrative checkout only: $30.00 − $4.50 + $2.00 + $2.10 = $29.60. Example terms
-        min $25 / max $5 off. Actual tax, fees, menu, payment methods and offer conditions
-        come from the restaurant.
-      </p>
-      <p class="note">
-        Concept build for testing: Big D Fried is a fictional restaurant brand and every
-        asset here is drawn in code, so no real brand assets are involved. Menus, prices
-        and terms are illustrative, and points, coupons and the account live in this test
-        build only.
-      </p>
     </section>
 
-    <section id="results" class="panel hidden">
-      <h1 id="vResTitle">Run credited</h1>
-      <p class="lede" id="vResNote"></p>
+    <!-- ── pause ────────────────────────────────────────────────────── -->
+    <div id="pauseScrim" class="scrim hidden"></div>
+    <section id="pause" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
+      <div class="stripes"></div>
+      <h1 id="pauseTitle" class="display">Paused</h1>
+      <div class="actions">
+        <button id="btnResume" class="red" type="button">Resume</button>
+        <button id="btnQuit" type="button">Quit run</button>
+      </div>
+      <p class="note">Quitting abandons the run: nothing is submitted, so nothing is credited.</p>
+    </section>
+
+    <!-- ── results ──────────────────────────────────────────────────── -->
+    <div id="scrim" class="scrim hidden"></div>
+    <section id="results" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="resTitle">
+      <div class="stripes"></div>
+      <header><h1 id="resTitle" class="display">Run over</h1><span id="vVerify" class="verify">verifying…</span></header>
+      <div class="big display" id="vResScore">0</div>
+      <p id="vResNote"></p>
       <div class="grid">
-        <div class="cell"><b id="vResScore">0</b><span>run score</span></div>
-        <div class="cell"><b id="vResAward">0</b><span>verified points</span></div>
+        <div class="cell"><b id="vResCoins">0</b><span>drumsticks</span></div>
         <div class="cell"><b id="vResDistance">0</b><span>metres</span></div>
-        <div class="cell"><b id="vResPickups">0</b><span>items collected</span></div>
-        <div class="cell"><b id="vResCombo">x1</b><span>best combo</span></div>
-        <div class="cell"><b id="vResHits">0</b><span>hits taken</span></div>
+        <div class="cell"><b id="vResBest">0</b><span>best run</span></div>
+        <div class="cell"><b id="vResPoints">0</b><span>coupon points</span></div>
       </div>
-      <h2>Landmarks on this run</h2>
-      <div class="chips" id="vResLandmarks"></div>
+      <div id="vSetDone" class="ribbon hidden">Mission set complete! Multiplier up, +1 key, +250 drumsticks</div>
+      <h2>Missions</h2>
+      <div id="vResMissions"></div>
       <div class="actions">
-        <button id="btnAgain" class="primary" type="button">Run again</button>
-        <button id="btnMenu" type="button">Account</button>
-        <button id="btnResClaim" type="button" class="hidden">Claim 15% coupon</button>
+        <button id="btnAgain" class="red" type="button">Run again</button>
+        <button id="btnHome" type="button">Home</button>
+        <button id="btnResClaim" class="green hidden" type="button">Claim coupon</button>
       </div>
     </section>
 
-    <section id="reward" class="panel hidden">
-      <h1>Coupon issued</h1>
-      <p class="lede">Show this code in the food app at checkout. It is tied to your account.</p>
-      <div class="code" id="vCode">DLS-0000-0000-0000</div>
+    <!-- ── missions ─────────────────────────────────────────────────── -->
+    <section id="sheet-missions" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="mTitle">
+      <div class="stripes"></div>
+      <header><h1 id="mTitle" class="display">Missions</h1><button class="x" type="button" data-close>✕</button></header>
+      <p>Finish all three to raise your score multiplier. Set <b id="vSetNo">1</b>.</p>
+      <div id="vMissions"></div>
+      <h2>Score multiplier</h2>
+      <div class="multi" id="vMultLadder"></div>
+      <p class="note">Each finished set: multiplier +1 (up to x6), +1 key, +250 drumsticks.</p>
+    </section>
+
+    <!-- ── shop ─────────────────────────────────────────────────────── -->
+    <section id="sheet-shop" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="sTitle">
+      <div class="stripes"></div>
+      <header><h1 id="sTitle" class="display">Shop</h1><span class="cur"><i>🍗</i><span id="vShopCoins">0</span></span></header>
+      <div id="vShop"></div>
+      <div class="actions"><button type="button" data-close>Done</button></div>
+    </section>
+
+    <!-- ── characters ───────────────────────────────────────────────── -->
+    <section id="sheet-chars" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cTitle">
+      <div class="stripes"></div>
+      <header><h1 id="cTitle" class="display">Crew</h1><button class="x" type="button" data-close>✕</button></header>
+      <p>Unlocked by lifetime points. Tap to wear.</p>
+      <div class="chars" id="vChars"></div>
+      <h2>Dallas landmarks spotted</h2>
+      <p id="vLandmarkCount">0 of 10</p>
+    </section>
+
+    <!-- ── rewards ──────────────────────────────────────────────────── -->
+    <section id="sheet-rewards" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="rTitle">
+      <div class="stripes"></div>
+      <header><h1 id="rTitle" class="display">Your KFC coupon</h1><button class="x" type="button" data-close>✕</button></header>
+      <div class="grid">
+        <div class="cell"><b id="vRPoints">0</b><span>coupon points</span></div>
+        <div class="cell"><b id="vRBest">0</b><span>best run</span></div>
+        <div class="cell"><b id="vRRuns">0</b><span>runs credited</span></div>
+      </div>
+      <div id="vCoupons"></div>
+      <div class="actions"><button id="btnClaim" class="red" type="button" disabled>Claim 15% coupon</button></div>
+      <p class="note" id="vTerms"></p>
+      <div class="actions"><button id="btnTestGrant" class="test" type="button">Test mode: top up to 100,000 points</button></div>
+      <p class="note" id="vTestNote">Test shortcut for checking the coupon flow. Real points only come from verified runs.</p>
+      <h2>How it works</h2>
+      <ol class="steps">
+        <li><b>Run.</b> Every run is replayed and verified before its points count.</li>
+        <li><b>Claim.</b> At 100,000 points, claim: the points are deducted and a one-time code is issued.</li>
+        <li><b>Order.</b> Sign in to the KFC app with the same account and enter the code at checkout.</li>
+        <li><b>Redeem once.</b> The code is reserved for that order and used up when it's paid. If the restaurant cancels, it comes back.</li>
+      </ol>
+      <div class="receipt">
+        <div class="r"><span>Food subtotal</span><span>$30.00</span></div>
+        <div class="r"><span>Dallas Dash coupon (15%, max $5)</span><span class="save">−$4.50</span></div>
+        <div class="r"><span>Delivery</span><span>$2.00</span></div>
+        <div class="r"><span>Tax (illustrative)</span><span>$2.10</span></div>
+        <div class="r total"><span>Total</span><span>$29.60</span></div>
+      </div>
+      <p class="note" id="vRuntimeNote"></p>
+    </section>
+
+    <!-- ── coupon issued ────────────────────────────────────────────── -->
+    <section id="reward" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cpTitle">
+      <div class="stripes"></div>
+      <h1 id="cpTitle" class="display">Coupon unlocked!</h1>
+      <p>Enter this code at checkout in the KFC app. It's tied to your account and works once.</p>
+      <div class="code" id="vCode">KFC-0000-0000-0000-0</div>
+      <p class="note" id="vRewardTerms"></p>
       <div class="actions">
         <button id="btnCopy" type="button">Copy code</button>
-        <button id="btnRewardClose" class="primary" type="button">Back to the game</button>
+        <button id="btnRewardClose" class="red" type="button">Back to the game</button>
       </div>
-      <p class="note" id="vRewardTerms"></p>
-      <div class="receipt" id="vRewardMath">
-        <div class="row"><span>Food subtotal</span><span>$30.00</span></div>
-        <div class="row"><span>Game coupon 15%</span><span class="save">−$4.50</span></div>
-        <div class="row"><span>Delivery</span><span>$2.00</span></div>
-        <div class="row"><span>Tax (illustrative)</span><span>$2.10</span></div>
-        <div class="row total"><span>Total</span><span>$29.60</span></div>
-      </div>
-      <p class="note">
-        In the food app the coupon is reserved against the order, redeemed once, and
-        restored if the restaurant cancels. Those rules belong to the food app and the
-        shared service, not this test build.
-      </p>
     </section>
-
-    <footer id="banner">
-      <span>Concept build · Dallas, TX</span>
-      <span>Fictional fried-chicken brand, drawn in code</span>
-      <span>Runs verified server-side before points are credited</span>
-    </footer>
 
     <div id="fatal" class="hidden">
       <h1>The game could not start</h1>
