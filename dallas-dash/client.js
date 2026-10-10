@@ -7,7 +7,7 @@
  * the rules replaying it, never by this code.
  */
 
-import { createRenderer } from "./scene.js";
+import { createRenderer, districtAt } from "./scene.js";
 import { audio } from "./audio.js";
 import * as SIM from "./sim.js";
 
@@ -116,6 +116,10 @@ let showStats = new URLSearchParams(location.search).has("stats");
 let reviveTimer = 0;
 let reviveShown = false;
 let openSheet = null;
+let hudCoins = 0;
+let hudDistrict = "";
+let hudSightings = 0;
+let bestBefore = 0;
 
 function onState(msg) {
   const before = view;
@@ -281,6 +285,62 @@ function jolt(flash) {
   if (navigator.vibrate) navigator.vibrate(flash ? 120 : 40);
 }
 
+function flashClass(el, cls) {
+  el.classList.remove(cls);
+  void el.offsetWidth;
+  el.classList.add(cls);
+}
+
+function showDistrict(name) {
+  q("vDistrict").textContent = name;
+  const el = q("district");
+  el.classList.add("on");
+  clearTimeout(showDistrict._t);
+  showDistrict._t = setTimeout(() => el.classList.remove("on"), 2400);
+}
+
+function showSpot(name) {
+  q("vSpot").textContent = name;
+  const el = q("spot");
+  el.classList.add("on");
+  clearTimeout(showSpot._t);
+  showSpot._t = setTimeout(() => el.classList.remove("on"), 2600);
+}
+
+const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+function confetti() {
+  if (reduceMotion) return;
+  const colors = ["#e4002b", "#ffc43c", "#ffffff", "#0b6b3a", "#1b6fd1"];
+  for (let i = 0; i < 70; i += 1) {
+    const c = document.createElement("i");
+    c.className = "confetti";
+    c.style.left = `${Math.random() * 100}vw`;
+    c.style.background = colors[i % colors.length];
+    c.style.setProperty("--dx", `${(Math.random() - 0.5) * 30}vw`);
+    c.style.setProperty("--rot", `${(Math.random() - 0.5) * 1080}deg`);
+    c.style.animationDuration = `${1.6 + Math.random() * 1.4}s`;
+    c.style.animationDelay = `${Math.random() * 0.4}s`;
+    document.body.appendChild(c);
+    setTimeout(() => c.remove(), 3600);
+  }
+}
+
+function countUp(el, to) {
+  if (reduceMotion) {
+    el.textContent = fmt(to);
+    return;
+  }
+  const t0 = performance.now();
+  const dur = Math.min(1400, 500 + to / 40);
+  const step = (now) => {
+    const k = Math.min(1, (now - t0) / dur);
+    el.textContent = fmt(Math.round(to * (1 - Math.pow(1 - k, 3))));
+    if (k < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
 let coinSoundAt = 0;
 function react(events) {
   for (const e of events) {
@@ -397,17 +457,39 @@ function startRun() {
   reviveShown = false;
   hide(q("home"));
   show(q("hud"));
-  show(q("hint"));
-  setTimeout(() => hide(q("hint")), 4200);
+  hudCoins = 0;
+  hudSightings = 0;
+  hudDistrict = districtAt(0).name;
+  bestBefore = view.bestRun || 0;
+  // the controls card shows for the first few runs, then gets out of the way
+  let seen = 0;
+  try {
+    seen = Number(localStorage.getItem("dash:tut") || 0);
+    localStorage.setItem("dash:tut", String(seen + 1));
+  } catch {
+    seen = 0;
+  }
+  if (seen < 3) {
+    show(q("hint"));
+    setTimeout(() => hide(q("hint")), 5200);
+  } else hide(q("hint"));
   const el = q("countdown");
   let n = 3;
   el.textContent = String(n);
+  el.classList.remove("go");
   show(el);
+  flashClass(el, "tick");
   countdown = window.setInterval(() => {
     n -= 1;
-    if (n > 0) el.textContent = String(n);
-    else if (n === 0) el.textContent = "GO!";
-    else {
+    if (n > 0) {
+      el.textContent = String(n);
+      flashClass(el, "tick");
+    } else if (n === 0) {
+      el.innerHTML = "Giddy<br />up!";
+      el.classList.add("go");
+      flashClass(el, "tick");
+      showDistrict(hudDistrict);
+    } else {
       window.clearInterval(countdown);
       countdown = 0;
       hide(el);
@@ -423,6 +505,10 @@ function pause() {
   if (!running || paused) return;
   paused = true;
   audio.stopMusic();
+  q("vPauseWhere").textContent = `Catching your breath in ${districtAt(run.distance).name}.`;
+  q("vPauseScore").textContent = fmt(Math.round(run.score));
+  q("vPauseCoins").textContent = fmt(run.coins);
+  q("vPauseDist").textContent = fmt(Math.round(run.distance));
   show(q("pauseScrim"));
   show(q("pause"));
   q("btnResume").focus();
@@ -518,7 +604,11 @@ function showResults(summary) {
         : "Ten minutes up — what a run.";
   q("resTitle").textContent = summary.reason === "timeup" ? "Time!" : "Run over";
   q("vResNote").textContent = why;
-  q("vResScore").textContent = fmt(summary.score);
+  countUp(q("vResScore"), summary.score);
+  const best = summary.score > bestBefore && summary.score > 0;
+  q("vNewBest").classList.toggle("hidden", !best);
+  if (best) setTimeout(confetti, 350);
+  q("vResDistrict").textContent = districtAt(summary.distance).name;
   q("vResCoins").textContent = fmt(summary.coins);
   q("vResDistance").textContent = fmt(summary.distance);
   q("vResBest").textContent = fmt(Math.max(view ? view.bestRun : 0, summary.score));
@@ -550,6 +640,8 @@ function paintHome() {
   q("vCoins").textContent = fmt(view.coins);
   q("vKeys").textContent = fmt(view.keys);
   q("vMultBadge").textContent = `x${view.mult}`;
+  q("vHomeBest").textContent = fmt(view.bestRun);
+  q("vHomeRuns").textContent = fmt(view.runs);
   q("vClaimBadge").classList.toggle("hidden", !view.claimReady);
   const pct = view.claimReady ? 100 : Math.min(100, (view.points / view.terms.points) * 100);
   q("vBar").style.width = `${pct}%`;
@@ -566,6 +658,21 @@ function paintHud() {
   mult.textContent = `x${m}`;
   mult.classList.toggle("x2", run.double > 0);
   q("vRunCoins").textContent = fmt(run.coins);
+  if (run.coins !== hudCoins) {
+    if (run.coins > hudCoins) flashClass(q("coinChip"), "bump");
+    hudCoins = run.coins;
+  }
+  q("vDist").textContent = fmt(Math.round(run.distance));
+  const district = districtAt(run.distance).name;
+  if (district !== hudDistrict) {
+    hudDistrict = district;
+    showDistrict(district);
+    audio.power();
+  }
+  if (run.sightings.length > hudSightings) {
+    hudSightings = run.sightings.length;
+    showSpot(SIM.LANDMARKS[run.sightings[hudSightings - 1]]);
+  }
   q("vBoards").textContent = run.board > 0 ? "on" : `×${run.boardsLeft}`;
   q("btnBoard").disabled = run.board > 0 || run.boardsLeft <= 0;
   q("chaseWarn").classList.toggle("on", run.chase > 0 && run.chase < 280 && !run.downed);
@@ -575,7 +682,7 @@ function paintHud() {
     const left = k === "jetpack" ? run.jet : run[k];
     if (left > 0) {
       const total = SIM.powerTicks(k, run.levels[k]);
-      timers.push(`<div class="timer"><i style="background:${POWER[k].color}">${POWER[k].glyph}</i><div class="t"><div style="width:${(left / total) * 100}%"></div></div></div>`);
+      timers.push(`<div class="timer${left < 120 ? " low" : ""}"><i style="background:${POWER[k].color}">${POWER[k].glyph}</i><div class="t"><div style="width:${(left / total) * 100}%"></div></div></div>`);
     }
   }
   if (run.board > 0) {

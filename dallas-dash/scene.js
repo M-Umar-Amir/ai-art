@@ -13,8 +13,6 @@
 import { HAZ, JET_HEIGHT } from "./sim.js";
 
 const ROAD_HALF = 4.6;
-const SIDEWALK_EDGE = 8.2;
-const LANE_DIV = 1.15;
 const LANE_X = [-2.3, 0, 2.3];
 
 // KFC brand colours: the red is the brand's #E4002B
@@ -34,7 +32,8 @@ const STONE = [186, 112, 92];
 const GREEN = [98, 200, 120];
 const GOLD = [255, 196, 60];
 
-const SKY = { top: [64, 132, 214], mid: [128, 184, 240], low: [255, 220, 180], haze: [226, 214, 210] };
+// Texas golden hour: deep blue overhead, warm peach at the horizon
+const SKY = { top: [38, 92, 188], mid: [104, 162, 232], low: [255, 190, 132], haze: [240, 204, 172] };
 
 export const CAM = {
   h: 3.1,
@@ -45,13 +44,86 @@ export const CAM = {
   focal: 1.38,
 };
 
+/* ── Dallas neighbourhoods: each one mixes its own kind of street ─────── */
+
+export const DISTRICT_LEN = 520;
+export const DISTRICTS = [
+  { name: "Deep Ellum", mix: { brick: 6, loft: 2, cantina: 2, glass: 1 } },
+  { name: "Downtown", mix: { glass: 7, loft: 2, brick: 1, cantina: 1 } },
+  { name: "Bishop Arts", mix: { cantina: 6, brick: 3, loft: 2 } },
+  { name: "West End", mix: { loft: 6, brick: 3, cantina: 1, glass: 1 } },
+  { name: "Uptown", mix: { glass: 4, cantina: 3, loft: 2, brick: 2 } },
+];
+export function districtAt(distance) {
+  return DISTRICTS[Math.floor(Math.max(0, distance) / DISTRICT_LEN) % DISTRICTS.length];
+}
+
+const SEG = 13; // one city block per side per SEG units of road
+const FACE_X = 9.0; // building fronts sit at the back of the sidewalk
+const MURALS = ["DEEP ELLUM", "BIG D", "HOWDY Y'ALL", "DALLAS", "LONE STAR", "TEXAS PROUD"];
+const SHOP_SIGNS = ["TACOS", "BBQ", "HONKY TONK", "TEX-MEX", "BOOTS", "MARGARITAS", "KOLACHES"];
+const GHOST_SIGNS = ["ELM ST", "MAIN ST", "COMMERCE ST", "WEST END", "DALLAS COTTON CO."];
+const MURAL_BG = ["#1b6fd1", "#f2a20c", "#16a37f", "#7a3fc4", "#e4002b", "#0b9bb5"];
+const CANTINA = [[64, 196, 196], [246, 132, 156], [250, 204, 72], [120, 200, 120], [250, 160, 80]];
+const BRICK = [[170, 72, 52], [150, 62, 48], [184, 96, 64], [128, 58, 50]];
+const LOFT = [[214, 186, 146], [196, 170, 136], [222, 204, 172]];
+const TOWER = [[70, 112, 168], [56, 96, 140], [92, 140, 186], [64, 120, 150]];
+
+/** A stable 0..1 value for an integer: the street is the same every visit. */
+function hash(n) {
+  let x = Math.imul((n | 0) ^ 0x9e3779b9, 0x85ebca6b);
+  x ^= x >>> 13;
+  x = Math.imul(x, 0xc2b2ae35);
+  x ^= x >>> 16;
+  return (x >>> 0) / 4294967296;
+}
+
+function pickMix(mix, r) {
+  let total = 0;
+  for (const k in mix) total += mix[k];
+  let v = r * total;
+  for (const k in mix) {
+    v -= mix[k];
+    if (v <= 0) return k;
+  }
+  return "brick";
+}
+
+function blockSpec(i, side) {
+  const r = hash(i * 2 + (side > 0 ? 1 : 0));
+  const r2 = hash(i * 7 + (side > 0 ? 101 : 3));
+  const r3 = hash(i * 13 + (side > 0 ? 57 : 29));
+  const style = pickMix(districtAt(i * SEG).mix, r);
+  const alley = r2 < 0.22 ? 3 : 0.35;
+  const spec = { style, len: SEG - alley, r2, r3 };
+  if (style === "brick") {
+    spec.h = 7 + Math.floor(r3 * 3) * 1.6;
+    spec.color = BRICK[Math.floor(r2 * BRICK.length)];
+    if (r3 < 0.6) spec.mural = { text: MURALS[Math.floor(r2 * 997) % MURALS.length], bg: MURAL_BG[Math.floor(r3 * 991) % MURAL_BG.length] };
+  } else if (style === "loft") {
+    spec.h = 10 + Math.floor(r3 * 3) * 2;
+    spec.color = LOFT[Math.floor(r2 * LOFT.length)];
+    spec.ghost = GHOST_SIGNS[Math.floor(r3 * 991) % GHOST_SIGNS.length];
+  } else if (style === "cantina") {
+    spec.h = 4.6 + r3 * 1.4;
+    spec.color = CANTINA[Math.floor(r2 * CANTINA.length)];
+    spec.sign = SHOP_SIGNS[Math.floor(r3 * 991) % SHOP_SIGNS.length];
+  } else {
+    spec.h = 20 + Math.floor(r3 * 4) * 5;
+    spec.color = TOWER[Math.floor(r2 * TOWER.length)];
+    spec.pegasus = r3 > 0.8; // the red neon Pegasus, Dallas's rooftop mascot
+  }
+  spec.water = style !== "glass" && r3 > 0.72; // a rooftop water tower
+  return spec;
+}
+
 function rgb(c, mul) {
   const f = mul === undefined ? 1 : mul;
   return `rgb(${Math.min(255, Math.round(c[0] * f))},${Math.min(255, Math.round(c[1] * f))},${Math.min(255, Math.round(c[2] * f))})`;
 }
 
 function fogMix(c, depth) {
-  const t = Math.max(0, Math.min(0.8, (depth - 50) / 200));
+  const t = Math.max(0, Math.min(0.8, (depth - 60) / 190));
   return [
     c[0] + (SKY.haze[0] - c[0]) * t,
     c[1] + (SKY.haze[1] - c[1]) * t,
@@ -86,6 +158,7 @@ export function createRenderer(canvas) {
   let W = 1;
   let H = 1;
   let focal = 900;
+  let focalBase = 900;
   let cx = 0;
   let cy = 0;
   let faces = [];
@@ -110,7 +183,8 @@ export function createRenderer(canvas) {
     canvas.height = Math.floor(H * dpr);
     ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     // landscape screens get a wider lens so the runner doesn't fill the frame
-    focal = Math.min(W, H) * (W > H * 1.2 ? CAM.focal * 0.8 : CAM.focal);
+    focalBase = Math.min(W, H) * (W > H * 1.2 ? CAM.focal * 0.8 : CAM.focal);
+    focal = focalBase;
     cx = W / 2;
     cy = H * CAM.cy;
   }
@@ -179,7 +253,7 @@ export function createRenderer(canvas) {
       if (p.y < minY) minY = p.y;
       if (p.y > maxY) maxY = p.y;
     }
-    if (maxX < -40 || minX > W + 40 || maxY < -40 || minY > H + 40) return;
+    if (maxX < -90 || minX > W + 90 || maxY < -90 || minY > H + 90) return;
     faces.push({ out, depth, color: rgb(fogMix(color, depth), tone === undefined ? 1 : tone), paint });
   }
 
@@ -287,67 +361,490 @@ export function createRenderer(canvas) {
     };
   }
 
+  /* ── painted Dallas signage (cached closures, one per look) ─────────── */
+
+  const paintCache = new Map();
+  function cached(key, make) {
+    let p = paintCache.get(key);
+    if (!p) {
+      p = make();
+      paintCache.set(key, p);
+    }
+    return p;
+  }
+
+  function starPath(x, y, r) {
+    ctx.beginPath();
+    for (let i = 0; i < 10; i += 1) {
+      const a = -Math.PI / 2 + (i * Math.PI) / 5;
+      const rr = i % 2 ? r * 0.42 : r;
+      ctx.lineTo(x + Math.cos(a) * rr, y + Math.sin(a) * rr);
+    }
+    ctx.closePath();
+  }
+
+  /** Text squeezed to fit `maxW` of the 100-unit sign space. */
+  function fitText(text, x, y, size, maxW, fill, stroke) {
+    ctx.font = `italic 900 ${size}px Oswald, Impact, 'Arial Narrow', sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
+    const w = ctx.measureText(text).width;
+    ctx.save();
+    ctx.translate(x, y);
+    if (w > maxW) ctx.scale(maxW / w, 1);
+    if (stroke) {
+      ctx.lineWidth = size * 0.16;
+      ctx.strokeStyle = stroke;
+      ctx.lineJoin = "round";
+      ctx.strokeText(text, 0, 0);
+    }
+    ctx.fillStyle = fill;
+    ctx.fillText(text, 0, 0);
+    ctx.restore();
+  }
+
+  function paintMural(text, bg) {
+    return cached(`m:${text}:${bg}`, () => () => {
+      ctx.fillStyle = bg;
+      ctx.fillRect(0, 0, 100, 100);
+      // sunburst rays behind the lettering, a Deep Ellum mural staple
+      ctx.fillStyle = "rgba(255,255,255,0.16)";
+      for (let i = 0; i < 12; i += 2) {
+        const a0 = (i / 12) * Math.PI * 2;
+        const a1 = ((i + 1) / 12) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(50, 50);
+        ctx.lineTo(50 + Math.cos(a0) * 90, 50 + Math.sin(a0) * 90);
+        ctx.lineTo(50 + Math.cos(a1) * 90, 50 + Math.sin(a1) * 90);
+        ctx.closePath();
+        ctx.fill();
+      }
+      starPath(50, 30, 18);
+      ctx.fillStyle = "#fff";
+      ctx.fill();
+      fitText(text, 50, 70, 34, 92, "#ffd84a", "#202124");
+    });
+  }
+
+  function paintShopSign(text, bg) {
+    return cached(`s:${text}:${bg}`, () => () => {
+      ctx.fillStyle = "#202124";
+      ctx.fillRect(0, 0, 100, 100);
+      ctx.fillStyle = bg;
+      ctx.fillRect(4, 8, 92, 84);
+      fitText(text, 50, 52, 62, 86, "#fff", "#202124");
+    });
+  }
+
+  function paintGhost(text) {
+    return cached(`g:${text}`, () => () => {
+      ctx.fillStyle = "rgba(255,255,255,0.22)";
+      ctx.fillRect(0, 0, 100, 100);
+      fitText(text, 50, 52, 54, 94, "rgba(255,250,236,0.85)", null);
+    });
+  }
+
+  const paintTexas = () => {
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, 100, 50);
+    ctx.fillStyle = "#bf0a30";
+    ctx.fillRect(0, 50, 100, 50);
+    ctx.fillStyle = "#002868";
+    ctx.fillRect(0, 0, 34, 100);
+    starPath(17, 50, 12);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+  };
+
+  function paintHighway(text, shield) {
+    return cached(`h:${text}:${shield}`, () => () => {
+      ctx.fillStyle = "#0b6b3a";
+      ctx.fillRect(0, 0, 100, 100);
+      ctx.strokeStyle = "#fff";
+      ctx.lineWidth = 4;
+      ctx.strokeRect(5, 7, 90, 86);
+      // interstate shield
+      ctx.fillStyle = "#fff";
+      ctx.beginPath();
+      ctx.moveTo(12, 18);
+      ctx.lineTo(38, 18);
+      ctx.quadraticCurveTo(40, 50, 25, 62);
+      ctx.quadraticCurveTo(10, 50, 12, 18);
+      ctx.fill();
+      ctx.fillStyle = "#1b3f94";
+      ctx.fillRect(14, 28, 22, 22);
+      ctx.fillStyle = "#c8102e";
+      ctx.fillRect(14, 20, 22, 7);
+      fitText(shield, 25, 40, 16, 20, "#fff", null);
+      ctx.font = "800 15px Oswald, Impact, sans-serif";
+      fitText("NORTH", 70, 26, 18, 48, "#fff", null);
+      fitText(text, 52, 76, 26, 82, "#fff", null);
+    });
+  }
+
+  const paintPegasus = () => {
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    const horse = () => {
+      ctx.beginPath();
+      ctx.ellipse(46, 62, 20, 9, -0.1, 0, Math.PI * 2); // body
+      ctx.moveTo(62, 56);
+      ctx.lineTo(74, 36); // neck
+      ctx.lineTo(86, 40); // head
+      ctx.moveTo(32, 68);
+      ctx.lineTo(22, 86); // hind leg
+      ctx.moveTo(40, 70);
+      ctx.lineTo(42, 90);
+      ctx.moveTo(56, 70);
+      ctx.lineTo(66, 86); // fore legs
+      ctx.moveTo(60, 68);
+      ctx.lineTo(74, 78);
+      ctx.moveTo(27, 60);
+      ctx.quadraticCurveTo(12, 62, 10, 76); // tail
+      ctx.moveTo(44, 54);
+      ctx.quadraticCurveTo(26, 30, 18, 8); // wing
+      ctx.quadraticCurveTo(44, 22, 56, 52);
+      ctx.moveTo(30, 34);
+      ctx.lineTo(48, 40);
+    };
+    horse();
+    ctx.strokeStyle = "rgba(255, 60, 70, 0.35)";
+    ctx.lineWidth = 11;
+    ctx.stroke();
+    horse();
+    ctx.strokeStyle = "#ff3344";
+    ctx.lineWidth = 4.5;
+    ctx.stroke();
+  };
+
+  /** A 2D paint fitted to a vertical wall plane at x, readable from the road. */
+  function wallPaint(cam, side, x, y0, y1, zNear, zFar, paint, bias, fromNear) {
+    const q = quadScreen(cam, [x, y1, zFar], [x, y1, zNear], [x, y0, zNear], [x, y0, zFar]);
+    if (!q) return;
+    // seen from the road, left-hand walls read near→far and right-hand walls
+    // far→near; a flag instead always starts at its pole (the near end)
+    const ordered = fromNear || side < 0 ? [q[1], q[0], q[3], q[2]] : q;
+    faces.push({ out: ordered, depth: (q[0].d + q[2].d) / 2 - (bias || 0.08), color: "#fff", paint });
+  }
+
   /* ── roadside furniture ─────────────────────────────────────────────── */
 
-  function streetFurniture(cam, run) {
-    const base = Math.floor(run.distance / 26);
-    for (let i = 0; i < 9; i += 1) {
-      const gz = (base + i) * 26 - run.distance;
-      if (gz < -4) continue;
-      const wz = -gz;
-      const side = (base + i) % 2 === 0 ? -1 : 1;
-      const px = side * 6.6;
-      prism(cam, px, 0, wz, 0.14, 4.8, 5, [96, 100, 112]);
-      box(cam, px - side * 0.6, 4.8, wz, 1.4, 0.16, 0.3, [96, 100, 112]);
-      box(cam, px - side * 1.2, 4.66, wz, 0.5, 0.14, 0.34, [255, 236, 190]);
-      const q = (base + i) % 4;
-      if (q === 0) {
-        // a palm: Dallas, after all
-        prism(cam, px + side * 0.9, 0, wz - 3, 0.18, 5.4, 5, [140, 108, 76]);
-        ball(cam, px + side * 0.9, 5.6, wz - 3, 1.5, [80, 150, 84]);
-      } else if (q === 1) box(cam, px - side * 1.6, 0.4, wz, 1.4, 0.2, 0.5, [150, 112, 78]);
-      else if (q === 2) prism(cam, px - side * 1.6, 0, wz, 0.3, 0.8, 6, RED, WHITE);
-      else prism(cam, px - side * 1.6, 0, wz, 0.14, 0.7, 5, [200, 60, 60]);
+  /* ── the city: continuous Dallas blocks along both sidewalks ───────── */
+
+  function windowsOn(cam, side, x, zNear, len, y0, y1, rel, seed) {
+    const floors = Math.max(1, Math.floor((y1 - y0) / 3.2));
+    const per = Math.max(1, Math.floor((len - 1) / 3.2));
+    const pitch = (len - 1) / per;
+    for (let f = 0; f < floors; f += 1) {
+      const wy0 = y0 + f * 3.2 + 0.9;
+      const wy1 = wy0 + 1.7;
+      if (rel > 70) {
+        // far away: one band per floor is enough
+        face(cam, [[x, wy0, zNear - 0.6], [x, wy0, zNear - len + 0.6], [x, wy1, zNear - len + 0.6], [x, wy1, zNear - 0.6]], [44, 56, 76], 1);
+        continue;
+      }
+      for (let k = 0; k < per; k += 1) {
+        const a = zNear - 0.5 - k * pitch - pitch * 0.2;
+        const b = a - pitch * 0.6;
+        const on = hash(seed * 31 + f * 7 + k) > 0.72;
+        face(cam, [[x, wy0, a], [x, wy0, b], [x, wy1, b], [x, wy1, a]], on ? [255, 212, 140] : [44, 56, 76], 1);
+      }
+    }
+  }
+
+  function waterTower(cam, x, y, z) {
+    for (const [dx, dz] of [[-0.8, -0.8], [0.8, -0.8], [-0.8, 0.8], [0.8, 0.8]]) box(cam, x + dx, y + 1, z + dz, 0.14, 2, 0.14, [80, 66, 56]);
+    prism(cam, x, y + 2, z, 1.3, 2.2, 8, [150, 112, 82]);
+    prism(cam, x, y + 4.2, z, 1.4, 0.9, 8, [96, 80, 70], null, 0.1);
+  }
+
+  function building(cam, side, zNear, spec, rel, seed) {
+    const len = spec.len;
+    const zFar = zNear - len;
+    const fx = side * FACE_X;
+    const bx = side * (FACE_X + 9);
+    const h = spec.h;
+    const lit = side < 0 ? 0.98 : 0.82;
+    const n = Math.max(1, Math.ceil(len / 6.5));
+    const sl = len / n;
+    for (let k = 0; k < n; k += 1) {
+      const a = zNear - sl * k;
+      const b = zNear - sl * (k + 1);
+      face(cam, [[fx, 0, a], [fx, 0, b], [fx, h, b], [fx, h, a]], spec.color, lit);
+    }
+    if (zNear < cam.pz) face(cam, [[fx, 0, zNear], [bx, 0, zNear], [bx, h, zNear], [fx, h, zNear]], spec.color, 1.08);
+    if (rel > 150) return;
+    const wx = fx - side * 0.04;
+    const st = spec.style;
+    if (st === "glass") {
+      // curtain wall: pale spandrel bands between dark glass floors
+      const top = Math.min(h, 32);
+      for (let y = 3.2; y < top; y += 3.2) face(cam, [[wx, y, zNear - 0.2], [wx, y, zFar + 0.2], [wx, y + 0.5, zFar + 0.2], [wx, y + 0.5, zNear - 0.2]], [200, 220, 236], lit);
+      face(cam, [[wx, 0, zNear - 0.3], [wx, 0, zFar + 0.3], [wx, 2.8, zFar + 0.3], [wx, 2.8, zNear - 0.3]], [230, 238, 244], lit);
+      if (spec.pegasus) wallPaint(cam, side, side * (FACE_X + 3), h + 0.4, h + 6.4, zNear - 2, zNear - 9, paintPegasus, 0.2);
+    } else if (st === "cantina") {
+      face(cam, [[wx, 0.5, zNear - 0.8], [wx, 0.5, zFar + 0.8], [wx, 2.6, zFar + 0.8], [wx, 2.6, zNear - 0.8]], [60, 84, 112], 1);
+      // striped awning sloping out over the sidewalk
+      const ax = fx - side * 1.5;
+      const strips = 6;
+      for (let k = 0; k < strips; k += 1) {
+        const a = zNear - 0.6 - ((len - 1.2) * k) / strips;
+        const b = zNear - 0.6 - ((len - 1.2) * (k + 1)) / strips;
+        face(cam, [[fx, 3.3, a], [fx, 3.3, b], [ax, 2.7, b], [ax, 2.7, a]], k % 2 ? WHITE : spec.color, 0.95);
+      }
+      if (rel < 110) wallPaint(cam, side, wx, 3.5, Math.min(h - 0.2, 4.6), zNear - 2.2, zNear - Math.min(len - 2, 8), paintShopSign(spec.sign, rgb(spec.color, 0.8)));
+    } else {
+      const muralTop = Math.min(h - 1.2, 6.4);
+      const hasMural = spec.mural && len > 8;
+      if (hasMural && rel < 120) {
+        wallPaint(cam, side, wx, 1.2, muralTop, zNear - 1.6, zNear - Math.min(len - 1.6, 9), paintMural(spec.mural.text, spec.mural.bg));
+      }
+      if (rel < 140) windowsOn(cam, side, wx, zNear, len, hasMural ? 6.4 : 0, h - (st === "loft" ? 3.6 : 1), rel, seed);
+      if (st === "loft" && rel < 120) wallPaint(cam, side, wx, h - 3.2, h - 0.8, zNear - 1.5, zNear - len + 1.5, paintGhost(spec.ghost));
+      // cornice: a ledge jutting toward the road
+      const cx0 = fx - side * 0.35;
+      face(cam, [[cx0, h - 0.6, zNear], [cx0, h - 0.6, zFar], [cx0, h, zFar], [cx0, h, zNear]], spec.color, lit * 0.78);
+      face(cam, [[fx, h - 0.6, zNear], [fx, h - 0.6, zFar], [cx0, h - 0.6, zFar], [cx0, h - 0.6, zNear]], spec.color, 0.5);
+    }
+    if (spec.water && rel < 160) waterTower(cam, side * (FACE_X + 3.5), h, zNear - len / 2);
+  }
+
+  function liveOak(cam, x, z) {
+    prism(cam, x, 0, z, 0.9, 0.5, 6, [150, 120, 96]); // planter
+    prism(cam, x, 0.5, z, 0.2, 2.4, 5, [104, 80, 58]);
+    ball(cam, x, 3.4, z, 1.5, [62, 118, 66]);
+    ball(cam, x - 0.6, 3.0, z + 0.4, 1.0, [78, 140, 74]);
+  }
+
+  function flagPole(cam, side, x, z) {
+    prism(cam, x, 0, z, 0.08, 7.4, 5, [210, 210, 214]);
+    wallPaint(cam, side, x, 5.8, 7.3, z - 0.1, z - 2.4, paintTexas, 0.05, true);
+  }
+
+  function overpass(cam, wz) {
+    box(cam, 0, 13.6, wz - 2.5, 40, 1.8, 5, [188, 182, 176]);
+    box(cam, 0, 14.7, wz - 0.1, 40, 0.5, 0.3, [160, 154, 150]);
+    for (const px of [-7.6, 7.6]) box(cam, px, 6.35, wz - 2.5, 1.2, 12.7, 2.2, [176, 170, 164]);
+    for (const [x0, x1, text, shield] of [[-4.8, -0.5, "DOWNTOWN", "35E"], [0.5, 4.8, "FAIR PARK", "30"]]) {
+      const q = quadScreen(cam, [x0, 12.7, wz + 0.02], [x1, 12.7, wz + 0.02], [x1, 10.5, wz + 0.02], [x0, 10.5, wz + 0.02]);
+      if (q) faces.push({ out: q, depth: (q[0].d + q[2].d) / 2 - 0.3, color: "#fff", paint: paintHighway(text, shield) });
+    }
+  }
+
+  /** Blocks, sidewalk props and overpasses for the stretch of road in view. */
+  function city(cam, run) {
+    const d = run.distance;
+    // keep storefronts and landmark plazas clear of buildings
+    const clear = [];
+    for (const o of run.objects) {
+      if (o.t !== 2) continue;
+      const rel = o.z - d;
+      if (rel < -40 || rel > 240) continue;
+      if (o.k === "store") clear.push({ side: Math.floor(o.z) % 2 === 0 ? 1 : -1, a: o.z - 9, b: o.z + 8 });
+      else clear.push({ side: o.l === 0 ? -1 : 1, a: o.z - 16, b: o.z + 16, plaza: true });
+    }
+    const first = Math.floor((d - 14) / SEG);
+    const last = Math.floor((d + 205) / SEG);
+    for (let i = first; i <= last; i += 1) {
+      if (i < 0) continue;
+      const z0 = i * SEG;
+      const rel = z0 - d;
+      const wz = -rel;
+      for (const side of [-1, 1]) {
+        const spec = blockSpec(i, side);
+        const blocked = clear.find((c) => c.side === side && z0 + spec.len > c.a && z0 < c.b);
+        if (!blocked) building(cam, side, wz, spec, Math.max(0, rel), i * 2 + side);
+        else if (blocked.plaza && i % 2 === 0) flagPole(cam, side, side * 8.4, wz - 4);
+        if (rel > 120) continue;
+        const sx = side * 7.0;
+        const kind = (i + (side > 0 ? 1 : 0)) % 4;
+        if (kind === 1) liveOak(cam, sx, wz - 6);
+        else if (kind === 3) {
+          // Dallas acorn street lamp
+          prism(cam, sx, 0, wz - 6, 0.12, 4.6, 5, [36, 38, 44]);
+          ball(cam, sx, 4.9, wz - 6, 0.42, [255, 236, 190]);
+        } else if (kind === 0 && i % 3 === 0) flagPole(cam, side, side * 7.6, wz - 3);
+        else if (kind === 2) prism(cam, sx, 0, wz - 2, 0.22, 0.7, 6, [204, 40, 40]); // hydrant
+      }
+      // DART catenary: a gantry over the road every other block, wires between
+      if (i % 2 === 0 && rel < 150) {
+        for (const px of [-5.3, 5.3]) prism(cam, px, 0, wz, 0.13, 6.6, 5, [70, 74, 84]);
+        box(cam, 0, 6.5, wz, 10.8, 0.2, 0.2, [70, 74, 84]);
+        if (rel < 110) for (const lx of LANE_X) line(cam, [lx, 6.25, wz], [lx, 6.25, wz - SEG * 2], [60, 60, 68], 0.9);
+      }
+      if (i % 17 === 9 && rel > -6) overpass(cam, wz);
     }
   }
 
   /* ── the runner ────────────────────────────────────────────────────── */
 
+  /**
+   * Visual-only motion layered on the simulation: Subway-Surfers-style hops,
+   * leans, squash and stretch. The sim's x/y stay the truth for collisions;
+   * this only changes how big the moves *look*.
+   */
+  const fx = { run: null, tick: -1, visX: 0, velX: 0, visY: 0, lane: 1, hop: 1, dir: 0, jumps: 0, rolls: 0, coins: 0, air: false, base: 0, land: 0, spin: 0, spinOn: false, camX: 0, bank: 0, kick: 0, dip: 0, particles: [] };
+
+  function puff(x, y, z, n, color, spread, up) {
+    for (let i = 0; i < n; i += 1) {
+      const a = Math.random() * Math.PI * 2;
+      fx.particles.push({
+        x: x + Math.cos(a) * 0.2,
+        y: y + 0.05,
+        z,
+        spark: color[2] < 100,
+        vx: Math.cos(a) * spread,
+        vy: up * (0.5 + Math.random()),
+        vz: 1.5 + Math.abs(Math.sin(a)) * spread * 0.5,
+        life: 0,
+        max: 0.35 + Math.random() * 0.25,
+        r: color[2] < 100 ? 0.035 + Math.random() * 0.03 : 0.12 + Math.random() * 0.1,
+        color,
+      });
+    }
+  }
+
+  function updateFx(run, dt) {
+    if (fx.run !== run) {
+      Object.assign(fx, { run, tick: run.tick, visX: run.x, velX: 0, visY: run.y, lane: run.lane, hop: 1, dir: 0, jumps: run.jumps, rolls: run.rolls, coins: run.coins, air: false, base: run.y, land: 0, spin: 0, spinOn: false, camX: run.x * 0.34, bank: 0, kick: 0, dip: 0, particles: [] });
+    }
+    const grounded = run.y <= run.floor + 0.001 && run.vy <= 0;
+    if (run.lane !== fx.lane) {
+      fx.dir = Math.sign(run.lane - fx.lane);
+      fx.lane = run.lane;
+      fx.hop = 0;
+      if (grounded && run.jet <= 0) puff(run.x, run.floor, -0.2, 5, [230, 214, 196], 1.6, 1.2);
+    }
+    if (run.jumps !== fx.jumps) {
+      fx.jumps = run.jumps;
+      fx.air = true;
+      fx.base = run.floor;
+      fx.kick = 1;
+      fx.spinOn = run.sneakers > 0;
+      fx.spin = 0;
+      puff(run.x, run.floor, 0, 6, [230, 214, 196], 1.2, 1.6);
+    }
+    if (run.rolls !== fx.rolls) {
+      fx.rolls = run.rolls;
+      fx.dip = 1;
+    }
+    if (run.coins !== fx.coins) {
+      if (run.coins > fx.coins) puff(run.x, run.y + 1.3, -0.4, 3, [255, 206, 70], 2.2, 2.4);
+      fx.coins = run.coins;
+    }
+    if (fx.air && grounded && run.tick !== fx.tick) {
+      fx.air = false;
+      fx.land = 1;
+      puff(run.x, run.floor, 0, 8, [230, 214, 196], 2.4, 1.4);
+    }
+    fx.tick = run.tick;
+
+    // springy sideways move with a little overshoot
+    const k = 420;
+    const damp = 2 * Math.sqrt(k) * 0.52;
+    const steps = Math.max(1, Math.round(dt / (1 / 120)));
+    const h = dt / steps;
+    for (let i = 0; i < steps; i += 1) {
+      fx.velX += (k * (run.x - fx.visX) - damp * fx.velX) * h;
+      fx.visX += fx.velX * h;
+    }
+    // jumps read ~55% taller than the sim's arc; ramps and roofs stay exact
+    const target = fx.air ? run.y + Math.max(0, run.y - fx.base) * 0.55 : run.y;
+    fx.visY += (target - fx.visY) * Math.min(1, dt * (fx.air ? 40 : 26));
+    if (run.jet > 0) fx.visY = run.y;
+
+    fx.hop = Math.min(1, fx.hop + dt / 0.26);
+    fx.land = Math.max(0, fx.land - dt / 0.2);
+    fx.kick = Math.max(0, fx.kick - dt / 0.35);
+    fx.dip = Math.max(0, fx.dip - dt / 0.5);
+    if (fx.spinOn) fx.spin = Math.min(Math.PI * 2, fx.spin + dt * 13);
+    if (!fx.air) fx.spinOn = false;
+
+    // the camera trails the runner and banks into the turn
+    fx.camX += (fx.visX * 0.42 - fx.camX) * Math.min(1, dt * 7);
+    const bankTarget = Math.max(-0.07, Math.min(0.07, -fx.velX * 0.006));
+    fx.bank += (bankTarget - fx.bank) * Math.min(1, dt * 10);
+
+    if (run.slide > 0 && grounded && Math.random() < 0.6) puff(run.x, run.floor, 0.3, 1, [220, 204, 186], 1.4, 0.6);
+    for (let i = fx.particles.length - 1; i >= 0; i -= 1) {
+      const p = fx.particles[i];
+      p.life += dt;
+      if (p.life >= p.max) {
+        fx.particles.splice(i, 1);
+        continue;
+      }
+      p.x += p.vx * dt;
+      p.y += p.vy * dt;
+      p.z += p.vz * dt;
+      p.vy -= 4 * dt;
+    }
+    if (fx.particles.length > 80) fx.particles.splice(0, fx.particles.length - 80);
+  }
+
   function runner(cam, run, outfit, t) {
-    const x = run.x;
+    const x = fx.visX;
     const onBoard = run.board > 0;
-    const y = run.y + (onBoard ? 0.22 : 0);
+    const y = fx.visY + (onBoard ? 0.22 : 0);
     const sliding = run.slide > 0;
     const flying = run.jet > 0;
     const down = Boolean(run.downed);
+    const airborne = fx.air && !flying;
     if (run.invuln > 0 && !down && Math.floor(t / 70) % 2 === 0 && run.invuln < 140) return;
 
     const skin = [228, 180, 146];
     const kit =
       outfit === "gold" ? GOLD : outfit === "apron" ? [248, 248, 246] : outfit === "tie" ? WHITE : outfit === "bucket" ? RED : RED;
-    const kitDeep = outfit === "gold" ? [214, 150, 30] : outfit === "apron" ? [222, 222, 222] : RED_DEEP;
     const legs = outfit === "apron" ? [60, 60, 66] : INK;
-    const squash = down ? 0.25 : sliding ? 0.5 : 1;
-    const stride = sliding || flying || down ? 0 : Math.sin(run.tick * 0.42);
-    const bob = sliding || flying ? 0 : Math.abs(Math.cos(run.tick * 0.42)) * 0.07;
-    const lean = sliding ? 0 : 0.08;
-    const legZ = stride * 0.46;
+
+    // pose: hop arc and lean on a lane switch, stretch going up, squash on landing
+    const hopS = fx.hop < 1 ? Math.sin(Math.PI * fx.hop) : 0;
+    const rising = airborne && run.vy > 0;
+    let sy = 1;
+    if (down) sy = 0.25;
+    else if (sliding) sy = 0.42;
+    else if (rising) sy = 1.16;
+    else if (fx.land > 0) sy = 1 - 0.3 * Math.sin(Math.PI * fx.land);
+    const sx = 1 / Math.sqrt(sy);
+    const P = {
+      x,
+      y: y + (sliding || flying || down ? 0 : hopS * 0.42),
+      z: 0,
+      yaw: fx.dir * 0.5 * hopS + fx.spin,
+      roll: fx.dir * 0.3 * hopS + (flying ? Math.sin(t * 0.004) * 0.06 : 0),
+      sx,
+      sy,
+    };
+    const part = (dx, dy, dz, w, h, d, color) => {
+      const ddx = dx * P.sx + P.roll * dy * P.sy;
+      const ddy = dy * P.sy;
+      const co = Math.cos(P.yaw);
+      const si = Math.sin(P.yaw);
+      box(cam, P.x + ddx * co - dz * si, P.y + ddy, P.z + ddx * si + dz * co, w * P.sx, h * P.sy, d, color, P.yaw);
+    };
+
+    const stride = sliding || flying || down || airborne ? 0 : Math.sin(run.tick * 0.42);
+    const bob = sliding || flying || airborne ? 0 : Math.abs(Math.cos(run.tick * 0.42)) * 0.09;
+    const lean = sliding ? -0.1 : 0.12;
+    const legZ = stride * 0.52;
 
     if (onBoard) {
       box(cam, x, y - 0.14, 0.05, 0.7, 0.08, 1.6, RED);
       box(cam, x, y - 0.1, 0.05, 0.26, 0.02, 1.62, WHITE);
       decals.push({ x, z: 0.05, r: 0.8, color: [255, 120, 140], alpha: 0.35 });
     }
-    box(cam, x - 0.17, y + 0.3 * squash, legZ + lean, 0.22, 0.6 * squash, 0.24, legs);
-    box(cam, x + 0.17, y + 0.3 * squash, -legZ + lean, 0.22, 0.6 * squash, 0.24, legs);
-    box(cam, x - 0.17, y + 0.07 * squash, legZ + lean - 0.07, 0.25, 0.15, 0.36, WHITE);
-    box(cam, x + 0.17, y + 0.07 * squash, -legZ + lean - 0.07, 0.25, 0.15, 0.36, WHITE);
+    // legs: tucked up in the air, pumping on the ground
+    const legY = airborne ? 0.5 : 0.3;
+    const tuck = airborne ? -0.22 : 0;
+    part(-0.17, legY, legZ + lean + tuck, 0.22, 0.6, 0.24, legs);
+    part(0.17, legY, -legZ + lean + tuck, 0.22, 0.6, 0.24, legs);
+    part(-0.17, legY - 0.23, legZ + lean + tuck - 0.07, 0.25, 0.15, 0.36, WHITE);
+    part(0.17, legY - 0.23, -legZ + lean + tuck - 0.07, 0.25, 0.15, 0.36, WHITE);
 
-    box(cam, x, y + 0.98 * squash + bob, lean, 0.7, 0.76 * squash, 0.44, kit);
+    part(0, 0.98 + bob, lean, 0.7, 0.76, 0.44, kit);
     // the delivery bag on the back, branded
-    box(cam, x, y + 1.14 * squash + bob, lean + 0.32, 0.56, 0.56 * squash, 0.26, outfit === "gold" ? RED : WHITE);
-    box(cam, x, y + 1.14 * squash + bob, lean + 0.46, 0.4, 0.2 * squash, 0.02, RED);
-    if (outfit === "tie") box(cam, x, y + 1.0 * squash + bob, lean - 0.23, 0.1, 0.46 * squash, 0.02, INK);
+    part(0, 1.14 + bob, lean + 0.32, 0.56, 0.56, 0.26, outfit === "gold" ? RED : WHITE);
+    part(0, 1.14 + bob, lean + 0.46, 0.4, 0.2, 0.02, RED);
+    if (outfit === "tie") part(0, 1.0 + bob, lean - 0.23, 0.1, 0.46, 0.02, INK);
     if (flying) {
       box(cam, x - 0.18, y + 1.0, lean + 0.52, 0.22, 0.6, 0.22, [180, 186, 196]);
       box(cam, x + 0.18, y + 1.0, lean + 0.52, 0.22, 0.6, 0.22, [180, 186, 196]);
@@ -356,26 +853,32 @@ export function createRenderer(canvas) {
       face(cam, [[x + 0.08, y + 0.7, lean + 0.52], [x + 0.28, y + 0.7, lean + 0.52], [x + 0.18, y + 0.7 - flick, lean + 0.52]], [255, 170, 40], 1.2);
     }
 
-    const armSwing = flying ? 0 : legZ * 0.9;
-    box(cam, x - 0.46, y + 1.0 * squash + bob, -armSwing + lean, 0.18, 0.64 * squash, 0.2, kit);
-    box(cam, x + 0.46, y + 1.0 * squash + bob, armSwing + lean, 0.18, 0.64 * squash, 0.2, kit);
-    box(cam, x - 0.46, y + 0.74 * squash + bob, -armSwing + lean, 0.2, 0.16, 0.22, skin);
-    box(cam, x + 0.46, y + 0.74 * squash + bob, armSwing + lean, 0.2, 0.16, 0.22, skin);
+    // arms: thrown up on a jump, swinging on the run
+    const armSwing = flying || airborne ? 0 : legZ * 1.1;
+    const armY = airborne ? 1.42 : 1.0;
+    const handY = airborne ? 1.82 : 0.74;
+    const armOut = airborne ? 0.54 : 0.46;
+    part(-armOut, armY + bob, -armSwing + lean, 0.18, 0.64, 0.2, kit);
+    part(armOut, armY + bob, armSwing + lean, 0.18, 0.64, 0.2, kit);
+    part(-armOut, handY + bob, -armSwing + lean, 0.2, 0.16, 0.22, skin);
+    part(armOut, handY + bob, armSwing + lean, 0.2, 0.16, 0.22, skin);
 
-    const headY = y + 1.62 * squash + bob;
-    box(cam, x, headY, lean, 0.46, 0.44 * Math.max(0.6, squash), 0.44, skin);
+    const headY = 1.62 + bob;
+    part(0, headY, lean, 0.46, 0.44, 0.44, skin);
     if (outfit === "bucket" || outfit === "gold") {
-      prism(cam, x, headY + 0.18, lean, 0.34, 0.42, 10, outfit === "gold" ? GOLD : RED, WHITE, 0.4);
+      const hy = P.y + (headY + 0.18) * P.sy;
+      prism(cam, x + P.roll * (headY + 0.18) * P.sy, hy, lean, 0.34 * P.sx, 0.42 * P.sy, 10, outfit === "gold" ? GOLD : RED, WHITE, 0.4 * P.sx);
     } else if (outfit === "apron") {
-      prism(cam, x, headY + 0.2, lean, 0.26, 0.5, 8, WHITE, null, 0.34);
+      const hy = P.y + (headY + 0.2) * P.sy;
+      prism(cam, x + P.roll * (headY + 0.2) * P.sy, hy, lean, 0.26 * P.sx, 0.5 * P.sy, 8, WHITE, null, 0.34 * P.sx);
     } else {
-      box(cam, x, headY + 0.28, lean, 0.5, 0.18, 0.5, outfit === "tie" ? INK : RED);
-      box(cam, x, headY + 0.27, lean - 0.33, 0.46, 0.07, 0.2, outfit === "tie" ? INK : RED_DEEP);
+      part(0, headY + 0.28, lean, 0.5, 0.18, 0.5, outfit === "tie" ? INK : RED);
+      part(0, headY + 0.27, lean - 0.33, 0.46, 0.07, 0.2, outfit === "tie" ? INK : RED_DEEP);
     }
 
     if (!flying) {
-      const lift = Math.max(0, run.y - run.floor);
-      decals.push({ x, y: run.floor, z: 0, r: 0.48 - Math.min(0.2, lift * 0.08), color: [20, 20, 30], alpha: 0.3 });
+      const lift = Math.max(0, fx.visY - run.floor);
+      decals.push({ x, y: run.floor, z: 0, r: 0.5 - Math.min(0.24, lift * 0.07), color: [20, 20, 30], alpha: 0.32 });
     }
   }
 
@@ -604,7 +1107,7 @@ export function createRenderer(canvas) {
     box(cam, faceX - side * 0.2, 2.9, z, 0.5, 0.2, 9, RED);
     const q = quadScreen(cam, [faceX - side * 0.4, 7.6, z - 2], [faceX - side * 0.4, 7.6, z + 2], [faceX - side * 0.4, 5.6, z + 2], [faceX - side * 0.4, 5.6, z - 2]);
     if (q) {
-      const ordered = side > 0 ? [q[1], q[0], q[3], q[2]] : q;
+      const ordered = side < 0 ? [q[1], q[0], q[3], q[2]] : q;
       faces.push({ out: ordered, depth: (q[0].d + q[2].d) / 2 - 0.1, color: "#fff", paint: paintWordmark() });
     }
     // the rotating bucket on its pole, with the Colonel on the front
@@ -686,61 +1189,134 @@ export function createRenderer(canvas) {
 
   /* ── frame ─────────────────────────────────────────────────────────── */
 
+  /** Extrapolate a near→far screen edge down past the bottom of the frame. */
+  function toBottom(pts) {
+    if (pts.length < 2) return pts;
+    const a = pts[0];
+    const b = pts[1];
+    if (a.y >= H * 1.25 || a.y <= b.y) return pts;
+    const t = (H * 1.25 - a.y) / (a.y - b.y);
+    return [{ x: a.x + (a.x - b.x) * t, y: H * 1.25 }, ...pts];
+  }
+
   function paintWorld(cam, run) {
+    // drawn oversized so the camera can bank without exposing the corners
     const g = ctx.createLinearGradient(0, 0, 0, H * 0.7);
     g.addColorStop(0, rgb(SKY.top));
-    g.addColorStop(0.55, rgb(SKY.mid));
-    g.addColorStop(0.9, rgb(SKY.low));
+    g.addColorStop(0.5, rgb(SKY.mid));
+    g.addColorStop(0.88, rgb(SKY.low));
     g.addColorStop(1, rgb(SKY.haze));
     ctx.fillStyle = g;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(-W * 0.2, -H * 0.2, W * 1.4, H * 1.4);
 
     const horizon = proj(cam, 0, 0, -250);
     const hy = horizon ? horizon.y : H * 0.4;
 
+    // low Texas sun
+    const sunX = cx + W * 0.18 - run.x * 4;
+    const sun = ctx.createRadialGradient(sunX, hy - 40, 4, sunX, hy - 40, Math.max(W, H) * 0.45);
+    sun.addColorStop(0, "rgba(255, 240, 200, 0.95)");
+    sun.addColorStop(0.08, "rgba(255, 214, 150, 0.55)");
+    sun.addColorStop(1, "rgba(255, 190, 130, 0)");
+    ctx.fillStyle = sun;
+    ctx.fillRect(-W * 0.2, -H * 0.2, W * 1.4, hy + H * 0.2);
+
     // clouds, drifting slowly
-    ctx.fillStyle = "rgba(255,255,255,0.75)";
+    ctx.fillStyle = "rgba(255,255,255,0.7)";
     for (let i = 0; i < 5; i += 1) {
       const px = ((i * 211 - run.distance * 0.04) % (W + 300) + W + 300) % (W + 300) - 150;
-      const py = hy * (0.18 + (i % 3) * 0.14);
+      const py = hy * (0.14 + (i % 3) * 0.13);
       ctx.beginPath();
-      ctx.ellipse(px, py, 60 + (i % 2) * 30, 16, 0, 0, Math.PI * 2);
-      ctx.ellipse(px + 40, py - 10, 40, 18, 0, 0, Math.PI * 2);
+      ctx.ellipse(px, py, 60 + (i % 2) * 30, 14, 0, 0, Math.PI * 2);
+      ctx.ellipse(px + 40, py - 9, 40, 16, 0, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // far skyline, parallaxed
-    const par = (run.distance * 0.06 + run.x * 6) % 420;
-    ctx.fillStyle = "rgb(150,168,196)";
+    // the Dallas skyline on the horizon, framed between the street walls
+    const sx0 = cx - run.x * 7 - ((run.distance * 0.02) % 60);
+    ctx.fillStyle = "rgb(150, 146, 184)";
     ctx.beginPath();
-    for (let i = 0; i < 46; i += 1) {
-      const bw = 26 + ((i * 37) % 42);
-      const bh = 22 + ((i * 61) % 96);
-      ctx.rect(-60 + i * 34 - par * 0.5, hy - bh, bw, bh);
+    for (let i = -14; i < 14; i += 1) {
+      const bw = 18 + hash(i + 400) * 26;
+      const bh = 24 + hash(i + 900) * 70;
+      ctx.rect(sx0 + i * 30, hy - bh, bw, bh);
     }
-    ctx.rect(W * 0.3 - par * 0.12, hy - 132, 8, 132);
     ctx.fill();
+    ctx.fillStyle = "rgb(128, 124, 168)";
+    // Reunion Tower: the ball on a stem
+    const rx = sx0 - 96;
+    ctx.fillRect(rx - 4, hy - 150, 8, 150);
     ctx.beginPath();
-    ctx.arc(W * 0.3 - par * 0.12 + 4, hy - 138, 16, 0, Math.PI * 2);
+    ctx.arc(rx, hy - 158, 17, 0, Math.PI * 2);
     ctx.fill();
+    ctx.fillStyle = "rgba(255, 236, 200, 0.85)";
+    for (let k = -2; k <= 2; k += 1) {
+      ctx.beginPath();
+      ctx.arc(rx + k * 6, hy - 158 + Math.abs(k) * 1.5, 1.6, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.fillStyle = "rgb(128, 124, 168)";
+    // Bank of America Plaza, with its green outline
+    const bx = sx0 + 34;
+    ctx.fillRect(bx, hy - 172, 30, 172);
+    ctx.strokeStyle = "rgb(96, 220, 130)";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(bx + 1, hy - 171, 28, 171);
+    // Fountain Place: the slanted prism
+    ctx.beginPath();
+    ctx.moveTo(sx0 + 84, hy);
+    ctx.lineTo(sx0 + 84, hy - 120);
+    ctx.lineTo(sx0 + 104, hy - 150);
+    ctx.lineTo(sx0 + 118, hy - 112);
+    ctx.lineTo(sx0 + 118, hy);
+    ctx.fill();
+    // Comerica Bank Tower: the stepped crown
+    const cxx = sx0 - 44;
+    ctx.fillRect(cxx, hy - 128, 28, 128);
+    ctx.fillRect(cxx + 4, hy - 140, 20, 12);
+    ctx.fillRect(cxx + 9, hy - 148, 10, 8);
 
-    // ground + sidewalks
-    ctx.fillStyle = rgb([196, 186, 176]);
-    ctx.fillRect(0, hy, W, H - hy);
-    const strip = [];
+    // ground
+    ctx.fillStyle = rgb([200, 176, 156]);
+    ctx.fillRect(-W * 0.2, hy, W * 1.4, H * 1.2 - hy);
+    let strip = [];
     for (let i = 14; i >= -200; i -= 4) {
-      const p = proj(cam, -SIDEWALK_EDGE, 0.19, i);
+      const p = proj(cam, -FACE_X, 0.19, i);
       if (p) strip.push(p);
     }
-    if (strip.length > 2) {
+    let stripR = [];
+    for (let i = 14; i >= -200; i -= 4) {
+      const p = proj(cam, FACE_X, 0.19, i);
+      if (p) stripR.push(p);
+    }
+    if (strip.length > 2 && stripR.length > 2) {
+      strip = toBottom(strip);
+      stripR = toBottom(stripR);
       ctx.beginPath();
       ctx.moveTo(strip[0].x, strip[0].y);
       for (const p of strip) ctx.lineTo(p.x, p.y);
-      for (let i = strip.length - 1; i >= 0; i -= 1) ctx.lineTo(cx * 2 - strip[i].x, strip[i].y);
+      for (let i = stripR.length - 1; i >= 0; i -= 1) ctx.lineTo(stripR[i].x, stripR[i].y);
       ctx.closePath();
-      ctx.fillStyle = rgb([214, 208, 200]);
+      ctx.fillStyle = rgb([222, 204, 184]);
       ctx.fill();
     }
+    // sidewalk paving joints scroll by: a strong speed cue at the edges
+    ctx.strokeStyle = "rgba(150, 120, 96, 0.35)";
+    ctx.lineWidth = 1.5;
+    const jOff = -(run.distance % 3);
+    ctx.beginPath();
+    for (let i = 2; i > -90; i -= 3) {
+      const z = i + jOff;
+      for (const s of [-1, 1]) {
+        const a = proj(cam, s * ROAD_HALF, 0.2, z);
+        const b = proj(cam, s * FACE_X, 0.2, z);
+        if (!a || !b) continue;
+        ctx.moveTo(a.x, a.y);
+        ctx.lineTo(b.x, b.y);
+      }
+    }
+    ctx.stroke();
+
     const roadPts = (halfW) => {
       const pts = [];
       for (let i = 14; i >= -200; i -= 6) {
@@ -749,8 +1325,8 @@ export function createRenderer(canvas) {
       }
       return pts;
     };
-    const left = roadPts(-ROAD_HALF);
-    const right = roadPts(ROAD_HALF);
+    const left = toBottom(roadPts(-ROAD_HALF));
+    const right = toBottom(roadPts(ROAD_HALF));
     if (left.length > 2 && right.length > 2) {
       ctx.beginPath();
       ctx.moveTo(left[0].x, left[0].y);
@@ -758,22 +1334,22 @@ export function createRenderer(canvas) {
       for (let i = right.length - 1; i >= 0; i -= 1) ctx.lineTo(right[i].x, right[i].y);
       ctx.closePath();
       const roadGrad = ctx.createLinearGradient(0, hy, 0, H);
-      roadGrad.addColorStop(0, rgb([120, 120, 126]));
-      roadGrad.addColorStop(1, rgb([82, 84, 92]));
+      roadGrad.addColorStop(0, rgb([126, 118, 116]));
+      roadGrad.addColorStop(1, rgb([78, 76, 82]));
       ctx.fillStyle = roadGrad;
       ctx.fill();
     }
 
-    // lane dashes
-    const off = -(run.distance % 12);
-    ctx.fillStyle = "rgba(255,255,255,0.85)";
-    for (const lane of [-LANE_DIV, LANE_DIV]) {
-      for (let i = -2; i > -160; i -= 12) {
-        const z = i + off;
-        const a = proj(cam, lane - 0.09, 0.02, z);
-        const b = proj(cam, lane + 0.09, 0.02, z);
-        const c = proj(cam, lane + 0.09, 0.02, z - 5);
-        const d = proj(cam, lane - 0.09, 0.02, z - 5);
+    // DART rail track in each lane: sleepers, then the two rails
+    const tOff = -(run.distance % 2.2);
+    ctx.fillStyle = "rgba(70, 58, 50, 0.75)";
+    for (const lx of LANE_X) {
+      for (let i = 4; i > -96; i -= 2.2) {
+        const z = i + tOff;
+        const a = proj(cam, lx - 0.98, 0.02, z);
+        const b = proj(cam, lx + 0.98, 0.02, z);
+        const c = proj(cam, lx + 0.98, 0.02, z - 0.5);
+        const d = proj(cam, lx - 0.98, 0.02, z - 0.5);
         if (!a || !b || !c || !d) continue;
         ctx.beginPath();
         ctx.moveTo(a.x, a.y);
@@ -784,6 +1360,31 @@ export function createRenderer(canvas) {
         ctx.fill();
       }
     }
+    for (const lx of LANE_X) {
+      for (const rxo of [-0.66, 0.66]) {
+        let l = [];
+        let r = [];
+        for (let i = 12; i >= -170; i -= 8) {
+          const a = proj(cam, lx + rxo - 0.07, 0.05, i);
+          const b = proj(cam, lx + rxo + 0.07, 0.05, i);
+          if (a && b) {
+            l.push(a);
+            r.push(b);
+          }
+        }
+        if (l.length < 2) continue;
+        l = toBottom(l);
+        r = toBottom(r);
+        ctx.beginPath();
+        ctx.moveTo(l[0].x, l[0].y);
+        for (const p of l) ctx.lineTo(p.x, p.y);
+        for (let i = r.length - 1; i >= 0; i -= 1) ctx.lineTo(r[i].x, r[i].y);
+        ctx.closePath();
+        ctx.fillStyle = "rgb(206, 210, 220)";
+        ctx.fill();
+      }
+    }
+
     // red curbs, the brand along the road edge
     for (const sx of [-ROAD_HALF, ROAD_HALF]) {
       const cOff = -(run.distance % 4);
@@ -795,6 +1396,7 @@ export function createRenderer(canvas) {
     }
   }
 
+  let lastNow = 0;
   function draw(run, opts) {
     const t0 = performance.now();
     faces = [];
@@ -803,9 +1405,23 @@ export function createRenderer(canvas) {
     decals = [];
     badges = [];
     const now = (opts && opts.now) || t0;
-    const camY = CAM.h + run.y * 0.62 - (run.slide > 0 ? 0.7 : 0);
-    const cam = makeCamera(run.x * 0.34, camY, CAM.back, run.x * 0.14, CAM.lookY + run.y * 0.72, -CAM.lookAhead);
+    const dt = lastNow ? Math.max(0.001, Math.min(0.05, (now - lastNow) / 1000)) : 1 / 60;
+    lastNow = now;
+    updateFx(run, dt);
 
+    // a wider lens as the pace climbs, and a punch on take-off
+    const pace = Math.max(0, Math.min(1, (run.speed - 20) / 26));
+    focal = focalBase * (1 - 0.12 * pace - 0.05 * Math.sin(Math.PI * fx.kick) - (run.jet > 0 ? 0.06 : 0));
+
+    const dip = run.slide > 0 ? 0.9 : 0;
+    const landDip = Math.sin(Math.PI * fx.land) * 0.28;
+    const camY = CAM.h + fx.visY * 0.62 - dip - landDip;
+    const cam = makeCamera(fx.camX, camY, CAM.back - pace * 0.6, fx.visX * 0.16, CAM.lookY + fx.visY * 0.72 - dip * 0.4, -CAM.lookAhead);
+
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.rotate(fx.bank);
+    ctx.translate(-cx, -cy);
     paintWorld(cam, run);
 
     for (const o of run.objects) {
@@ -840,7 +1456,7 @@ export function createRenderer(canvas) {
         obstacle(cam, o, x, wz);
       }
     }
-    streetFurniture(cam, run);
+    city(cam, run);
     chaser(cam, run);
     runner(cam, run, (opts && opts.outfit) || "classic", now);
 
@@ -954,24 +1570,36 @@ export function createRenderer(canvas) {
       polys += 1;
     }
 
+    // dust, sparkles: drawn last, they always sit around the runner
+    for (const p of fx.particles) {
+      const q = proj(cam, p.x, p.y, p.z);
+      if (!q || q.d < 3) continue;
+      const r = Math.min(18, (focal * p.r * (p.spark ? 1 : 1 + p.life * 1.5)) / q.d);
+      ctx.fillStyle = `rgba(${p.color[0]}, ${p.color[1]}, ${p.color[2]}, ${0.7 * (1 - p.life / p.max)})`;
+      ctx.beginPath();
+      ctx.arc(q.x, q.y, r, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.restore();
+
     // speed streaks grow with pace: the "fast" feeling
-    const k = Math.max(0, (run.speed - 24) / 22);
+    const k = Math.max(0, (run.speed - 22) / 20) + (run.sneakers > 0 ? 0.25 : 0);
     if (k > 0 || run.jet > 0) {
-      ctx.strokeStyle = `rgba(255, 255, 255, ${0.12 + 0.3 * Math.min(1, k + (run.jet > 0 ? 0.5 : 0))})`;
-      ctx.lineWidth = 2;
-      for (let i = 0; i < 14; i += 1) {
-        const a = (i / 14) * Math.PI * 2 + (run.tick % 7) * 0.13;
-        const r0 = Math.min(W, H) * (0.42 + ((i * 37 + run.tick * 3) % 20) / 100);
+      ctx.strokeStyle = `rgba(255, 255, 255, ${0.14 + 0.32 * Math.min(1, k + (run.jet > 0 ? 0.5 : 0))})`;
+      ctx.lineWidth = 2.5;
+      for (let i = 0; i < 18; i += 1) {
+        const a = (i / 18) * Math.PI * 2 + (run.tick % 7) * 0.13;
+        const r0 = Math.min(W, H) * (0.4 + ((i * 37 + run.tick * 3) % 20) / 100);
         const x0 = cx + Math.cos(a) * r0;
         const y0 = cy * 0.8 + Math.sin(a) * r0 * 0.7;
         ctx.beginPath();
         ctx.moveTo(x0, y0);
-        ctx.lineTo(x0 + Math.cos(a) * 40 * (0.5 + k), y0 + Math.sin(a) * 28 * (0.5 + k));
+        ctx.lineTo(x0 + Math.cos(a) * 46 * (0.5 + k), y0 + Math.sin(a) * 32 * (0.5 + k));
         ctx.stroke();
       }
     }
 
-    return { polys, ms: performance.now() - t0 };
+    return { polys, ms: performance.now() - t0, district: districtAt(run.distance).name };
   }
 
   resize();

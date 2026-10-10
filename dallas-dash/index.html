@@ -364,9 +364,129 @@
       .ring > div { width: 4.8rem; height: 4.8rem; border-radius: 50%; background: var(--cream); display: grid; place-items: center; font-size: 2.2rem; }
       #fatal { position: fixed; inset: 0; z-index: 20; display: grid; place-content: center; gap: 0.5rem; text-align: center; padding: 2rem; background: var(--cream); }
       #stats { position: fixed; left: 0.5rem; bottom: 0.4rem; z-index: 6; font: 600 0.66rem/1.3 ui-monospace, Menlo, monospace; color: #fff; background: rgba(0,0,0,.4); border-radius: 0.3rem; padding: 0.2rem 0.4rem; pointer-events: none; }
+      /* ── HUD, district signs, countdown, tutorial, results ── */
+      .scorecard {
+        display: inline-flex;
+        align-items: flex-end;
+        gap: 0.35rem;
+        background: linear-gradient(180deg, rgba(32,33,36,.8), rgba(32,33,36,.62));
+        border-radius: 0.9rem;
+        padding: 0.3rem 0.6rem 0.35rem;
+        box-shadow: 0 6px 18px rgba(0,0,0,.22);
+      }
+      .scorecard small { display: block; text-transform: uppercase; color: rgba(255,255,255,.7); font: 800 0.66rem/1 var(--display); letter-spacing: 0.16em; }
+      #vScore { font-size: 2.3rem; text-shadow: 0 2px 0 rgba(0,0,0,.35); }
+      #vMult { margin: 0 0 0.25rem; }
+      #hudCoins { display: flex; gap: 0.35rem; margin-top: 0.4rem; }
+      .cur.bump { animation: bump 240ms ease-out; }
+      @keyframes bump { 40% { transform: scale(1.18); background: rgba(228,0,43,.9); } }
+      .cur.dist i { background: #0b6b3a; color: #fff; font: 900 0.75rem/1 var(--display); }
+      .timer.low { animation: blink 0.35s steps(2) infinite; }
+      @keyframes blink { 50% { opacity: 0.45; } }
+
+      /* Dallas freeway sign: announces each neighbourhood */
+      #district {
+        position: fixed;
+        left: 50%;
+        top: calc(7.4rem + env(safe-area-inset-top));
+        z-index: 6;
+        transform: translate(-50%, -40px) scale(0.9);
+        opacity: 0;
+        background: #0b6b3a;
+        color: #fff;
+        border: 3px solid #fff;
+        outline: 3px solid #0b6b3a;
+        border-radius: 0.55rem;
+        padding: 0.35rem 1.1rem 0.4rem;
+        text-align: center;
+        pointer-events: none;
+        box-shadow: 0 10px 24px rgba(0,0,0,.3);
+        transition: transform 380ms cubic-bezier(.2,1.4,.4,1), opacity 200ms;
+        white-space: nowrap;
+      }
+      #district small { display: block; font: 800 0.72rem/1 var(--display); letter-spacing: 0.22em; opacity: 0.85; text-transform: uppercase; }
+      #district b { display: block; font: italic 900 1.9rem/1 var(--display); text-transform: uppercase; letter-spacing: 0.02em; }
+      #district.on { transform: translate(-50%, 0) scale(1); opacity: 1; }
+      #spot {
+        position: fixed;
+        right: 0.8rem;
+        top: 40%;
+        z-index: 6;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: #fff;
+        border-radius: 999px;
+        padding: 0.35rem 0.9rem 0.35rem 0.35rem;
+        box-shadow: 0 8px 20px rgba(0,0,0,.25);
+        font: 800 1rem/1.05 var(--display);
+        text-transform: uppercase;
+        transform: translateX(calc(100% + 1.2rem));
+        transition: transform 360ms cubic-bezier(.2,1.3,.4,1);
+        pointer-events: none;
+        max-width: calc(100vw - 1.6rem);
+      }
+      #spot i { font-style: normal; width: 2rem; height: 2rem; border-radius: 50%; background: var(--red); display: grid; place-items: center; font-size: 1rem; flex: none; }
+      #spot small { display: block; color: var(--dim); font-size: 0.68rem; letter-spacing: 0.14em; }
+      #spot.on { transform: translateX(0); }
+
+      #countdown { font-size: 8rem; }
+      #countdown.tick { animation: count 420ms cubic-bezier(.2,1.5,.4,1); }
+      #countdown.go { color: var(--gold); font-size: 4.6rem; text-align: center; line-height: 0.9; }
+      @keyframes count { 0% { transform: scale(2.2); opacity: 0; } 60% { transform: scale(0.92); opacity: 1; } 100% { transform: scale(1); } }
+
+      #hint.tut {
+        bottom: calc(6rem + env(safe-area-inset-bottom));
+        border-radius: 1.1rem;
+        padding: 0.6rem 0.8rem;
+        display: grid;
+        grid-template-columns: repeat(4, auto);
+        gap: 0.7rem;
+        background: rgba(32,33,36,.82);
+        animation: hintIn 400ms ease-out;
+      }
+      #hint .k { display: grid; justify-items: center; gap: 0.25rem; font: 800 0.74rem/1.05 var(--display); letter-spacing: 0.05em; text-transform: uppercase; text-align: center; }
+      #hint .k b { width: 2.4rem; height: 2.4rem; border-radius: 0.7rem; background: #fff; color: var(--red); display: grid; place-items: center; font: 900 1.25rem/1 var(--display); }
+      #hint .k:nth-child(1) b { animation: nudgeX 1s ease-in-out infinite; }
+      #hint .k:nth-child(2) b { animation: nudgeUp 1s ease-in-out infinite; }
+      #hint .k:nth-child(3) b { animation: nudgeDown 1s ease-in-out infinite; }
+      @keyframes nudgeX { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+      @keyframes nudgeUp { 50% { transform: translateY(-5px); } }
+      @keyframes nudgeDown { 50% { transform: translateY(5px); } }
+      @keyframes hintIn { from { opacity: 0; transform: translate(-50%, 12px); } }
+
+      /* home extras */
+      .lockup .name .tag { display: inline-block; margin-top: 0.3rem; background: #fff; color: var(--red); font: 900 0.72rem/1 var(--display); letter-spacing: 0.2em; padding: 0.22rem 0.45rem; border-radius: 0.3rem; text-shadow: none; }
+      #btnPlay { position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; gap: 0.6rem; }
+      #btnPlay::before { content: "\25B6"; font-size: 1.3rem; font-style: normal; }
+      #btnPlay::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: -40%;
+        width: 30%;
+        background: linear-gradient(100deg, transparent, rgba(255,255,255,.45), transparent);
+        transform: skewX(-20deg);
+        animation: sheen 2.6s ease-in-out infinite;
+      }
+      @keyframes sheen { 0%, 55% { left: -40%; } 100% { left: 130%; } }
+      .homestats { display: flex; gap: 0.4rem; width: 100%; }
+      .homestats .cur { flex: 1; justify-content: center; padding: 0.42rem 0.6rem; border-radius: 0.8rem; font-size: 1rem; }
+      .homestats .cur small { font: 800 0.66rem/1 var(--display); letter-spacing: 0.14em; opacity: 0.75; margin-right: 0.2rem; text-transform: uppercase; }
+      .sidebtn { background: rgba(255,255,255,.95); }
+
+      /* results extras */
+      .newbest { display: inline-block; margin-left: 0.5rem; vertical-align: 0.9rem; background: var(--gold); color: var(--ink); border-radius: 0.5rem; padding: 0.25rem 0.5rem; font: italic 900 1.05rem/1 var(--display); text-transform: uppercase; animation: pop 500ms cubic-bezier(.2,1.6,.4,1); }
+      @keyframes pop { from { transform: scale(0.2) rotate(-12deg); } }
+      .confetti { position: fixed; top: -2vh; z-index: 11; width: 0.55rem; height: 0.9rem; pointer-events: none; animation: fall linear forwards; }
+      @keyframes fall { to { transform: translate(var(--dx), 108vh) rotate(var(--rot)); } }
+      .cell b.small { font-size: 1.15rem; line-height: 1.35; }
+
       @media (prefers-reduced-motion: reduce) {
-        #btnPlay, #chaseWarn.on { animation: none; }
+        #btnPlay, #btnPlay::after, #chaseWarn.on, #hint .k b, .timer.low, #countdown.tick { animation: none; }
         #toast.pop { animation-duration: 1ms; }
+        .confetti { display: none; }
       }
     </style>
   </head>
@@ -380,7 +500,7 @@
       <div id="homeTop">
         <div class="lockup">
           <img src="/dallas-dash/assets/kfc-logo.svg" alt="KFC" width="54" height="54" />
-          <div class="name display"><small>KFC</small><b>Dallas Dash</b></div>
+          <div class="name display"><small>KFC</small><b>Dallas Dash</b><span class="tag">&#9733; Big D &middot; Texas</span></div>
         </div>
         <div class="chips">
           <span class="cur" title="Drumsticks"><i>🍗</i><span id="vCoins">0</span></span>
@@ -394,6 +514,10 @@
         <button class="sidebtn" type="button" data-sheet="rewards"><i class="ico">🎟️</i>Coupon<span class="badge hidden" id="vClaimBadge">!</span></button>
       </nav>
       <div id="playWrap">
+        <div class="homestats">
+          <span class="cur"><small>Best</small><span id="vHomeBest">0</span></span>
+          <span class="cur"><small>Runs</small><span id="vHomeRuns">0</span></span>
+        </div>
         <div class="progress" id="homeProgress">
           <div><span id="vPointsLine">0 / 100,000 points to a 15% KFC coupon</span></div>
           <div class="bar"><div id="vBar"></div></div>
@@ -406,17 +530,27 @@
     <!-- ── run HUD ──────────────────────────────────────────────────── -->
     <section id="hud" class="hidden" aria-live="off">
       <div id="hudTL">
-        <div><span id="vScore" class="display">0</span><span id="vMult" class="display">x1</span></div>
-        <div id="hudCoins"><span class="cur"><i>🍗</i><span id="vRunCoins">0</span></span></div>
+        <div class="scorecard"><div><small>Score</small><span id="vScore" class="display">0</span></div><span id="vMult" class="display">x1</span></div>
+        <div id="hudCoins">
+          <span class="cur" id="coinChip"><i>🍗</i><span id="vRunCoins">0</span></span>
+          <span class="cur dist"><i>m</i><span id="vDist">0</span></span>
+        </div>
       </div>
       <div id="hudTR">
         <button id="btnPause" type="button" aria-label="Pause">❚❚</button>
         <div id="timers"></div>
       </div>
       <button id="btnBoard" type="button" aria-label="Use hoverboard"><i class="ico">🛹</i><span id="vBoards">×0</span></button>
-      <div id="hint"><span class="touchonly">Swipe to dodge, jump and roll · double-tap for hoverboard</span><span class="keysonly">← → dodge · ↑ / space jump · ↓ roll · B hoverboard · P pause</span></div>
+      <div id="hint" class="tut">
+        <span class="k"><b>&#10231;</b><span class="touchonly">Swipe<br />dodge</span><span class="keysonly">&larr; &rarr;<br />dodge</span></span>
+        <span class="k"><b>&uarr;</b><span class="touchonly">Swipe<br />jump</span><span class="keysonly">&uarr; / space<br />jump</span></span>
+        <span class="k"><b>&darr;</b><span class="touchonly">Swipe<br />roll</span><span class="keysonly">&darr;<br />roll</span></span>
+        <span class="k"><b>🛹</b><span class="touchonly">Double-tap<br />board</span><span class="keysonly">B<br />board</span></span>
+      </div>
     </section>
     <div id="toast" class="display hidden"></div>
+    <div id="district" aria-live="polite"><small>Now entering</small><b id="vDistrict">Deep Ellum</b></div>
+    <div id="spot" aria-live="polite"><i>📍</i><div><small>Landmark spotted</small><span id="vSpot">Reunion Tower</span></div></div>
     <div id="countdown" class="display hidden">3</div>
     <div id="stats" class="hidden"></div>
 
@@ -439,6 +573,12 @@
     <section id="pause" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="pauseTitle">
       <div class="stripes"></div>
       <h1 id="pauseTitle" class="display">Paused</h1>
+      <p id="vPauseWhere">Catching your breath in Deep Ellum.</p>
+      <div class="grid">
+        <div class="cell"><b id="vPauseScore">0</b><span>score</span></div>
+        <div class="cell"><b id="vPauseCoins">0</b><span>drumsticks</span></div>
+        <div class="cell"><b id="vPauseDist">0</b><span>metres</span></div>
+      </div>
       <div class="actions">
         <button id="btnResume" class="red" type="button">Resume</button>
         <button id="btnQuit" type="button">Quit run</button>
@@ -451,13 +591,14 @@
     <section id="results" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="resTitle">
       <div class="stripes"></div>
       <header><h1 id="resTitle" class="display">Run over</h1><span id="vVerify" class="verify">verifying…</span></header>
-      <div class="big display" id="vResScore">0</div>
+      <div><span class="big display" id="vResScore">0</span><span id="vNewBest" class="newbest hidden">New best!</span></div>
       <p id="vResNote"></p>
       <div class="grid">
         <div class="cell"><b id="vResCoins">0</b><span>drumsticks</span></div>
         <div class="cell"><b id="vResDistance">0</b><span>metres</span></div>
         <div class="cell"><b id="vResBest">0</b><span>best run</span></div>
         <div class="cell"><b id="vResPoints">0</b><span>coupon points</span></div>
+        <div class="cell"><b id="vResDistrict" class="small">Deep Ellum</b><span>made it to</span></div>
       </div>
       <div id="vSetDone" class="ribbon hidden">Mission set complete! Multiplier up, +1 key, +250 drumsticks</div>
       <h2>Missions</h2>
