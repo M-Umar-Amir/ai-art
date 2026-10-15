@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex" />
+<title>Dallas Dash crew check</title>
+<style>html,body{margin:0;height:100%;background:#a9c8e6}canvas{display:block;width:100%;height:100%}</style>
+<script type="importmap">
+  { "imports": { "three": "/dallas-dash/vendor/three/three.module.min.js", "three/addons/": "/dallas-dash/vendor/three/addons/" } }
+</script>
+<canvas id="c"></canvas>
+<script type="module">
+  // Visual QA of the crew: ?back=1 shows the side the game camera sees. Not linked from the game.
+  import * as THREE from "three";
+  import { loadAssets, makeArt } from "/dallas-dash/assets.js";
+  import { CrewFactory } from "/dallas-dash/crew.js";
+  import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+
+  const p = new URLSearchParams(location.search);
+  const canvas = document.getElementById("c");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xa9c8e6);
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.5;
+  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x8a7a66, 1.1));
+  const sun = new THREE.DirectionalLight(0xfff1dc, 2.2);
+  sun.position.set(3, 6, 5);
+  scene.add(sun);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: 0x8d8a86 }));
+  ground.rotation.x = -Math.PI / 2;
+  scene.add(ground);
+  const A = await loadAssets();
+  const art = makeArt(A);
+  const f = new CrewFactory(A.crew, A.clips, art);
+  const ids = ["dante", "maya", "r11", "officer"];
+  const runners = ids.map((id, i) => {
+    const r = f.make(id);
+    r.root.position.x = (i - 1.5) * 1.3;
+    r.root.rotation.y = p.has("back") ? Math.PI : 0;
+    scene.add(r.root);
+    return r;
+  });
+  const cam = new THREE.PerspectiveCamera(30, innerWidth / innerHeight, 0.1, 100);
+  cam.position.set(0, 1.4, 7);
+  cam.lookAt(0, 1.0, 0);
+  const clip = p.get("clip") || "idle";
+  let frames = 0;
+  renderer.setAnimationLoop(() => {
+    for (const r of runners) {
+      r.play(clip, 0);
+      r.mixer.update(frames === 0 ? Number(p.get("t") || 0.4) : 0.016);
+    }
+    renderer.render(scene, cam);
+    if (++frames === 3) document.title = "ready";
+  });
+</script>

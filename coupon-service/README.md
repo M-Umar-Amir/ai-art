@@ -1,7 +1,7 @@
-# Coupon service — Dallas Dash × KFC ordering app
+# Coupon service — Dallas Dash × our delivery app
 
 One Postgres database, two schemas: `game.*` (runs, points ledger) and `rewards.*` (coupons).
-This service is the only writer of `rewards.coupons`; the ordering app calls its endpoints.
+This service is the only writer of `rewards.coupons`; our delivery app calls its endpoints.
 
 ```
 npm install

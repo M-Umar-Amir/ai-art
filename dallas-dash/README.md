@@ -10,12 +10,42 @@ Live at `epical.art/dallas-dash` (noindex). Plain static files, no build step.
 | `rules.js` | Account ledger: replay verification, wallet (drumsticks, recipe cards, glide boards), shop, missions → multiplier, crew, route, coupon claim. |
 | `routes.js` | The four maps (Downtown, East and West Dallas, Toronto): districts, signage, skyline, 10 landmarks each. Cosmetic only — the course is identical on every route. |
 | `coupon-code.js` | `KFC-XXXX-XXXX-XXXX-C` codes: 60 random bits + a check symbol. Shared with `../coupon-service`. |
-| `scene.js` | Canvas 2D software 3D renderer: streets per route, KFC restaurants/billboards/hoardings, the three characters, 40 landmarks, near-plane clipping. |
-| `client.js` | Screens, swipe/keyboard/gamepad input, run loop, revive prompt. |
+| `scene.js` | The WebGL renderer (three.js): camera, lights, fog, the home showcase, the visual motion layer, adaptive resolution. Same API as the old 2D renderer. |
+| `city.js` | Streets and buildings: modular facades assembled once and drawn as instances, far-block impostors, KFC restaurants, billboards, hoardings, overpasses, flags, rails, the 40 landmarks. |
+| `crew.js` | Dante, Maya, R-11 and the parking officer: base bodies with faces, clothing shells derived from the body, the KFC bag and patches, the animation state machine. |
+| `course.js` | Pickups (3D drumsticks, KFC menu items), power-ups, and the unbranded hazards (Jersey barriers, traffic drums, scaffolds, box vans, freight containers). |
+| `art.js` | 2D artwork painted once into textures: KFC posters, packaging, signs atlas, flags, skyline band. |
+| `assets.js` / `meshutil.js` | Model loading with progress; geometry merging helpers. |
+| `assets/models/*.glb` | The packed CC0 models (7.3 MB total, WebP textures, meshopt). See `assets/CREDITS.md`. |
+| `vendor/three/` | three.js r180 (MIT), vendored so the game has no CDN dependency. |
+| `client.js` | Screens, swipe/keyboard/gamepad input, run loop, revive prompt, loader, character picker. |
 | `local-room.js` | Runs the rules in the browser for this static build (ledger in localStorage). |
 | `audio.js` | Synthesised sound; music tempo follows run speed. |
-| `assets/kfc-logo.svg` | KFC Colonel roundel (public reference copy from Wikimedia Commons). Replace with the client's official brand-kit file. |
-| `tests/` | `node --test tests/rules.test.mjs`, `node tests/bot.mjs 6 10800` (fairness bot), `tests/render.html?scene=roof` (visual checks). Not deployed. |
+| `tools/build-assets.mjs` | Offline pipeline: packs the source kits into `assets/models` (not deployed). |
+| `tests/` | `node --test tests/rules.test.mjs`, `node tests/bot.mjs 6 10800` (fairness bot), `tests/render.html?scene=…&route=…&outfit=…`, `tests/crew.html`, `tests/models.html` (visual checks). Not deployed. |
+
+## Graphics and performance
+
+Real models, not code-drawn shapes: a modular city kit, scanned street furniture, and rigged
+characters with modelled faces (all CC0). Performance is built for phones:
+
+- **Instancing:** every repeated thing (facades, sidewalks, lamps, trees, rails, signs) is one
+  `InstancedMesh` per material — the street costs ~110–150 draw calls whatever is in view.
+- **Impostors:** at load, each building's facade is rendered once into a texture; blocks more
+  than ~70 m away draw as that picture on a box (12 triangles instead of ~15,000).
+- **Merged props:** course objects and landmarks are merged per material, plain-painted parts
+  into one vertex-coloured material.
+- **No hitches:** containers, pools and landmarks are pre-built and all shaders compiled behind
+  the loading screen.
+- **Adaptive resolution:** the render scale drops a step when frames run long and recovers with
+  headroom (0.75×–1.6×).
+- Measured on an Intel HD 620 laptop GPU (roughly a mid-range phone): 250–390k triangles,
+  ~110–150 draw calls, typically 50–100 fps.
+
+**Expo / EAS:** the renderer is plain three.js; on device it runs on `expo-gl` via
+`@react-three/fiber/native` (or `expo-three`). `sim.js`, `rules.js`, `routes.js` and the models
+carry over unchanged; `art.js` needs an offscreen canvas (react-native-skia) or pre-baked images,
+and `assets.js` loads the GLBs from the app bundle.
 
 ## Gameplay
 
@@ -31,8 +61,9 @@ Secret recipe cards revive you (1, 2, 4… cards). Power-ups: drumstick magnet, 
 five districts, its own skyline, flags, trees, highway signs and 10 real landmarks (40 to collect).
 
 **Crew**: Dante (skater courier) and Maya (street dancer) are free; R-11 (delivery robot, modelled on
-today's humanoid robots) unlocks at 25,000 lifetime points. All wear KFC-branded kit, with the
-Colonel roundel on the back.
+today's humanoid robots) unlocks at 25,000 lifetime points. Full 3D models with faces, rigged and
+animated; all wear KFC-branded kit (Dante's KFC delivery bag, the Colonel roundel on the backs).
+The home screen shows the selected runner facing you; ◀ ▶ switches runners.
 
 **Branding placement**: KFC appears in the *world*, not on the course: KFC restaurants between
 ordinary buildings (these are what the "pass N KFC restaurants" mission counts), rooftop
@@ -46,8 +77,8 @@ mission multipliers) is common to many endless runners and game mechanics are no
 copyright. What *is* protectable is expression — characters, art, names, text, music — and all of
 that here is original: our own characters (no likeness of any other game's cast), our own names
 (glide board, spring kicks, recipe cards, parking officer — chosen to avoid other games' terms),
-code-drawn art, synthesised audio, and no third-party assets except the KFC logo used with KFC's
-permission. Don't add other games' names, characters, logos, sound or UI art, and don't market the
+synthesised audio, and 3D models that are either ours or CC0 public-domain packs (credited in
+`assets/CREDITS.md`); the only trademark used is KFC's, with KFC's permission. Don't add other games' names, characters, logos, sound or UI art, and don't market the
 game by comparison to another title. Real landmarks are drawn as simplified silhouettes and named
 factually; buildings and public places are fine to depict, but if KFC wants to use a specific
 landmark in paid advertising, have their legal team confirm it (a few, e.g. sports venues, carry

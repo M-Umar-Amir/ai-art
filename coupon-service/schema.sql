@@ -1,14 +1,14 @@
--- KFC Dallas Dash — one database for the game and the ordering app.
+-- KFC Dallas Dash — one database for the game and our delivery app.
 --
 -- Two schemas, one Postgres (e.g. Neon via the Vercel Marketplace):
 --   game.*      written only by the game API (runs, points ledger)
 --   rewards.*   written only by the coupon service (coupons, their history)
--- The ordering app never touches these tables directly: it calls the coupon
+-- The delivery app never touches these tables directly: it calls the coupon
 -- service (validate / reserve / redeem / release / restore). One owner per
 -- table is what keeps "a coupon can only be used once" true.
 --
 -- Users are shared: both apps sign in against the same identity provider, so
--- user_id means the same person in the game and in the KFC app.
+-- user_id means the same person in the game and in our delivery app.
 
 CREATE SCHEMA IF NOT EXISTS game;
 CREATE SCHEMA IF NOT EXISTS rewards;

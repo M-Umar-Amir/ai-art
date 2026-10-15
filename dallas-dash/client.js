@@ -10,7 +10,7 @@
 import { createRenderer, districtAt } from "./scene.js";
 import { audio } from "./audio.js";
 import * as SIM from "./sim.js";
-import { routeById } from "./routes.js";
+import { routeById, ROUTES } from "./routes.js";
 
 const ITEM_LABEL = {
   bucket: "Original Recipe Bucket",
@@ -30,6 +30,8 @@ const POWER = {
 };
 const CHAR_AV = { dante: "🧢", maya: "🎧", r11: "🤖" };
 const ROUTE_AV = { downtown: "🏙️", east: "🎡", west: "🌉", toronto: "🍁" };
+const icon = (id, cls = "ico") => `<svg class="${cls}"><use href="#${id}" /></svg>`;
+let preview = null; // the runner shown on the home screen (may be locked)
 // player-facing names for the board and the revive token (sim ids stay "board"/"keys")
 const BOARD = "Glide board";
 const TOKEN = "recipe card";
@@ -42,6 +44,27 @@ const STEP_MS = 1000 / 60;
 
 const canvas = q("view");
 const renderer = createRenderer(canvas);
+
+const TIPS = [
+  "Swipe up to jump, down to roll — roll in mid-air to dive.",
+  "Run up a container's ramp and along the roof.",
+  "Double-tap for a glide board: it takes one crash for you.",
+  "Every run is replayed and verified before its points count.",
+  "Finish a mission set to raise your score multiplier.",
+  "Spot all 40 landmarks across Dallas and Toronto.",
+];
+let tipAt = 0;
+function tickLoader() {
+  const el = q("loader");
+  if (!el || el.classList.contains("done")) return;
+  q("vLoadBar").style.width = `${Math.max(3, Math.round(renderer.progress * 100))}%`;
+  if (renderer.error) q("vLoadTip").textContent = "Couldn't load the 3D city — check your connection and reload.";
+  else if (performance.now() - tipAt > 2600) {
+    tipAt = performance.now();
+    q("vLoadTip").textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+  }
+  if (renderer.ready && view) el.classList.add("done");
+}
 
 /* ── net (the server is authoritative; the static build runs it locally) ── */
 
@@ -433,7 +456,8 @@ function frame(now) {
     }
     drawn = idle;
   }
-  if (drawn) stats = renderer.draw(drawn, { outfit: view ? view.outfit : "dante", route: run ? runRoute : myRoute(), now });
+  tickLoader();
+  if (drawn) stats = renderer.draw(drawn, { outfit: run ? (view ? view.outfit : "dante") : preview || (view ? view.outfit : "dante"), route: run ? runRoute : myRoute(), now, idle: !run });
   if (run) paintHud();
 
   frames += 1;
@@ -442,14 +466,18 @@ function frame(now) {
     frames = 0;
     fpsAt = now;
   }
-  if (showStats) q("stats").textContent = `${fps} fps · ${stats.polys} polys · ${stats.ms.toFixed(1)} ms`;
+  if (showStats) q("stats").textContent = `${fps} fps · ${stats.polys} tris · ${stats.calls || 0} calls · ${stats.ms.toFixed(1)} ms · ${(stats.ratio || 1).toFixed(2)}x`;
 }
 
 /* ── run lifecycle ─────────────────────────────────────────────────────── */
 
 function startRun() {
-  if (!view) {
+  if (!view || !renderer.ready) {
     toast("Loading — one moment");
+    return;
+  }
+  if (preview && view.outfits.indexOf(preview) < 0) {
+    toast("Still locked — keep running");
     return;
   }
   audio.unlock();
@@ -653,14 +681,44 @@ function paintHome() {
   q("vHomeRuns").textContent = fmt(view.runs);
   q("vClaimBadge").classList.toggle("hidden", !view.claimReady);
   const r = routeById(view.route);
-  q("vRouteName").textContent = r.name;
-  q("vRouteIco").textContent = ROUTE_AV[r.id];
   q("vTag").textContent = `${r.region === "Texas" ? "★" : "🍁"} ${r.name} · ${r.region}`;
+  paintPicker();
+  const chips = q("cities");
+  const html = ROUTES.map((x) => `<button type="button" role="radio" aria-checked="${x.id === view.route}" data-route="${x.id}">${ROUTE_AV[x.id]} ${x.name}</button>`).join("");
+  if (chips.innerHTML !== html) chips.innerHTML = html;
   const pct = view.claimReady ? 100 : Math.min(100, (view.points / view.terms.points) * 100);
   q("vBar").style.width = `${pct}%`;
   q("vPointsLine").textContent = view.claimReady
     ? "Coupon ready — tap Coupon to claim 15% off"
     : `${fmt(view.points)} / ${fmt(view.terms.points)} points to a 15% KFC coupon`;
+}
+
+function paintPicker() {
+  if (!view) return;
+  const list = view.outfitList;
+  if (!preview || !list.some((o) => o.id === preview)) preview = view.outfit;
+  const o = list.find((x) => x.id === preview) || list[0];
+  const owned = view.outfits.indexOf(o.id) >= 0;
+  q("vWho").textContent = o.name;
+  q("vRole").textContent = o.role || "";
+  q("vLock").classList.toggle("hidden", owned);
+  q("vLockText").textContent = `${fmt(o.at)} lifetime pts`;
+  const play = q("btnPlay");
+  play.disabled = !owned;
+  play.textContent = owned ? "Run" : "Locked";
+}
+
+function stepPicker(dir) {
+  if (!view) return;
+  audio.unlock();
+  audio.ui();
+  const list = view.outfitList;
+  const i = Math.max(0, list.findIndex((o) => o.id === (preview || view.outfit)));
+  preview = list[(i + dir + list.length) % list.length].id;
+  if (view.outfits.indexOf(preview) >= 0 && preview !== view.outfit) {
+    send({ type: "action", action: { kind: "setOutfit", outfit: preview } });
+  }
+  paintPicker();
 }
 
 function paintHud() {
@@ -700,7 +758,7 @@ function paintHud() {
     }
   }
   if (run.board > 0) {
-    timers.push(`<div class="timer"><i style="background:#e4002b">🛹</i><div class="t"><div style="width:${(run.board / SIM.BOARD_TICKS) * 100}%"></div></div></div>`);
+    timers.push(`<div class="timer"><i style="background:#fff">${icon("i-board", "ic")}</i><div class="t"><div style="width:${(run.board / SIM.BOARD_TICKS) * 100}%"></div></div></div>`);
   }
   const html = timers.join("");
   if (html !== paintHud._t) {
@@ -730,8 +788,8 @@ function paintSheet(name) {
   if (name === "shop") {
     q("vShopCoins").textContent = fmt(view.coins);
     const rows = [
-      { id: "board", ico: "🛹", title: BOARD, sub: `Absorbs one crash · you own ${view.boards}`, price: view.prices.board },
-      { id: "key", ico: "📜", title: "Secret recipe card", sub: `Revive after a crash · you own ${view.keys}`, price: view.prices.key },
+      { id: "board", ico: icon("i-board"), title: BOARD, sub: `Absorbs one crash · you own ${view.boards}`, price: view.prices.board },
+      { id: "key", ico: icon("i-card"), title: "Secret recipe card", sub: `Revive after a crash · you own ${view.keys}`, price: view.prices.key },
     ];
     for (const k of SIM.POWERS) {
       const lv = view.levels[k];
@@ -750,7 +808,7 @@ function paintSheet(name) {
         const btn =
           r.price === null
             ? `<button type="button" disabled>Max</button>`
-            : `<button type="button" class="red" data-buy="${r.id}" ${view.coins < r.price ? "disabled" : ""}>🍗 ${fmt(r.price)}</button>`;
+            : `<button type="button" class="red buy" data-buy="${r.id}" ${view.coins < r.price ? "disabled" : ""}>${icon("i-drum", "ic")} ${fmt(r.price)}</button>`;
         return `<div class="row"><i class="ico">${r.ico}</i><div class="body"><b>${r.title}</b><small>${r.sub}</small>${pips}</div>${btn}</div>`;
       })
       .join("");
@@ -786,7 +844,7 @@ function paintSheet(name) {
     q("vTestNote").classList.toggle("hidden", !view.testMode);
     q("btnTestGrant").disabled = view.claimReady;
     q("vRuntimeNote").textContent = window.DASH_LOCAL
-      ? "Test build: your account and coupons live in this browser only. In production they live on the server, every run is replayed there, and the KFC app redeems codes against the same database."
+      ? "Test build: your account and coupons live in this browser only. In production they live on the server, every run is replayed there, and our delivery app redeems codes against the same database."
       : "";
   }
 }
@@ -832,6 +890,15 @@ q("vShop").addEventListener("click", (event) => {
   audio.ui();
   send({ type: "action", action: { kind: "buy", item: b.dataset.buy } });
 });
+q("btnPrev").addEventListener("click", () => stepPicker(-1));
+q("btnNext").addEventListener("click", () => stepPicker(1));
+q("cities").addEventListener("click", (event) => {
+  const b = event.target.closest("[data-route]");
+  if (!b || !view || b.dataset.route === view.route) return;
+  audio.unlock();
+  audio.ui();
+  send({ type: "action", action: { kind: "setRoute", route: b.dataset.route } });
+});
 q("vRoutes").addEventListener("click", (event) => {
   const b = event.target.closest("[data-route]");
   if (!b) return;
@@ -848,6 +915,7 @@ q("vChars").addEventListener("click", (event) => {
   }
   audio.ui();
   idle = null;
+  preview = b.dataset.outfit;
   send({ type: "action", action: { kind: "setOutfit", outfit: b.dataset.outfit } });
 });
 

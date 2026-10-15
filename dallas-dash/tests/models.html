@@ -1,0 +1,84 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex" />
+<title>Dallas Dash model check</title>
+<style>html,body{margin:0;height:100%;background:#9cc4e8}canvas{display:block;width:100%;height:100%}</style>
+<script type="importmap">
+  { "imports": { "three": "/dallas-dash/vendor/three/three.module.min.js", "three/addons/": "/dallas-dash/vendor/three/addons/" } }
+</script>
+<canvas id="c"></canvas>
+<script type="module">
+  // Visual QA of the packed models: ?view=crew|city|props. Not linked from the game.
+  import * as THREE from "three";
+  import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
+  import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
+  import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js";
+
+  const view = new URLSearchParams(location.search).get("view") || "crew";
+  const clipName = new URLSearchParams(location.search).get("clip") || "Sprint_Loop";
+  const canvas = document.getElementById("c");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x9cc4e8);
+  scene.add(new THREE.HemisphereLight(0xdfeeff, 0x8a7a66, 1.6));
+  const sun = new THREE.DirectionalLight(0xfff1dc, 2.4);
+  sun.position.set(4, 8, 6);
+  scene.add(sun);
+  const cam = new THREE.PerspectiveCamera(35, innerWidth / innerHeight, 0.1, 400);
+  const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+  const load = (u) =>
+    new Promise((ok, no) =>
+      loader.load(u, (g) => {
+        g.scene.traverse((o) => { if (o.userData.name) o.name = o.userData.name; });
+        ok(g);
+      }, undefined, no),
+    );
+  const mixers = [];
+
+  if (view === "crew") {
+    const [crew, anims] = await Promise.all([load("/dallas-dash/assets/models/crew.glb"), load("/dallas-dash/assets/models/anims.glb")]);
+    const clip = anims.animations.find((a) => a.name === clipName);
+    const names = crew.scene.children.map((c) => c.name);
+    console.log("crew nodes", names.join(","));
+    let x = -1.2;
+    for (const who of ["male", "female"]) {
+      const src = crew.scene.getObjectByName(who);
+      const body = SkeletonUtils.clone(src);
+      body.position.set(x, 0, 0);
+      body.rotation.y = Number(new URLSearchParams(location.search).get("yaw") || 0.4);
+      scene.add(body);
+      const m = new THREE.AnimationMixer(body);
+      if (clip) m.clipAction(clip).play();
+      mixers.push(m);
+      x += 2.4;
+    }
+    cam.position.set(0, 1.6, 4.2);
+    cam.lookAt(0, 1.1, 0);
+  } else {
+    const gltf = await load(`/dallas-dash/assets/models/${view}.glb`);
+    const kids = [...gltf.scene.children];
+    let x = 0;
+    for (const k of kids) {
+      const box = new THREE.Box3().setFromObject(k);
+      const w = box.max.x - box.min.x;
+      k.position.x = x - box.min.x;
+      scene.add(k);
+      x += w + 0.6;
+    }
+    cam.position.set(x / 2, 12, x * 0.55);
+    cam.lookAt(x / 2, 2, 0);
+    cam.far = 2000;
+    cam.updateProjectionMatrix();
+  }
+  const clock = new THREE.Clock();
+  let frames = 0;
+  renderer.setAnimationLoop(() => {
+    const dt = clock.getDelta();
+    for (const m of mixers) m.update(frames === 0 ? 0.35 : dt);
+    renderer.render(scene, cam);
+    if (++frames === 3) document.title = "ready";
+  });
+</script>

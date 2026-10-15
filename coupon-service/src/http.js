@@ -4,8 +4,8 @@
  *
  *   POST /coupons/issue      game app     { issueKey }                     → coupon
  *   GET  /coupons            game + app   —                                → my coupons
- *   POST /coupons/validate   KFC app      { code, subtotalCents }          → discount preview
- *   POST /coupons/reserve    KFC app      { code, orderId, subtotalCents } → lock to order
+ *   POST /coupons/validate   delivery app { code, subtotalCents }          → discount preview
+ *   POST /coupons/reserve    delivery app { code, orderId, subtotalCents } → lock to order
  *   POST /coupons/redeem     order svc    { orderId }   (payment captured)
  *   POST /coupons/release    order svc    { orderId }   (payment failed / abandoned)
  *   POST /coupons/restore    order svc    { orderId }   (restaurant cancelled)
