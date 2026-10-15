@@ -9,7 +9,7 @@
     <meta property="og:title" content="KFC Dallas Dash" />
     <meta
       property="og:description"
-      content="Run downtown Dallas, dodge the traffic, grab drumsticks and turn verified points into a 15% KFC coupon."
+      content="Run Downtown, East and West Dallas or Toronto, dodge the traffic, grab KFC menu items and turn verified points into a 15% KFC coupon."
     />
     <link rel="icon" href="/dallas-dash/assets/kfc-logo.svg" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -329,6 +329,19 @@
       .char.on { border-color: var(--red); }
       .char.locked { opacity: 0.55; }
       .char .av { font-size: 2.2rem; }
+      .char small.role { display: block; opacity: 0.75; margin: 0.15rem 0; }
+      .char.route { text-align: left; }
+      #routeChip {
+        background: rgba(32, 33, 36, 0.72);
+        color: #fff;
+        border-radius: 999px;
+        padding: 0.4rem 0.9rem;
+        font: 800 1rem/1 var(--display);
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        box-shadow: none;
+      }
+      #routeChip small { opacity: 0.7; font-size: 0.75em; margin-left: 0.3rem; text-decoration: underline; }
       .char b { display: block; font: 800 1.1rem/1.1 var(--display); text-transform: uppercase; }
       .code {
         font: 800 1.35rem/1.3 ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
@@ -500,16 +513,17 @@
       <div id="homeTop">
         <div class="lockup">
           <img src="/dallas-dash/assets/kfc-logo.svg" alt="KFC" width="54" height="54" />
-          <div class="name display"><small>KFC</small><b>Dallas Dash</b><span class="tag">&#9733; Big D &middot; Texas</span></div>
+          <div class="name display"><small>KFC</small><b>Dallas Dash</b><span class="tag" id="vTag">&#9733; Downtown Dallas &middot; Texas</span></div>
         </div>
         <div class="chips">
           <span class="cur" title="Drumsticks"><i>🍗</i><span id="vCoins">0</span></span>
-          <span class="cur" title="Keys"><i>🔑</i><span id="vKeys">0</span></span>
+          <span class="cur" title="Secret recipe cards"><i>📜</i><span id="vKeys">0</span></span>
         </div>
       </div>
       <nav id="homeSide" aria-label="Menu">
         <button class="sidebtn" type="button" data-sheet="missions"><i class="ico">🎯</i>Missions<span class="badge" id="vMultBadge">x1</span></button>
         <button class="sidebtn" type="button" data-sheet="shop"><i class="ico">🛒</i>Shop</button>
+        <button class="sidebtn" type="button" data-sheet="routes"><i class="ico">🗺️</i>Map</button>
         <button class="sidebtn" type="button" data-sheet="chars"><i class="ico">🧢</i>Crew</button>
         <button class="sidebtn" type="button" data-sheet="rewards"><i class="ico">🎟️</i>Coupon<span class="badge hidden" id="vClaimBadge">!</span></button>
       </nav>
@@ -522,6 +536,7 @@
           <div><span id="vPointsLine">0 / 100,000 points to a 15% KFC coupon</span></div>
           <div class="bar"><div id="vBar"></div></div>
         </div>
+        <button id="routeChip" type="button" data-sheet="routes"><span id="vRouteIco">🏙️</span> <span id="vRouteName">Downtown Dallas</span> <small>change</small></button>
         <button id="btnPlay" class="red display" type="button">Tap to run</button>
       </div>
       <div id="legal">Prototype by Epical Studio for KFC · KFC marks belong to KFC · points &amp; coupons in this build are for testing</div>
@@ -540,7 +555,7 @@
         <button id="btnPause" type="button" aria-label="Pause">❚❚</button>
         <div id="timers"></div>
       </div>
-      <button id="btnBoard" type="button" aria-label="Use hoverboard"><i class="ico">🛹</i><span id="vBoards">×0</span></button>
+      <button id="btnBoard" type="button" aria-label="Use glide board"><i class="ico">🛹</i><span id="vBoards">×0</span></button>
       <div id="hint" class="tut">
         <span class="k"><b>&#10231;</b><span class="touchonly">Swipe<br />dodge</span><span class="keysonly">&larr; &rarr;<br />dodge</span></span>
         <span class="k"><b>&uarr;</b><span class="touchonly">Swipe<br />jump</span><span class="keysonly">&uarr; / space<br />jump</span></span>
@@ -560,9 +575,9 @@
         <div class="stripes"></div>
         <h1 id="reviveTitle" class="display">Save me!</h1>
         <p id="reviveWhy">You crashed.</p>
-        <div class="ring" id="reviveRing"><div>🔑</div></div>
+        <div class="ring" id="reviveRing"><div>📜</div></div>
         <div class="actions" style="justify-content: center">
-          <button id="btnRevive" class="green" type="button">Use 1 key</button>
+          <button id="btnRevive" class="green" type="button">Use 1 recipe card</button>
           <button id="btnGiveUp" type="button">No thanks</button>
         </div>
       </div>
@@ -600,7 +615,7 @@
         <div class="cell"><b id="vResPoints">0</b><span>coupon points</span></div>
         <div class="cell"><b id="vResDistrict" class="small">Deep Ellum</b><span>made it to</span></div>
       </div>
-      <div id="vSetDone" class="ribbon hidden">Mission set complete! Multiplier up, +1 key, +250 drumsticks</div>
+      <div id="vSetDone" class="ribbon hidden">Mission set complete! Multiplier up, +1 recipe card, +250 drumsticks</div>
       <h2>Missions</h2>
       <div id="vResMissions"></div>
       <div class="actions">
@@ -618,7 +633,7 @@
       <div id="vMissions"></div>
       <h2>Score multiplier</h2>
       <div class="multi" id="vMultLadder"></div>
-      <p class="note">Each finished set: multiplier +1 (up to x6), +1 key, +250 drumsticks.</p>
+      <p class="note">Each finished set: multiplier +1 (up to x6), +1 recipe card, +250 drumsticks.</p>
     </section>
 
     <!-- ── shop ─────────────────────────────────────────────────────── -->
@@ -633,10 +648,18 @@
     <section id="sheet-chars" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="cTitle">
       <div class="stripes"></div>
       <header><h1 id="cTitle" class="display">Crew</h1><button class="x" type="button" data-close>✕</button></header>
-      <p>Unlocked by lifetime points. Tap to wear.</p>
+      <p>Pick who runs. Everyone wears the KFC crew kit.</p>
       <div class="chars" id="vChars"></div>
-      <h2>Dallas landmarks spotted</h2>
-      <p id="vLandmarkCount">0 of 10</p>
+      <h2>Landmarks spotted</h2>
+      <p id="vLandmarkCount">0 of 40</p>
+    </section>
+
+    <!-- ── routes ───────────────────────────────────────────────────── -->
+    <section id="sheet-routes" class="sheet hidden" role="dialog" aria-modal="true" aria-labelledby="mapTitle">
+      <div class="stripes"></div>
+      <header><h1 id="mapTitle" class="display">Pick your city</h1><button class="x" type="button" data-close>✕</button></header>
+      <p>Same course, same points — new streets, skyline and landmarks.</p>
+      <div class="chars" id="vRoutes"></div>
     </section>
 
     <!-- ── rewards ──────────────────────────────────────────────────── -->

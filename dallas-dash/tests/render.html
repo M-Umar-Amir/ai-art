@@ -27,6 +27,7 @@
   if (scene === "oncoming") { find((o) => o.k === "oncoming", 60 * 300); }
   if (scene === "gate") { find((o) => o.k === "awning" || o.k === "bar"); }
   if (scene === "store") { find((o) => o.k === "store"); for (let i = 0; i < Number(p.get("ahead") || 0); i++) SIM.stepRun(run, 0); }
+  if (scene === "landmark") { const o = find((o) => o.k === "landmark"); for (const x of run.objects) if (x.k === "landmark") x.n = Number(p.get("n") || 0); run.distance = o.z - Number(p.get("back") || 70); }
   if (scene === "jet") { for (let i = 0; i < 300; i++) SIM.stepRun(run, 0); run.jet = 400; run.y = SIM.JET_HEIGHT; run.invuln = 999; }
   if (scene === "power") { find((o) => o.t === 3); run.board = 600; run.magnet = 300; }
   if (scene === "chase") { for (let i = 0; i < 200; i++) SIM.stepRun(run, 0); run.chase = 280; run.invuln = 999; }
@@ -34,5 +35,5 @@
   for (const o of run.objects) o.hit = 0;
   window.__state = { lane: run.lane, x: run.x, y: run.y, d: run.distance, near: run.objects.filter((o) => o.t === 1 && Math.abs(o.z - run.distance) < 30).map((o) => [o.k, o.l, +(o.z - run.distance).toFixed(1), o.len]) };
   const r = createRenderer(document.getElementById("c"));
-  setTimeout(() => { r.draw(run, { outfit: p.get("outfit") || "classic", now: 1000 }); document.title = "ready"; }, 400);
+  setTimeout(() => { r.draw(run, { outfit: p.get("outfit") || "dante", route: p.get("route") || "downtown", now: 1000 }); document.title = "ready"; }, 400);
 </script>

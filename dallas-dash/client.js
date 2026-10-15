@@ -10,6 +10,7 @@
 import { createRenderer, districtAt } from "./scene.js";
 import { audio } from "./audio.js";
 import * as SIM from "./sim.js";
+import { routeById } from "./routes.js";
 
 const ITEM_LABEL = {
   bucket: "Original Recipe Bucket",
@@ -24,10 +25,14 @@ const ITEM_LABEL = {
 const POWER = {
   magnet: { name: "Drumstick magnet", glyph: "🧲", color: "#e4002b" },
   jetpack: { name: "Jetpack", glyph: "🚀", color: "#ff961e" },
-  sneakers: { name: "Super sneakers", glyph: "👟", color: "#3ca0f0" },
+  sneakers: { name: "Spring kicks", glyph: "👟", color: "#3ca0f0" },
   double: { name: "2× score", glyph: "2×", color: "#e0a100" },
 };
-const CHAR_AV = { classic: "🛵", tie: "👔", bucket: "🪣", apron: "👨‍🍳", gold: "🏆" };
+const CHAR_AV = { dante: "🧢", maya: "🎧", r11: "🤖" };
+const ROUTE_AV = { downtown: "🏙️", east: "🎡", west: "🌉", toronto: "🍁" };
+// player-facing names for the board and the revive token (sim ids stay "board"/"keys")
+const BOARD = "Glide board";
+const TOKEN = "recipe card";
 
 const q = (id) => document.getElementById(id);
 const show = (el) => el.classList.remove("hidden");
@@ -120,12 +125,15 @@ let hudCoins = 0;
 let hudDistrict = "";
 let hudSightings = 0;
 let bestBefore = 0;
+let runRoute = "downtown";
+
+const myRoute = () => (view && view.route) || "downtown";
 
 function onState(msg) {
   const before = view;
   view = msg.view;
   if (before && view && view.outfits.length > before.outfits.length) {
-    toast("New crew outfit unlocked!");
+    toast("New crew member unlocked!");
     audio.coupon();
   }
   if (awaiting && view && view.lastRun && (!before || before.runs !== view.runs)) {
@@ -353,17 +361,17 @@ function react(events) {
     } else if (e === "stumble") {
       audio.hit();
       jolt(false);
-      toast("Watch out — the inspector's behind you!");
+      toast("Watch out — the parking officer's behind you!");
     } else if (e === "crashed" || e === "caught") {
       audio.crash();
       jolt(true);
     } else if (e === "boardbreak") {
       audio.crash();
       jolt(true);
-      toast("Hoverboard saved you!");
+      toast(`${BOARD} saved you!`);
     } else if (e === "board") {
       audio.power();
-      toast("Hoverboard!");
+      toast(`${BOARD}!`);
     } else if (e === "revive") {
       audio.coupon();
     } else if (e.startsWith("power:")) {
@@ -425,7 +433,7 @@ function frame(now) {
     }
     drawn = idle;
   }
-  if (drawn) stats = renderer.draw(drawn, { outfit: view ? view.outfit : "classic", now });
+  if (drawn) stats = renderer.draw(drawn, { outfit: view ? view.outfit : "dante", route: run ? runRoute : myRoute(), now });
   if (run) paintHud();
 
   frames += 1;
@@ -459,7 +467,8 @@ function startRun() {
   show(q("hud"));
   hudCoins = 0;
   hudSightings = 0;
-  hudDistrict = districtAt(0).name;
+  runRoute = myRoute();
+  hudDistrict = districtAt(0, runRoute).name;
   bestBefore = view.bestRun || 0;
   // the controls card shows for the first few runs, then gets out of the way
   let seen = 0;
@@ -505,7 +514,7 @@ function pause() {
   if (!running || paused) return;
   paused = true;
   audio.stopMusic();
-  q("vPauseWhere").textContent = `Catching your breath in ${districtAt(run.distance).name}.`;
+  q("vPauseWhere").textContent = `Catching your breath in ${districtAt(run.distance, runRoute).name}.`;
   q("vPauseScore").textContent = fmt(Math.round(run.score));
   q("vPauseCoins").textContent = fmt(run.coins);
   q("vPauseDist").textContent = fmt(Math.round(run.distance));
@@ -548,8 +557,8 @@ function showRevive() {
   audio.stopMusic();
   const cost = SIM.reviveCost(run);
   q("reviveWhy").textContent =
-    run.downed === "caught" ? "The inspector caught you." : "You crashed.";
-  q("btnRevive").textContent = `Use ${cost} key${cost > 1 ? "s" : ""} (${run.keysLeft} left)`;
+    run.downed === "caught" ? "The parking officer caught you." : "You crashed.";
+  q("btnRevive").textContent = `Use ${cost} ${TOKEN}${cost > 1 ? "s" : ""} (${run.keysLeft} left)`;
   reviveTimer = 4000;
   show(q("revive"));
   q("btnRevive").focus();
@@ -598,7 +607,7 @@ function finishRun() {
 function showResults(summary) {
   const why =
     summary.reason === "caught"
-      ? "The inspector caught you."
+      ? "The parking officer caught you."
       : summary.reason === "crashed"
         ? "You crashed."
         : "Ten minutes up — what a run.";
@@ -608,7 +617,7 @@ function showResults(summary) {
   const best = summary.score > bestBefore && summary.score > 0;
   q("vNewBest").classList.toggle("hidden", !best);
   if (best) setTimeout(confetti, 350);
-  q("vResDistrict").textContent = districtAt(summary.distance).name;
+  q("vResDistrict").textContent = districtAt(summary.distance, runRoute).name;
   q("vResCoins").textContent = fmt(summary.coins);
   q("vResDistance").textContent = fmt(summary.distance);
   q("vResBest").textContent = fmt(Math.max(view ? view.bestRun : 0, summary.score));
@@ -643,6 +652,10 @@ function paintHome() {
   q("vHomeBest").textContent = fmt(view.bestRun);
   q("vHomeRuns").textContent = fmt(view.runs);
   q("vClaimBadge").classList.toggle("hidden", !view.claimReady);
+  const r = routeById(view.route);
+  q("vRouteName").textContent = r.name;
+  q("vRouteIco").textContent = ROUTE_AV[r.id];
+  q("vTag").textContent = `${r.region === "Texas" ? "★" : "🍁"} ${r.name} · ${r.region}`;
   const pct = view.claimReady ? 100 : Math.min(100, (view.points / view.terms.points) * 100);
   q("vBar").style.width = `${pct}%`;
   q("vPointsLine").textContent = view.claimReady
@@ -663,7 +676,7 @@ function paintHud() {
     hudCoins = run.coins;
   }
   q("vDist").textContent = fmt(Math.round(run.distance));
-  const district = districtAt(run.distance).name;
+  const district = districtAt(run.distance, runRoute).name;
   if (district !== hudDistrict) {
     hudDistrict = district;
     showDistrict(district);
@@ -671,7 +684,8 @@ function paintHud() {
   }
   if (run.sightings.length > hudSightings) {
     hudSightings = run.sightings.length;
-    showSpot(SIM.LANDMARKS[run.sightings[hudSightings - 1]]);
+    const spots = routeById(runRoute).landmarks;
+    showSpot(spots[run.sightings[hudSightings - 1] % spots.length].name);
   }
   q("vBoards").textContent = run.board > 0 ? "on" : `×${run.boardsLeft}`;
   q("btnBoard").disabled = run.board > 0 || run.boardsLeft <= 0;
@@ -716,8 +730,8 @@ function paintSheet(name) {
   if (name === "shop") {
     q("vShopCoins").textContent = fmt(view.coins);
     const rows = [
-      { id: "board", ico: "🛹", title: "Hoverboard", sub: `Absorbs one crash · you own ${view.boards}`, price: view.prices.board },
-      { id: "key", ico: "🔑", title: "Key", sub: `Revive after a crash · you own ${view.keys}`, price: view.prices.key },
+      { id: "board", ico: "🛹", title: BOARD, sub: `Absorbs one crash · you own ${view.boards}`, price: view.prices.board },
+      { id: "key", ico: "📜", title: "Secret recipe card", sub: `Revive after a crash · you own ${view.keys}`, price: view.prices.key },
     ];
     for (const k of SIM.POWERS) {
       const lv = view.levels[k];
@@ -745,10 +759,17 @@ function paintSheet(name) {
     q("vChars").innerHTML = view.outfitList
       .map((o) => {
         const owned = view.outfits.indexOf(o.id) >= 0;
-        return `<button type="button" class="char${view.outfit === o.id ? " on" : ""}${owned ? "" : " locked"}" data-outfit="${o.id}"><div class="av">${CHAR_AV[o.id]}</div><b>${o.name}</b><small>${owned ? (view.outfit === o.id ? "wearing" : "tap to wear") : `${fmt(o.at)} lifetime pts`}</small></button>`;
+        return `<button type="button" class="char${view.outfit === o.id ? " on" : ""}${owned ? "" : " locked"}" data-outfit="${o.id}"><div class="av">${CHAR_AV[o.id] || "🏃"}</div><b>${o.name}</b><small class="role">${o.role || ""}</small><small>${owned ? (view.outfit === o.id ? "running" : "tap to pick") : `${fmt(o.at)} lifetime pts`}</small></button>`;
       })
       .join("");
     q("vLandmarkCount").textContent = `${view.landmarks.length} of ${view.landmarkTotal}${view.landmarks.length ? ` — ${view.landmarks.join(", ")}` : ""}`;
+  }
+  if (name === "routes") {
+    q("vRoutes").innerHTML = view.routeList
+      .map(
+        (r) => `<button type="button" class="char route${view.route === r.id ? " on" : ""}" data-route="${r.id}"><div class="av">${ROUTE_AV[r.id]}</div><b>${r.name}</b><small class="role">${r.blurb}</small><small>${view.route === r.id ? "selected" : "tap to run here"} · ${r.spotted}/10 landmarks</small></button>`,
+      )
+      .join("");
   }
   if (name === "rewards") {
     q("vRPoints").textContent = fmt(view.points);
@@ -810,6 +831,13 @@ q("vShop").addEventListener("click", (event) => {
   if (!b) return;
   audio.ui();
   send({ type: "action", action: { kind: "buy", item: b.dataset.buy } });
+});
+q("vRoutes").addEventListener("click", (event) => {
+  const b = event.target.closest("[data-route]");
+  if (!b) return;
+  audio.ui();
+  idle = null;
+  send({ type: "action", action: { kind: "setRoute", route: b.dataset.route } });
 });
 q("vChars").addEventListener("click", (event) => {
   const b = event.target.closest("[data-outfit]");

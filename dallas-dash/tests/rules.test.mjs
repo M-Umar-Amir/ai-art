@@ -106,3 +106,40 @@ test("old v1 saves migrate", () => {
   assert.equal(v.keys, 2);
   assert.equal(v.mult, 1);
 });
+
+test("routes: pick a map; landmarks are credited on the ledger's route", () => {
+  let state = R.setup([P]);
+  assert.equal(R.viewFor(state, P).route, "downtown");
+  assert.match(act(state, { kind: "setRoute", route: "paris" }).error, /unknown route/);
+  state = act(state, { kind: "setRoute", route: "toronto" }).state;
+  const view = R.viewFor(state, P);
+  assert.equal(view.route, "toronto");
+  assert.equal(view.landmarkTotal, 40);
+  // run long enough to pass scenery, never steering
+  const { run, inputs } = play(view, (r) => (r.downed ? SIM.INPUT.GIVE_UP : r.tick % 40 === 5 ? SIM.INPUT.JUMP : 0), 60 * 90);
+  const r = act(state, { kind: "submitRun", runId: "run-route1", seed: view.nextSeed, inputs, claimedScore: Math.round(run.score) });
+  assert.equal(r.error, undefined);
+  const after = R.viewFor(r.state, P);
+  assert.equal(after.landmarks.length, run.sightings.length);
+  const toronto = ["CN Tower", "Rogers Centre", "Toronto City Hall", "Gooderham Building", "Union Station", "Royal Ontario Museum", "Casa Loma", "Distillery District", "Kensington Market", "St. Lawrence Market"];
+  for (const name of after.landmarks) assert.ok(toronto.includes(name), name);
+});
+
+test("crew: three characters; the robot unlocks with lifetime points", () => {
+  let state = R.setup([P]);
+  const v = R.viewFor(state, P);
+  assert.deepEqual(v.outfitList.map((o) => o.id), ["dante", "maya", "r11"]);
+  assert.deepEqual(v.outfits, ["dante", "maya"]);
+  assert.match(act(state, { kind: "setOutfit", outfit: "r11" }).error, /locked/);
+  state = act(state, { kind: "setOutfit", outfit: "maya" }).state;
+  assert.equal(R.viewFor(state, P).outfit, "maya");
+});
+
+test("v2 saves migrate: old outfits fall back, Dallas sightings are re-keyed", () => {
+  const old = { v: 2, accounts: { [P]: { points: 10, lifetime: 30000, outfit: "gold", outfits: ["classic", "gold"], sightings: [0, 1, 7], seenRuns: [], coupons: [] } } };
+  const v = R.viewFor(R.migrate(old), P);
+  assert.equal(v.outfit, "dante");
+  assert.deepEqual(v.outfits, ["dante", "maya", "r11"]);
+  assert.equal(v.route, "downtown");
+  assert.deepEqual(v.landmarks.sort(), ["Klyde Warren Park", "Margaret Hunt Hill Bridge", "Reunion Tower"]);
+});

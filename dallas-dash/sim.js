@@ -6,10 +6,12 @@
  * and compute the real score. Because there is only one copy, the two can no
  * longer drift apart.
  *
- * The run is endless (capped at ten minutes for replay cost) and plays like
- * Subway Surfers: three lanes, swipe to dodge, jump and roll, trailers you can
- * ride on top of, oncoming vans, a stumble-and-get-caught chase, a hoverboard
- * that absorbs one crash, four timed power-ups and keys to revive.
+ * The run is endless (capped at ten minutes for replay cost) and uses the
+ * common three-lane endless-runner controls: swipe to dodge, jump and roll,
+ * freight containers you can ride on top of, oncoming vans, a stumble-and-get-
+ * caught chase, a glide board that absorbs one crash, four timed power-ups and
+ * recipe cards to revive. (Internal ids like "board" and "keys" are kept so old
+ * saves and replays stay valid; the player-facing names live in the client.)
  *
  * Rules for this file: no DOM, no timers, no Math.random, no Date. Everything
  * is a function of (seed, loadout, input log), so a server can replay it

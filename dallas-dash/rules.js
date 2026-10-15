@@ -17,6 +17,7 @@
 
 import * as SIM from "./sim.js";
 import { generateCode } from "./coupon-code.js";
+import { ROUTES, SPOTS, routeIndex, sightingName } from "./routes.js";
 
 export const meta = { game: "Dallas Dash", minPlayers: 1, maxPlayers: 1 };
 
@@ -41,14 +42,13 @@ const PRICES = {
  */
 const TEST_GRANTS = true;
 
-/** Characters, unlocked by lifetime points (once unlocked, kept). */
+/** The crew: original characters, unlocked by lifetime points (once unlocked, kept). */
 const OUTFITS = [
-  { id: "classic", name: "Delivery rider", at: 0 },
-  { id: "tie", name: "Crew member", at: 5000 },
-  { id: "bucket", name: "Bucket hat", at: 25000 },
-  { id: "apron", name: "Kitchen chef", at: 60000 },
-  { id: "gold", name: "Golden bucket", at: 150000 },
+  { id: "dante", name: "Dante", role: "Skater courier", at: 0 },
+  { id: "maya", name: "Maya", role: "Street dancer", at: 0 },
+  { id: "r11", name: "R-11", role: "Delivery robot", at: 25000 },
 ];
+const OUTFIT_IDS = OUTFITS.map((o) => o.id);
 
 /* ── missions: sets of three; finishing a set raises the multiplier ──────── */
 
@@ -56,13 +56,13 @@ const MISSION_STATS = {
   coins: "Collect {n} drumsticks",
   jumps: "Jump {n} times",
   rolls: "Roll {n} times",
-  rides: "Run on {n} trailer roofs",
+  rides: "Run on {n} container roofs",
   powerups: "Grab {n} power-ups",
   pickups: "Collect {n} menu items",
   distance: "Run {n} m",
   score: "Score {n} in one run",
-  boardsUsed: "Use {n} hoverboards",
-  stores: "Pass {n} KFC stores",
+  boardsUsed: "Use {n} glide boards",
+  stores: "Pass {n} KFC restaurants",
 };
 // [stat, target, single-run?] — per set; later sets scale the targets up
 const MISSION_SETS = [
@@ -121,8 +121,9 @@ function blankAccount(playerId) {
     sightings: [],
     coupons: [],
     claimed: 0,
-    outfit: "classic",
-    outfits: ["classic"],
+    outfit: "dante",
+    outfits: ["dante", "maya"],
+    route: ROUTES[0].id,
     seed: (hash32(playerId) | 1) >>> 0,
     testCredits: 0,
     lastRun: null,
@@ -145,17 +146,42 @@ function withOutfits(acct) {
 export function setup(players) {
   const accounts = {};
   for (const id of players) accounts[id] = blankAccount(id);
-  return { v: 2, accounts };
+  return { v: 3, accounts };
 }
 
-/** Older saves (v1) had no wallet, missions or loadout: give them the defaults. */
+/** The Dallas-only build's ten landmarks, in its sighting order. */
+const V2_LANDMARKS = [
+  "Reunion Tower", "Margaret Hunt Hill Bridge", "Bank of America Plaza", "Fountain Place", "Omni Dallas",
+  "Winspear Opera House", "Old Red Museum", "Klyde Warren Park", "AT&T Discovery District", "Comerica Bank Tower",
+];
+
+/**
+ * Older saves: v1 had no wallet, missions or loadout; v2 had five outfits and
+ * one Dallas map. Both get the crew, a route and their sightings re-keyed.
+ */
 export function migrate(state) {
-  if (!state || state.v === 2) return state;
+  if (!state || state.v === 3) return state;
+  const names = [];
+  for (const r of ROUTES) for (const l of r.landmarks) names.push(l.name);
   const accounts = {};
   for (const [id, a] of Object.entries(state.accounts || {})) {
-    accounts[id] = { ...blankAccount(id), ...a, lifetime: a.lifetime || a.points || 0 };
+    const sightings = [];
+    for (const n of a.sightings || []) {
+      const key = names.indexOf(V2_LANDMARKS[n]);
+      if (key >= 0 && sightings.indexOf(key) < 0) sightings.push(key);
+    }
+    const base = blankAccount(id);
+    accounts[id] = withOutfits({
+      ...base,
+      ...a,
+      lifetime: a.lifetime || a.points || 0,
+      outfit: OUTFIT_IDS.indexOf(a.outfit) >= 0 ? a.outfit : base.outfit,
+      outfits: (a.outfits || []).filter((o) => OUTFIT_IDS.indexOf(o) >= 0),
+      route: base.route,
+      sightings,
+    });
   }
-  return { v: 2, accounts };
+  return { v: 3, accounts };
 }
 
 /* ── validation ──────────────────────────────────────────────────────────── */
@@ -242,6 +268,10 @@ export function validateAction(state, playerId, action) {
     return { ok: true };
   }
 
+  if (kind === "setRoute") {
+    return ROUTES.some((r) => r.id === action.route) ? { ok: true } : { ok: false, error: "unknown route" };
+  }
+
   if (kind === "setOutfit") {
     if (!action.outfit || acct.outfits.indexOf(action.outfit) < 0) {
       return { ok: false, error: "that character is still locked" };
@@ -291,8 +321,10 @@ export function applyAction(state, playerId, action) {
     acct.distance += replay.distance;
     acct.stores += replay.stores;
     if (replay.score > acct.bestRun) acct.bestRun = replay.score;
+    // landmarks are credited on the route the ledger says this run was on
+    const base = routeIndex(acct.route) * SPOTS;
     for (const n of replay.sightings) {
-      if (acct.sightings.indexOf(n) < 0) acct.sightings = [...acct.sightings, n];
+      if (acct.sightings.indexOf(base + n) < 0) acct.sightings = [...acct.sightings, base + n];
     }
     acct.seenRuns = [...acct.seenRuns, action.runId].slice(-SEEN_CAP);
     const setBefore = acct.missionSet;
@@ -342,6 +374,7 @@ export function applyAction(state, playerId, action) {
   }
 
   if (action.kind === "setOutfit") acct.outfit = action.outfit;
+  if (action.kind === "setRoute") acct.route = action.route;
 
   acct = withOutfits(acct);
   return { ...state, accounts: { ...state.accounts, [playerId]: acct } };
@@ -380,8 +413,16 @@ export function viewFor(state, playerId) {
     runs: acct.runs,
     distance: acct.distance,
     stores: acct.stores,
-    landmarks: acct.sightings.map((i) => SIM.LANDMARKS[i]),
-    landmarkTotal: SIM.LANDMARKS.length,
+    landmarks: acct.sightings.map(sightingName),
+    landmarkTotal: ROUTES.length * SPOTS,
+    route: acct.route,
+    routeList: ROUTES.map((r) => ({
+      id: r.id,
+      name: r.name,
+      region: r.region,
+      blurb: r.blurb,
+      spotted: acct.sightings.filter((k) => Math.floor(k / SPOTS) === routeIndex(r.id)).length,
+    })),
     outfit: acct.outfit,
     outfits: acct.outfits,
     outfitList: OUTFITS,

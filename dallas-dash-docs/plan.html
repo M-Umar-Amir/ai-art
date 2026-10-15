@@ -55,22 +55,22 @@
 <section class="first cover">
   <div>
     <div class="stripes"></div>
-    <div class="kicker">Epical Studio · for KFC · 9 October 2026</div>
+    <div class="kicker">Epical Studio · for KFC · updated 15 October 2026</div>
     <h1>Dallas Dash</h1>
     <h2 style="color:var(--ink);font-size:22pt;margin-top:4pt">Coupons, game upgrade &amp; mobile pathway</h2>
-    <p class="lede">How a coupon earned in the game becomes a discount in the KFC ordering app with one database, single use, and a unique code every time. What we rebuilt in the game after studying Subway Surfers, and the step-by-step route to iOS and Android with React Native, Expo and EAS from a Windows PC.</p>
+    <p class="lede">How a coupon earned in the game becomes a discount in the KFC ordering app with one database, single use, and a unique code every time. The game itself: four city maps (Downtown, East and West Dallas, Toronto), an original three-character crew, KFC branding placed in the city rather than on the course, and the step-by-step route to iOS and Android with React Native, Expo and EAS from a Windows PC.</p>
     <ol class="toc">
       <li><b>Summary</b>: what was built and what's next</li>
       <li><b>Game → app coupons</b>: one database, validation, verification, uniqueness</li>
-      <li><b>Subway Surfers study</b>: feature by feature, and what Dallas Dash now does</li>
+      <li><b>The game</b>: maps, crew, branding, genre features and originality</li>
       <li><b>Mobile pathway</b>: React Native + Expo/EAS on Windows, phase by phase</li>
     </ol>
   </div>
   <div class="shots">
     <img src="img/phone-home.jpg" alt="Home screen" />
-    <img src="img/phone-run2.jpg" alt="Running" />
-    <img src="img/scene-roof.jpg" alt="On a trailer roof" />
-    <img src="img/phone-revive.jpg" alt="Revive prompt" />
+    <img src="img/phone-routes.jpg" alt="Pick your city" />
+    <img src="img/route-toronto.jpg" alt="Running in Toronto" />
+    <img src="img/crew-r11.jpg" alt="R-11, the robot runner" />
   </div>
   <div class="meta">Prototype at epical.art/dallas-dash (not indexed). Source in the repo: <code>dallas-dash/</code> (game), <code>coupon-service/</code> (backend). KFC marks belong to KFC.</div>
 </section>
@@ -82,9 +82,11 @@
   <table>
     <tr><th style="width:28%">Area</th><th>What changed</th><th style="width:16%">Status</th></tr>
     <tr><td><b>Coupon backend</b></td><td>A coupon service with its Postgres schema: issue, validate, reserve, redeem, release, restore and expiry. Codes are random, single-use, owner-bound and stored hashed and encrypted. 7 automated tests run against a real Postgres engine, including two checkouts racing for the same code.</td><td><span class="tag built">built &amp; tested</span></td></tr>
-    <tr><td><b>Game mechanics</b></td><td>The run is now endless and faster: speed climbs from 20 to 46 (it was 14 to 30) and the run no longer stops at 44 seconds. New: rideable trailers with ramps, oncoming vans, stumble and the inspector chase, hoverboard, 4 power-ups with 5 upgrade levels, keys to revive, a drumstick currency, a shop, and missions that raise a score multiplier.</td><td><span class="tag built">built &amp; tested</span></td></tr>
-    <tr><td><b>UI / UX</b></td><td>Subway-Surfers-style flow: a tap-to-run home screen, side menu (Missions, Shop, Crew, Coupon), a minimal in-run HUD with power-up timers, a "Save me!" revive prompt with a countdown, and results with mission progress. Swipes fire mid-gesture, double-tap uses the hoverboard, and the screen shakes and vibrates on hits.</td><td><span class="tag built">built</span></td></tr>
-    <tr><td><b>KFC branding</b></td><td>KFC red #E4002B with red-and-white bucket stripes, the Colonel logo on the home screen and on the rotating bucket sign, KFC wordmarks on stores, vans and trailers, menu pickups (Original Recipe Bucket, Famous Bowl, Chicken Sandwich and more) and a KFC crew uniform. Page set to noindex.</td><td><span class="tag next">swap in brand kit</span></td></tr>
+    <tr><td><b>Game mechanics</b></td><td>The run is endless and fast: speed climbs from 20 to 46 (it was 14 to 30). Freight containers with ramps to run along, oncoming vans, a stumble-and-chase by a parking officer, a glide board that absorbs one crash, 4 power-ups with 5 upgrade levels, secret recipe cards to revive, a drumstick currency, a shop, and missions that raise a score multiplier.</td><td><span class="tag built">built &amp; tested</span></td></tr>
+    <tr><td><b>Maps</b> <span class="small">(new)</span></td><td>Four cities to pick from: <b>Downtown Dallas</b>, <b>East Dallas</b>, <b>West Dallas</b> and <b>Toronto</b>. Each has five named districts, its own sky, skyline, flags, trees, street signs and 10 real landmarks: 40 to collect. The course and scoring are identical on every map, so verification is unaffected.</td><td><span class="tag built">built &amp; tested</span></td></tr>
+    <tr><td><b>Crew</b> <span class="small">(new)</span></td><td>Three original characters in KFC-branded kit: <b>Dante</b> (skater courier) and <b>Maya</b> (street dancer), both free, and <b>R-11</b>, a delivery robot modelled on today's humanoid robots, unlocked at 25,000 lifetime points.</td><td><span class="tag built">built</span></td></tr>
+    <tr><td><b>UI / UX</b></td><td>A tap-to-run home screen with a city chip above the play button, side menu (Missions, Shop, Map, Crew, Coupon), a minimal in-run HUD with power-up timers, district and landmark callouts, a "Save me!" revive prompt with a countdown, and results with mission progress. Swipes fire mid-gesture, double-tap uses the glide board, and the screen shakes and vibrates on hits.</td><td><span class="tag built">built</span></td></tr>
+    <tr><td><b>KFC branding</b></td><td>KFC appears <i>in the city, not on the course</i>: KFC restaurants (with the rotating bucket sign) between ordinary buildings, rooftop billboards, and construction hoardings covered in KFC posters. Pickups are menu items (Original Recipe Bucket, Famous Bowl, Chicken Sandwich and more), and the crew wear KFC kit with the Colonel roundel on the back. Obstacles, containers and vans carry no brand. Page set to noindex.</td><td><span class="tag next">swap in brand kit</span></td></tr>
     <tr><td><b>Anti-cheat core</b></td><td>The simulation is now a single shared module. The server replays the same file the phone draws with, so the two can't drift apart. A lookahead bot checks that every course can be beaten.</td><td><span class="tag built">built &amp; tested</span></td></tr>
     <tr><td><b>Mobile apps</b></td><td>The pathway and stack choice are in section 4. The game logic files carry over to React Native unchanged.</td><td><span class="tag road">plan</span></td></tr>
   </table>
@@ -129,7 +131,7 @@
   <ol>
     <li>The server hands each account the seed for its next course. A run on any other seed is refused.</li>
     <li>The phone plays the course and records only the inputs (tick number + swipe), never a score.</li>
-    <li>The game API replays the input log through the same <code>sim.js</code> with the account's own loadout from the database (multiplier, boards, keys, upgrade levels), and credits only the score the replay produces. A changed score, a reused <code>run_id</code> or more than 6,000 inputs is rejected.</li>
+    <li>The game API replays the input log through the same <code>sim.js</code> with the account's own loadout from the database (multiplier, boards, recipe cards, upgrade levels), and credits only the score the replay produces. A changed score, a reused <code>run_id</code> or more than 6,000 inputs is rejected.</li>
     <li>Points move only through <code>game.point_ledger</code> (+run, −coupon, +refund), so every balance can be audited back to the runs that earned it.</li>
   </ol>
 
@@ -203,30 +205,73 @@ POST /coupons/restore    order svc    { orderId }   restaurant cancelled</pre>
 
 <section>
   <div class="stripes"></div><br />
-  <h2>3 · Subway Surfers study</h2>
-  <p>Subway Surfers is the reference endless runner: three lanes, swipe to dodge, jump and roll, trains to run on, and the inspector and his dog chasing you. Around that loop sit power-ups, a hoverboard shield, coins as currency, keys to revive, missions that raise a score multiplier, and rotating "World Tour" city themes. We mapped each feature to Dallas Dash. A few numbers deliberately differ, because here points turn into real money off food.</p>
+  <h2>3 · The game</h2>
+  <h3 style="margin-top:0">Four cities</h3>
+  <p>Players pick a city from the Map button or the chip above <i>Tap to run</i>. The course, speed and points are the same on every map; only the world changes, so a run is verified the same way wherever it was played.</p>
   <table>
-    <tr><th style="width:21%">Subway Surfers</th><th style="width:35%">How it works there</th><th>Dallas Dash</th></tr>
-    <tr><td>Endless run, rising speed</td><td>No finish line; speed ramps up until you crash.</td><td><span class="tag built">built</span> Endless, with a 10-minute cap to keep server replays cheap. Speed goes from 20 to 46, the music tempo and speed lines rise with it, and the difficulty of patterns ramps up over the first ~40 patterns.</td></tr>
-    <tr><td>Lanes, jump, roll</td><td>Swipe left/right/up/down; rolling in the air drops you fast.</td><td><span class="tag built">built</span> Swipes fire mid-gesture rather than on release, and you can roll mid-air to dive. Keyboard and gamepad also work.</td></tr>
-    <tr><td>Trains</td><td>Parked trains to dodge, trains with ramps to run on top of, moving trains coming at you.</td><td><span class="tag built">built</span> KFC trailers with ramps (run along the roof and collect drumsticks there), parked KFC vans you can land on, and oncoming vans. Oncoming vans only spawn where the meeting point is clear, so they are always escapable.</td></tr>
-    <tr><td>Stumble and the inspector</td><td>Clipping something makes you stumble and the inspector closes in. Stumble again before he backs off and you're caught. A head-on crash ends the run.</td><td><span class="tag built">built</span> The health inspector, with clipboard. Small obstacles and side bumps cause a stumble, and a second within 5 s means caught. Barriers, gates and van fronts cause a crash. The screen edges glow red while he's close.</td></tr>
-    <tr><td>Hoverboard</td><td>Double-tap; lasts 30 s and survives one crash.</td><td><span class="tag built">built</span> Same: 30 s, breaks on the first crash and clears the obstacles just ahead. Bought in the shop for 300 drumsticks; 2 to start.</td></tr>
-    <tr><td>Power-ups</td><td>Coin magnet, jetpack, super sneakers, 2× multiplier, pogo stick. The first four can be upgraded, each level adding 5 s.</td><td><span class="tag built">built</span> Drumstick magnet, jetpack (flies above the traffic over a trail of sky drumsticks), super sneakers (jump onto vans and trailers), 2× score. 5 upgrade levels at +3 s each. <span class="tag road">roadmap</span> Pogo stick.</td></tr>
-    <tr><td>Coins</td><td>Collected currency for upgrades, boards and characters.</td><td><span class="tag built">built</span> Drumsticks, laid in lines and in arcs over obstacles: the arc itself shows you where to jump.</td></tr>
-    <tr><td>Keys and "Save me"</td><td>Spend keys to continue after a crash; the cost doubles each time in a run.</td><td><span class="tag built">built</span> A "Save me!" prompt with a 4-second ring. Costs 1, 2, 4… keys. Keys come from mission sets or cost 1,200 drumsticks. Revives are part of the replayed log, so they are verified too.</td></tr>
-    <tr><td>Missions → multiplier</td><td>Sets of 3 missions; each set raises a permanent score multiplier (up to x30).</td><td><span class="tag built">built</span> 5 rotating sets that get harder each cycle. Each set gives +1 multiplier, +1 key and +250 drumsticks. <b>Capped at x6</b>, because the multiplier speeds up coupon earning.</td></tr>
-    <tr><td>Characters and boards</td><td>Unlockable characters and boards, many seasonal.</td><td><span class="tag built">built</span> 5 KFC crew outfits unlocked by lifetime points. <span class="tag road">roadmap</span> More boards and seasonal crew.</td></tr>
-    <tr><td>Daily challenges and hunts</td><td>Daily word hunt / login rewards; weekly hunts.</td><td><span class="tag road">roadmap</span> "Daily Bucket": spell K-F-C from letters in the run for a daily drumstick bonus. A 7-day streak calendar.</td></tr>
-    <tr><td>Mystery boxes</td><td>Random rewards from missions and hunts.</td><td><span class="tag road">roadmap</span> Only with clearly published odds, and never containing coupon points.</td></tr>
-    <tr><td>World Tour</td><td>Every few weeks a new city theme with its own visuals.</td><td><span class="tag road">roadmap</span> The engine already places named landmarks (10 real Dallas buildings). Next themes could be Houston, Austin or San Antonio for regional KFC campaigns.</td></tr>
-    <tr><td>Leaderboards</td><td>Friends and weekly top scores.</td><td><span class="tag road">roadmap</span> Weekly leaderboard per city. Server-verified scores make it trustworthy.</td></tr>
+    <tr><th style="width:17%">Map</th><th style="width:38%">Districts (announced on a freeway-style sign)</th><th>Look and landmarks</th></tr>
+    <tr><td><b>Downtown Dallas</b></td><td>Main Street, Arts District, West End, Victory Park, Farmers Market</td><td>Golden-hour sky, glass towers, DART rails. Reunion Tower, Bank of America Plaza, Fountain Place, Omni Dallas, Old Red Museum, Comerica Bank Tower, AT&amp;T Discovery District, Dallas City Hall, Winspear Opera House, Klyde Warren Park.</td></tr>
+    <tr><td><b>East Dallas</b></td><td>Deep Ellum, Fair Park, Lower Greenville, Lakewood, White Rock</td><td>Purple dusk, murals, art-deco fronts. Texas Star Ferris wheel, Hall of State, Cotton Bowl, Fair Park Esplanade, the Traveling Man statue, Lakewood and Granada theaters, White Rock Lake, Dallas Arboretum, Swiss Avenue mansions.</td></tr>
+    <tr><td><b>West Dallas</b></td><td>Trinity Groves, Design District, Bishop Arts, Oak Cliff, Sylvan Thirty</td><td>Warehouses and galleries. Margaret Hunt Hill and Ronald Kirk bridges, Trinity Groves, the Bishop Arts gateway, Texas Theatre, Kessler Theater, Belmont Hotel, Design District galleries, the Dallas Zoo giraffe, Trinity Overlook.</td></tr>
+    <tr><td><b>Toronto</b></td><td>Financial District, Queen West, Kensington Market, Distillery District, Harbourfront</td><td>Crisp autumn sky, maples, Canadian flags, streetcar wires, Victorian row houses, Ontario highway signs. CN Tower, Rogers Centre, City Hall with the TORONTO sign, Gooderham Building, Union Station, Royal Ontario Museum, Casa Loma, Distillery District, Kensington Market, St. Lawrence Market.</td></tr>
   </table>
   <div class="shots">
-    <figure><img src="img/scene-roof.jpg" alt="" /><figcaption>Running on a trailer roof</figcaption></figure>
-    <figure><img src="img/scene-jet.jpg" alt="" /><figcaption>Jetpack over the traffic</figcaption></figure>
-    <figure><img src="img/scene-power.jpg" alt="" /><figcaption>Hoverboard + sneakers power-up</figcaption></figure>
-    <figure><img src="img/scene-chase.jpg" alt="" /><figcaption>The inspector after a stumble</figcaption></figure>
+    <figure><img src="img/route-downtown.jpg" alt="" /><figcaption>Downtown Dallas</figcaption></figure>
+    <figure><img src="img/route-east.jpg" alt="" /><figcaption>East Dallas at dusk</figcaption></figure>
+    <figure><img src="img/route-west.jpg" alt="" /><figcaption>West Dallas</figcaption></figure>
+    <figure><img src="img/route-toronto.jpg" alt="" /><figcaption>Toronto</figcaption></figure>
+  </div>
+
+  <h3>Branding: in the world, not on the course</h3>
+  <ul>
+    <li><b>KFC restaurants</b> appear between ordinary buildings, with the red-and-white striped roof, the wordmark and the rotating bucket on its pole. The "pass N KFC restaurants" mission counts them.</li>
+    <li><b>Billboards and hoardings.</b> Rooftop billboards face the runner, so they read as you run at them. Construction sites are fenced with plywood hoardings covered in KFC posters ("Finger Lickin' Good", "Original Recipe", "Grab a Bucket", "Famous Bowls").</li>
+    <li><b>Menu items</b> are the collectibles: drumsticks are the currency, and bonus pickups are named after real menu items.</li>
+    <li><b>The crew kit</b> carries the Colonel roundel on the back, the side the camera sees all run.</li>
+    <li><b>No brand on obstacles.</b> Cones, barriers, traffic drums, height bars, scaffolds, plain fleet vans and unmarked freight containers keep the hazards neutral. A crash is never "into KFC".</li>
+  </ul>
+
+  <h3>The crew</h3>
+  <div class="grid2">
+    <ul>
+      <li><b>Dante</b> (free): skater courier. Backwards red cap, red hoodie with white sleeve stripes, joggers, and an insulated delivery bag with the roundel.</li>
+      <li><b>Maya</b> (free): street dancer. Red-and-white varsity bomber, red headphones, a high puff that bounces as she runs, and a mini backpack with the roundel.</li>
+      <li><b>R-11</b> (25,000 lifetime points): a delivery robot modelled on today's humanoid robots, with a white shell, graphite joints, a glowing visor, red shoulder plates and a battery pack on its back.</li>
+    </ul>
+    <div class="shots" style="margin:0">
+      <figure style="width:24mm"><img src="img/crew-dante.jpg" alt="" /><figcaption>Dante</figcaption></figure>
+      <figure style="width:24mm"><img src="img/crew-maya.jpg" alt="" /><figcaption>Maya</figcaption></figure>
+      <figure style="width:24mm"><img src="img/crew-r11.jpg" alt="" /><figcaption>R-11</figcaption></figure>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="stripes"></div><br />
+  <h3 style="margin-top:0">Genre features and what Dallas Dash does</h3>
+  <p>Dallas Dash is a three-lane endless runner, a genre with well-established conventions. The table lists those conventions and how this game implements them. A few numbers deliberately differ, because here points turn into real money off food.</p>
+  <table>
+    <tr><th style="width:21%">Genre convention</th><th>Dallas Dash</th></tr>
+    <tr><td>Endless run, rising speed</td><td><span class="tag built">built</span> Endless, with a 10-minute cap to keep server replays cheap. Speed goes from 20 to 46, the music tempo and speed lines rise with it, and the difficulty of patterns ramps up over the first ~40 patterns.</td></tr>
+    <tr><td>Lanes, jump, roll</td><td><span class="tag built">built</span> Swipes fire mid-gesture rather than on release, and you can roll mid-air to dive. Keyboard and gamepad also work.</td></tr>
+    <tr><td>Vehicles to dodge and ride</td><td><span class="tag built">built</span> Freight containers on flatbeds with ramps (run along the roof and collect drumsticks there), parked vans you can land on, and oncoming vans. Oncoming vans only spawn where the meeting point is clear, so they are always escapable.</td></tr>
+    <tr><td>Stumble and a chaser</td><td><span class="tag built">built</span> A parking officer in a hi-vis vest with a ticket book. Small obstacles and side bumps cause a stumble, and a second within 5 s means caught. Barriers, gates and van fronts cause a crash. The screen edges glow red while he's close.</td></tr>
+    <tr><td>Shield board</td><td><span class="tag built">built</span> The <b>glide board</b>: double-tap, 30 s, breaks on the first crash and clears the obstacles just ahead. 300 drumsticks in the shop; 2 to start.</td></tr>
+    <tr><td>Power-ups</td><td><span class="tag built">built</span> Drumstick magnet, jetpack (flies above the traffic over a trail of sky drumsticks), <b>spring kicks</b> (jump onto vans and containers), 2× score. 5 upgrade levels at +3 s each.</td></tr>
+    <tr><td>Currency</td><td><span class="tag built">built</span> Drumsticks, laid in lines and in arcs over obstacles: the arc itself shows you where to jump.</td></tr>
+    <tr><td>Continue after a crash</td><td><span class="tag built">built</span> A "Save me!" prompt with a 4-second ring, paid in <b>secret recipe cards</b> (1, 2, 4… per run). Cards come from mission sets or cost 1,200 drumsticks. Revives are part of the replayed log, so they are verified too.</td></tr>
+    <tr><td>Missions → multiplier</td><td><span class="tag built">built</span> 5 rotating sets that get harder each cycle. Each set gives +1 multiplier, +1 recipe card and +250 drumsticks. <b>Capped at x6</b>, because the multiplier speeds up coupon earning.</td></tr>
+    <tr><td>Characters and cities</td><td><span class="tag built">built</span> 3 crew members and 4 cities with 40 landmarks to collect. <span class="tag road">roadmap</span> Seasonal crew outfits and more cities (Houston, Austin, San Antonio, other Canadian markets) for regional KFC campaigns.</td></tr>
+    <tr><td>Daily challenges</td><td><span class="tag road">roadmap</span> "Daily Bucket": spell K-F-C from letters in the run for a daily drumstick bonus. A 7-day streak calendar.</td></tr>
+    <tr><td>Random reward boxes</td><td><span class="tag road">roadmap</span> Only with clearly published odds, and never containing coupon points.</td></tr>
+    <tr><td>Leaderboards</td><td><span class="tag road">roadmap</span> Weekly leaderboard per city. Server-verified scores make it trustworthy.</td></tr>
+  </table>
+  <div class="callout"><b>Originality and IP.</b> Game mechanics such as lanes, swipes, ride-on vehicles, a chaser, revive tokens and timed power-ups are common to the genre and are not protected by copyright. What is protectable is expression: characters, art, names, text and sound. All of that in Dallas Dash is original. The characters, names (glide board, spring kicks, recipe cards, parking officer), code-drawn art and synthesised audio were made for this game, and no third-party assets are used except KFC's own marks. We will not use other games' names, characters, logos, sounds or UI art, or market the game by comparison to another title. Real landmarks appear as simplified silhouettes and are named factually. A few carry sponsor names (e.g. Rogers Centre, AT&amp;T Discovery District), so KFC's counsel should confirm before any landmark is used in paid advertising. This is a practical summary, not legal advice.</div>
+  <div class="shots">
+    <figure><img src="img/scene-roof.jpg" alt="" /><figcaption>Running on a container roof</figcaption></figure>
+    <figure><img src="img/scene-jet.jpg" alt="" /><figcaption>Jetpack over Toronto traffic</figcaption></figure>
+    <figure><img src="img/scene-power.jpg" alt="" /><figcaption>Glide board + spring kicks</figcaption></figure>
+    <figure><img src="img/scene-chase.jpg" alt="" /><figcaption>The parking officer after a stumble</figcaption></figure>
   </div>
 </section>
 
@@ -235,8 +280,8 @@ POST /coupons/restore    order svc    { orderId }   restaurant cancelled</pre>
   <h3 style="margin-top:0">UI/UX changes</h3>
   <div class="grid2">
     <ul>
-      <li><b>Home first, not a form.</b> Tap-to-run fills the bottom of the screen, the runner jogs in the scene, the menu sits on the left and currencies on the top right, as in Subway Surfers. The coupon progress bar sits right above the play button, so the reward is always visible.</li>
-      <li><b>Minimal HUD.</b> Score + multiplier, drumsticks, pause, power-up timers that shrink, and a hoverboard button with its count. The old stat rows and the long explanatory copy were removed from the run screen.</li>
+      <li><b>Home first, not a form.</b> Tap-to-run fills the bottom of the screen, the runner jogs in the scene, the menu sits on the left and currencies on the top right. The current city sits just above the play button, one tap from the map picker, and the coupon progress bar sits right above the play button, so the reward is always visible.</li>
+      <li><b>Minimal HUD.</b> Score + multiplier, drumsticks, pause, power-up timers that shrink, and a glide-board button with its count. Freeway-style signs announce each district and a pin callout marks each landmark. The old stat rows and the long explanatory copy were removed from the run screen.</li>
       <li><b>Feel.</b> Faster pace, swipes that fire mid-gesture, screen shake, a white flash and vibration on crashes, a red edge glow during the chase, and pickup toasts named after real menu items.</li>
     </ul>
     <ul>
@@ -248,14 +293,14 @@ POST /coupons/restore    order svc    { orderId }   restaurant cancelled</pre>
   <div class="shots">
     <figure><img src="img/phone-run2.jpg" alt="" /><figcaption>In-run HUD</figcaption></figure>
     <figure><img src="img/phone-results.jpg" alt="" /><figcaption>Results + missions</figcaption></figure>
-    <figure><img src="img/phone-shop.jpg" alt="" /><figcaption>Shop</figcaption></figure>
+    <figure><img src="img/phone-chars.jpg" alt="" /><figcaption>Crew</figcaption></figure>
     <figure><img src="img/phone-rewards.jpg" alt="" /><figcaption>Coupon screen</figcaption></figure>
   </div>
   <h3>Quality checks run</h3>
   <ul>
     <li><b>Fairness bot:</b> a lookahead bot played 6 different courses for 3 minutes each (to top speed, about 6.6 km) without crashing or being caught, and an earlier 2-minute pass over 8 courses had zero stumbles. If a perfect player can survive, every pattern is escapable. Each run's full input log replayed to the identical score.</li>
-    <li><b>Rules tests (5):</b> verified runs are credited; tampered, replayed and out-of-date runs are refused; revives spend only the keys the account owns; shop prices; coupon threshold, uniqueness and limit; old saves migrate.</li>
-    <li><b>Browser QA</b> on a phone and a desktop viewport: full run → crash → revive prompt → results → "✓ verified", with zero console errors. Visual checks of every prop. These found and fixed two renderer bugs: long trailers vanished as you ran along them (no near-plane clipping), and the bridge deck was drawn as a wall across the road (a bug in the original build).</li>
+    <li><b>Rules tests (8):</b> verified runs are credited; tampered, replayed and out-of-date runs are refused; revives spend only the recipe cards the account owns; shop prices; coupon threshold, uniqueness and limit; city choice, with landmarks credited to the city the ledger says the run was on; crew unlocks; old saves from both earlier builds migrate (old outfits fall back to Dante, Dallas landmark sightings carry over).</li>
+    <li><b>Browser QA</b> on a phone and a desktop viewport: full run → crash → revive prompt → results → "✓ verified", with zero console errors. Visual checks of every prop, every map, all three characters and all 40 landmarks. These found and fixed renderer bugs: long vehicles vanished as you ran along them (no near-plane clipping), the bridge deck was drawn as a wall across the road, and landmarks stood so far back that street buildings hid all but the tallest (they now sit across a cleared plaza).</li>
   </ul>
 </section>
 
@@ -309,7 +354,7 @@ eas submit --platform android     # to Play Console internal testing
 eas update --branch production    # over-the-air JS fixes later</pre></li>
     <li><b>Testing without a Mac:</b> real iPhones via Expo Go during development, then TestFlight builds. Expo's cloud-hosted iOS simulator (EAS Simulator) was in limited preview as of September 2026.</li>
     <li><b>Backend:</b> deploy the game API and the coupon service (section 2), and point the app at it. Sign in with the KFC app's identity provider. Add App Attest / Play Integrity to run submissions.</li>
-    <li><b>Store readiness:</b> privacy policy and data-safety forms, age rating, reward terms in the app, Sign in with Apple if any social login is offered, and haptics/sound settings. Keep drumsticks and keys earnable only: selling them for money brings in Apple/Google in-app purchase rules.</li>
+    <li><b>Store readiness:</b> privacy policy and data-safety forms, age rating, reward terms in the app, Sign in with Apple if any social login is offered, and haptics/sound settings. Keep drumsticks and recipe cards earnable only: selling them for money brings in Apple/Google in-app purchase rules.</li>
   </ol>
   <h3>Phases</h3>
   <table>
@@ -323,7 +368,6 @@ eas update --branch production    # over-the-air JS fixes later</pre></li>
   <p class="small">Estimates assume one experienced React Native developer plus our team, and a responsive KFC ordering-backend owner. Running costs at launch are small: Apple $99/year, Google $25 once, EAS and Neon free or entry tiers (check current pricing), and Vercel hosting for the APIs.</p>
   <h3>Sources</h3>
   <ul class="small">
-    <li>Subway Surfers power-ups, hoverboard and upgrade levels: Subway Surfers Wiki, subwaysurf.fandom.com/wiki/Power-Ups</li>
     <li>Expo SDK 57 / React Native 0.86: expo.dev/changelog/sdk-57</li>
     <li>Building iOS from Windows with EAS and EAS Simulator: expo.dev/blog/build-ios-apps-on-windows-with-cloud-simulators</li>
     <li>KFC logo reference: Wikimedia Commons, KFC_logo.svg (to be replaced with the official brand kit)</li>
