@@ -331,8 +331,9 @@
       .char.on { border-color: var(--red); }
       .char.locked { opacity: 0.55; }
       .char .av { font-size: 2.2rem; height: 7.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-      .char .av img { height: 100%; width: auto; max-width: 100%; object-fit: contain; display: block; }
+      .char .av img { height: 7.5rem; width: auto; max-width: 100%; object-fit: contain; display: block; }
       .char.route .av { height: 4.5rem; justify-content: flex-start; }
+      .char.route .av img { height: 4.5rem; }
       .album { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
       .album .lm { margin: 0; background: #fff; border-radius: 0.8rem; padding: 0.5rem; text-align: center; }
       .album .lm img { height: 5.5rem; max-width: 100%; object-fit: contain; filter: grayscale(1) opacity(0.35); }
@@ -552,12 +553,18 @@
       .timer { background: rgba(18,20,26,.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.14); }
       #spot i { color: #fff; }
       #spot i svg { width: 1.2rem; height: 1.2rem; }
-      #spot.art i { width: 4.2rem; height: 4.2rem; border-radius: 0.8rem; background: #fff; }
-      #spot.art i img { max-width: 92%; max-height: 92%; object-fit: contain; }
-      #spot.art { border-radius: 1.1rem; }
+      /* fixed box, image sized to it (percent max sizes inside a grid cell are ignored by some WebViews) */
+      #spot.art i { width: 3.6rem; height: 3.6rem; min-width: 3.6rem; border-radius: 0.7rem; background: #fff; overflow: hidden; display: block; }
+      #spot.art i img { display: block; width: 3.6rem; height: 3.6rem; padding: 0.2rem; box-sizing: border-box; object-fit: contain; }
+      #spot.art { border-radius: 1.1rem; max-width: min(19rem, calc(100vw - 1.6rem)); }
+      #spot span { display: block; overflow: hidden; text-overflow: ellipsis; }
       .big-ic { width: 2.6rem; height: 2.6rem; }
       @media (max-height: 640px) { #picker .who b { font-size: 1.7rem; } #btnPlay { font-size: 2rem; padding: 0.75rem; } #homeSide { top: 46%; } }
       @media (min-width: 900px) { #playWrap { left: auto; right: 4vw; transform: none; bottom: calc(3rem + env(safe-area-inset-bottom)); } }
+      /* phones: solid panels instead of backdrop blur over the canvas */
+      .lite *, .lite *::before, .lite *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+      .lite .cur, .lite .scorecard, .lite .timer, .lite .progress, .lite #cities button { background: rgba(18, 20, 26, 0.78); }
+      .lite .sidebtn, .lite #btnBoard { background: rgba(255, 255, 255, 0.97); }
       @media (prefers-reduced-motion: reduce) {
         #btnPlay, #btnPlay::after, #chaseWarn.on, #hint .k b, .timer.low, #countdown.tick { animation: none; }
         #toast.pop { animation-duration: 1ms; }

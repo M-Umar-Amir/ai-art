@@ -44,11 +44,20 @@ const TOKEN = "recipe card";
 const q = (id) => document.getElementById(id);
 const show = (el) => el.classList.remove("hidden");
 const hide = (el) => el.classList.add("hidden");
-const fmt = (n) => Number(n || 0).toLocaleString("en-US");
+// one shared formatter: toLocaleString builds a new one per call, and the HUD formats every frame
+const NUM = new Intl.NumberFormat("en-US");
+const fmt = (n) => NUM.format(Number(n || 0));
 const STEP_MS = 1000 / 60;
 
 const canvas = q("view");
+// phones: no backdrop blur over the live 3D view (the WebView re-blurs it every frame)
+if (window.DASH_APP || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)) document.documentElement.classList.add("lite");
 const renderer = createRenderer(canvas);
+if (new URLSearchParams(location.search).has("debug")) {
+  // QA scripts
+  window.__renderer = renderer;
+  window.__showSpot = (lm) => showSpot(lm);
+}
 
 const TIPS = [
   "Swipe up to jump, down to roll — roll in mid-air to dive.",
@@ -321,10 +330,10 @@ function jolt(flash) {
   if (navigator.vibrate) navigator.vibrate(flash ? 120 : 40);
 }
 
+/** Restart a CSS animation without forcing a synchronous layout (costly mid-run on phones). */
 function flashClass(el, cls) {
   el.classList.remove(cls);
-  void el.offsetWidth;
-  el.classList.add(cls);
+  requestAnimationFrame(() => el.classList.add(cls));
 }
 
 function showDistrict(name) {

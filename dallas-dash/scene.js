@@ -31,11 +31,13 @@ export const CAM = { h: 3.1, back: 6.4, lookY: 0.8, lookAhead: 9, cy: 0.6, focal
 
 export function createRenderer(canvas) {
   const dpr = window.devicePixelRatio || 1;
-  const gl = new THREE.WebGLRenderer({ canvas, antialias: dpr < 1.5, powerPreference: "high-performance", alpha: false });
+  // MSAA is close to free on phone (tile-based) GPUs and keeps the toon outlines clean
+  const gl = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: "high-performance", alpha: false });
   gl.outputColorSpace = THREE.SRGBColorSpace;
   gl.toneMapping = THREE.ACESFilmicToneMapping;
   gl.toneMappingExposure = 1.05;
-  gl.setPixelRatio(Math.min(dpr, 1.6));
+  const phone = Boolean(window.DASH_APP) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
+  gl.setPixelRatio(Math.min(dpr, phone ? 1.5 : 1.6));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.3, 420);
   const hemi = new THREE.HemisphereLight(0xdcecff, 0x8f8070, 1.25);
@@ -96,18 +98,7 @@ export function createRenderer(canvas) {
       course.prewarm();
       runnerFor("dante");
       city.setRoute(routeById(null));
-      // three compiles only what's visible: show everything for the compile
-      const hidden = [];
-      scene.traverse((o) => {
-        if (!o.visible) {
-          hidden.push(o);
-          o.visible = true;
-        }
-      });
-      const done = () => {
-        for (const o of hidden) o.visible = false;
-      };
-      return (gl.compileAsync ? gl.compileAsync(scene, camera) : Promise.resolve(gl.compile(scene, camera))).then(done, done);
+      return warm();
     })
     .then(() => {
       state.ready = true;
@@ -117,6 +108,33 @@ export function createRenderer(canvas) {
       state.error = e;
       console.error(e);
     });
+
+  /**
+   * Compile every shader and upload every texture now, so nothing new stalls
+   * a frame mid-run. three compiles only what's visible, so hidden things are
+   * shown just while the compile gathers them (synchronously).
+   */
+  function warm() {
+    const hidden = [];
+    scene.traverse((o) => {
+      if (!o.visible) {
+        hidden.push(o);
+        o.visible = true;
+      }
+    });
+    const maps = new Set();
+    scene.traverse((o) => {
+      for (const m of [].concat(o.material || [])) for (const k of ["map", "gradientMap", "normalMap", "bumpMap"]) if (m[k]) maps.add(m[k]);
+    });
+    let p;
+    try {
+      p = gl.compileAsync ? gl.compileAsync(scene, camera) : Promise.resolve(gl.compile(scene, camera));
+    } finally {
+      for (const o of hidden) o.visible = false;
+    }
+    for (const t of maps) gl.initTexture(t);
+    return p.catch(() => {});
+  }
 
   function runnerFor(id) {
     let r = runners.get(id);
@@ -268,22 +286,36 @@ export function createRenderer(canvas) {
   }
 
   // adaptive resolution: phones vary wildly, so hold the frame rate by
-  // trading pixels — down a step when frames run long, back up with headroom
-  const maxRatio = Math.min(dpr, 1.6);
+  // trading pixels. Each change reallocates the framebuffer (a visible
+  // hitch), so it only judges steady running — never the first seconds of a
+  // run, when shaders and new streets arrive — changes rarely, and never goes
+  // below 1x: below that the picture turns to mush.
+  const maxRatio = Math.min(dpr, phone ? 1.5 : 1.6);
+  const minRatio = Math.min(1, maxRatio);
   let ratio = maxRatio;
   let frameEma = 16.7;
   let lastAdjust = 0;
-  function adapt(dtMs, now) {
-    frameEma += (Math.min(100, dtMs) - frameEma) * 0.05;
-    if (now - lastAdjust < 1500) return;
+  let steadySince = 0;
+  function adapt(dtMs, now, steady) {
+    if (!steady) {
+      steadySince = 0;
+      return;
+    }
+    if (!steadySince) {
+      steadySince = now;
+      frameEma = 16.7;
+    }
+    frameEma += (Math.min(60, dtMs) - frameEma) * 0.03;
+    if (now - steadySince < 3500 || now - lastAdjust < 5000) return;
     let next = ratio;
-    if (frameEma > 20.5 && ratio > 0.75) next = Math.max(0.75, ratio - 0.15);
-    else if (frameEma < 14.5 && ratio < maxRatio) next = Math.min(maxRatio, ratio + 0.1);
+    if (frameEma > 24 && ratio > minRatio) next = Math.max(minRatio, ratio - 0.15);
+    else if (frameEma < 13.5 && ratio < maxRatio) next = Math.min(maxRatio, ratio + 0.15);
     if (next !== ratio) {
       ratio = next;
       gl.setPixelRatio(ratio);
       resize();
       lastAdjust = now;
+      frameEma = 16.7;
     }
   }
 
@@ -293,11 +325,16 @@ export function createRenderer(canvas) {
     const t0 = performance.now();
     const now = opts.now || t0;
     const dt = lastNow ? Math.max(0.001, Math.min(0.05, (now - lastNow) / 1000)) : 1 / 60;
-    if (lastNow && !opts.fixed) adapt(now - lastNow, now);
+    if (lastNow && !opts.fixed) adapt(now - lastNow, now, Boolean(run) && !opts.idle && show < 0.02 && !run.downed);
     lastNow = now;
     const R = routeById(opts.route);
     if (route !== R) {
+      const switched = route !== null;
       route = R;
+      if (switched && state.ready) {
+        city.setRoute(R);
+        warm();
+      }
       sky.set(R);
       const hz = R.sky.haze;
       scene.fog.color.setRGB(hz[0] / 255, hz[1] / 255, hz[2] / 255, THREE.SRGBColorSpace);

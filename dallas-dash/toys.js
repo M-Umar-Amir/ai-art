@@ -231,7 +231,7 @@ export function buildToy(id, skeleton) {
 
   if (spec.robot) robot(kit, J, at, lerp, v);
   else person(kit, spec, J, at, lerp, v);
-  return { ...kit.build(spec.robot ? 0.011 : 0.01), spec, patch: kit.patch || null };
+  return { ...kit.build(spec.robot ? 0.017 : 0.015), spec, patch: kit.patch || null };
 }
 
 /** The varsity kids and the officer share one body plan. */
@@ -349,7 +349,8 @@ function person(kit, s, J, at, lerp, v) {
   kit.limb(midT, chestTop, tw * 1.02, tw * 1.08, top, "spine_03", { flat: FLAT, capY: 0.6 });
   // where the jacket's front surface is at a given height
   const fz = (c, r) => c.z + r * FLAT - 0.003;
-  if (!s.officer) kit.patch = { p: v(0, upC.y - 0.02, upC.z - tw * 1.06 * FLAT - 0.006), r: 0.08 };
+  // the roundel sits high between the shoulder blades, clear of the lower jacket when the runner leans
+  if (!s.officer) kit.patch = { p: v(0, chestTop.y - 0.125, chestTop.z - tw * 1.08 * FLAT - 0.012), r: 0.078 };
   if (!s.officer) {
     // the hoodie shows down the open front
     // a flat red panel that follows the jacket's front from hem to collar
@@ -398,7 +399,9 @@ function person(kit, s, J, at, lerp, v) {
     const shoeUp = s.officer ? 0x121214 : TOY.red;
     const soleC = s.officer ? 0x0b0b0c : TOY.white;
     kit.blob(v(shoeC.x, 0.065, shoeC.z), [0.07, 0.062, 0.135], shoeUp, `foot_${sd}`, { p: 2.5 });
-    kit.blob(v(shoeC.x, 0.018, shoeC.z + 0.01), [0.075, 0.02, 0.145], soleC, `foot_${sd}`, { p: 5 });
+    // white midsole over a dark rubber outsole (what the camera sees when the toe points down)
+    kit.blob(v(shoeC.x, 0.026, shoeC.z + 0.01), [0.075, 0.016, 0.145], soleC, `foot_${sd}`, { p: 5 });
+    kit.blob(v(shoeC.x, 0.009, shoeC.z + 0.01), [0.073, 0.009, 0.143], s.officer ? 0x050505 : 0x3a3533, `foot_${sd}`, { p: 5, outline: false });
     if (!s.officer) {
       kit.blob(v(toe.x, 0.045, toe.z - 0.03), [0.06, 0.04, 0.045], TOY.white, `ball_${sd}`, { p: 2.4 });
       kit.blob(v(shoeC.x, 0.07, F.z - 0.065), [0.062, 0.035, 0.025], TOY.redDeep, `foot_${sd}`, { p: 2.6 });
@@ -414,6 +417,8 @@ function person(kit, s, J, at, lerp, v) {
     const Hd = J[`hand_${sd}`];
     const dir = Hd.clone().sub(L).normalize();
     const ar = (kid ? 0.062 : 0.068) * slim;
+    // the shoulder rides the collarbone, which the sprint shrugs: it bridges torso to arm
+    kit.limb(lerp(J[`clavicle_${sd}`], U, 0.3), U, ar * 1.1, ar * 1.2, sleeve, `clavicle_${sd}`);
     kit.blob(U, [ar * 1.2, ar * 1.2, ar * 1.2], sleeve, `upperarm_${sd}`);
     kit.limb(U, L, ar * 1.08, ar, sleeve, `upperarm_${sd}`);
     const wrist = Hd.clone().addScaledVector(dir, -0.035);
@@ -475,6 +480,7 @@ function robot(kit, J, at, lerp, v) {
     const L = J[`lowerarm_${sd}`];
     const Hd = J[`hand_${sd}`];
     const dir = Hd.clone().sub(L).normalize();
+    kit.limb(lerp(J[`clavicle_${sd}`], U, 0.3), U, 0.05, 0.06, G, `clavicle_${sd}`);
     kit.blob(U, [0.085, 0.085, 0.085], R, `upperarm_${sd}`);
     kit.limb(U, L, 0.03, 0.03, G, `upperarm_${sd}`);
     kit.limb(L.clone().addScaledVector(dir, 0.02), Hd.clone().addScaledVector(dir, -0.03), 0.068, 0.062, C, `lowerarm_${sd}`);
@@ -497,7 +503,7 @@ function robot(kit, J, at, lerp, v) {
     kit.ring(F.clone().add(v(0, 0.1, 0)), UP, 0.083, 0.02, R, `calf_${sd}`);
     const shoe = lerp(F, toe, 0.45);
     kit.blob(v(shoe.x, 0.055, shoe.z), [0.078, 0.055, 0.13], TOY.white, `foot_${sd}`, { p: 2.4 });
-    kit.blob(v(shoe.x, 0.018, shoe.z), [0.082, 0.018, 0.138], R, `foot_${sd}`, { p: 5 });
+    kit.blob(v(shoe.x, 0.018, shoe.z), [0.082, 0.018, 0.138], TOY.graphite, `foot_${sd}`, { p: 5 });
   }
 }
 
