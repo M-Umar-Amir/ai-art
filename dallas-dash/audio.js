@@ -13,6 +13,8 @@ let musicOn = false;
 let musicTimer = null;
 let step = 0;
 let enabled = false;
+let unlocked = false; // a gesture has happened (browsers need one before sound)
+let muted = false; // the player's Sound: off
 let stepMs = 150;
 
 function ac() {
@@ -70,8 +72,18 @@ function noise(dur, gain, freq) {
 export const audio = {
   /** Browsers only allow sound after a gesture — call this from a click. */
   unlock() {
-    enabled = true;
-    ac();
+    unlocked = true;
+    enabled = !muted;
+    if (enabled) ac();
+  },
+  /** The Settings switch; remembered by the client. */
+  setMuted(m) {
+    muted = Boolean(m);
+    enabled = unlocked && !muted;
+    if (muted) audio.stopMusic();
+  },
+  get muted() {
+    return muted;
   },
   get on() {
     return enabled;

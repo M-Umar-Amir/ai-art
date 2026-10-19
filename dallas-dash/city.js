@@ -592,7 +592,7 @@ export class City {
     const tint = new THREE.Color();
     // ground: asphalt tiles, track beds and rails, sidewalks
     const g0 = Math.floor((d - behind) / 6);
-    for (let k = g0; k < g0 + 34 + Math.ceil(behind / 6); k += 1) {
+    for (let k = g0; k < g0 + Math.ceil(((globalThis.__viewAhead ?? 185) + 19) / 6) + Math.ceil(behind / 6); k += 1) {
       const z = -(k * 6 + 3);
       T.asphalt.put(mat(-3, 0.15, z), null);
       T.asphalt.put(mat(3, 0.15, z), null);
@@ -631,7 +631,8 @@ export class City {
       } else this.placeLandmark(c.lm, R);
     }
     const first = Math.floor((d - behind) / SEG);
-    const last = Math.floor((d + 185) / SEG);
+    // how far ahead streets are built: the renderer shortens it (with the fog) on low-end phones
+    const last = Math.floor((d + (globalThis.__viewAhead ?? 185)) / SEG);
     // blocks before the start line exist too: the home showcase looks back down the street
     for (let i = first; i <= last; i += 1) {
       const z0 = i * SEG;

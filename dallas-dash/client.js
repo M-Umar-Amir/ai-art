@@ -53,6 +53,26 @@ const canvas = q("view");
 // phones: no backdrop blur over the live 3D view (the WebView re-blurs it every frame)
 if (window.DASH_APP || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches)) document.documentElement.classList.add("lite");
 const renderer = createRenderer(canvas);
+/* ── settings: graphics level and sound, remembered on this device ─────── */
+
+const SETTINGS_KEY = "dash:settings";
+const QUALITY_NAME = { low: "Low", medium: "Medium", high: "High" };
+let settings = { quality: null, sound: true }; // quality null = the device's recommendation
+try {
+  settings = { ...settings, ...JSON.parse(localStorage.getItem(SETTINGS_KEY) || "{}") };
+} catch {
+  /* private mode or a bad value: defaults */
+}
+function saveSettings() {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+  } catch {
+    /* not saved; still applies for this session */
+  }
+}
+renderer.setQuality(settings.quality || renderer.recommended, !settings.quality);
+audio.setMuted(!settings.sound);
+
 if (new URLSearchParams(location.search).has("debug")) {
   // QA scripts
   window.__renderer = renderer;
@@ -856,6 +876,14 @@ function paintSheet(name) {
       })
       .join("");
   }
+  if (name === "settings") {
+    for (const b of document.querySelectorAll("[data-quality]")) b.setAttribute("aria-checked", String(b.dataset.quality === renderer.quality));
+    for (const b of document.querySelectorAll("[data-sound]")) b.setAttribute("aria-checked", String((b.dataset.sound === "on") === !audio.muted));
+    const rec = QUALITY_NAME[renderer.recommended];
+    q("vQualityNote").textContent = settings.quality
+      ? `Recommended for this device: ${rec}.`
+      : `Set for this device: ${rec}. Lower it if the game stutters, raise it for sharper streets.`;
+  }
   if (name === "routes") {
     q("vRoutes").innerHTML = view.routeList
       .map(
@@ -906,6 +934,25 @@ document.querySelectorAll("[data-sheet]").forEach((btn) => {
     openSheet = btn.dataset.sheet;
     paintSheet(openSheet);
     showSheet(q(`sheet-${openSheet}`));
+  });
+});
+document.querySelectorAll("[data-quality]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    settings.quality = btn.dataset.quality;
+    saveSettings();
+    renderer.setQuality(settings.quality, false);
+    audio.ui();
+    paintSheet("settings");
+  });
+});
+document.querySelectorAll("[data-sound]").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    settings.sound = btn.dataset.sound === "on";
+    saveSettings();
+    audio.unlock();
+    audio.setMuted(!settings.sound);
+    audio.ui();
+    paintSheet("settings");
   });
 });
 document.querySelectorAll("[data-close]").forEach((btn) => {

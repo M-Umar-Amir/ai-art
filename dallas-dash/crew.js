@@ -53,7 +53,9 @@ export class CrewFactory {
       if (o.isSkinnedMesh) meshes.push(o);
     });
     const body = meshes.find((m) => /superhero/i.test(m.name)) || meshes[meshes.length - 1];
-    const skeleton = body.skeleton;
+    // a skeleton of our own: Skeleton.clone() shares the boneInverses array between
+    // every copy, so reproportioning one character would re-skin all the others
+    const skeleton = new THREE.Skeleton(body.skeleton.bones, body.skeleton.boneInverses.map((m) => m.clone()));
     skeleton.pose();
     // the scanned base bodies only lend their skeleton: the toy parts replace them
     for (const m of meshes) m.visible = false;

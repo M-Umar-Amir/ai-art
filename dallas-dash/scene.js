@@ -37,14 +37,26 @@ export function createRenderer(canvas) {
   gl.toneMapping = THREE.ACESFilmicToneMapping;
   gl.toneMappingExposure = 1.05;
   const phone = Boolean(window.DASH_APP) || (window.matchMedia && window.matchMedia("(pointer: coarse)").matches);
-  gl.setPixelRatio(Math.min(dpr, phone ? 1.5 : 1.6));
+  // entry-level phone GPUs (Mali-G52 class: Redmi 13, Galaxy A1x…) get the low tier from the start
+  const gpu = (() => {
+    try {
+      const c = gl.getContext();
+      const ext = c.getExtension("WEBGL_debug_renderer_info");
+      return String(ext ? c.getParameter(ext.UNMASKED_RENDERER_WEBGL) : c.getParameter(c.RENDERER));
+    } catch {
+      return "";
+    }
+  })();
+  const strongGpu = /Adreno \(TM\) ([7-9]\d\d)|Immortalis|Mali-G7[1-9]\d|Mali-G[6-9]\d\d|Apple GPU/i.test(gpu);
+  const weakGpu = /Mali-(G5[0-7]|G3\d|T\d|4\d\d)|Adreno \(TM\) ([1-5]\d\d|6[01]\d)|PowerVR|Mali-G68 MC4/i.test(gpu);
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 0.3, 420);
   const hemi = new THREE.HemisphereLight(0xdcecff, 0x8f8070, 1.25);
   const sun = new THREE.DirectionalLight(0xfff0d8, 2.3);
   sun.position.set(-30, 50, 20);
   scene.add(hemi, sun, sun.target);
-  scene.environment = new THREE.PMREMGenerator(gl).fromScene(new RoomEnvironment(), 0.04).texture;
+  const envTex = new THREE.PMREMGenerator(gl).fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environment = envTex;
   scene.environmentIntensity = 0.45;
   scene.fog = new THREE.Fog(0xe8d0b0, 110, 300);
   const sky = makeSky(scene);
@@ -101,6 +113,7 @@ export function createRenderer(canvas) {
       return warm();
     })
     .then(() => {
+      applyQuality(); // dust and the rest exist now
       state.ready = true;
       state.progress = 1;
     })
@@ -290,9 +303,52 @@ export function createRenderer(canvas) {
   // hitch), so it only judges steady running — never the first seconds of a
   // run, when shaders and new streets arrive — changes rarely, and never goes
   // below 1x: below that the picture turns to mush.
-  const maxRatio = Math.min(dpr, phone ? 1.5 : 1.6);
-  const minRatio = Math.min(1, maxRatio);
+  /**
+   * Three quality levels. Low is for entry-level phone GPUs (Mali-G52 class):
+   * native-ish resolution (MSAA stays on — it's cheap on tile GPUs), no
+   * image-based lighting, a shorter view into thicker haze, far buildings as
+   * flat impostors sooner, no dust. The player picks in Settings; until they
+   * do, the device's recommendation applies and may step down if it struggles.
+   */
+  const QUALITY = {
+    high: { ratio: Math.min(dpr, phone ? 1.5 : 1.6), floor: 1, env: true, hemi: 1.25, fog: [110, 300], view: 185, lod: 72, dust: true },
+    medium: { ratio: Math.min(dpr, 1.25), floor: 0.95, env: true, hemi: 1.25, fog: [85, 230], view: 150, lod: 52, dust: true },
+    low: { ratio: Math.min(dpr, 1), floor: 0.85, env: false, hemi: 1.75, fog: [55, 160], view: 110, lod: 34, dust: false },
+  };
+  const forced = (location.search.match(/[?&]q=(low|medium|high)\b/) || [])[1];
+  const recommended = forced || (weakGpu ? "low" : strongGpu || !phone ? "high" : "medium");
+  let tier = recommended;
+  let autoTier = true;
+  let maxRatio = QUALITY[tier].ratio;
+  let minRatio = Math.min(QUALITY[tier].floor, maxRatio);
   let ratio = maxRatio;
+  gl.setPixelRatio(ratio);
+  resize();
+  function applyQuality() {
+    const Q = QUALITY[tier];
+    maxRatio = Q.ratio;
+    minRatio = Math.min(Q.floor, maxRatio);
+    ratio = maxRatio;
+    gl.setPixelRatio(ratio);
+    resize();
+    scene.environment = Q.env ? envTex : null;
+    hemi.intensity = Q.hemi;
+    scene.fog.near = Q.fog[0];
+    scene.fog.far = Q.fog[1];
+    globalThis.__viewAhead = Q.view;
+    globalThis.__lodAt = Q.lod;
+    if (dust) dust.points.visible = Q.dust;
+    // lighting changes recompile materials: do it now, not on the next frames
+    if (state.ready) warm();
+  }
+  /** `auto`: the device's pick, which may step down on its own if frames run long. */
+  function setQuality(level, auto = false) {
+    if (!QUALITY[level]) return;
+    autoTier = auto;
+    if (level === tier) return;
+    tier = level;
+    applyQuality();
+  }
   let frameEma = 16.7;
   let lastAdjust = 0;
   let steadySince = 0;
@@ -308,6 +364,14 @@ export function createRenderer(canvas) {
     frameEma += (Math.min(60, dtMs) - frameEma) * 0.03;
     if (now - steadySince < 3500 || now - lastAdjust < 5000) return;
     let next = ratio;
+    if (frameEma > 24 && ratio <= minRatio && autoTier && tier !== "low") {
+      // already at the floor and still slow: step the device's pick down a level
+      tier = tier === "high" ? "medium" : "low";
+      applyQuality();
+      lastAdjust = now;
+      frameEma = 16.7;
+      return;
+    }
     if (frameEma > 24 && ratio > minRatio) next = Math.max(minRatio, ratio - 0.15);
     else if (frameEma < 13.5 && ratio < maxRatio) next = Math.min(maxRatio, ratio + 0.15);
     if (next !== ratio) {
@@ -428,6 +492,11 @@ export function createRenderer(canvas) {
     resize,
     debug: () => scene,
     gl,
+    setQuality,
+    get quality() {
+      return tier;
+    },
+    recommended,
     get ready() {
       return state.ready;
     },
