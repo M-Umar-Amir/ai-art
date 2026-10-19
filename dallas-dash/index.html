@@ -330,7 +330,15 @@
       .char { background: #fff; border-radius: 0.9rem; padding: 0.7rem; text-align: center; border: 3px solid transparent; cursor: pointer; font: inherit; color: inherit; box-shadow: none; text-transform: none; letter-spacing: 0; }
       .char.on { border-color: var(--red); }
       .char.locked { opacity: 0.55; }
-      .char .av { font-size: 2.2rem; }
+      .char .av { font-size: 2.2rem; height: 7.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+      .char .av img { height: 100%; width: auto; max-width: 100%; object-fit: contain; display: block; }
+      .char.route .av { height: 4.5rem; justify-content: flex-start; }
+      .album { display: grid; grid-template-columns: repeat(auto-fill, minmax(6.4rem, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+      .album .lm { margin: 0; background: #fff; border-radius: 0.8rem; padding: 0.5rem; text-align: center; }
+      .album .lm img { height: 5.5rem; max-width: 100%; object-fit: contain; filter: grayscale(1) opacity(0.35); }
+      .album .lm.got img { filter: none; }
+      .album .lm b { display: block; font: 800 0.78rem/1.1 var(--display); text-transform: uppercase; margin-top: 0.3rem; }
+      .album .lm small { display: block; font-size: 0.68rem; opacity: 0.7; }
       .char small.role { display: block; opacity: 0.75; margin: 0.15rem 0; }
       .char.route { text-align: left; }
       #routeChip {
@@ -544,6 +552,9 @@
       .timer { background: rgba(18,20,26,.55); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,.14); }
       #spot i { color: #fff; }
       #spot i svg { width: 1.2rem; height: 1.2rem; }
+      #spot.art i { width: 4.2rem; height: 4.2rem; border-radius: 0.8rem; background: #fff; }
+      #spot.art i img { max-width: 92%; max-height: 92%; object-fit: contain; }
+      #spot.art { border-radius: 1.1rem; }
       .big-ic { width: 2.6rem; height: 2.6rem; }
       @media (max-height: 640px) { #picker .who b { font-size: 1.7rem; } #btnPlay { font-size: 2rem; padding: 0.75rem; } #homeSide { top: 46%; } }
       @media (min-width: 900px) { #playWrap { left: auto; right: 4vw; transform: none; bottom: calc(3rem + env(safe-area-inset-bottom)); } }
@@ -640,7 +651,7 @@
     </section>
     <div id="toast" class="display hidden"></div>
     <div id="district" aria-live="polite"><small>Now entering</small><b id="vDistrict">Deep Ellum</b></div>
-    <div id="spot" aria-live="polite"><i><svg><use href="#i-pin" /></svg></i><div><small>Landmark spotted</small><span id="vSpot">Reunion Tower</span></div></div>
+    <div id="spot" aria-live="polite"><i id="spotArt"><svg><use href="#i-pin" /></svg></i><div><small>Landmark spotted</small><span id="vSpot">Reunion Tower</span></div></div>
     <div id="countdown" class="display hidden">3</div>
     <div id="stats" class="hidden"></div>
 
@@ -725,8 +736,9 @@
       <header><h1 id="cTitle" class="display">Crew</h1><button class="x" type="button" data-close>✕</button></header>
       <p>Pick who runs. Everyone wears the KFC crew kit.</p>
       <div class="chars" id="vChars"></div>
-      <h2>Landmarks spotted</h2>
+      <h2>Landmark album</h2>
       <p id="vLandmarkCount">0 of 40</p>
+      <div class="album" id="vAlbum"></div>
     </section>
 
     <!-- ── routes ───────────────────────────────────────────────────── -->

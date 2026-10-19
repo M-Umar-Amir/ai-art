@@ -373,9 +373,10 @@ export function createRenderer(canvas) {
     const chasing = !opts.idle && (run.chase >= 90 || caught);
     officer.root.visible = chasing;
     if (chasing) {
-      const zz = caught ? 1.4 : 2.0 + (1 - run.chase / 300) * 1.6;
+      // just behind the runner and half a lane over: close enough to feel, clear of the lens
+      const zz = caught ? 1.2 : 1.5 + (1 - run.chase / 300) * 1.3;
       const side = run.x > 1 ? -1 : 1;
-      officer.root.position.set(run.x + side * (caught ? 0.8 : 1.2), 0, -d + zz);
+      officer.root.position.set(fx.visX + side * (caught ? 0.7 : 0.95), 0, -d + zz);
       officer.root.rotation.set(0, Math.PI, 0);
       officer.drive({ ...run, downed: caught ? "" : "", jet: 0, slide: 0 }, { air: false }, false, dt);
     }

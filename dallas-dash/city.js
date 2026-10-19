@@ -14,6 +14,7 @@ import * as THREE from "three";
 import { mergeGeometries } from "three/addons/utils/BufferGeometryUtils.js";
 import { routeById, districtAt } from "./routes.js";
 import { flatten } from "./meshutil.js";
+import { buildHero } from "./landmarks.js";
 import { AD_LINES, paintAd, paintSignAtlas, paintStripes, paintWordmark, paintSkyline, toTexture } from "./art.js";
 
 export const ROAD_HALF = 4.6;
@@ -856,6 +857,14 @@ function buildLandmark(city, model, side) {
     prism(_c, x, 0, z, 0.35, 2.2, 6, [110, 84, 60]);
     ball(_c, x, 2.2 + r, z, r, color);
   };
+  // the ten illustrated landmarks have full models (landmarks.js)
+  const hero = buildHero(
+    model,
+    side,
+    (geo, color, isGlass) => group.add(new THREE.Mesh(geo, city.landmarkMaterial(color.map((v) => Math.min(255, v)), Boolean(isGlass)))),
+    (geo, material) => group.add(new THREE.Mesh(geo, material)),
+  );
+  if (hero) return flatten(group);
   const z = 0;
   const landmark0 = (() => {
     // set back across the plaza the course clears for it, so it can be seen

@@ -11,6 +11,7 @@ import { createRenderer, districtAt } from "./scene.js";
 import { audio } from "./audio.js";
 import * as SIM from "./sim.js";
 import { routeById, ROUTES } from "./routes.js";
+import { HERO_ART } from "./landmarks.js";
 
 const ITEM_LABEL = {
   bucket: "Original Recipe Bucket",
@@ -28,8 +29,12 @@ const POWER = {
   sneakers: { name: "Spring kicks", glyph: "👟", color: "#3ca0f0" },
   double: { name: "2× score", glyph: "2×", color: "#e0a100" },
 };
-const CHAR_AV = { dante: "🧢", maya: "🎧", r11: "🤖" };
+// the crew cards show the character sheets
 const ROUTE_AV = { downtown: "🏙️", east: "🎡", west: "🌉", toronto: "🍁" };
+// route cards show a landmark illustration where there is one
+const ROUTE_ART = { downtown: HERO_ART.reunion, west: HERO_ART.archbridge, toronto: HERO_ART.cntower };
+const crewImg = (id) => `<img src="${(globalThis.DD_ASSETS && globalThis.DD_ASSETS[`art/crew-${id}.webp`]) || `assets/art/crew-${id}.webp`}" alt="" loading="lazy" />`;
+const routeAv = (id) => (ROUTE_ART[id] ? `<img src="${ROUTE_ART[id]}" alt="" loading="lazy" />` : ROUTE_AV[id]);
 const icon = (id, cls = "ico") => `<svg class="${cls}"><use href="#${id}" /></svg>`;
 let preview = null; // the runner shown on the home screen (may be locked)
 // player-facing names for the board and the revive token (sim ids stay "board"/"keys")
@@ -330,8 +335,11 @@ function showDistrict(name) {
   showDistrict._t = setTimeout(() => el.classList.remove("on"), 2400);
 }
 
-function showSpot(name) {
-  q("vSpot").textContent = name;
+function showSpot(lm) {
+  q("vSpot").textContent = lm.name;
+  const art = HERO_ART[lm.model];
+  q("spotArt").innerHTML = art ? `<img src="${art}" alt="" />` : '<svg><use href="#i-pin" /></svg>';
+  q("spot").classList.toggle("art", Boolean(art));
   const el = q("spot");
   el.classList.add("on");
   clearTimeout(showSpot._t);
@@ -372,6 +380,11 @@ function countUp(el, to) {
   requestAnimationFrame(step);
 }
 
+/** Phone vibration, through the app shell when running inside it (dallas-dash-mobile). */
+function haptic(kind) {
+  if (window.ReactNativeWebView) window.ReactNativeWebView.postMessage(JSON.stringify({ haptic: kind }));
+}
+
 let coinSoundAt = 0;
 function react(events) {
   for (const e of events) {
@@ -383,13 +396,16 @@ function react(events) {
       }
     } else if (e === "stumble") {
       audio.hit();
+      haptic("warn");
       jolt(false);
       toast("Watch out — the parking officer's behind you!");
     } else if (e === "crashed" || e === "caught") {
       audio.crash();
+      haptic("heavy");
       jolt(true);
     } else if (e === "boardbreak") {
       audio.crash();
+      haptic("heavy");
       jolt(true);
       toast(`${BOARD} saved you!`);
     } else if (e === "board") {
@@ -397,9 +413,11 @@ function react(events) {
       toast(`${BOARD}!`);
     } else if (e === "revive") {
       audio.coupon();
+      haptic("success");
     } else if (e.startsWith("power:")) {
       const k = e.slice(6);
       audio.power();
+      haptic("light");
       toast(POWER[k].name);
     } else if (e.startsWith("item:")) {
       const k = e.slice(5);
@@ -743,7 +761,7 @@ function paintHud() {
   if (run.sightings.length > hudSightings) {
     hudSightings = run.sightings.length;
     const spots = routeById(runRoute).landmarks;
-    showSpot(spots[run.sightings[hudSightings - 1] % spots.length].name);
+    showSpot(spots[run.sightings[hudSightings - 1] % spots.length]);
   }
   q("vBoards").textContent = run.board > 0 ? "on" : `×${run.boardsLeft}`;
   q("btnBoard").disabled = run.board > 0 || run.boardsLeft <= 0;
@@ -817,15 +835,22 @@ function paintSheet(name) {
     q("vChars").innerHTML = view.outfitList
       .map((o) => {
         const owned = view.outfits.indexOf(o.id) >= 0;
-        return `<button type="button" class="char${view.outfit === o.id ? " on" : ""}${owned ? "" : " locked"}" data-outfit="${o.id}"><div class="av">${CHAR_AV[o.id] || "🏃"}</div><b>${o.name}</b><small class="role">${o.role || ""}</small><small>${owned ? (view.outfit === o.id ? "running" : "tap to pick") : `${fmt(o.at)} lifetime pts`}</small></button>`;
+        return `<button type="button" class="char${view.outfit === o.id ? " on" : ""}${owned ? "" : " locked"}" data-outfit="${o.id}"><div class="av">${crewImg(o.id)}</div><b>${o.name}</b><small class="role">${o.role || ""}</small><small>${owned ? (view.outfit === o.id ? "running" : "tap to pick") : `${fmt(o.at)} lifetime pts`}</small></button>`;
       })
       .join("");
-    q("vLandmarkCount").textContent = `${view.landmarks.length} of ${view.landmarkTotal}${view.landmarks.length ? ` — ${view.landmarks.join(", ")}` : ""}`;
+    q("vLandmarkCount").textContent = `${view.landmarks.length} of ${view.landmarkTotal} spotted. Run past them to fill your album.`;
+    // the album: the illustrated landmarks, in colour once you've run past them
+    q("vAlbum").innerHTML = ROUTES.flatMap((r) => r.landmarks.filter((l) => HERO_ART[l.model]).map((l) => ({ ...l, city: r.name })))
+      .map((l) => {
+        const got = view.landmarks.indexOf(l.name) >= 0;
+        return `<figure class="lm${got ? " got" : ""}"><img src="${HERO_ART[l.model]}" alt="" loading="lazy" /><figcaption><b>${l.name}</b><small>${got ? l.city : "not spotted yet"}</small></figcaption></figure>`;
+      })
+      .join("");
   }
   if (name === "routes") {
     q("vRoutes").innerHTML = view.routeList
       .map(
-        (r) => `<button type="button" class="char route${view.route === r.id ? " on" : ""}" data-route="${r.id}"><div class="av">${ROUTE_AV[r.id]}</div><b>${r.name}</b><small class="role">${r.blurb}</small><small>${view.route === r.id ? "selected" : "tap to run here"} · ${r.spotted}/10 landmarks</small></button>`,
+        (r) => `<button type="button" class="char route${view.route === r.id ? " on" : ""}" data-route="${r.id}"><div class="av">${routeAv(r.id)}</div><b>${r.name}</b><small class="role">${r.blurb}</small><small>${view.route === r.id ? "selected" : "tap to run here"} · ${r.spotted}/10 landmarks</small></button>`,
       )
       .join("");
   }
@@ -967,6 +992,10 @@ q("btnCopy").addEventListener("click", async () => {
 });
 
 window.addEventListener("resize", () => renderer.resize());
+// the app shell calls this when the phone backgrounds the game
+window.__ddPause = () => {
+  if (running && !run.downed) pause();
+};
 document.addEventListener("visibilitychange", () => {
   if (document.hidden && running && !run.downed) pause();
   last = performance.now();

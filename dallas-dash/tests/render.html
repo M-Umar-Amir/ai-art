@@ -44,7 +44,7 @@
     if (r.error) { document.title = "error"; return; }
     if (!r.ready) return setTimeout(wait, 100);
     let t = 1000;
-    for (let i = 0; i < 8; i++) { t += 16; window.__stats = r.draw(run, { outfit: p.get("outfit") || "dante", route: p.get("route") || "downtown", now: t, idle: p.has("idle"), fixed: true }); }
+    for (let i = 0; i < 150; i++) { t += 16; window.__stats = r.draw(run, { outfit: p.get("outfit") || "dante", route: p.get("route") || "downtown", now: t, idle: p.has("idle"), fixed: true }); }
     window.__redraw = () => { t += 16; return r.draw(run, { outfit: p.get("outfit") || "dante", route: p.get("route") || "downtown", now: t, idle: p.has("idle"), fixed: true }); };
     document.title = "ready";
   };

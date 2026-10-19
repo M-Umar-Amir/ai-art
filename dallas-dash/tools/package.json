@@ -2,12 +2,15 @@
   "private": true,
   "type": "module",
   "description": "Offline asset pipeline for Dallas Dash (not deployed)",
-  "scripts": { "build": "node build-assets.mjs" },
+  "scripts": {
+    "build": "node build-assets.mjs"
+  },
   "devDependencies": {
     "@gltf-transform/cli": "^4.5.1",
     "@gltf-transform/core": "^4.5.1",
     "@gltf-transform/extensions": "^4.5.1",
     "@gltf-transform/functions": "^4.5.1",
+    "esbuild": "^0.25.12",
     "meshoptimizer": "^0.22.0",
     "sharp": "^0.35.5"
   }

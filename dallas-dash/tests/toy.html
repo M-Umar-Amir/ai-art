@@ -1,0 +1,56 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex" />
+<title>Dallas Dash toy check</title>
+<style>html,body{margin:0;height:100%;background:#e9e4da}canvas{display:block;width:100%;height:100%}</style>
+<script type="importmap">
+  { "imports": { "three": "/dallas-dash/vendor/three/three.module.min.js", "three/addons/": "/dallas-dash/vendor/three/addons/" } }
+</script>
+<canvas id="c"></canvas>
+<script type="module">
+  // Close-up QA of the toy crew. ?ids=dante,maya&yaw=0.6&clip=run&t=0.3&rest=1&h=1.0&dist=3.2
+  import * as THREE from "three";
+  import { loadAssets, makeArt } from "/dallas-dash/assets.js";
+  import { CrewFactory } from "/dallas-dash/crew.js";
+  const p = new URLSearchParams(location.search);
+  const canvas = document.getElementById("c");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(2);
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.05;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xe9e4da);
+  scene.add(new THREE.HemisphereLight(0xdcecff, 0x8f8070, 1.25));
+  const sun = new THREE.DirectionalLight(0xfff0d8, 2.3);
+  sun.position.set(-3, 5, 4);
+  scene.add(sun);
+  const ground = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({ color: 0xcfc8bb }));
+  ground.rotation.x = -Math.PI / 2;
+  scene.add(ground);
+  const A = await loadAssets();
+  const f = new CrewFactory(A.crew, A.clips, makeArt(A));
+  const ids = (p.get("ids") || "dante,maya,r11").split(",");
+  const gap = Number(p.get("gap") || 0.95);
+  const runners = ids.map((id, i) => {
+    const r = f.make(id);
+    r.root.position.x = (i - (ids.length - 1) / 2) * gap;
+    r.root.rotation.y = Number(p.get("yaw") || 0);
+    scene.add(r.root);
+    return r;
+  });
+  const cam = new THREE.PerspectiveCamera(Number(p.get("fov") || 28), innerWidth / innerHeight, 0.05, 100);
+  const h = Number(p.get("h") || 0.85);
+  cam.position.set(0, h + Number(p.get("up") || 0.15), Number(p.get("dist") || 3.4));
+  cam.lookAt(0, h, 0);
+  let frames = 0;
+  renderer.setAnimationLoop(() => {
+    if (!p.has("rest")) for (const r of runners) {
+      r.play(p.get("clip") || "idle2", 0);
+      r.mixer.update(frames === 0 ? Number(p.get("t") || 0.4) : 0);
+    }
+    renderer.render(scene, cam);
+    if (++frames === 3) document.title = "ready";
+  });
+</script>

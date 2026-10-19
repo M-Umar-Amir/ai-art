@@ -43,3 +43,7 @@ agents/**/*.pyc
 agents/**/venv/
 agents/**/.venv/
 
+
+# Dallas Dash: extracted copy of dallas-dash-landmarks.zip, and the mobile build font cache
+dallas-dash/assets/src/dallas-dash-landmarks/
+dallas-dash/tools/.fonts/

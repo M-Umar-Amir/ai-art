@@ -10,6 +10,8 @@ import { MeshoptDecoder } from "three/addons/libs/meshopt_decoder.module.js";
 import { makeCanvas, toTexture, paintKnit, paintRoundel, paintStripes, paintCrust, paintHazard } from "./art.js";
 
 const BASE = "/dallas-dash/assets/";
+/** Where an asset lives; the mobile build inlines them all into DD_ASSETS. */
+export const assetUrl = (path) => (globalThis.DD_ASSETS && globalThis.DD_ASSETS[path]) || BASE + path;
 
 function loadImage(url) {
   return new Promise((ok) => {
@@ -39,7 +41,7 @@ export async function loadAssets(onProgress) {
   const load = (f) =>
     new Promise((ok, no) =>
       loader.load(
-        `${BASE}models/${f}.glb`,
+        assetUrl(`models/${f}.glb`),
         (g) => {
           // GLTFLoader de-duplicates node names file-wide; the real ones are in extras
           const renamed = new Map();
@@ -69,7 +71,7 @@ export async function loadAssets(onProgress) {
         no,
       ),
     );
-  const [city, props, crew, anims, logo] = await Promise.all([load("city"), load("props"), load("crew"), load("anims"), loadImage(`${BASE}kfc-logo.svg`)]);
+  const [city, props, crew, anims, logo] = await Promise.all([load("city"), load("props"), load("crew"), load("anims"), loadImage(assetUrl("kfc-logo.svg"))]);
   return { city, props, crew, clips: anims.animations, logo };
 }
 

@@ -1,0 +1,53 @@
+<!doctype html>
+<meta charset="utf-8" />
+<meta name="robots" content="noindex" />
+<title>Dallas Dash landmark check</title>
+<style>html,body{margin:0;height:100%;background:#f3efe6}canvas{display:block;width:100%;height:100%}</style>
+<script type="importmap">
+  { "imports": { "three": "/dallas-dash/vendor/three/three.module.min.js", "three/addons/": "/dallas-dash/vendor/three/addons/" } }
+</script>
+<canvas id="c"></canvas>
+<script type="module">
+  // QA of the hero landmarks against the illustrations. ?m=reunion&az=0.8&el=0.45&side=1
+  import * as THREE from "three";
+  import { RoomEnvironment } from "three/addons/environments/RoomEnvironment.js";
+  import { buildHero } from "/dallas-dash/landmarks.js";
+  import { flatten } from "/dallas-dash/meshutil.js";
+  const p = new URLSearchParams(location.search);
+  const canvas = document.getElementById("c");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+  renderer.setPixelRatio(1.5);
+  renderer.setSize(innerWidth, innerHeight, false);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  const scene = new THREE.Scene();
+  scene.background = new THREE.Color(0xf3efe6);
+  scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(), 0.04).texture;
+  scene.environmentIntensity = 0.45;
+  scene.add(new THREE.HemisphereLight(0xdcecff, 0x8f8070, 1.25));
+  const sun = new THREE.DirectionalLight(0xfff0d8, 2.3);
+  sun.position.set(-30, 50, 20);
+  scene.add(sun);
+  const side = Number(p.get("side") || 1);
+  const mats = new Map();
+  const group = new THREE.Group();
+  const ok = buildHero(p.get("m") || "reunion", side, (geo, c, glassy) => {
+    const k = c.join(",") + glassy;
+    if (!mats.has(k)) mats.set(k, new THREE.MeshStandardMaterial({ color: new THREE.Color(c[0] / 255, c[1] / 255, c[2] / 255).convertSRGBToLinear(), roughness: glassy ? 0.18 : 0.78, metalness: glassy ? 0.55 : 0.05, side: THREE.DoubleSide }));
+    group.add(new THREE.Mesh(geo, mats.get(k)));
+  }, (geo, m) => group.add(new THREE.Mesh(geo, m)));
+  const flat = flatten(group);
+  scene.add(flat);
+  const bb = new THREE.Box3().setFromObject(flat);
+  const c = bb.getCenter(new THREE.Vector3());
+  const size = bb.getSize(new THREE.Vector3()).length();
+  const az = Number(p.get("az") || 0.8);
+  const el = Number(p.get("el") || 0.42);
+  const cam = new THREE.PerspectiveCamera(24, innerWidth / innerHeight, 0.5, 2000);
+  const dist = size * 2.1;
+  cam.position.set(c.x + Math.sin(az) * Math.cos(el) * dist * -side, c.y + Math.sin(el) * dist, c.z + Math.cos(az) * Math.cos(el) * dist);
+  cam.lookAt(c);
+  renderer.render(scene, cam);
+  window.__info = { ok, tris: renderer.info.render.triangles, calls: renderer.info.render.calls };
+  document.title = "ready";
+</script>
