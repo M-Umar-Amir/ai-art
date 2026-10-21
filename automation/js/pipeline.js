@@ -198,7 +198,20 @@ Exactly 6 shots.`,
         onChange(c);
       }
       log("TV commercial: voice-over");
-      const vo = await speak((spot.vo || []).join(" "), spot.vo_language || voLang);
+      let vo;
+      try {
+        vo = await speak((spot.vo || []).join(" "), spot.vo_language || voLang);
+      } catch {
+        // free voice unavailable: render with music and supers only (a silent VO track)
+        log("Voice-over unavailable on the free tier; rendering with music and supers");
+        const ac = new OfflineAudioContext(1, 48000, 48000);
+        const buf = await ac.startRendering();
+        const wav = new DataView(new ArrayBuffer(44 + buf.length * 2));
+        const w = (o, str) => [...str].forEach((c, i) => wav.setUint8(o + i, c.charCodeAt(0)));
+        w(0, "RIFF"); wav.setUint32(4, 36 + buf.length * 2, true); w(8, "WAVEfmt "); wav.setUint32(16, 16, true); wav.setUint16(20, 1, true); wav.setUint16(22, 1, true);
+        wav.setUint32(24, 48000, true); wav.setUint32(28, 96000, true); wav.setUint16(32, 2, true); wav.setUint16(34, 16, true); w(36, "data"); wav.setUint32(40, buf.length * 2, true);
+        vo = new Blob([wav.buffer], { type: "audio/wav" });
+      }
       const music = await get("blobs", `${ws}/music`);
       log("TV commercial: edit, grade, supers, sound mix (keep this tab visible)");
       const { master, vertical, mime } = await renderTVC({ plates, vo, music, brand, cols, logo, endLine: spot.end_line, legal: spot.legal, onProgress: (p) => { c.step = `TV commercial: rendering ${Math.round(p * 100)}% (keep this tab visible)`; onChange(c); } });
