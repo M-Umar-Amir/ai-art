@@ -62,6 +62,22 @@ namespace DallasDash.Gameplay
             }
             PowerUps.Activated += OnPowerUp;
 
+            // Burger combo: a pill under the pause button with the streak and a bar that drains until the
+            // next pickup. Hidden below 3 in a row.
+            var cb = UiKit.Panel(canvas, "Combo", Vector2.zero, new Vector2(300f, 96f), new Color(0.05f, 0.08f, 0.25f, 0.78f));
+            cb.raycastTarget = false;
+            comboPill = cb.rectTransform;
+            Pin(comboPill, new Vector2(0.5f, 1f), new Vector2(0f, -232f));
+            comboText = UiKit.Label(cb.transform, "", 46, new Vector2(0f, 10f), new Vector2(300f, 60f), UiKit.Yellow);
+            var ctrack = UiKit.Panel(cb.transform, "Track", new Vector2(0f, -30f), new Vector2(240f, 12f), new Color(1f, 1f, 1f, 0.18f));
+            ctrack.raycastTarget = false;
+            var cfill = UiKit.Panel(ctrack.transform, "Fill", new Vector2(-120f, 0f), new Vector2(240f, 12f), UiKit.Yellow);
+            cfill.raycastTarget = false;
+            comboBar = cfill.rectTransform;
+            comboBar.pivot = new Vector2(0f, 0.5f);
+            cb.gameObject.SetActive(false);
+            GameManager.Instance.ComboMilestone += OnComboMilestone;
+
             flash = UiKit.Rect(canvas, "Hit flash", Vector2.zero, Vector2.one).gameObject.AddComponent<Image>();
             flash.sprite = EdgeVignette();
             flash.color = new Color(1f, 0.1f, 0.1f, 0f);
@@ -72,6 +88,12 @@ namespace DallasDash.Gameplay
 
         Image flash;
         float flashT;
+        RectTransform comboPill, comboBar;
+        Text comboText;
+        float comboPop;
+        int lastCombo;
+
+        void OnComboMilestone(int combo, int points) => comboPop = 1.6f;
 
         /// Clear in the middle, solid at the screen edges: the hit flash rims the view instead of tinting it.
         static Sprite EdgeVignette()
@@ -98,6 +120,7 @@ namespace DallasDash.Gameplay
         {
             PowerUps.Activated -= OnPowerUp;
             TrackSpawner.Struck -= OnStruck;
+            if (GameManager.Instance) GameManager.Instance.ComboMilestone -= OnComboMilestone;
         }
 
         void OnPowerUp(PowerUp p)
@@ -133,6 +156,18 @@ namespace DallasDash.Gameplay
             badge.gameObject.SetActive(running && gm.Multiplier > 1);
             badgeText.text = gm.ScoreFactor > gm.Multiplier ? $"x{gm.ScoreFactor}" : $"x{gm.Multiplier}";
             if (running && gm.ScoreFactor > 1) badge.gameObject.SetActive(true);
+
+            bool combo = running && gm.Combo >= 3;
+            comboPill.gameObject.SetActive(combo);
+            if (combo)
+            {
+                if (gm.Combo != lastCombo) comboPop = Mathf.Max(comboPop, 0.5f);
+                comboText.text = $"x{gm.Combo} COMBO";
+                comboBar.localScale = new Vector3(gm.ComboFraction, 1f, 1f);
+            }
+            lastCombo = gm.Combo;
+            comboPop = Mathf.MoveTowards(comboPop, 0f, Time.deltaTime * 4f);
+            comboPill.localScale = Vector3.one * (1f + comboPop * 0.18f);
 
             flashT = Mathf.MoveTowards(flashT, 0f, Time.unscaledDeltaTime * 3f);
             flash.color = new Color(1f, 0.12f, 0.1f, flashT * 0.7f);

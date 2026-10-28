@@ -30,11 +30,11 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5896988984762154665}
-  - {fileID: 563352659023739566}
-  - {fileID: 4857518452109143980}
+  - {fileID: 364294441080553654}
+  - {fileID: 8164183291225531091}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &4184266010063536305
+--- !u!1 &4541967067148350620
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -42,9 +42,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 4857518452109143980}
-  - component: {fileID: 8214644112157458485}
-  - component: {fileID: 935856834825943401}
+  - component: {fileID: 8164183291225531091}
+  - component: {fileID: 7471358443634053654}
+  - component: {fileID: 9201849337510483943}
   m_Layer: 0
   m_Name: Brake light
   m_TagString: Untagged
@@ -52,13 +52,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &4857518452109143980
+--- !u!4 &8164183291225531091
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4184266010063536305}
+  m_GameObject: {fileID: 4541967067148350620}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.72, y: 0.9421098, z: -2.22}
@@ -67,21 +67,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6441865275657488162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &8214644112157458485
+--- !u!33 &7471358443634053654
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4184266010063536305}
+  m_GameObject: {fileID: 4541967067148350620}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &935856834825943401
+--- !u!23 &9201849337510483943
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4184266010063536305}
+  m_GameObject: {fileID: 4541967067148350620}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -124,7 +124,7 @@ MeshRenderer:
   m_SortingOrder: 0
   m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!1 &7559920333990188347
+--- !u!1 &5431489363912263859
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -132,9 +132,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 563352659023739566}
-  - component: {fileID: 966407553637369623}
-  - component: {fileID: 3666086167392941514}
+  - component: {fileID: 364294441080553654}
+  - component: {fileID: 9032029339145019868}
+  - component: {fileID: 8971508859319044304}
   m_Layer: 0
   m_Name: Brake light
   m_TagString: Untagged
@@ -142,13 +142,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &563352659023739566
+--- !u!4 &364294441080553654
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7559920333990188347}
+  m_GameObject: {fileID: 5431489363912263859}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.72, y: 0.9421098, z: -2.22}
@@ -157,21 +157,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6441865275657488162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &966407553637369623
+--- !u!33 &9032029339145019868
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7559920333990188347}
+  m_GameObject: {fileID: 5431489363912263859}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &3666086167392941514
+--- !u!23 &8971508859319044304
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7559920333990188347}
+  m_GameObject: {fileID: 5431489363912263859}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1

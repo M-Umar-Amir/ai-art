@@ -1021,7 +1021,7 @@ namespace DallasDash.Gameplay
             if (Time.time - laneChangedAt > 0.45f) return;
             if (Mathf.Abs(o.transform.position.z - d) > o.halfLength + Tuning.PlayerHalf) return;
             o.nearMiss = true;
-            GameManager.Instance.AddBonus(NearMissBonus);
+            GameManager.Instance.AddNearMiss(NearMissBonus);
             Missions.Add(MissionStat.NearMisses, 1);
             NearMiss?.Invoke(o);
         }
@@ -1075,6 +1075,7 @@ namespace DallasDash.Gameplay
                 o.gameObject.AddComponent<Topple>();
                 GameManager.Instance.Bonk();
             }
+            GameManager.Instance.BreakCombo();
             Struck?.Invoke(o);
             rider.Wobble();
             if (chase) chase.Stumble();

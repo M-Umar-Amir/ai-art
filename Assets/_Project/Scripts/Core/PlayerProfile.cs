@@ -67,6 +67,13 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetFloat("volume", Mathf.Clamp01(value)); Save(); }
         }
 
+        /// Vibration taps on pickups and hits (Haptics).
+        public static bool Haptics
+        {
+            get => PlayerPrefs.GetInt("haptics", 1) == 1;
+            set { PlayerPrefs.SetInt("haptics", value ? 1 : 0); Save(); }
+        }
+
         public static bool Muted
         {
             get => PlayerPrefs.GetInt("muted", 0) == 1;

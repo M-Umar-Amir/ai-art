@@ -122,6 +122,10 @@ namespace DallasDash.Gameplay
                 yield return new WaitForSeconds(0.3f);
                 yield return Shot("missions");
                 menu.Open("none");
+                menu.Open("ranks");
+                yield return new WaitForSeconds(0.3f);
+                yield return Shot("ranks");
+                menu.Open("none");
                 // The earned scooter, on the title shot, without saving it to the profile.
                 var look = FindFirstObjectByType<RiderLook>();
                 if (look && look.scooter)
@@ -191,6 +195,14 @@ namespace DallasDash.Gameplay
             // The result card (with the mission strip) slides in after the two-shot.
             yield return new WaitForSeconds(1.4f);
             yield return Shot("result");
+            // The ranks board with the run just recorded on it.
+            var m = DallasDash.UI.MenuUI.Instance;
+            if (m)
+            {
+                m.Open("ranks");
+                yield return new WaitForSeconds(0.3f);
+                yield return Shot("ranks-after");
+            }
             Application.Quit();
         }
 

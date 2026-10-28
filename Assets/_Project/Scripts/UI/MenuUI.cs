@@ -23,7 +23,12 @@ namespace DallasDash.UI
         Image[] dayIcons;
         Button claimButton;
         Image[] tierButtons;
-        Text muteLabel;
+        Text muteLabel, hapticsLabel;
+        GameObject ranksPanel;
+        BoardPeriod ranksPeriod = BoardPeriod.Today;
+        Image[] ranksTabs;
+        Text[] rankRows;
+        Text ranksEmpty;
         Slider volume;
         GameObject settingsReturn, crewPanel;
         float toastTimer, captionTimer, captionAge, popupTimer;
@@ -74,6 +79,7 @@ namespace DallasDash.UI
             TrackSpawner.NearMiss += OnNearMiss;
             TrackSpawner.LandmarkAhead += OnLandmark;
             GameManager.Instance.MultiplierUp += m => { if (m > 1) Popup($"x{m} MULTIPLIER!"); };
+            GameManager.Instance.ComboMilestone += (c, pts) => Popup($"COMBO x{c}!  +{pts:N0}");
             OnState(GameManager.Instance.State);
             // First open of the day: show the calendar straight away.
             if (PlayerProfile.CanClaimDaily) ShowDaily();
@@ -100,6 +106,7 @@ namespace DallasDash.UI
             BuildCrew(root);
             BuildShop(root);
             BuildMissions(root);
+            BuildRanks(root);
 
             // Scene captions (Loading Up, Ran the Red, The Pursuit, street banners) and quick stunt popups.
             captionTitle = UiKit.Label(root, "", 118, new Vector2(0, 560), new Vector2(1000, 150), UiKit.Yellow);
@@ -149,12 +156,13 @@ namespace DallasDash.UI
             var play = UiKit.Button(t, "PLAY", new Vector2(0, -360), new Vector2(660, 210), UiKit.Green, Play, 104, "play");
             play.transform.Find("Face").gameObject.AddComponent<UiPulse>(); // the root's scale belongs to ButtonBounce
 
-            // Four icon tiles along the bottom; settings is the gear under the best-score pill.
-            Tile(t, "CREW", "rider", new Vector2(-390, -640), UiKit.Yellow, ShowCrew);
-            Tile(t, "SHOP", "cart", new Vector2(-130, -640), new Color(1f, 0.5f, 0.15f), ShowShop);
-            Tile(t, "MISSIONS", "list", new Vector2(130, -640), UiKit.Blue, ShowMissions);
-            var dailyBtn = Tile(t, "DAILY", "calendar", new Vector2(390, -640), UiKit.Red, ShowDaily);
-            var badge = UiKit.Panel(dailyBtn.transform, "Badge", new Vector2(92, 96), new Vector2(76, 76), UiKit.Yellow);
+            // Five icon tiles along the bottom; settings is the gear between the top pills.
+            Tile(t, "CREW", "rider", new Vector2(-420, -640), UiKit.Yellow, ShowCrew);
+            Tile(t, "SHOP", "cart", new Vector2(-210, -640), new Color(1f, 0.5f, 0.15f), ShowShop);
+            Tile(t, "MISSIONS", "list", new Vector2(0, -640), UiKit.Blue, ShowMissions);
+            Tile(t, "RANKS", "trophy", new Vector2(210, -640), new Color(0.55f, 0.3f, 0.85f), ShowRanks);
+            var dailyBtn = Tile(t, "DAILY", "calendar", new Vector2(420, -640), UiKit.Red, ShowDaily);
+            var badge = UiKit.Panel(dailyBtn.transform, "Badge", new Vector2(78, 92), new Vector2(70, 70), UiKit.Yellow);
             badge.sprite = UiKit.Gradient;
             UiKit.Label(badge.transform, "!", 56, new Vector2(0, 2), new Vector2(76, 76), Color.white);
             badge.gameObject.AddComponent<UiPulse>().scale = 0.12f;
@@ -165,10 +173,10 @@ namespace DallasDash.UI
         /// Square menu tile: big icon on top, a short word underneath.
         static Button Tile(Transform parent, string word, string icon, Vector2 pos, Color c, UnityEngine.Events.UnityAction onClick)
         {
-            var b = UiKit.Button(parent, "", pos, new Vector2(236, 230), c, onClick);
+            var b = UiKit.Button(parent, "", pos, new Vector2(192, 220), c, onClick);
             var face = b.transform.Find("Face");
-            UiKit.Icon(face, icon, new Vector2(0, 28), 124);
-            UiKit.Label(face, word, word.Length > 6 ? 32 : 40, new Vector2(0, -74), new Vector2(230, 50), Color.white);
+            UiKit.Icon(face, icon, new Vector2(0, 28), 112);
+            UiKit.Label(face, word, word.Length > 6 ? 28 : 36, new Vector2(0, -72), new Vector2(190, 50), Color.white);
             return b;
         }
 
@@ -241,8 +249,8 @@ namespace DallasDash.UI
         void BuildSettings(Transform root)
         {
             settings = UiKit.Shade(root, "Settings").gameObject;
-            var p = UiKit.Card(settings.transform, new Vector2(0, 40), new Vector2(940, 1000)).transform;
-            UiKit.Label(p, "SETTINGS", 92, new Vector2(0, 400), new Vector2(900, 120), UiKit.Yellow);
+            var p = UiKit.Card(settings.transform, new Vector2(0, 0), new Vector2(940, 1160)).transform;
+            UiKit.Label(p, "SETTINGS", 92, new Vector2(0, 470), new Vector2(900, 120), UiKit.Yellow);
 
             UiKit.Label(p, "GRAPHICS", 48, new Vector2(0, 260), new Vector2(800, 70), Color.white);
             tierButtons = new Image[3];
@@ -265,7 +273,10 @@ namespace DallasDash.UI
             var mute = UiKit.Button(p, "MUTE", new Vector2(330, -160), new Vector2(180, 100), UiKit.Red, ToggleMute, 40);
             muteLabel = mute.GetComponentInChildren<Text>();
 
-            UiKit.Button(p, "DONE", new Vector2(0, -370), new Vector2(420, 140), UiKit.Green, CloseSettings, 64);
+            var vib = UiKit.Button(p, "VIBRATION: ON", new Vector2(0, -300), new Vector2(560, 110), UiKit.Blue, ToggleHaptics, 44);
+            hapticsLabel = vib.GetComponentInChildren<Text>();
+
+            UiKit.Button(p, "DONE", new Vector2(0, -460), new Vector2(420, 130), UiKit.Green, CloseSettings, 60);
             settings.SetActive(false);
         }
 
@@ -296,8 +307,16 @@ namespace DallasDash.UI
             RefreshSettings();
         }
 
+        void ToggleHaptics()
+        {
+            PlayerProfile.Haptics = !PlayerProfile.Haptics;
+            Haptics.Play(Haptics.Strength.Medium);
+            RefreshSettings();
+        }
+
         void RefreshSettings()
         {
+            hapticsLabel.text = PlayerProfile.Haptics ? "VIBRATION: ON" : "VIBRATION: OFF";
             for (int i = 0; i < tierButtons.Length; i++)
                 tierButtons[i].color = i == PlayerProfile.Graphics ? UiKit.Yellow : new Color(0.2f, 0.26f, 0.55f);
             muteLabel.text = PlayerProfile.Muted ? "UNMUTE" : "MUTE";
@@ -663,6 +682,61 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
                 : $"Missions completed: {Missions.Level}   -   Courier scooter at {Missions.ScooterMissions}";
         }
 
+        // ---------- Ranks (leaderboard)
+
+        const int RankRows = 10;
+
+        void BuildRanks(Transform root)
+        {
+            ranksPanel = UiKit.Shade(root, "Ranks").gameObject;
+            var p = UiKit.Card(ranksPanel.transform, new Vector2(0, 40), new Vector2(980, 1300)).transform;
+            UiKit.Label(p, "RANKS", 96, new Vector2(0, 550), new Vector2(800, 120), UiKit.Yellow);
+            UiKit.Label(p, "Your best runs on this phone. Online boards are coming soon.", 30, new Vector2(0, 465), new Vector2(900, 50), UiKit.Cream);
+            ranksTabs = new Image[3];
+            string[] names = { "TODAY", "THIS WEEK", "ALL TIME" };
+            for (int i = 0; i < 3; i++)
+            {
+                var period = (BoardPeriod)i;
+                var b = UiKit.Button(p, names[i], new Vector2(-300 + i * 300, 360), new Vector2(270, 100), UiKit.Blue, () => { ranksPeriod = period; RefreshRanks(); }, 36);
+                ranksTabs[i] = b.transform.Find("Face").GetComponent<Image>();
+            }
+            rankRows = new Text[RankRows];
+            for (int i = 0; i < RankRows; i++)
+            {
+                float y = 250 - i * 82;
+                var row = UiKit.Panel(p, "Row" + i, new Vector2(0, y), new Vector2(880, 72), new Color(0.2f, 0.26f, 0.55f, i % 2 == 0 ? 0.9f : 0.65f));
+                row.raycastTarget = false;
+                rankRows[i] = UiKit.Label(row.transform, "", 32, new Vector2(10, 0), new Vector2(840, 70), Color.white, TextAnchor.MiddleLeft, false);
+                rankRows[i].supportRichText = true;
+            }
+            ranksEmpty = UiKit.Label(p, "No runs here yet. Ride to set a score!", 36, new Vector2(0, 0), new Vector2(880, 80), UiKit.Cream);
+            UiKit.Button(p, "X", new Vector2(430, 590), new Vector2(110, 110), UiKit.Red, () => ranksPanel.SetActive(false), 56);
+            ranksPanel.SetActive(false);
+        }
+
+        void ShowRanks()
+        {
+            ranksPanel.SetActive(true);
+            RefreshRanks();
+        }
+
+        void RefreshRanks()
+        {
+            for (int i = 0; i < ranksTabs.Length; i++)
+                ranksTabs[i].color = i == (int)ranksPeriod ? UiKit.Yellow : new Color(0.2f, 0.26f, 0.55f);
+            var runs = Leaderboard.Top(ranksPeriod, RankRows);
+            for (int i = 0; i < RankRows; i++)
+            {
+                rankRows[i].transform.parent.gameObject.SetActive(i < runs.Count);
+                if (i >= runs.Count) continue;
+                var r = runs[i];
+                string medal = i == 0 ? "<color=#FFCC26>" : i == 1 ? "<color=#E0E6F0>" : i == 2 ? "<color=#E39A5B>" : "<color=#FFFFFF>";
+                string when = ranksPeriod == BoardPeriod.Today ? r.When.ToLocalTime().ToString("HH:mm") : r.When.ToLocalTime().ToString("d MMM");
+                rankRows[i].text = $"{medal}#{i + 1}</color>   <color=#FFCC26>{r.score:N0}</color>   <color=#FFF3D6>{r.distance:N0} m  |  {r.burgers} burgers  |  x{r.bestCombo} combo  |  {when}</color>";
+            }
+            ranksEmpty.gameObject.SetActive(runs.Count == 0);
+        }
+
         // ---------- Captions
 
         GameObject skipHint;
@@ -691,6 +765,7 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
             CloseCrew();
             shopPanel.SetActive(false);
             missionsPanel.SetActive(false);
+            ranksPanel.SetActive(false);
             if (StoryDirector.Instance) StoryDirector.Instance.Play();
             else GameManager.Instance.StartRun();
         }
@@ -717,7 +792,9 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
                 StartCoroutine(ShowBustedAfter(1.4f));
                 var gm = GameManager.Instance;
                 bustedScore.text = gm.Score.ToString("N0");
-                bustedBest.text = gm.NewBest ? "NEW BEST SCORE!" : $"Best {PlayerProfile.BestScore:N0}";
+                string best = gm.NewBest ? "NEW BEST SCORE!" : $"Best {PlayerProfile.BestScore:N0}";
+                var r = gm.LastRanks;
+                bustedBest.text = r.today <= 3 ? $"{best}   |   #{r.today} today" : best;
                 bustedCoins.text = $"+{gm.CoinsEarned:N0} coins   ({gm.PickupCount} burgers)";
                 var lines = new System.Text.StringBuilder();
                 foreach (var m in Missions.Active) lines.AppendLine($"{m.Text}   {Mathf.Min(m.progress, m.target):N0}/{m.target:N0}");
@@ -775,6 +852,7 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
                 if (crewPanel.activeSelf) CloseCrew();
                 else if (shopPanel.activeSelf) shopPanel.SetActive(false);
                 else if (missionsPanel.activeSelf) missionsPanel.SetActive(false);
+                else if (ranksPanel.activeSelf) ranksPanel.SetActive(false);
                 else if (settings.activeSelf) CloseSettings();
                 else if (daily.activeSelf) daily.SetActive(false);
                 else if (pause.activeSelf) Resume();
@@ -816,11 +894,12 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
             if (panel == "crew") ShowCrew();
             if (panel == "shop") ShowShop();
             if (panel == "missions") ShowMissions();
+            if (panel == "ranks") ShowRanks();
             if (panel == "pause") Pause();
             if (panel == "none")
             {
                 daily.SetActive(false); settings.SetActive(false); CloseCrew();
-                shopPanel.SetActive(false); missionsPanel.SetActive(false);
+                shopPanel.SetActive(false); missionsPanel.SetActive(false); ranksPanel.SetActive(false);
             }
         }
     }

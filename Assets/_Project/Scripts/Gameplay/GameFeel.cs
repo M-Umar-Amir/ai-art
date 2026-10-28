@@ -52,6 +52,13 @@ namespace DallasDash.Gameplay
             rider.Dropped += () => sfx.PlayOneShot(drop);
             rider.Landed += () => dust.Emit(Params(rider.transform.position), 6);
             rider.LaneChanged += () => sfx.PlayOneShot(whoosh, 0.6f);
+            GameManager.Instance.ComboMilestone += (c, pts) =>
+            {
+                sfx.pitch = 1.15f;
+                sfx.PlayOneShot(powerUp, 0.5f);
+                burst.Emit(Params(rider.transform.position + Vector3.up * 1.2f), 24);
+                Haptics.Play(Haptics.Strength.Medium);
+            };
             GameManager.Instance.StateChanged += s => { if (s == RunState.Busted) { sfx.PlayOneShot(thud); cam.Shake(0.5f); } };
         }
 
@@ -71,6 +78,7 @@ namespace DallasDash.Gameplay
         {
             sfx.pitch = 1f;
             sfx.PlayOneShot(powerUp, 0.8f);
+            Haptics.Play(Haptics.Strength.Medium);
             var main = burst.main;
             var was = main.startColor;
             main.startColor = new ParticleSystem.MinMaxGradient(PowerUps.Colors[(int)p], Color.white);
@@ -91,6 +99,7 @@ namespace DallasDash.Gameplay
         void OnNearMiss(TrackObject o)
         {
             sfx.PlayOneShot(whoosh, 1f);
+            Haptics.Play(Haptics.Strength.Light);
             cam.Kick(1f);
             StartCoroutine(SlowMo());
         }
@@ -119,6 +128,7 @@ namespace DallasDash.Gameplay
             comboTimer = 0.6f;
             sfx.pitch = 1f + Mathf.Min(combo, 8) * 0.06f;
             sfx.PlayOneShot(coin, 0.7f);
+            Haptics.Play(Haptics.Strength.Light);
             burst.Emit(Params(o.transform.position), 14);
         }
 
@@ -128,6 +138,7 @@ namespace DallasDash.Gameplay
             sfx.PlayOneShot(thud);
             dust.Emit(Params(o.transform.position + Vector3.up * 0.5f), 18);
             cam.Shake(0.45f);
+            Haptics.Play(Haptics.Strength.Medium);
             if (GameManager.Instance.State == RunState.Running) StartCoroutine(HitStop());
         }
 

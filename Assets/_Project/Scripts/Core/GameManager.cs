@@ -21,11 +21,33 @@ namespace DallasDash.Core
         /// Set when a run ends: coins paid out (one per burger) and whether the score beat the saved best.
         public int CoinsEarned { get; private set; }
         public bool NewBest { get; private set; }
+        /// Where the run just ended placed on the Today / This week / All time boards.
+        public (int today, int week, int all) LastRanks { get; private set; }
         /// Frame the run started on, so the input that started it isn't also read as a move.
         public int StartFrame { get; private set; } = -1;
 
         public event Action<RunState> StateChanged;
         public event Action<int> MultiplierUp;
+
+        // ---- Burger combo: pickups in quick succession build a streak; a hit or a gap ends it.
+        /// Burgers in the current streak, and the longest streak this run.
+        public int Combo { get; private set; }
+        public int BestCombo { get; private set; }
+        /// 1 just after a pickup, draining to 0 when the streak runs out.
+        public float ComboFraction => Combo > 0 ? Mathf.Clamp01(comboTimer / ComboWindow) : 0f;
+        /// Every ComboStep burgers in a row pays ComboBonus points per step reached (x the score factor).
+        public const int ComboStep = 10, ComboBonus = 25;
+        const float ComboWindow = 1.1f;
+        float comboTimer;
+        /// (combo reached, points paid) at each milestone.
+        public event Action<int, int> ComboMilestone;
+
+        /// Seconds of riding this run (excludes pauses), and near misses pulled off: for the leaderboard.
+        public float RunTime { get; private set; }
+        public int NearMisses { get; private set; }
+
+        /// A hit ends the streak.
+        public void BreakCombo() { Combo = 0; comboTimer = 0f; }
 
         float scoreCarry;
         /// 1 right after a head-on hit, easing back to 0: the rider is slowed while it lasts.
@@ -45,6 +67,8 @@ namespace DallasDash.Core
             Multiplier = 1;
             scoreCarry = 0f;
             bonk = 0f;
+            Combo = BestCombo = NearMisses = 0;
+            comboTimer = RunTime = 0f;
             StartFrame = Time.frameCount;
             PowerUps.Clear();
             Missions.BeginRun();
@@ -62,6 +86,8 @@ namespace DallasDash.Core
             NewBest = Score > PlayerProfile.BestScore;
             if (NewBest) PlayerProfile.BestScore = Score;
             PlayerProfile.Coins += CoinsEarned;
+            LastRanks = Leaderboard.Record(this);
+            Haptics.Play(Haptics.Strength.Heavy);
             SetState(RunState.Busted);
         }
 
@@ -78,6 +104,12 @@ namespace DallasDash.Core
 
         /// Near misses and other stunts.
         public void AddBonus(int points) => Score += points * ScoreFactor;
+
+        public void AddNearMiss(int points)
+        {
+            NearMisses++;
+            AddBonus(points);
+        }
 
         /// Score multiplier with Double Score folded in.
         public int ScoreFactor => Multiplier * (PowerUps.Active(PowerUp.Double) ? 2 : 1);
@@ -104,6 +136,15 @@ namespace DallasDash.Core
             PickupCount++;
             Score += points * ScoreFactor;
             Missions.Add(MissionStat.Burgers, 1);
+            Combo = comboTimer > 0f ? Combo + 1 : 1;
+            comboTimer = ComboWindow;
+            BestCombo = Mathf.Max(BestCombo, Combo);
+            if (Combo % ComboStep == 0)
+            {
+                int pay = ComboBonus * (Combo / ComboStep) * ScoreFactor;
+                Score += pay;
+                ComboMilestone?.Invoke(Combo, pay);
+            }
         }
 
         void Update()
@@ -112,6 +153,8 @@ namespace DallasDash.Core
             if (State != RunState.Running || Paused) return;
 
             PowerUps.Tick(Time.deltaTime);
+            RunTime += Time.deltaTime;
+            if (comboTimer > 0f && (comboTimer -= Time.deltaTime) <= 0f) Combo = 0;
             Speed = Mathf.Min(Tuning.SpeedMax, Tuning.SpeedBase + Distance * Tuning.SpeedRamp);
             if (PowerUps.Active(PowerUp.Rush)) Speed *= PowerUps.RushSpeedFactor;
             bonk = Mathf.MoveTowards(bonk, 0f, Time.deltaTime * 0.8f);
