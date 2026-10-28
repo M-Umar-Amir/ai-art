@@ -1,5 +1,7 @@
 using System.Collections;
+using System.Collections.Generic;
 using System.IO;
+using Unity.Collections;
 using DallasDash.Core;
 using DallasDash.UI;
 using UnityEngine;
@@ -10,7 +12,8 @@ namespace DallasDash.Gameplay
     /// Client showcase recording: launch with `-showcase <dir>`. Tours the menus, plays the full story intro,
     /// lets the autopilot ride a run, then a bust, with a caption strip explaining each part.
     /// Game time is locked to 30 fps and every frame is saved as a JPG, so the video plays smoothly
-    /// however slowly the machine renders.
+    /// however slowly the machine renders. The game's mixed audio is captured offline in step with those
+    /// frames (AudioRenderer) and written to audio.wav beside them, ready to mux.
     public class Showcase : MonoBehaviour
     {
         const int Fps = 30;
@@ -36,9 +39,14 @@ namespace DallasDash.Gameplay
             }
         }
 
+        readonly List<float> audio = new();
+        int channels;
+
         void Awake()
         {
             Time.captureFramerate = Fps;
+            channels = AudioSettings.speakerMode == AudioSpeakerMode.Mono ? 1 : 2;
+            AudioRenderer.Start();
             MenuUI.ShowSkipHint = false;
             BuildOverlay();
         }
@@ -118,19 +126,27 @@ namespace DallasDash.Gameplay
             for (float t = 0.5f; t > 0f; t -= 1f / Fps) { card.alpha = t / 0.5f; yield return null; }
             card.alpha = 0f;
 
-            Say("MAIN MENU", "Play, Crew, Daily Bonus and Settings. Coins and best score are saved on the device.", 3.5f);
+            Say("MAIN MENU", "Play, Crew, Shop, Missions and the Daily Bonus. Coins and best score are saved on the device.", 3.5f);
             yield return new WaitForSeconds(4f);
-            menu.Open("daily");
-            Say("DAILY LOGIN BONUS", "A 7-day streak calendar. Rewards climb from 100 to 1,000 coins.", 3.5f);
-            yield return new WaitForSeconds(4f);
-            menu.Open("none");
-            menu.Open("settings");
-            Say("SETTINGS", "Graphics quality Low / Medium / High, a volume slider and mute.", 3.5f);
-            yield return new WaitForSeconds(4f);
-            menu.Open("none");
             menu.Open("crew");
-            Say("THE CREW", "Pick a rider: Finn and Faye on bikes. Fizz-11 unlocks at 25,000 points.", 3.5f);
+            Say("THE CREW", "A live 3D showroom: flip between Finn, Faye and Fizz-11. Fizz-11 unlocks at 25,000 points.", 3.5f);
+            yield return new WaitForSeconds(2.2f);
+            menu.FlipCrew(1);
+            yield return new WaitForSeconds(1.6f);
+            menu.FlipCrew(1);
+            yield return new WaitForSeconds(1.6f);
+            menu.Open("none");
+            menu.Open("shop");
+            Say("SHOP", "Spend coins to make power-ups last longer. The courier scooter is earned through missions, never sold.", 4f);
+            yield return new WaitForSeconds(4.5f);
+            menu.Open("none");
+            menu.Open("missions");
+            Say("MISSIONS", "Three goals at a time. Finish one for coins and a new one takes its place.", 3.5f);
             yield return new WaitForSeconds(4f);
+            menu.Open("none");
+            menu.Open("daily");
+            Say("DAILY LOGIN BONUS", "A 7-day streak calendar. Rewards climb from 100 to 1,000 coins.", 3f);
+            yield return new WaitForSeconds(3.5f);
             menu.Open("none");
             yield return new WaitForSeconds(0.6f);
 
@@ -139,26 +155,49 @@ namespace DallasDash.Gameplay
             StoryDirector.Instance.Play();
             while (GameManager.Instance.State != RunState.Running) yield return null;
 
-            Say("THE RUN", "Swipe left and right to change lanes, up to jump, down to roll.", 4f);
+            Say("THE RUN", "Swipe left and right to change lanes, up to jump, down to roll. Downtown Dallas at Christmas.", 4f);
             yield return new WaitForSeconds(6f);
             Say("COLLECT BURGERS", "Every burger is a coin. The score multiplier grows the further you ride.", 4f);
+            yield return new WaitForSeconds(5f);
+            PowerUps.Activate(PowerUp.Magnet);
+            Say("POWER-UPS: MAGNET", "Burgers fly in from every lane.", 3.5f);
+            yield return new WaitForSeconds(5f);
+            PowerUps.Activate(PowerUp.Double);
+            Say("POWER-UPS: DOUBLE SCORE", "Every point counts twice while the timer runs.", 3.5f);
+            yield return new WaitForSeconds(4.5f);
+            PowerUps.Activate(PowerUp.Rush);
+            Say("POWER-UPS: SUGAR RUSH", "Faster, and obstacles go flying instead of slowing you down.", 4f);
             yield return new WaitForSeconds(6f);
-            Say("NEAR MISSES", "Dodge close to an obstacle for bonus points and a slow-motion beat.", 4f);
-            yield return new WaitForSeconds(8f);
-            Say("THE CHASE", "Hit an obstacle and the officer closes in, siren blaring. Hit again while he's close and you're busted.", 5f);
-            yield return new WaitForSeconds(4f);
+            PowerUps.Clear();
+            Say("THE CHASE", "Hit an obstacle and it topples, you lose speed, and the officer closes in. Hit again while he's close and you're busted.", 5f);
+            yield return new WaitForSeconds(3f);
 
             // Let go of the bars: the next hits pull the officer in and end the run.
             autopilot = false;
             for (float t = 0f; GameManager.Instance.State == RunState.Running && t < 25f; t += Time.deltaTime) yield return null;
-            Say("BUSTED", "The run ends with a cutscene, then the score, coins earned and best score.", 5f);
-            yield return new WaitForSeconds(5.5f);
+            Say("BUSTED", "A two-shot cutscene, then the score, coins earned and mission progress.", 5f);
+            yield return new WaitForSeconds(6f);
 
-            yield return Card("FOOD INC GAME", "Next up: graphics polish, performance and the Android build.", 2.5f);
+            yield return Card("FOOD INC GAME", "Work-in-progress build\nNext: the Android build for phone testing.", 2.5f);
             card.alpha = 1f;
             yield return null;
             yield return null;
+            AudioRenderer.Stop();
+            WriteWav(Path.Combine(dir, "audio.wav"));
             Application.Quit();
+        }
+
+        /// 16-bit PCM WAV of everything AudioRenderer captured.
+        void WriteWav(string path)
+        {
+            int rate = AudioSettings.outputSampleRate;
+            using var w = new BinaryWriter(File.Create(path));
+            int bytes = audio.Count * 2;
+            w.Write(System.Text.Encoding.ASCII.GetBytes("RIFF")); w.Write(36 + bytes);
+            w.Write(System.Text.Encoding.ASCII.GetBytes("WAVEfmt ")); w.Write(16); w.Write((short)1); w.Write((short)channels);
+            w.Write(rate); w.Write(rate * channels * 2); w.Write((short)(channels * 2)); w.Write((short)16);
+            w.Write(System.Text.Encoding.ASCII.GetBytes("data")); w.Write(bytes);
+            foreach (float f in audio) w.Write((short)Mathf.Clamp(Mathf.RoundToInt(f * 32767f), -32768, 32767));
         }
 
         IEnumerator Record()
@@ -170,6 +209,15 @@ namespace DallasDash.Gameplay
                 var tex = ScreenCapture.CaptureScreenshotAsTexture(2);
                 File.WriteAllBytes(Path.Combine(dir, $"f{frame++:00000}.jpg"), tex.EncodeToJPG(92));
                 Destroy(tex);
+                // This frame's slice of the mix, so audio and video stay in step however slow the render.
+                int n = AudioRenderer.GetSampleCountForCaptureFrame();
+                if (n > 0)
+                {
+                    var buf = new NativeArray<float>(n * channels, Allocator.Temp);
+                    AudioRenderer.Render(buf);
+                    audio.AddRange(buf);
+                    buf.Dispose();
+                }
             }
         }
     }

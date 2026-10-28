@@ -12,6 +12,8 @@ namespace DallasDash.EditorTools
     public static class KitImport
     {
         const string Src = "Assets/_Project/Art/Models/Kit/city.glb";
+        /// Street props and trees: Quaternius Stylized Nature trees, Poly Haven street furniture (CC0).
+        const string PropSrc = "Assets/_Project/Art/Models/Kit/props.glb";
         const string MeshDir = "Assets/_Project/Art/Kit/Meshes";
         const string PrefabDir = "Assets/_Project/Prefabs/Kit";
         const string MatDir = "Assets/_Project/Materials/Kit";
@@ -29,10 +31,15 @@ namespace DallasDash.EditorTools
         public static bool Available => AssetDatabase.LoadAssetAtPath<GameObject>(Src);
 
         /// Prefab for one kit piece by its node name (e.g. "Brick_Window_Square_Single"), or null.
-        public static GameObject Get(string piece)
+        public static GameObject Get(string piece) => Get(Src, piece);
+
+        /// Prefab for one street prop or tree from props.glb, or null.
+        public static GameObject GetProp(string piece) => Get(PropSrc, piece);
+
+        static GameObject Get(string srcPath, string piece)
         {
             if (cache.TryGetValue(piece, out var hit) && hit) return hit;
-            var src = AssetDatabase.LoadAssetAtPath<GameObject>(Src);
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>(srcPath);
             if (!src) return null;
             var node = Find(src.transform, piece);
             if (!node) { Debug.LogWarning("[DallasDash] Kit piece missing: " + piece); return null; }
@@ -165,6 +172,11 @@ namespace DallasDash.EditorTools
             m.SetColor("_ShadeColor", new Color(0.72f, 0.76f, 0.9f));
             m.SetColor("_EmissionColor", name == "MI_FakeInterior" ? new Color(0.25f, 0.2f, 0.12f) : Color.black);
             m.SetFloat("_OutlineWidth", 0f);
+            // Tree leaves and bark are alpha-tested, double-sided cards (glTF MASK, cutoff 0.2).
+            bool foliage = name.StartsWith("Leaves") || name.StartsWith("Bark");
+            m.SetFloat("_Cutoff", foliage ? 0.3f : 0f);
+            m.SetFloat("_Cull", foliage ? 0f : 2f);
+            if (foliage) m.EnableKeyword("_ALPHATEST_ON"); else m.DisableKeyword("_ALPHATEST_ON");
             m.SetFloat("_RimStrength", name == "MI_Glass" ? 0.8f : 0.12f);
             EditorUtility.SetDirty(m);
             mats[name] = m;

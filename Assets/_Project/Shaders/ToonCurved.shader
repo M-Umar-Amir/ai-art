@@ -11,6 +11,9 @@ Shader "FoodInc/ToonCurved"
         _RimStrength ("Rim", Range(0,1)) = 0.35
         _OutlineWidth ("Outline Width", Range(0,0.05)) = 0
         _OutlineColor ("Outline Color", Color) = (0.12,0.1,0.16,1)
+        // Alpha-tested cut-outs (tree leaves): 0 keeps everything. Leaves also render both faces.
+        _Cutoff ("Alpha Cutoff", Range(0,1)) = 0
+        [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
     }
     SubShader
     {
@@ -24,6 +27,7 @@ Shader "FoodInc/ToonCurved"
         {
             Name "ForwardToon"
             Tags { "LightMode"="UniversalForward" }
+            Cull [_Cull]
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
@@ -31,6 +35,7 @@ Shader "FoodInc/ToonCurved"
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
+            #pragma shader_feature_local _ALPHATEST_ON
 
             struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; UNITY_VERTEX_INPUT_INSTANCE_ID };
             struct Varyings
@@ -61,6 +66,9 @@ Shader "FoodInc/ToonCurved"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv) * _BaseColor;
+                #ifdef _ALPHATEST_ON
+                clip(albedo.a - _Cutoff);
+                #endif
                 half3 n = normalize(i.normalWS);
                 Light main = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
                 // Cel step on the surface angle first, then the shadow on top. (Multiplying the shadow into
@@ -125,16 +133,20 @@ Shader "FoodInc/ToonCurved"
             Name "ShadowCaster"
             Tags { "LightMode"="ShadowCaster" }
             ZWrite On ZTest LEqual ColorMask 0
+            Cull [_Cull]
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
             #pragma multi_compile_vertex _ _CASTING_PUNCTUAL_LIGHT_SHADOW
+            #pragma shader_feature_local _ALPHATEST_ON
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Shadows.hlsl"
             float3 _LightDirection;
-            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; UNITY_VERTEX_INPUT_INSTANCE_ID };
-            float4 vert(Attributes v) : SV_POSITION
+            struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; float2 uv : TEXCOORD0; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct ShadowV { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; };
+            ShadowV vert(Attributes v)
             {
+                ShadowV o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 float3 ws = TransformObjectToWorld(v.positionOS.xyz);
                 float3 nws = TransformObjectToWorldNormal(v.normalOS);
@@ -144,9 +156,18 @@ Shader "FoodInc/ToonCurved"
                 #else
                     cs.z = max(cs.z, UNITY_NEAR_CLIP_VALUE);
                 #endif
-                return cs;
+                o.positionCS = cs;
+                o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
+                return o;
             }
-            half4 frag() : SV_Target { return 0; }
+            half4 frag(ShadowV i) : SV_Target
+            {
+                // Leaf cut-outs cast leafy shadows, not squares.
+                #ifdef _ALPHATEST_ON
+                clip(SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv).a * _BaseColor.a - _Cutoff);
+                #endif
+                return 0;
+            }
             ENDHLSL
         }
 
@@ -155,17 +176,29 @@ Shader "FoodInc/ToonCurved"
             Name "DepthOnly"
             Tags { "LightMode"="DepthOnly" }
             ZWrite On ColorMask R
+            Cull [_Cull]
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment frag
             #pragma multi_compile_instancing
-            struct Attributes { float4 positionOS : POSITION; UNITY_VERTEX_INPUT_INSTANCE_ID };
-            float4 vert(Attributes v) : SV_POSITION
+            #pragma shader_feature_local _ALPHATEST_ON
+            struct Attributes { float4 positionOS : POSITION; float2 uv : TEXCOORD0; UNITY_VERTEX_INPUT_INSTANCE_ID };
+            struct DepthV { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; };
+            DepthV vert(Attributes v)
             {
                 UNITY_SETUP_INSTANCE_ID(v);
-                return TransformWorldToHClip(CurveWorld(TransformObjectToWorld(v.positionOS.xyz)));
+                DepthV o;
+                o.positionCS = TransformWorldToHClip(CurveWorld(TransformObjectToWorld(v.positionOS.xyz)));
+                o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
+                return o;
             }
-            half4 frag() : SV_Target { return 0; }
+            half4 frag(DepthV i) : SV_Target
+            {
+                #ifdef _ALPHATEST_ON
+                clip(SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv).a * _BaseColor.a - _Cutoff);
+                #endif
+                return 0;
+            }
             ENDHLSL
         }
     }

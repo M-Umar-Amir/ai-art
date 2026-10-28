@@ -31,6 +31,12 @@ namespace DallasDash.Gameplay
             siren.volume = 0f;
             siren.clip = Synth.Siren();
             siren.Play();
+            // Background music under the menus and the run (public-domain Jingle Bells, synthesised).
+            music = gameObject.AddComponent<AudioSource>();
+            music.clip = Synth.Music();
+            music.loop = true;
+            music.volume = 0.32f;
+            music.Play();
             coin = Synth.Coin();
             jump = Synth.Sweep(320f, 760f, 0.16f, 0.35f);
             roll = Synth.Sweep(500f, 180f, 0.18f, 0.3f);
@@ -60,6 +66,7 @@ namespace DallasDash.Gameplay
         }
 
         AudioClip powerUp;
+        AudioSource music;
 
         void OnPowerUp(PowerUp p)
         {
@@ -92,8 +99,9 @@ namespace DallasDash.Gameplay
         System.Collections.IEnumerator HitStop()
         {
             if (GameManager.Instance.Paused) yield break;
-            Time.timeScale = 0.05f;
-            for (float t = 0f; t < 0.08f; t += Time.unscaledDeltaTime) yield return null;
+            // A brief slow-down, not a freeze: a near-zero time scale read as the game lagging.
+            Time.timeScale = 0.25f;
+            for (float t = 0f; t < 0.06f; t += Time.unscaledDeltaTime) yield return null;
             if (!GameManager.Instance.Paused) Time.timeScale = 1f;
         }
 
@@ -144,6 +152,13 @@ namespace DallasDash.Gameplay
             var chase = FindChase();
             float want = running && chase && chase.Close ? 0.35f : 0f;
             siren.volume = Mathf.MoveTowards(siren.volume, want, Time.deltaTime * 0.8f);
+            // Music ducks under the siren and drops away on the busted screen; slightly faster under Sugar Rush.
+            if (music)
+            {
+                float mv = gm.State == RunState.Busted ? 0.12f : running && chase && chase.Close ? 0.2f : 0.32f;
+                music.volume = Mathf.MoveTowards(music.volume, mv, Time.unscaledDeltaTime * 0.6f);
+                music.pitch = Mathf.MoveTowards(music.pitch, running && PowerUps.Active(PowerUp.Rush) ? 1.08f : 1f, Time.unscaledDeltaTime * 0.5f);
+            }
         }
 
         ChaseController chaseCache;

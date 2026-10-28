@@ -17,6 +17,7 @@ CBUFFER_START(UnityPerMaterial)
     half _RimStrength;
     half _OutlineWidth;
     half4 _OutlineColor;
+    half _Cutoff;
 CBUFFER_END
 
 float3 CurveWorld(float3 positionWS)

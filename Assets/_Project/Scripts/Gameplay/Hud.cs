@@ -63,8 +63,7 @@ namespace DallasDash.Gameplay
             PowerUps.Activated += OnPowerUp;
 
             flash = UiKit.Rect(canvas, "Hit flash", Vector2.zero, Vector2.one).gameObject.AddComponent<Image>();
-            flash.sprite = UiKit.Soft;
-            flash.type = Image.Type.Sliced;
+            flash.sprite = EdgeVignette();
             flash.color = new Color(1f, 0.1f, 0.1f, 0f);
             flash.raycastTarget = false;
             flash.transform.SetAsFirstSibling();
@@ -73,6 +72,25 @@ namespace DallasDash.Gameplay
 
         Image flash;
         float flashT;
+
+        /// Clear in the middle, solid at the screen edges: the hit flash rims the view instead of tinting it.
+        static Sprite EdgeVignette()
+        {
+            const int n = 64;
+            var tex = new Texture2D(n, n, TextureFormat.RGBA32, false) { wrapMode = TextureWrapMode.Clamp };
+            var px = new Color[n * n];
+            for (int y = 0; y < n; y++)
+            for (int x = 0; x < n; x++)
+            {
+                float dx = Mathf.Abs((x + 0.5f) / n * 2f - 1f), dy = Mathf.Abs((y + 0.5f) / n * 2f - 1f);
+                float d = Mathf.Max(dx, dy * 0.9f);
+                float a = Mathf.SmoothStep(0f, 1f, Mathf.InverseLerp(0.62f, 1f, d));
+                px[y * n + x] = new Color(1f, 1f, 1f, a);
+            }
+            tex.SetPixels(px);
+            tex.Apply();
+            return Sprite.Create(tex, new Rect(0, 0, n, n), new Vector2(0.5f, 0.5f));
+        }
 
         void OnStruck(TrackObject o) => flashT = 1f;
 
@@ -116,8 +134,8 @@ namespace DallasDash.Gameplay
             badgeText.text = gm.ScoreFactor > gm.Multiplier ? $"x{gm.ScoreFactor}" : $"x{gm.Multiplier}";
             if (running && gm.ScoreFactor > 1) badge.gameObject.SetActive(true);
 
-            flashT = Mathf.MoveTowards(flashT, 0f, Time.unscaledDeltaTime * 2.5f);
-            flash.color = new Color(1f, 0.12f, 0.1f, flashT * 0.45f);
+            flashT = Mathf.MoveTowards(flashT, 0f, Time.unscaledDeltaTime * 3f);
+            flash.color = new Color(1f, 0.12f, 0.1f, flashT * 0.7f);
 
             float y = -166f;
             for (int i = 0; i < PowerUps.Count; i++)

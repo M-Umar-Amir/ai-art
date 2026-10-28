@@ -23,8 +23,17 @@ namespace DallasDash.Gameplay
         ProfilerRecorder batchRec, setPassRec, triRec;
         readonly FrameTiming[] timing = new FrameTiming[1];
 
+        // Whole-run hitch tracking, including the late chase after the autopilot lets go (where speed peaks).
+        int lateFrames, lateHitches;
+        float lateWorst;
+
         void Update()
         {
+            if (GameManager.Instance.State == RunState.Running && Time.unscaledTime - lastShotAt > 0.3f && frames > 30)
+            {
+                float ms = Time.unscaledDeltaTime * 1000f;
+                if (!autopilot) { lateFrames++; lateWorst = Mathf.Max(lateWorst, ms); if (ms > 25f) lateHitches++; }
+            }
             if (!autopilot || GameManager.Instance.State != RunState.Running) return;
             // Saving a double-size screenshot stalls a frame or two: leave those out of the reading.
             if (Time.unscaledTime - lastShotAt < 0.3f) return;
@@ -155,6 +164,7 @@ namespace DallasDash.Gameplay
                 wait += Time.deltaTime;
                 yield return null;
             }
+            File.AppendAllText(Path.Combine(dir, "fps.txt"), $"late run (top speed, chase): {lateFrames} frames, worst {lateWorst:F1} ms, hitches over 25 ms: {lateHitches}" + "\n");
             yield return new WaitForSeconds(0.8f);
             yield return Shot("busted");
             // The result card (with the mission strip) slides in after the two-shot.

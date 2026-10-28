@@ -79,7 +79,7 @@ namespace DallasDash.UI
             if (models == null) return;
             Shown = Mathf.Clamp(index, 0, models.Length - 1);
             for (int i = 0; i < models.Length; i++) if (models[i]) models[i].SetActive(i == Shown);
-            spin = 200f; // start three-quarter on, facing slightly left
+            spin = 0f;
             // Frame the whole figure, a little headroom, looking slightly down from chest height.
             var b = bounds[Shown];
             float h = Mathf.Max(b.size.y, b.size.x * 0.8f);
@@ -97,9 +97,10 @@ namespace DallasDash.UI
         void Update()
         {
             if (!cam || !cam.enabled) return;
-            // Slow showroom turn with a gentle idle bob.
-            spin += Time.unscaledDeltaTime * 35f;
-            turntable.rotation = Quaternion.Euler(0f, spin, 0f);
+            // Showroom sway around a front three-quarter view (a full turn showed the back half the time),
+            // with a gentle idle bob. The models face +Z; the camera looks at them from -Z.
+            spin += Time.unscaledDeltaTime;
+            turntable.rotation = Quaternion.Euler(0f, 180f + 18f + Mathf.Sin(spin * 0.9f) * 35f, 0f);
             turntable.position = Origin + Vector3.up * Mathf.Sin(Time.unscaledTime * 2f) * 0.02f;
         }
     }

@@ -474,6 +474,11 @@ namespace DallasDash.EditorTools
                 spawner.kitFrame = KitImport.Material(KitImport.FrameMaterial);
                 spawner.kitBrickBody = mats["BrickRed"];
                 spawner.kitMetalBody = mats["Skyline"];
+                spawner.kitTrees = System.Array.ConvertAll(new[] { "CommonTree_3", "CommonTree_4" }, KitImport.GetProp);
+                spawner.kitLamp = KitImport.GetProp("street_lamp_01");
+                spawner.kitTrash = KitImport.GetProp("metal_trash_can");
+                spawner.kitUtility = KitImport.GetProp("utility_box_02");
+                spawner.kitBush = KitImport.GetProp("Bush_Common");
             }
             spawner.decorPrefabs = new[] { ModelImport.Get("tree-planter"), ModelImport.Get("presents") };
             spawner.bulbColors = new[] { new Color(1f, 0.25f, 0.2f), new Color(0.3f, 1f, 0.4f), new Color(1f, 0.82f, 0.3f), new Color(1f, 0.95f, 0.85f) };

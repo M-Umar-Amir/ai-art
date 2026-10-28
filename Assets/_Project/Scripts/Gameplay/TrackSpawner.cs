@@ -53,6 +53,10 @@ namespace DallasDash.Gameplay
         /// Body colour behind each style, for the building sides and roof.
         public Material kitBrickBody, kitMetalBody;
 
+        [Header("Street props (CC0: Quaternius trees, Poly Haven furniture)")]
+        public GameObject[] kitTrees;
+        public GameObject kitLamp, kitTrash, kitUtility, kitBush;
+
         /// Sidewalk dressing (small trees, presents): spawned without hit tests.
         public GameObject[] decorPrefabs;
 
@@ -116,6 +120,8 @@ namespace DallasDash.Gameplay
 
         void ResetTrack()
         {
+            pending.Clear();
+            building = null;
             foreach (var o in live) if (o) Destroy(o.gameObject);
             foreach (var s in segments) if (s) Destroy(s);
             live.Clear();
@@ -128,6 +134,27 @@ namespace DallasDash.Gameplay
             landmarkIndex = 0;
             segmentIndex = 0;
             Build(0f);
+            while (Pump()) { }
+        }
+
+        // ---- Frame-sliced street building. A modular block is ~100 kit pieces plus a mesh merge; built in one
+        // frame it cost 20-60 ms, and at top speed two blocks a second made the late run stutter. Each block is
+        // now built over about five frames (road, left side, its merge, right side, its merge), queued well
+        // beyond view distance so nothing pops in.
+
+        readonly Queue<System.Collections.IEnumerator> pending = new();
+        System.Collections.IEnumerator building;
+
+        /// Advances the queued street work by one step. False when there is nothing left to do.
+        bool Pump()
+        {
+            if (building == null)
+            {
+                if (pending.Count == 0) return false;
+                building = pending.Dequeue();
+            }
+            if (!building.MoveNext()) building = null;
+            return true;
         }
 
         void Update()
@@ -136,6 +163,9 @@ namespace DallasDash.Gameplay
             if (gm == null) return;
             float d = gm.Distance;
             Build(d);
+            // One step a frame; catch up faster if the queue backs up.
+            Pump();
+            if (pending.Count > 3) Pump();
             if (gm.State == RunState.Running)
             {
                 if (rider.Lane != lastLane) { laneFrom = lastLane; laneChangedAt = Time.time; lastLane = rider.Lane; }
@@ -152,9 +182,14 @@ namespace DallasDash.Gameplay
             {
                 SpawnLandmark(landmarks[landmarkIndex++]);
             }
-            while (builtTo < d + Tuning.FarEdge)
+            while (builtTo < d + Tuning.FarEdge + segmentLength * 2f)
             {
-                segments.Add(MakeSegment(builtTo));
+                var root = new GameObject("Segment");
+                root.transform.SetParent(transform);
+                // Root sits at the segment start so Cull() sees its real distance.
+                root.transform.position = new Vector3(0f, 0f, builtTo);
+                segments.Add(root);
+                pending.Enqueue(SegmentSteps(root, builtTo));
                 builtTo += segmentLength;
             }
             while (nextRow < d + Tuning.FarEdge)
@@ -164,45 +199,55 @@ namespace DallasDash.Gameplay
             }
         }
 
-        GameObject MakeSegment(float z)
+        System.Collections.IEnumerator SegmentSteps(GameObject root, float z)
         {
-            var root = new GameObject("Segment");
-            root.transform.SetParent(transform);
-            // Root sits at the segment start so Cull() sees its real distance.
-            root.transform.position = new Vector3(0f, 0f, z);
+            var t = root.transform;
             var road = GameObject.CreatePrimitive(PrimitiveType.Cube);
-            road.transform.SetParent(root.transform);
+            road.transform.SetParent(t);
             road.transform.localScale = new Vector3(8f, 0.2f, segmentLength);
             road.transform.position = new Vector3(0f, -0.1f, z + segmentLength / 2f);
             Paint(road, roadMaterial);
             foreach (float side in new[] { -1f, 1f })
             {
                 var walk = GameObject.CreatePrimitive(PrimitiveType.Cube);
-                walk.transform.SetParent(root.transform);
+                walk.transform.SetParent(t);
                 walk.transform.localScale = new Vector3(3f, 0.4f, segmentLength);
                 walk.transform.position = new Vector3(side * 5.5f, 0f, z + segmentLength / 2f);
                 Paint(walk, sidewalkMaterial);
-                Block(root.transform, new Vector3(side * 4.05f, 0.12f, z + segmentLength / 2f), new Vector3(0.18f, 0.3f, segmentLength), curbMaterial);
-                if (InPlaza(side, z)) Plaza(root.transform, side, z);
-                else
-                {
-                    Storefront(root.transform, side, z);
-                    Skyline(root.transform, side, z);
-                }
-                LampPost(root.transform, side, z + 5f);
-                LampPost(root.transform, side, z + 15f);
-                SidewalkDecor(root.transform, side, z);
-                Furniture(root.transform, side, z);
+                Block(t, new Vector3(side * 4.05f, 0.12f, z + segmentLength / 2f), new Vector3(0.18f, 0.3f, segmentLength), curbMaterial);
             }
             // Dashed lane lines between the three lanes.
             foreach (float lx in new[] { -1.15f, 1.15f })
                 for (float dz = 1f; dz < segmentLength; dz += 5f)
-                    Block(root.transform, new Vector3(lx, 0.005f, z + dz + 1.25f), new Vector3(0.12f, 0.02f, 2.5f), laneLineMaterial);
-            RoadDetail(root.transform, z);
+                    Block(t, new Vector3(lx, 0.005f, z + dz + 1.25f), new Vector3(0.12f, 0.02f, 2.5f), laneLineMaterial);
+            RoadDetail(t, z);
             // String lights across the street every other segment.
-            if (segmentIndex++ % 2 == 0) StringLights(root.transform, z + segmentLength / 2f);
+            if (segmentIndex++ % 2 == 0) StringLights(t, z + segmentLength / 2f);
             Combine(root);
-            return root;
+            yield return null;
+
+            foreach (float side in new[] { -1f, 1f })
+            {
+                if (!root) yield break;
+                // Each side gets its own batching root, so the merge cost is split across frames too.
+                var sideRoot = new GameObject(side < 0f ? "Left" : "Right").transform;
+                sideRoot.SetParent(t, false);
+                if (InPlaza(side, z)) Plaza(sideRoot, side, z);
+                else
+                {
+                    Storefront(sideRoot, side, z);
+                    Skyline(sideRoot, side, z);
+                }
+                LampPost(sideRoot, side, z + 5f);
+                LampPost(sideRoot, side, z + 15f);
+                StreetTree(sideRoot, side, z + 10f);
+                SidewalkDecor(sideRoot, side, z);
+                Furniture(sideRoot, side, z);
+                yield return null;
+                if (!root) yield break;
+                Combine(sideRoot.gameObject);
+                yield return null;
+            }
         }
 
         Material patchMaterial;
@@ -252,7 +297,11 @@ namespace DallasDash.Gameplay
                 Block(root, new Vector3(side * 4.55f, 0.74f, hz), new Vector3(0.2f, 0.1f, 0.2f), red);
                 Block(root, new Vector3(side * 4.55f, 0.5f, hz), new Vector3(0.42f, 0.1f, 0.12f), red);
             }
-            else if (r < 0.55f && doorMaterial)
+            else if (r < 0.42f && kitTrash)
+                Prop(root, kitTrash, new Vector3(side * 6.55f, SidewalkTop, z + Random.Range(6f, 14f)), side > 0 ? -90f : 90f, 0.9f);
+            else if (r < 0.5f && kitUtility)
+                Prop(root, kitUtility, new Vector3(side * 6.6f, SidewalkTop, z + Random.Range(6f, 14f)), side > 0 ? -90f : 90f, 1f);
+            else if (r < 0.62f && doorMaterial)
             {
                 float bz = z + Random.Range(3f, 17f);
                 float bx = side * 6.4f;
@@ -671,6 +720,13 @@ namespace DallasDash.Gameplay
         void LampPost(Transform parent, float side, float z)
         {
             float x = side * 4.6f;
+            if (kitLamp)
+            {
+                // Cast-iron street lamp, its arm reaching out over the road.
+                Prop(parent, kitLamp, new Vector3(x, SidewalkTop, z), side > 0 ? 90f : -90f, 1.4f);
+                LampWreath(parent, side, x, z);
+                return;
+            }
             var pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             Destroy(pole.GetComponent<Collider>());
             pole.transform.SetParent(parent);
@@ -684,7 +740,12 @@ namespace DallasDash.Gameplay
             lamp.transform.position = new Vector3(x, 5.3f, z);
             lamp.transform.localScale = Vector3.one * 0.36f;
             Paint(lamp, bulbMaterial);
-            // Wreath: a green disc facing the street, with a red bow.
+            LampWreath(parent, side, x, z);
+        }
+
+        /// Wreath on the lamp post: a green disc facing the street, with a red bow.
+        void LampWreath(Transform parent, float side, float x, float z)
+        {
             var wreath = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
             Destroy(wreath.GetComponent<Collider>());
             wreath.transform.SetParent(parent);
@@ -693,6 +754,26 @@ namespace DallasDash.Gameplay
             wreath.transform.localScale = new Vector3(0.75f, 0.06f, 0.75f);
             Paint(wreath, wreathMaterial);
             Block(parent, new Vector3(x - side * 0.2f, 3.32f, z), new Vector3(0.12f, 0.18f, 0.34f), awningMaterials != null && awningMaterials.Length > 0 ? awningMaterials[0] : null);
+        }
+
+        const float SidewalkTop = 0.2f;
+
+        /// A street tree in a dark iron grate near the curb, between the lamp posts, on most blocks.
+        void StreetTree(Transform parent, float side, float z)
+        {
+            if (kitTrees == null || kitTrees.Length == 0 || Random.value < 0.3f || InPlaza(side, z - 10f)) return;
+            float x = side * 5.05f;
+            Block(parent, new Vector3(x, SidewalkTop + 0.01f, z), new Vector3(1.3f, 0.03f, 1.3f), lampPostMaterial);
+            Prop(parent, kitTrees[Random.Range(0, kitTrees.Length)], new Vector3(x, SidewalkTop, z), Random.Range(0f, 360f), Random.Range(0.5f, 0.6f));
+        }
+
+        /// Places a kit prop as a direct child of the segment (so it batches), standing on y with its real base.
+        void Prop(Transform parent, GameObject prefab, Vector3 at, float yaw, float scale)
+        {
+            var go = Instantiate(prefab, at, Quaternion.Euler(0f, yaw, 0f), parent);
+            go.transform.localScale = Vector3.one * scale;
+            var mf = go.GetComponent<MeshFilter>();
+            if (mf && mf.sharedMesh) go.transform.position += Vector3.up * (-mf.sharedMesh.bounds.min.y * scale);
         }
 
         /// Far downtown towers above the shop roofs, tinted toward the fog so they sit back.
@@ -736,12 +817,33 @@ namespace DallasDash.Gameplay
             for (int i = 1; i < bulbs - 1; i++)
             {
                 float t = i / (float)(bulbs - 1);
-                // Bulbs are tiny and bloomed: a turned cube (12 triangles) reads the same as a sphere (768).
-                var b = Block(parent, Wire(t) + Vector3.down * 0.1f, new Vector3(0.12f, 0.17f, 0.12f), null);
-                b.transform.rotation = Quaternion.Euler(0f, 45f, 0f);
+                // A tiny elongated diamond (8 triangles) reads as a glowing bulb up close and far away;
+                // spheres cost 768 triangles each, and cubes looked like boxes when the camera passed under.
+                var b = new GameObject("Bulb", typeof(MeshFilter), typeof(MeshRenderer));
+                b.GetComponent<MeshFilter>().sharedMesh = BulbMesh;
+                b.transform.SetParent(parent);
+                b.transform.position = Wire(t) + Vector3.down * 0.12f;
+                b.transform.localScale = new Vector3(0.11f, 0.17f, 0.11f);
                 // Alternate red, green, gold and warm white. One shared material per colour (not property blocks),
                 // so the bulbs batch with each other.
                 Paint(b, BulbMaterial(i));
+            }
+        }
+
+        static Mesh bulbMesh;
+
+        /// Octahedron, unit size, pointed top and bottom: the string-light bulb.
+        static Mesh BulbMesh
+        {
+            get
+            {
+                if (bulbMesh) return bulbMesh;
+                var v = new[] { Vector3.up * 0.5f, Vector3.down * 0.5f, new Vector3(0.5f, 0f, 0f), new Vector3(0f, 0f, 0.5f), new Vector3(-0.5f, 0f, 0f), new Vector3(0f, 0f, -0.5f) };
+                var tris = new[] { 0, 3, 2, 0, 4, 3, 0, 5, 4, 0, 2, 5, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 2 };
+                bulbMesh = new Mesh { name = "Bulb", vertices = v, triangles = tris };
+                bulbMesh.RecalculateNormals();
+                bulbMesh.RecalculateBounds();
+                return bulbMesh;
             }
         }
 
