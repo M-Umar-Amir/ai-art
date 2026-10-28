@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 163934f16c909484ab16f8cf51b99ae7, type: 3}
+  m_Name: reunion-tower
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.LandmarkDef
+  id: reunion-tower
+  displayName: Reunion Tower
+  description: 
+  atDistance: 300
+  side: 1
+  street: Reunion Blvd
+  referenceSheet: {fileID: 2800000, guid: a62cd5532e85a4544927befe683299f8, type: 3}
+  prefab: {fileID: 8623092263629136140, guid: 307005a145901da459094b74bac891d8, type: 3}

@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3700106e12c20d848bfb021b5d581293, type: 3}
+  m_Name: bicycle
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.RideDef
+  id: bicycle
+  displayName: Delivery bicycle
+  description: Starter ride. Warm yellow and cream frame, chunky tyres, front basket,
+    insulated delivery backpack on the rear rack.
+  unlock: 0
+  unlockPoints: 0
+  isPolice: 0
+  handling: 1.1
+  referenceSheet: {fileID: 2800000, guid: 6e5bf137392c0d94fa2a5b5fa70d3941, type: 3}
+  prefab: {fileID: 0}

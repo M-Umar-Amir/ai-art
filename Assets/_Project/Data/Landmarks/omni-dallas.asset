@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 163934f16c909484ab16f8cf51b99ae7, type: 3}
+  m_Name: omni-dallas
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.LandmarkDef
+  id: omni-dallas
+  displayName: Omni Dallas hotel
+  description: 
+  atDistance: 2700
+  side: 1
+  street: Lamar Street
+  referenceSheet: {fileID: 2800000, guid: 5b90b19381439344b949000c6f3c81b3, type: 3}
+  prefab: {fileID: 1412019129687947180, guid: 30021a14396f03747b41957e54c11fa5, type: 3}

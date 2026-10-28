@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c8713a1fc2fd04eafeac98bdd1d5b7, type: 3}
+  m_Name: shopper
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.ObstacleDef
+  id: shopper
+  displayName: Jaywalking shopper with gift bags
+  kind: 3
+  size: {x: 0.9, y: 1.8, z: 0.6}
+  weight: 2
+  placeholderColor: {r: 0.3, g: 0.6, b: 0.35, a: 1}
+  prefab: {fileID: 1013447351172597626, guid: 0af8593ad3d307241821dfb0a9a176ce, type: 3}

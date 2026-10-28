@@ -1,0 +1,22 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 163934f16c909484ab16f8cf51b99ae7, type: 3}
+  m_Name: bank-of-america-plaza
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.LandmarkDef
+  id: bank-of-america-plaza
+  displayName: Bank of America Plaza
+  description: 
+  atDistance: 1500
+  side: 1
+  street: Main Street
+  referenceSheet: {fileID: 2800000, guid: f4afc448e81bbf144afc454b10bfd53b, type: 3}
+  prefab: {fileID: 8180003568752820598, guid: 0a1c18ab790ffbb42a4fa51d40632888, type: 3}

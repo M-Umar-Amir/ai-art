@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c8713a1fc2fd04eafeac98bdd1d5b7, type: 3}
+  m_Name: roadworks-barrier
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.ObstacleDef
+  id: roadworks-barrier
+  displayName: Roadworks barrier
+  kind: 1
+  size: {x: 2, y: 0.8, z: 0.4}
+  weight: 2
+  placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+  prefab: {fileID: 949149732010826991, guid: 7175ef75b0301d44f95c43a2233415c7, type: 3}
