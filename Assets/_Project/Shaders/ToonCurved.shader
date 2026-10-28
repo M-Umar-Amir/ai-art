@@ -73,6 +73,13 @@ Shader "FoodInc/ToonCurved"
                 // keep their colour instead of washing out to cream under bloom.
                 half3 light = albedo.rgb * (main.color * 0.68 + ambient * 0.18);
                 half3 c = lerp(shade, light, lit);
+                // Baked-look occlusion without lightmaps (the street is generated at runtime): walls and the sides
+                // of props darken softly where they meet the ground, and lower floors get a little less sky than
+                // upper ones in the street canyon. Only vertical surfaces; the road itself is untouched.
+                half vertical = 1 - abs(n.y);
+                half contact = lerp(0.62, 1, smoothstep(0.0, 1.3, i.positionWS.y));
+                half canyon = lerp(0.93, 1, saturate(i.positionWS.y / 10.0));
+                c *= lerp(1, contact * canyon, vertical);
                 half3 v = normalize(GetWorldSpaceViewDir(i.positionWS));
                 half rim = pow(1 - saturate(dot(n, v)), 3) * _RimStrength * (0.4 + 0.6 * lit);
                 c += rim * main.color * 0.6;

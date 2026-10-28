@@ -452,6 +452,29 @@ namespace DallasDash.EditorTools
             spawner.plazaMaterial = mats["Plaza"];
             spawner.signFont = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
             spawner.signTextMaterial = mats["SignText"];
+            if (KitImport.Available)
+            {
+                // Modular facades from the Quaternius Downtown City MegaKit (CC0), flattened by KitImport.
+                GameObject[] K(params string[] ids) => System.Array.ConvertAll(ids, KitImport.Get);
+                spawner.kitGround = K("Trim_FirstFloor_Window_001", "Metal_FirstFloor_Window");
+                spawner.kitDoorFrame = KitImport.Get("DoorFrame_Metal_Single");
+                spawner.kitBrickWindows = K("Brick_Window_Square_Single", "Brick_Window_Trim_Single");
+                spawner.kitTrimWindows = K("Trim_Window");
+                spawner.kitMetalWindows = K("Metal_Window_Half", "Metal_FullWindow");
+                spawner.kitBrickPlain = KitImport.Get("Brick_Plain_3");
+                spawner.kitTrimPlain = KitImport.Get("Trim_Plain_3");
+                spawner.kitMetalPlain = KitImport.Get("Metal_Plain_3");
+                spawner.kitBrickCornice = KitImport.Get("Cornice_Brick_Center");
+                spawner.kitTrimCornice = KitImport.Get("Cornice_Trim_Center");
+                spawner.kitMetalCornice = KitImport.Get("Cornice_Metal_Center");
+                spawner.kitTrim = KitImport.Material("MI_Trim");
+                spawner.kitPaints = KitImport.PaintVariants();
+                spawner.kitGlass = KitImport.Material("MI_Glass");
+                spawner.kitShopGlass = KitImport.ShopGlass();
+                spawner.kitFrame = KitImport.Material(KitImport.FrameMaterial);
+                spawner.kitBrickBody = mats["BrickRed"];
+                spawner.kitMetalBody = mats["Skyline"];
+            }
             spawner.decorPrefabs = new[] { ModelImport.Get("tree-planter"), ModelImport.Get("presents") };
             spawner.bulbColors = new[] { new Color(1f, 0.25f, 0.2f), new Color(0.3f, 1f, 0.4f), new Color(1f, 0.82f, 0.3f), new Color(1f, 0.95f, 0.85f) };
             ApplyGroundTextures(mats);
@@ -787,7 +810,7 @@ namespace DallasDash.EditorTools
                 var tm = label.GetComponent<TextMesh>();
                 tm.text = "SEASON'S EATINGS";
                 tm.anchor = TextAnchor.MiddleCenter;
-                tm.characterSize = 0.043f;
+                tm.characterSize = 0.037f;
                 tm.fontSize = 64;
                 tm.color = FestiveRed;
                 if (font) { tm.font = font; label.GetComponent<MeshRenderer>().sharedMaterial = mats["SignText"]; }

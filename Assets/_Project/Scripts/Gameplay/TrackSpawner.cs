@@ -35,6 +35,24 @@ namespace DallasDash.Gameplay
         public Font signFont;
         /// FoodInc/TextCurved: lettering that bends with the street and sits on its board.
         public Material signTextMaterial;
+        [Header("Modular facades (Quaternius Downtown City MegaKit, CC0)")]
+        /// 2 m shop-window modules for the ground floor.
+        public GameObject[] kitGround;
+        public GameObject kitDoorFrame;
+        /// 2 m upper-floor window modules per facade style: red brick, painted plaster, metal and glass.
+        public GameObject[] kitBrickWindows, kitTrimWindows, kitMetalWindows;
+        public GameObject kitBrickPlain, kitTrimPlain, kitMetalPlain;
+        public GameObject kitBrickCornice, kitTrimCornice, kitMetalCornice;
+        /// The kit's cream render material and its repainted variants (KitImport.Paints).
+        public Material kitTrim;
+        public Material[] kitPaints;
+        /// The kit's glass, and the warm lit-shop glass the ground floor swaps it for.
+        public Material kitGlass, kitShopGlass;
+        /// The kit's dark metal frame material; shop fronts repaint it in their awning colour.
+        public Material kitFrame;
+        /// Body colour behind each style, for the building sides and roof.
+        public Material kitBrickBody, kitMetalBody;
+
         /// Sidewalk dressing (small trees, presents): spawned without hit tests.
         public GameObject[] decorPrefabs;
 
@@ -381,6 +399,11 @@ namespace DallasDash.Gameplay
             float mid = z + segmentLength / 2f;
             float len = segmentLength - 0.6f;
             float face = side * 7f; // street-facing wall plane
+            if (kitGround != null && kitGround.Length > 0)
+            {
+                KitStorefront(parent, side, z, mid, len, face);
+                return;
+            }
             var brick = Pick(facadeMaterials);
             Block(parent, new Vector3(side * 10f, h / 2f, mid), new Vector3(6f, h, len), brick).name = "Storefront";
             Block(parent, new Vector3(face, h + 0.25f, mid), new Vector3(0.5f, 0.5f, len + 0.2f), trimMaterial);
@@ -411,15 +434,22 @@ namespace DallasDash.Gameplay
 
             BuildingDetail(parent, side, mid, len, h, face, brick);
 
+            SignBoard(parent, side, mid - 2f, 5.15f);
+        }
+
+        /// A sign board in one of the pack's styles (red with cream letters, cream with red, green with cream)
+        /// with an invented outlet name, centred at cz along the street and at height y.
+        void SignBoard(Transform parent, float side, float cz, float y)
+        {
             // Every shop has a sign board: red with cream letters, cream with red, or green with cream (as in the pack).
             int style = Random.Range(0, 3);
             var boardMat = style == 0 ? Pick(awningMaterials, 0) : style == 1 ? trimMaterial : Pick(awningMaterials, 1);
             Color ink = style == 1 ? new Color(0.78f, 0.1f, 0.12f) : new Color(1f, 0.95f, 0.85f);
-            Block(parent, new Vector3(side * 6.86f, 5.15f, mid - 2f), new Vector3(0.16f, 1.3f, 6.4f), trimMaterial).name = "SignFrame";
-            Block(parent, new Vector3(side * 6.8f, 5.15f, mid - 2f), new Vector3(0.12f, 1.1f, 6.1f), boardMat).name = "SignBoard";
+            Block(parent, new Vector3(side * 6.86f, y, cz), new Vector3(0.16f, 1.3f, 6.4f), trimMaterial).name = "SignFrame";
+            Block(parent, new Vector3(side * 6.8f, y, cz), new Vector3(0.12f, 1.1f, 6.1f), boardMat).name = "SignBoard";
             var sign = new GameObject("Sign", typeof(TextMesh));
             sign.transform.SetParent(parent);
-            sign.transform.position = new Vector3(side * 6.72f, 5.15f, mid - 2f);
+            sign.transform.position = new Vector3(side * 6.72f, y, cz);
             sign.transform.rotation = Quaternion.Euler(0f, side > 0 ? 90f : -90f, 0f);
             var tm = sign.GetComponent<TextMesh>();
             tm.text = Outlets[Random.Range(0, Outlets.Length)];
@@ -433,6 +463,73 @@ namespace DallasDash.Gameplay
                 sign.GetComponent<MeshRenderer>().sharedMaterial = signTextMaterial ? signTextMaterial : signFont.material;
             }
             else tm.fontStyle = FontStyle.Bold;
+        }
+
+        /// A shopfront assembled from the modular kit on a 2 m grid: nine columns of lit shop windows and a glazed
+        /// door on the ground floor, a sign band, two to four upper floors of windows alternating with plain wall,
+        /// and a cornice, in one of three styles (red brick, painted plaster, metal and glass). The awning, sign
+        /// board, garland, pilasters and fire escape are layered on as before.
+        void KitStorefront(Transform parent, float side, float z, float mid, float len, float face)
+        {
+            const int cols = 9;
+            const float band = 0.9f;
+            int style = Random.Range(0, 3);
+            int floors = Random.Range(2, 5);
+            float top = 3f + band + floors * 3f;
+            float h = top + 1f;
+            float yaw = side > 0 ? -90f : 90f; // kit fronts face +Z; turn them to face the street
+            Material paint = style == 1 && kitPaints != null && kitPaints.Length > 0 ? Pick(kitPaints) : null;
+            // Flat colours on the body box behind the facade (a kit texture would stretch across 6 x 15 m).
+            Material body = style == 0 ? kitBrickBody : style == 1 ? trimMaterial : kitMetalBody;
+            Block(parent, new Vector3(side * 10.1f, h / 2f, mid), new Vector3(6f, h, len), body ? body : Pick(facadeMaterials)).name = "Storefront";
+
+            var ground = kitGround[Random.Range(0, kitGround.Length)];
+            var windows = style == 0 ? kitBrickWindows : style == 1 ? kitTrimWindows : kitMetalWindows;
+            var window = windows != null && windows.Length > 0 ? windows[Random.Range(0, windows.Length)] : null;
+            var plain = style == 0 ? kitBrickPlain : style == 1 ? kitTrimPlain : kitMetalPlain;
+            var cornice = style == 0 ? kitBrickCornice : style == 1 ? kitTrimCornice : kitMetalCornice;
+            int doorCol = Random.value < 0.5f ? 6 : 2;
+            // Shop fronts painted in the awning colour (the kit's near-black frames read as bars).
+            var awningMat = Pick(awningMaterials);
+            for (int c = 0; c < cols; c++)
+            {
+                float cz = mid + (c - (cols - 1) / 2f) * 2f;
+                Kit(parent, c == doorCol && kitDoorFrame ? kitDoorFrame : ground, new Vector3(face, 0f, cz), yaw, kitGlass, kitShopGlass, paint, awningMat);
+                for (int f = 0; f < floors; f++)
+                    Kit(parent, c % 2 == 0 ? window : plain, new Vector3(face, 3f + band + f * 3f, cz), yaw, null, null, paint);
+                Kit(parent, cornice, new Vector3(face, top, cz), yaw, null, null, paint);
+            }
+            // Sign band between the shop floor and the flats above.
+            Block(parent, new Vector3(face + side * 0.02f, 3f + band / 2f, mid), new Vector3(0.3f, band, cols * 2f), paint ? paint : trimMaterial);
+
+            var awning = Block(parent, new Vector3(side * 6.6f, 2.95f, mid - 2f), new Vector3(1.3f, 0.12f, len * 0.6f), awningMat);
+            awning.transform.rotation = Quaternion.Euler(0f, 0f, side * 18f);
+            Block(parent, new Vector3(side * 6.86f, 3.62f, mid), new Vector3(0.3f, 0.3f, len - 0.4f), garlandMaterial);
+            foreach (float end in new[] { -1f, 1f })
+                Block(parent, new Vector3(face - side * 0.02f, h / 2f, mid + end * (cols + 0.35f)), new Vector3(0.4f, h, 0.7f), paint ? paint : trimMaterial);
+            RoofClutter(parent, side, mid, len, h);
+            if (h > 11f && Random.value < 0.35f) FireEscape(parent, side, mid, h, face);
+            SignBoard(parent, side, mid - 2f, 3f + band / 2f);
+        }
+
+        /// Instantiates a kit piece as a direct child of the segment (so it static-batches), optionally swapping
+        /// one material (shop glass) and repainting the cream trim.
+        void Kit(Transform parent, GameObject piece, Vector3 pos, float yaw, Material from, Material to, Material paint, Material frame = null)
+        {
+            if (!piece) return;
+            var go = Instantiate(piece, pos, Quaternion.Euler(0f, yaw, 0f), parent);
+            if ((from && to) || paint || frame)
+            {
+                var r = go.GetComponent<MeshRenderer>();
+                var ms = r.sharedMaterials;
+                for (int i = 0; i < ms.Length; i++)
+                {
+                    if (from && to && ms[i] == from) ms[i] = to;
+                    else if (frame && ms[i] == kitFrame) ms[i] = frame;
+                    else if (paint && ms[i] == kitTrim) ms[i] = paint;
+                }
+                r.sharedMaterials = ms;
+            }
         }
 
         /// The lit shop window was a blank glowing slab. Glazing bars split it into panes, a cream sill runs along
@@ -467,24 +564,17 @@ namespace DallasDash.Gameplay
                 {
                     // A little potted tree.
                     Block(parent, new Vector3(itemX, 0.8f, zz), new Vector3(0.18f, 0.18f, 0.18f), Pick(awningMaterials, 0));
-                    var tree = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                    Destroy(tree.GetComponent<Collider>());
-                    tree.transform.SetParent(parent);
-                    tree.transform.position = new Vector3(itemX, 1.2f, zz);
-                    tree.transform.localScale = new Vector3(0.32f, 0.62f, 0.32f);
-                    Paint(tree, wreathMaterial);
+                    Block(parent, new Vector3(itemX, 1.02f, zz), new Vector3(0.34f, 0.26f, 0.34f), wreathMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
+                    Block(parent, new Vector3(itemX, 1.24f, zz), new Vector3(0.24f, 0.22f, 0.24f), wreathMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
+                    Block(parent, new Vector3(itemX, 1.42f, zz), new Vector3(0.12f, 0.16f, 0.12f), wreathMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
                 }
                 else
                 {
                     // Baubles.
                     for (int k = 0; k < 3; k++)
                     {
-                        var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                        Destroy(b.GetComponent<Collider>());
-                        b.transform.SetParent(parent);
-                        b.transform.position = new Vector3(itemX, 0.82f, zz + (k - 1) * 0.18f);
-                        b.transform.localScale = Vector3.one * 0.16f;
-                        Paint(b, BulbMaterial(Random.Range(0, 8)));
+                        var b = Block(parent, new Vector3(itemX, 0.83f, zz + (k - 1) * 0.18f), Vector3.one * 0.13f, BulbMaterial(Random.Range(0, 8)));
+                        b.transform.rotation = Quaternion.Euler(45f, 0f, 45f);
                     }
                 }
             }
@@ -498,6 +588,14 @@ namespace DallasDash.Gameplay
                 Block(parent, new Vector3(face + side * 0.05f, h / 2f, mid + end * (len / 2f - 0.35f)), new Vector3(0.35f, h, 0.7f), trimMaterial);
             if (h > 10f) Block(parent, new Vector3(face, 7.9f, mid), new Vector3(0.24f, 0.22f, len), trimMaterial);
 
+            RoofClutter(parent, side, mid, len, h, brick);
+            if (Random.value < 0.35f && h > 10f) FireEscape(parent, side, mid, h, face);
+        }
+
+        /// Rooftop clutter: AC units, sometimes a wooden water tower on legs or a chimney.
+        void RoofClutter(Transform parent, float side, float mid, float len, float h, Material chimney = null)
+        {
+            if (!chimney) chimney = Pick(facadeMaterials);
             float roofX = side * 9.4f;
             int units = Random.Range(1, 3);
             for (int i = 0; i < units; i++)
@@ -528,27 +626,31 @@ namespace DallasDash.Gameplay
                 Paint(cap, lampPostMaterial);
             }
             else if (r < 0.55f)
-                Block(parent, new Vector3(side * 8.2f, h + 1f, mid + Random.Range(-len * 0.4f, len * 0.4f)), new Vector3(0.8f, 2f, 0.8f), brick);
+                Block(parent, new Vector3(side * 8.2f, h + 1f, mid + Random.Range(-len * 0.4f, len * 0.4f)), new Vector3(0.8f, 2f, 0.8f), chimney);
 
-            if (Random.value < 0.35f && h > 10f)
+        }
+
+        /// Black iron fire escape on the far half of the facade: a landing per floor, rails, and stairs between.
+        void FireEscape(Transform parent, float side, float mid, float h, float face)
+        {
+            float len = segmentLength - 0.6f;
+            // Fire escape on the far half of the facade: a landing per floor, rails, and ladders between.
+            float fz = mid + len * 0.22f;
+            float fx = face - side * 0.55f;
+            for (float fy = 5.6f; fy < h - 1.5f; fy += 3f)
             {
-                // Fire escape on the far half of the facade: a landing per floor, rails, and ladders between.
-                float fz = mid + len * 0.22f;
-                float fx = face - side * 0.55f;
-                for (float fy = 5.6f; fy < h - 1.5f; fy += 3f)
+                Block(parent, new Vector3(fx, fy - 0.95f, fz), new Vector3(1f, 0.06f, 3.6f), lampPostMaterial);
+                Block(parent, new Vector3(fx - side * 0.48f, fy - 0.45f, fz), new Vector3(0.05f, 0.05f, 3.6f), lampPostMaterial);
+                foreach (float pz in new[] { -1.75f, 0f, 1.75f })
+                    Block(parent, new Vector3(fx - side * 0.48f, fy - 0.7f, fz + pz), new Vector3(0.05f, 0.5f, 0.05f), lampPostMaterial);
+                if (fy + 3f < h - 1.5f)
                 {
-                    Block(parent, new Vector3(fx, fy - 0.95f, fz), new Vector3(1f, 0.06f, 3.6f), lampPostMaterial);
-                    Block(parent, new Vector3(fx - side * 0.48f, fy - 0.45f, fz), new Vector3(0.05f, 0.05f, 3.6f), lampPostMaterial);
-                    foreach (float pz in new[] { -1.75f, 0f, 1.75f })
-                        Block(parent, new Vector3(fx - side * 0.48f, fy - 0.7f, fz + pz), new Vector3(0.05f, 0.5f, 0.05f), lampPostMaterial);
-                    if (fy + 3f < h - 1.5f)
-                    {
-                        // Stair from this landing up to the next: 3 m rise over about 3.2 m.
-                        var ladder = Block(parent, new Vector3(fx, fy + 0.55f, fz), new Vector3(0.5f, 0.06f, 4.4f), lampPostMaterial);
-                        ladder.transform.rotation = Quaternion.Euler(-43f, 0f, 0f);
-                    }
+                    // Stair from this landing up to the next: 3 m rise over about 3.2 m.
+                    var ladder = Block(parent, new Vector3(fx, fy + 0.55f, fz), new Vector3(0.5f, 0.06f, 4.4f), lampPostMaterial);
+                    ladder.transform.rotation = Quaternion.Euler(-43f, 0f, 0f);
                 }
             }
+        
         }
 
         static Material Pick(Material[] set, int index) => set != null && set.Length > index ? set[index] : null;
@@ -634,11 +736,9 @@ namespace DallasDash.Gameplay
             for (int i = 1; i < bulbs - 1; i++)
             {
                 float t = i / (float)(bulbs - 1);
-                var b = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                Destroy(b.GetComponent<Collider>());
-                b.transform.SetParent(parent);
-                b.transform.localScale = new Vector3(0.14f, 0.19f, 0.14f);
-                b.transform.position = Wire(t) + Vector3.down * 0.1f;
+                // Bulbs are tiny and bloomed: a turned cube (12 triangles) reads the same as a sphere (768).
+                var b = Block(parent, Wire(t) + Vector3.down * 0.1f, new Vector3(0.12f, 0.17f, 0.12f), null);
+                b.transform.rotation = Quaternion.Euler(0f, 45f, 0f);
                 // Alternate red, green, gold and warm white. One shared material per colour (not property blocks),
                 // so the bulbs batch with each other.
                 Paint(b, BulbMaterial(i));
