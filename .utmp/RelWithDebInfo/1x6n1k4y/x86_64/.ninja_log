@@ -1,0 +1,12 @@
+# ninja log v5
+38	4661	8149085216374777	GameActivity/CMakeFiles/game.dir/UGAEntry.cpp.o	c0ad42b20f195b7a
+75	4707	8149085216404724	GameActivity/CMakeFiles/game.dir/UGAInputKeyEvent.cpp.o	e8298b4ce10878e4
+25	4928	8149085218754197	GameActivity/CMakeFiles/game.dir/UGAConfiguration.cpp.o	85d5508bf13e297d
+1	5202	8149085221478830	GameActivity/CMakeFiles/game.dir/UGADebug.cpp.o	47fc6d84bc92239e
+4929	5582	8149085225400270	FramePacing/CMakeFiles/swappywrapper.dir/UnitySwappyWrapper.cpp.o	915652d121e5944c
+60	6251	8149085232035916	GameActivity/CMakeFiles/game.dir/UGAInput.cpp.o	6b1d38ec2f61a9c3
+5583	6401	8149085232765909	G:/ai-art/dallas-dash-unity/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1x6n1k4y/obj/x86_64/libswappywrapper.so	c826eaf46a8e1172
+12	6558	8149085235284031	GameActivity/CMakeFiles/game.dir/UGAApplication.cpp.o	582130a1d762d632
+4708	8290	8149085252880630	GameActivity/CMakeFiles/game.dir/UGAInputMotionEvent.cpp.o	861deb7d29f7d1ae
+4683	8551	8149085255490984	GameActivity/CMakeFiles/game.dir/UGASoftKeyboard.cpp.o	df1fe04a3e676913
+8552	8781	8149085257642877	G:/ai-art/dallas-dash-unity/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/build/intermediates/cxx/RelWithDebInfo/1x6n1k4y/obj/x86_64/libgame.so	3797a2da20bba280

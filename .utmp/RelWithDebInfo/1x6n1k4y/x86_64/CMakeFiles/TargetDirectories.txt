@@ -1,0 +1,8 @@
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/CMakeFiles/edit_cache.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/CMakeFiles/rebuild_cache.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/GameActivity/CMakeFiles/game.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/GameActivity/CMakeFiles/edit_cache.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/GameActivity/CMakeFiles/rebuild_cache.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/FramePacing/CMakeFiles/swappywrapper.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/FramePacing/CMakeFiles/edit_cache.dir
+G:/ai-art/dallas-dash-unity/.utmp/RelWithDebInfo/1x6n1k4y/x86_64/FramePacing/CMakeFiles/rebuild_cache.dir

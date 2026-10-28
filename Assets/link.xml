@@ -1,0 +1,7 @@
+<!-- Engine code stripping removed the physics module (the game never uses physics), but
+     GameObject.CreatePrimitive still adds a collider to every primitive it makes, and on Android each
+     one logged "Can't add component because class 'SphereCollider' doesn't exist!" with a stack trace:
+     hundreds of errors per street block. Keep the module. -->
+<linker>
+  <assembly fullname="UnityEngine.PhysicsModule" preserve="all"/>
+</linker>
