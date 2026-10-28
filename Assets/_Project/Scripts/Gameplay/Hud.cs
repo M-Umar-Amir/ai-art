@@ -23,18 +23,20 @@ namespace DallasDash.Gameplay
         void Start()
         {
             var canvas = score.transform.parent;
+            // The pills live in the safe area, clear of notches and rounded corners; the hit flash still fills the screen.
+            var safe = SafeArea.Create(canvas);
             // The bootstrap's plain labels give way to the pills; keep the fields pointing at the live text.
             score.gameObject.SetActive(false);
             pickups.gameObject.SetActive(false);
             banner.gameObject.SetActive(false);
-            pickups = UiKit.Pill(canvas, "burger", Vector2.zero, 300, Color.white, out pickupPill);
-            score = UiKit.Pill(canvas, "star", Vector2.zero, 420, Color.white, out scorePill);
+            pickups = UiKit.Pill(safe, "burger", Vector2.zero, 300, Color.white, out pickupPill);
+            score = UiKit.Pill(safe, "star", Vector2.zero, 420, Color.white, out scorePill);
             score.alignment = TextAnchor.MiddleRight;
             score.rectTransform.anchoredPosition = new Vector2(10f, 2f);
             Pin(pickupPill, new Vector2(0f, 1f), new Vector2(30f, -50f));
             Pin(scorePill, new Vector2(1f, 1f), new Vector2(-30f, -50f));
 
-            var b = UiKit.Panel(canvas, "Multiplier", Vector2.zero, new Vector2(150f, 84f), UiKit.Red);
+            var b = UiKit.Panel(safe, "Multiplier", Vector2.zero, new Vector2(150f, 84f), UiKit.Red);
             b.sprite = UiKit.Gradient;
             b.raycastTarget = false;
             badge = b.rectTransform;
@@ -47,7 +49,7 @@ namespace DallasDash.Gameplay
             boostPop = new float[PowerUps.Count];
             for (int i = 0; i < PowerUps.Count; i++)
             {
-                var bg = UiKit.Panel(canvas, PowerUps.Names[i], Vector2.zero, new Vector2(250f, 88f), new Color(0.05f, 0.08f, 0.25f, 0.72f));
+                var bg = UiKit.Panel(safe, PowerUps.Names[i], Vector2.zero, new Vector2(250f, 88f), new Color(0.05f, 0.08f, 0.25f, 0.72f));
                 bg.raycastTarget = false;
                 boostPills[i] = bg.rectTransform;
                 UiKit.Icon(bg.transform, PowerUps.IconKeys[i], new Vector2(-82f, 2f), 92f);
@@ -64,7 +66,7 @@ namespace DallasDash.Gameplay
 
             // Burger combo: a pill under the pause button with the streak and a bar that drains until the
             // next pickup. Hidden below 3 in a row.
-            var cb = UiKit.Panel(canvas, "Combo", Vector2.zero, new Vector2(300f, 96f), new Color(0.05f, 0.08f, 0.25f, 0.78f));
+            var cb = UiKit.Panel(safe, "Combo", Vector2.zero, new Vector2(300f, 96f), new Color(0.05f, 0.08f, 0.25f, 0.78f));
             cb.raycastTarget = false;
             comboPill = cb.rectTransform;
             Pin(comboPill, new Vector2(0.5f, 1f), new Vector2(0f, -232f));
@@ -170,7 +172,7 @@ namespace DallasDash.Gameplay
             comboPill.localScale = Vector3.one * (1f + comboPop * 0.18f);
 
             flashT = Mathf.MoveTowards(flashT, 0f, Time.unscaledDeltaTime * 3f);
-            flash.color = new Color(1f, 0.12f, 0.1f, flashT * 0.7f);
+            flash.color = new Color(1f, 0.12f, 0.1f, flashT * (PlayerProfile.ReduceMotion ? 0.25f : 0.7f));
 
             float y = -166f;
             for (int i = 0; i < PowerUps.Count; i++)

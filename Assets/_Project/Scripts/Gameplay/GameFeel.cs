@@ -151,18 +151,19 @@ namespace DallasDash.Gameplay
             bool running = gm.State == RunState.Running;
             float speed01 = Mathf.InverseLerp(Tuning.SpeedBase, Tuning.SpeedMax, gm.Speed);
             var em = speedLines.emission;
-            em.rateOverTime = running ? Mathf.Lerp(8f, 60f, speed01) * (PowerUps.Active(PowerUp.Rush) ? 3f : 1f) : 0f;
+            em.rateOverTime = running && !PlayerProfile.ReduceMotion ? Mathf.Lerp(8f, 60f, speed01) * (PowerUps.Active(PowerUp.Rush) ? 3f : 1f) : 0f;
             speedLines.transform.position = cam.transform.position + cam.transform.forward * 14f;
             speedLines.transform.rotation = cam.transform.rotation;
 
             // Siren swells while the officer is close behind.
             var chase = FindChase();
-            float want = running && chase && chase.Close ? 0.35f : 0f;
+            float want = running && chase && chase.Close ? 0.35f * PlayerProfile.SfxVolume : 0f;
+            sfx.volume = PlayerProfile.SfxVolume;
             siren.volume = Mathf.MoveTowards(siren.volume, want, Time.deltaTime * 0.8f);
             // Music ducks under the siren and drops away on the busted screen; slightly faster under Sugar Rush.
             if (music)
             {
-                float mv = gm.State == RunState.Busted ? 0.12f : running && chase && chase.Close ? 0.2f : 0.32f;
+                float mv = (gm.State == RunState.Busted ? 0.12f : running && chase && chase.Close ? 0.2f : 0.32f) * PlayerProfile.MusicVolume;
                 music.volume = Mathf.MoveTowards(music.volume, mv, Time.unscaledDeltaTime * 0.6f);
                 music.pitch = Mathf.MoveTowards(music.pitch, running && PowerUps.Active(PowerUp.Rush) ? 1.08f : 1f, Time.unscaledDeltaTime * 0.5f);
             }

@@ -33,6 +33,14 @@ namespace DallasDash.EditorTools
         {
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
             EditorUserBuildSettings.buildAppBundle = false;
+            var android = UnityEditor.Build.NamedBuildTarget.Android;
+            PlayerSettings.SetScriptingBackend(android, ScriptingImplementation.IL2CPP);
+            // ARM64 for phones; x86-64 too so the test APK runs natively in the Android Emulator on a PC
+            // (ARM-only builds go through the emulator's ARM translation, slow and flaky with Unity).
+            PlayerSettings.Android.targetArchitectures = AndroidArchitecture.ARM64 | AndroidArchitecture.X86_64;
+            // Smaller, faster IL2CPP output: the full-speed C++ build ran this 16 GB machine out of memory.
+            PlayerSettings.SetIl2CppCodeGeneration(android, UnityEditor.Build.Il2CppCodeGeneration.OptimizeSize);
+            PlayerSettings.SetIl2CppCompilerConfiguration(android, Il2CppCompilerConfiguration.Release);
             Directory.CreateDirectory("Builds/Android");
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {

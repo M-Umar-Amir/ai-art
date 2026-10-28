@@ -36,8 +36,12 @@ namespace DallasDash.EditorTools
         /// Prefab for one street prop or tree from props.glb, or null.
         public static GameObject GetProp(string piece) => Get(PropSrc, piece);
 
+        /// The .glb a piece is being flattened from, so Toon() can bake its textures out of it.
+        static string currentSrc;
+
         static GameObject Get(string srcPath, string piece)
         {
+            currentSrc = srcPath;
             if (cache.TryGetValue(piece, out var hit) && hit) return hit;
             var src = AssetDatabase.LoadAssetAtPath<GameObject>(srcPath);
             if (!src) return null;
@@ -159,6 +163,12 @@ namespace DallasDash.EditorTools
             if (src)
                 foreach (var p in new[] { "baseColorTexture", "_BaseMap", "_MainTex", "_BaseColorMap" })
                     if (src.HasProperty(p) && src.GetTexture(p)) { tex = src.GetTexture(p); break; }
+            // Compressed copy of the kit texture (TextureBake) in place of glTFast's uncompressed one.
+            if (tex && currentSrc != null)
+            {
+                var baked = TextureBake.FromGlb(currentSrc, name, "kit-" + name, 1024);
+                if (baked) tex = baked;
+            }
             m.SetTexture("_BaseMap", tex);
             var c = src && src.HasProperty("baseColorFactor") ? src.GetColor("baseColorFactor") : src && src.HasProperty("_BaseColor") ? src.GetColor("_BaseColor") : Color.white;
             // Opaque toon glass: a cool sky-blue that reads as reflective in daylight (the kit's is near-black, 58% alpha).

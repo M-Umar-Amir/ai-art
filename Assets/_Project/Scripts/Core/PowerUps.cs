@@ -15,9 +15,9 @@ namespace DallasDash.Core
         public static readonly string[] Names = { "MAGNET", "SUGAR RUSH", "DOUBLE SCORE" };
         public static readonly string[] Blurbs =
         {
-            "Pulls in burgers from every lane.",
-            "Faster, and obstacles bounce off you.",
-            "Every point counts twice.",
+            "Burgers fly to you.",
+            "Faster; hits bounce off.",
+            "Every point x2.",
         };
         /// Icons.Get keys, HUD pill colours and token colours, in PowerUp order.
         public static readonly string[] IconKeys = { "magnet", "bolt", "x2" };

@@ -21,8 +21,9 @@ namespace DallasDash.Gameplay
 
         void Awake() => cam = GetComponent<Camera>();
 
-        public void Shake(float amount) => shake = Mathf.Max(shake, amount);
-        public void Kick(float amount) => kick = Mathf.Max(kick, amount);
+        // Reduce Motion (settings) turns off the shake and the field-of-view kick.
+        public void Shake(float amount) { if (!PlayerProfile.ReduceMotion) shake = Mathf.Max(shake, amount); }
+        public void Kick(float amount) { if (!PlayerProfile.ReduceMotion) kick = Mathf.Max(kick, amount); }
 
         void LateUpdate()
         {

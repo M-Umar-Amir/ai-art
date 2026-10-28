@@ -114,7 +114,9 @@ namespace DallasDash.EditorTools
                     var m = AssetDatabase.LoadAssetAtPath<Material>(path);
                     if (!m) { m = new Material(toon); AssetDatabase.CreateAsset(m, path); }
                     m.shader = toon;
-                    var tex = BaseTexture(mats[i]);
+                    // A compressed copy of the embedded image (TextureBake), not glTFast's raw RGBA32 one.
+                    Texture tex = TextureBake.FromGlb($"{ModelDir}/{id}.glb", mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
+                    if (!tex) tex = BaseTexture(mats[i]);
                     m.SetTexture("_BaseMap", tex);
                     m.SetColor("_BaseColor", tex ? Color.white : (mats[i] ? mats[i].color : Color.white));
                     m.SetFloat("_OutlineWidth", spec.outline);

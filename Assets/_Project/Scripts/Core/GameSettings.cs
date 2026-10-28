@@ -16,7 +16,8 @@ namespace DallasDash.Core
             ApplyAudio();
         }
 
-        public static void ApplyAudio() => AudioListener.volume = PlayerProfile.Muted ? 0f : PlayerProfile.Volume;
+        /// Mute is the master switch; the music and effects levels are applied by GameFeel to each source.
+        public static void ApplyAudio() => AudioListener.volume = PlayerProfile.Muted ? 0f : 1f;
 
         public static void ApplyGraphics()
         {

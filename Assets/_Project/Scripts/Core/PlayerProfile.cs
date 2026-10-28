@@ -67,6 +67,26 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetFloat("volume", Mathf.Clamp01(value)); Save(); }
         }
 
+        /// Music and sound-effect levels, set separately (accessibility guidelines: separate volume controls).
+        public static float MusicVolume
+        {
+            get => PlayerPrefs.GetFloat("music_volume", PlayerPrefs.GetFloat("volume", 0.8f));
+            set { PlayerPrefs.SetFloat("music_volume", Mathf.Clamp01(value)); Save(); }
+        }
+
+        public static float SfxVolume
+        {
+            get => PlayerPrefs.GetFloat("sfx_volume", PlayerPrefs.GetFloat("volume", 0.8f));
+            set { PlayerPrefs.SetFloat("sfx_volume", Mathf.Clamp01(value)); Save(); }
+        }
+
+        /// Turns off camera shake, speed lines and most of the red hit flash.
+        public static bool ReduceMotion
+        {
+            get => PlayerPrefs.GetInt("reduce_motion", 0) == 1;
+            set { PlayerPrefs.SetInt("reduce_motion", value ? 1 : 0); Save(); }
+        }
+
         /// Vibration taps on pickups and hits (Haptics).
         public static bool Haptics
         {
