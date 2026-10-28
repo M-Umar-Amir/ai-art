@@ -50,30 +50,34 @@ namespace DallasDash.Core
             return Make("thud", 0.35f, t => (Mathf.Sin(2f * Mathf.PI * (90f - 120f * t) * t) * 0.8f + ((float)rng.NextDouble() - 0.5f) * 0.4f * Env(t, 0.08f)) * Env(t, 0.35f, 0.002f));
         }
 
-        // ---- Music: "Jingle Bells" (James Lord Pierpont, 1857: public domain) as a bright chiptune loop.
-        // Pulse-wave lead, oom-pah bass, sleigh-bell shimmer on the off-beats. 16 bars at 150 bpm, ~25.6 s.
+        // ---- Music: an original city-groove loop (written for the game, no seasonal theme). Pulse-wave lead,
+        // walking triangle bass, closed hi-hats on the eighths with a clap on 2 and 4. 16 bars at 126 bpm, ~30 s.
 
-        // Melody as (semitones from C5, beats); the chorus twice, with its two endings.
+        // Melody as (semitones from C5, beats); -99 is a rest. Two 8-bar phrases over C - Am - F - G.
         static readonly float[,] Tune =
         {
-            {4,1},{4,1},{4,2}, {4,1},{4,1},{4,2}, {4,1},{7,1},{0,1.5f},{2,0.5f}, {4,4},
-            {5,1},{5,1},{5,1.5f},{5,0.5f}, {5,1},{4,1},{4,1},{4,0.5f},{4,0.5f}, {4,1},{2,1},{2,1},{4,1}, {2,2},{7,2},
-            {4,1},{4,1},{4,2}, {4,1},{4,1},{4,2}, {4,1},{7,1},{0,1.5f},{2,0.5f}, {4,4},
-            {5,1},{5,1},{5,1.5f},{5,0.5f}, {5,1},{4,1},{4,1},{4,0.5f},{4,0.5f}, {7,1},{7,1},{5,1},{2,1}, {0,4},
+            {7,0.5f},{9,0.5f},{7,0.5f},{4,0.5f},{-99,0.5f},{4,0.5f},{2,0.5f},{0,0.5f}, {2,1},{4,1},{-99,1},{0,1},
+            {9,0.5f},{7,0.5f},{4,0.5f},{7,0.5f},{-99,0.5f},{9,0.5f},{12,1}, {11,1},{9,1},{7,2},
+            {5,0.5f},{7,0.5f},{9,0.5f},{5,0.5f},{-99,0.5f},{12,0.5f},{9,1}, {7,1},{5,1},{4,1},{2,1},
+            {7,0.5f},{-99,0.5f},{7,0.5f},{9,0.5f},{11,1},{14,1}, {12,3},{-99,1},
+            {12,0.5f},{11,0.5f},{9,0.5f},{7,0.5f},{-99,0.5f},{7,0.5f},{9,0.5f},{12,0.5f}, {14,1},{12,1},{9,1},{7,1},
+            {9,0.5f},{12,0.5f},{16,1},{14,0.5f},{12,0.5f},{9,1}, {12,1},{9,1},{4,2},
+            {5,0.5f},{9,0.5f},{12,0.5f},{9,0.5f},{5,0.5f},{9,0.5f},{12,1}, {14,1},{12,1},{11,1},{9,1},
+            {7,1},{11,1},{14,1},{11,1}, {12,2},{-99,2},
         };
-        // Bass root per bar (semitones from C3): C C C C F C D G | C C C C F C G C.
-        static readonly int[] Roots = { 0, 0, 0, 0, 5, 0, 2, 7, 0, 0, 0, 0, 5, 0, 7, 0 };
+        // Bass root per bar (semitones from C3): C C Am Am F F G G, twice.
+        static readonly int[] Roots = { 0, 0, -3, -3, 5, 5, 7, 7, 0, 0, -3, -3, 5, 5, 7, 7 };
 
         static float Hz(float semisFromC, float octaveC) => octaveC * Mathf.Pow(2f, semisFromC / 12f);
 
         public static AudioClip Music()
         {
-            const float bpm = 150f, beat = 60f / bpm;
+            const float bpm = 126f, beat = 60f / bpm;
             int notes = Tune.GetLength(0);
             var starts = new float[notes];
             float acc = 0f;
             for (int i = 0; i < notes; i++) { starts[i] = acc; acc += Tune[i, 1] * beat; }
-            float length = acc;
+            float length = Roots.Length * 4 * beat;
             var rng = new System.Random(11);
             float noiseLp = 0f;
             int idx = 0;
@@ -81,29 +85,37 @@ namespace DallasDash.Core
             {
                 while (idx < notes - 1 && t >= starts[idx + 1]) idx++;
                 if (t < starts[idx]) idx = 0;
-                float nt = t - starts[idx], nlen = Tune[idx, 1] * beat;
-                float f = Hz(Tune[idx, 0], 523.25f) * (1f + 0.004f * Mathf.Sin(2f * Mathf.PI * 5.5f * nt));
-                float ph = (f * nt) % 1f;
-                float lead = (ph < 0.25f ? 1f : -0.33f) * 0.16f * Mathf.Min(1f, nt / 0.01f) * Mathf.Lerp(1f, 0.45f, Mathf.Clamp01(nt / nlen)) * (nt > nlen - 0.03f ? 0.3f : 1f);
+                float lead = 0f;
+                if (Tune[idx, 0] > -50f && t < acc)
+                {
+                    float nt = t - starts[idx], nlen = Tune[idx, 1] * beat;
+                    float f = Hz(Tune[idx, 0], 523.25f) * (1f + 0.004f * Mathf.Sin(2f * Mathf.PI * 5.5f * nt));
+                    float ph = (f * nt) % 1f;
+                    lead = (ph < 0.25f ? 1f : -0.33f) * 0.13f * Mathf.Min(1f, nt / 0.01f) * Mathf.Lerp(1f, 0.5f, Mathf.Clamp01(nt / nlen)) * (nt > nlen - 0.03f ? 0.3f : 1f);
+                }
 
-                // Oom-pah: root on beats 1 and 3, the fifth on 2 and 4, triangle wave.
+                // Walking bass on the eighths: root, root, octave, fifth, triangle wave with a short pluck.
+                float half = beat * 0.5f;
+                int e8 = (int)(t / half);
+                int bar = Mathf.Min(e8 / 8, Roots.Length - 1);
+                float et = t - e8 * half;
+                int step = e8 % 4;
+                float bf = Hz(Roots[bar] + (step == 2 ? 12 : step == 3 ? 7 : 0), 130.81f);
+                float tri = 2f * Mathf.Abs(2f * ((bf * et) % 1f) - 1f) - 1f;
+                float bass = tri * 0.2f * Mathf.Exp(-et * 6f);
+
+                // Kick on every beat, closed hats on the off-eighths, a clap on 2 and 4.
                 int b = (int)(t / beat);
-                int bar = Mathf.Min(b / 4, Roots.Length - 1);
                 float bt = t - b * beat;
-                float bf = Hz(Roots[bar] + (b % 2 == 1 ? 7 : 0), 130.81f);
-                float tri = 2f * Mathf.Abs(2f * ((bf * bt) % 1f) - 1f) - 1f;
-                float bass = tri * 0.22f * Mathf.Exp(-bt * 5f);
-
-                // Sleigh bells: bright noise bursts on every eighth, louder on the off-beat.
-                float e = t / (beat * 0.5f);
-                float et = (e - Mathf.Floor(e)) * beat * 0.5f;
+                float kick = Mathf.Sin(2f * Mathf.PI * (55f + 90f * Mathf.Exp(-bt * 30f)) * bt) * Mathf.Exp(-bt * 14f) * 0.28f;
                 float n = (float)rng.NextDouble() * 2f - 1f;
                 float hp = n - noiseLp; noiseLp += (n - noiseLp) * 0.35f;
-                float bells = hp * Mathf.Exp(-et * 38f) * (((int)e % 2 == 1) ? 0.11f : 0.05f);
+                float hats = hp * Mathf.Exp(-et * 60f) * (e8 % 2 == 1 ? 0.09f : 0.03f);
+                float clap = b % 2 == 1 ? n * Mathf.Exp(-bt * 22f) * 0.1f : 0f;
 
                 // Short fade at the loop seam.
                 float seam = Mathf.Clamp01(t / 0.02f) * Mathf.Clamp01((length - t) / 0.02f);
-                return (lead + bass + bells) * seam;
+                return (lead + bass + kick + hats + clap) * seam;
             });
         }
 

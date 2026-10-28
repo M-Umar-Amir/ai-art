@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c8713a1fc2fd04eafeac98bdd1d5b7, type: 3}
+  m_Name: courier-b
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.ObstacleDef
+  id: courier-b
+  displayName: Courier on a bike
+  kind: 2
+  size: {x: 1.160115, y: 1.9281411, z: 1.8}
+  weight: 2
+  placeholderColor: {r: 1, g: 0.45, b: 0.08, a: 1}
+  prefab: {fileID: 457035540181195168, guid: 412391455fd2e674f9451eed24996796, type: 3}
+  drift: 0.3
+  heavy: 1

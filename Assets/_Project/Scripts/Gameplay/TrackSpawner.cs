@@ -7,8 +7,8 @@ using Random = UnityEngine.Random;
 
 namespace DallasDash.Gameplay
 {
-    /// Streams a straight, junction-free Christmas street ahead of the rider and fills it with rows of
-    /// seasonal obstacles and burgers. Placeholder primitives stand in until the meshes from the asset pack are built.
+    /// Streams a straight downtown street ahead of the rider and fills it with rows of everyday hurdles
+    /// (roadworks, stopped vans, other couriers, cones and barriers) and burgers.
     public class TrackSpawner : MonoBehaviour
     {
         public RiderController rider;
@@ -21,15 +21,15 @@ namespace DallasDash.Gameplay
         public float rowSpacing = 14f;
         public float firstRowAt = 40f;
         public Material roadMaterial, sidewalkMaterial, landmarkMaterial;
-        /// Storefront dressing: brick facades, garland, string-light bulbs.
+        /// Storefront dressing: brick and painted facades; bulbMaterial lights the fallback lamp heads.
         public Material[] facadeMaterials;
-        public Material garlandMaterial, bulbMaterial;
+        public Material bulbMaterial;
         /// Shared URP/Lit base for placeholder obstacles and pickups, tinted per object.
         /// Runtime primitives otherwise get the built-in default material, which is stripped from URP builds (renders magenta).
         public Material tintMaterial;
         public Material laneLineMaterial, curbMaterial, trimMaterial;
         public Material[] windowMaterials, awningMaterials;
-        public Material lampPostMaterial, wreathMaterial, haloMaterial;
+        public Material lampPostMaterial, foliageMaterial, haloMaterial;
         public Material[] skylineMaterials;
         public Material doorMaterial, plazaMaterial;
         public Font signFont;
@@ -55,32 +55,13 @@ namespace DallasDash.Gameplay
 
         [Header("Street props (CC0: Quaternius trees, Poly Haven furniture)")]
         public GameObject[] kitTrees;
-        public GameObject kitLamp, kitTrash, kitUtility, kitBush;
+        public GameObject kitLamp, kitTrash, kitUtility, kitBush, kitTrafficLight;
 
-        /// Sidewalk dressing (small trees, presents): spawned without hit tests.
+        /// Sidewalk dressing (planter boxes, benches, crates outside the shops): spawned without hit tests.
         public GameObject[] decorPrefabs;
 
         /// Street stretches kept free of shops so a landmark can rise beside the road: side, from z, to z.
         readonly List<Vector3> plazas = new();
-        public Color[] bulbColors;
-        Material[] bulbMats;
-
-        Material BulbMaterial(int i)
-        {
-            if (bulbColors == null || bulbColors.Length == 0 || !bulbMaterial) return bulbMaterial;
-            if (bulbMats == null)
-            {
-                bulbMats = new Material[bulbColors.Length];
-                for (int k = 0; k < bulbColors.Length; k++)
-                {
-                    bulbMats[k] = new Material(bulbMaterial) { name = "Bulb " + k };
-                    bulbMats[k].SetColor("_BaseColor", bulbColors[k]);
-                    bulbMats[k].SetColor("_EmissionColor", bulbColors[k] * 2.6f);
-                }
-            }
-            return bulbMats[i % bulbMats.Length];
-        }
-
         /// Raised for game feel (particles, sound, camera).
         public static event Action<TrackObject> Collected, Struck, NearMiss, Smashed;
         public static event Action<LandmarkDef> LandmarkAhead;
@@ -92,6 +73,24 @@ namespace DallasDash.Gameplay
 
         /// Invented outlets only (pack, 24 Oct): real chain marks need a licence.
         static readonly string[] Outlets = { "CLUCK & CO", "SLICE HOUSE", "BURGER BARN", "DONUT DEPOT", "TAQUERIA SOL" };
+
+        /// Client presentation stills only (AutoCapture `-branded`): shop signs carry the client's restaurant
+        /// brands, Yum! Brands and the Ampex Brands portfolio, as wordmarks in brand colours. Never on in the
+        /// shipped game, which keeps the invented outlets above.
+        public static bool BrandedPreview;
+        static readonly (string name, Color board, Color ink)[] Brands =
+        {
+            ("KFC", new Color(0.89f, 0.1f, 0.17f), Color.white),
+            ("TACO BELL", new Color(0.44f, 0.13f, 0.51f), Color.white),
+            ("PIZZA HUT", new Color(0.93f, 0.19f, 0.14f), Color.white),
+            ("THE HABIT", new Color(0.12f, 0.12f, 0.14f), new Color(1f, 0.6f, 0.12f)),
+            ("BELLAGREEN", new Color(0.36f, 0.58f, 0.24f), Color.white),
+            ("AU BON PAIN", new Color(0.55f, 0.08f, 0.16f), new Color(1f, 0.95f, 0.85f)),
+            ("LONG JOHN SILVER'S", new Color(0.05f, 0.24f, 0.5f), new Color(1f, 0.82f, 0.1f)),
+            ("TIM HORTONS", new Color(0.78f, 0.06f, 0.18f), Color.white),
+        };
+        int brandIndex;
+        readonly Dictionary<Color, Material> brandMats = new();
 
         readonly List<TrackObject> live = new();
         public IReadOnlyList<TrackObject> Live => live;
@@ -131,6 +130,8 @@ namespace DallasDash.Gameplay
             plazas.Clear();
             nextRow = firstRowAt;
             nextPowerUp = FirstPowerUpAt;
+            brandIndex = 0;
+            lastOpen = 1;
             landmarkIndex = 0;
             segmentIndex = 0;
             Build(0f);
@@ -169,6 +170,7 @@ namespace DallasDash.Gameplay
             if (gm.State == RunState.Running)
             {
                 if (rider.Lane != lastLane) { laneFrom = lastLane; laneChangedAt = Time.time; lastLane = rider.Lane; }
+                MoveTraffic(d);
                 Resolve(d);
                 Announce(d);
                 Cull(d);
@@ -194,8 +196,10 @@ namespace DallasDash.Gameplay
             }
             while (nextRow < d + Tuning.FarEdge)
             {
-                SpawnRow(nextRow);
-                nextRow += rowSpacing * Mathf.Lerp(1f, 1.6f, Mathf.InverseLerp(Tuning.SpeedBase, Tuning.SpeedMax, GameManager.Instance.Speed));
+                // Rows with a long hurdle (a 6 m van or roadworks) get its length added to the gap after them,
+                // so the clear road between rows is the same whatever was spawned.
+                float extra = SpawnRow(nextRow);
+                nextRow += rowSpacing * Mathf.Lerp(1f, 1.6f, Mathf.InverseLerp(Tuning.SpeedBase, Tuning.SpeedMax, GameManager.Instance.Speed)) + extra;
             }
         }
 
@@ -221,8 +225,7 @@ namespace DallasDash.Gameplay
                 for (float dz = 1f; dz < segmentLength; dz += 5f)
                     Block(t, new Vector3(lx, 0.005f, z + dz + 1.25f), new Vector3(0.12f, 0.02f, 2.5f), laneLineMaterial);
             RoadDetail(t, z);
-            // String lights across the street every other segment.
-            if (segmentIndex++ % 2 == 0) StringLights(t, z + segmentLength / 2f);
+            segmentIndex++;
             Combine(root);
             yield return null;
 
@@ -264,6 +267,10 @@ namespace DallasDash.Gameplay
                 for (float x = -3.1f; x <= 3.11f; x += 0.78f)
                     Block(root, new Vector3(x, 0.008f, z + 2.2f), new Vector3(0.44f, 0.02f, 3f), laneLineMaterial);
                 Block(root, new Vector3(0f, 0.008f, z + 0.25f), new Vector3(7.2f, 0.02f, 0.3f), laneLineMaterial);
+                // Signals on both corners of the crossing.
+                if (kitTrafficLight)
+                    foreach (float side in new[] { -1f, 1f })
+                        Prop(root, kitTrafficLight, new Vector3(side * 4.5f, SidewalkTop, z + 0.9f), 180f, 1.1f);
             }
             if (!patchMaterial && roadMaterial)
             {
@@ -312,18 +319,26 @@ namespace DallasDash.Gameplay
             }
         }
 
-        void SpawnRow(float z)
+        int lastOpen = 1;
+
+        /// Returns how much longer than a short hurdle the row's longest one is.
+        float SpawnRow(float z)
         {
-            // One lane is always left open so every row is passable.
-            int open = Random.Range(0, Tuning.Lanes);
+            // One lane is always left open so every row is passable, and it is never more than one lane over
+            // from the last row's, so the way through is always one swipe away.
+            int open = Mathf.Clamp(lastOpen + Random.Range(-1, 2), 0, Tuning.Lanes - 1);
+            lastOpen = open;
+            float longest = 0f;
             bool token = z >= nextPowerUp;
             if (token) nextPowerUp = z + Random.Range(PowerUpGap * 0.75f, PowerUpGap * 1.25f);
             for (int lane = 0; lane < Tuning.Lanes; lane++)
             {
                 if (token && lane == open) { SpawnPowerUp((PowerUp)Random.Range(0, PowerUps.Count), lane, z); continue; }
                 if (lane == open || Random.value < 0.45f || obstacles == null || obstacles.Length == 0) { SpawnPickupLine(lane, z); continue; }
-                SpawnObstacle(WeightedObstacle(), lane, z);
+                var def = SpawnObstacle(WeightedObstacle(), lane, z);
+                if (def && def.drift <= 0f) longest = Mathf.Max(longest, def.size.z);
             }
+            return Mathf.Max(0f, longest - 1f);
         }
 
         void SpawnPickupLine(int lane, float z)
@@ -420,28 +435,84 @@ namespace DallasDash.Gameplay
             return go;
         }
 
-        void SpawnObstacle(ObstacleDef def, int lane, float z)
+        /// Places an obstacle (or a standing substitute for a courier with no room); returns what was placed.
+        ObstacleDef SpawnObstacle(ObstacleDef def, int lane, float z)
         {
+            // Another courier rides toward its meeting point from behind it, so it needs its lane clear for that
+            // stretch; otherwise put something that stands still there instead.
+            float path = def.drift * (z - GameManager.Instance.Distance) + def.size.z + 2f;
+            if (def.drift > 0f && !LaneClearBehind(lane, z, path))
+            {
+                for (int tries = 0; tries < 6 && def.drift > 0f; tries++) def = WeightedObstacle();
+                if (def.drift > 0f) return null;
+            }
+            // Burgers it would ride through on its way are taken off the street (they're far out in the haze).
+            if (def.drift > 0f) ClearPickupsBehind(lane, z, path);
             var go = def.prefab ? Instantiate(def.prefab) : GameObject.CreatePrimitive(PrimitiveType.Cube);
             go.name = def.displayName;
             go.transform.SetParent(transform);
-            // High obstacles hang overhead with a roll-under gap; everything else sits on the road.
-            float y = def.kind == TrackKind.High ? 1.6f : (def.prefab ? 0f : def.size.y / 2f);
-            go.transform.position = new Vector3(Tuning.LaneX[lane], y, z);
+            go.transform.position = new Vector3(Tuning.LaneX[lane], def.prefab ? 0f : def.size.y / 2f, z);
             if (!def.prefab)
             {
                 go.transform.localScale = def.size;
                 Tint(go, def.placeholderColor);
             }
-            if (def.id == "shopper") go.AddComponent<Bobber>();
             Register(go, def.kind, lane, def.size.z / 2f, 0, 0f);
+            var t = live[live.Count - 1];
+            t.heavy = def.heavy;
+            t.height = def.size.y;
+            t.drift = def.drift;
+            t.meetZ = z;
+            if (t.drift > 0f) PlaceTraffic(t, GameManager.Instance.Distance);
+            return def;
         }
 
-        /// One shopfront per side per segment: brick facade, cream cornice, two rows of upper windows,
-        /// a lit shop window under a striped awning, garland, and an invented outlet sign on some.
+        /// No obstacle in this lane over the stretch a courier rides through before the rider meets it.
+        bool LaneClearBehind(int lane, float z, float length)
+        {
+            foreach (var o in live)
+                if (o && o.kind != TrackKind.Pickup && o.lane == lane && o.transform.position.z + o.halfLength > z - length && o.transform.position.z < z) return false;
+            return true;
+        }
+
+        void ClearPickupsBehind(int lane, float z, float length)
+        {
+            for (int i = live.Count - 1; i >= 0; i--)
+            {
+                var o = live[i];
+                if (!o || o.kind != TrackKind.Pickup || o.lane != lane) continue;
+                float pz = o.transform.position.z;
+                if (pz < z - length || pz > z + 1f) continue;
+                Destroy(o.gameObject);
+                live.RemoveAt(i);
+            }
+        }
+
+        /// Other couriers ride the same way at a fraction of the rider's pace, arriving on their meeting point
+        /// exactly when the rider does: z = meet + drift * (d - meet). Once passed they drop back behind.
+        static void PlaceTraffic(TrackObject o, float d)
+        {
+            var p = o.transform.position;
+            p.z = o.meetZ + o.drift * (d - o.meetZ);
+            o.transform.position = p;
+        }
+
+        void MoveTraffic(float d)
+        {
+            foreach (var o in live)
+            {
+                if (!o || o.drift <= 0f || o.consumed) continue;
+                PlaceTraffic(o, d);
+                if (!o.passed && o.transform.position.z + o.halfLength + Tuning.PlayerHalf < d)
+                {
+                    o.passed = true;
+                    Missions.Add(MissionStat.Overtakes, 1);
+                }
+            }
+        }
+
         /// One shopfront per side per segment: brick facade, cream cornice, rows of upper windows (some lit),
-        /// a lit shop window under a striped awning, a framed door, garland, and a sign board in one of the
-        /// pack's styles with an invented outlet name.
+        /// a lit shop window under a striped awning, a framed door, and a sign board with an outlet name.
         void Storefront(Transform parent, float side, float z)
         {
             float h = Random.Range(8f, 15f);
@@ -478,9 +549,6 @@ namespace DallasDash.Gameplay
             Block(parent, new Vector3(face - side * 0.04f, 1.25f, doorZ), new Vector3(0.12f, 2.4f, 1.2f), doorMaterial);
             Block(parent, new Vector3(face - side * 0.06f, 1.9f, doorZ), new Vector3(0.1f, 0.8f, 0.8f), windowMaterials != null && windowMaterials.Length > 1 ? windowMaterials[1] : null);
 
-            // Garland along the shopfront.
-            Block(parent, new Vector3(side * 6.9f, 3.9f, mid), new Vector3(0.4f, 0.35f, len - 0.4f), garlandMaterial);
-
             BuildingDetail(parent, side, mid, len, h, face, brick);
 
             SignBoard(parent, side, mid - 2f, 5.15f);
@@ -494,6 +562,15 @@ namespace DallasDash.Gameplay
             int style = Random.Range(0, 3);
             var boardMat = style == 0 ? Pick(awningMaterials, 0) : style == 1 ? trimMaterial : Pick(awningMaterials, 1);
             Color ink = style == 1 ? new Color(0.78f, 0.1f, 0.12f) : new Color(1f, 0.95f, 0.85f);
+            string name = Outlets[Random.Range(0, Outlets.Length)];
+            if (BrandedPreview)
+            {
+                // Cycle through the brands so every still shows a spread of them.
+                var b = Brands[brandIndex++ % Brands.Length];
+                name = b.name;
+                ink = b.ink;
+                boardMat = BrandMaterial(b.board);
+            }
             Block(parent, new Vector3(side * 6.86f, y, cz), new Vector3(0.16f, 1.3f, 6.4f), trimMaterial).name = "SignFrame";
             Block(parent, new Vector3(side * 6.8f, y, cz), new Vector3(0.12f, 1.1f, 6.1f), boardMat).name = "SignBoard";
             var sign = new GameObject("Sign", typeof(TextMesh));
@@ -501,7 +578,9 @@ namespace DallasDash.Gameplay
             sign.transform.position = new Vector3(side * 6.72f, y, cz);
             sign.transform.rotation = Quaternion.Euler(0f, side > 0 ? 90f : -90f, 0f);
             var tm = sign.GetComponent<TextMesh>();
-            tm.text = Outlets[Random.Range(0, Outlets.Length)];
+            tm.text = name;
+            // Long names shrink to fit the 6 m board.
+            if (name.Length > 11) tm.characterSize = 0.2f * 11f / name.Length;
             tm.anchor = TextAnchor.MiddleCenter;
             tm.characterSize = 0.2f;
             tm.fontSize = 56;
@@ -514,10 +593,18 @@ namespace DallasDash.Gameplay
             else tm.fontStyle = FontStyle.Bold;
         }
 
+        Material BrandMaterial(Color c)
+        {
+            if (brandMats.TryGetValue(c, out var m) && m) return m;
+            m = new Material(trimMaterial) { name = "Brand board" };
+            m.SetColor("_BaseColor", c);
+            return brandMats[c] = m;
+        }
+
         /// A shopfront assembled from the modular kit on a 2 m grid: nine columns of lit shop windows and a glazed
         /// door on the ground floor, a sign band, two to four upper floors of windows alternating with plain wall,
         /// and a cornice, in one of three styles (red brick, painted plaster, metal and glass). The awning, sign
-        /// board, garland, pilasters and fire escape are layered on as before.
+        /// board, pilasters and fire escape are layered on as before.
         void KitStorefront(Transform parent, float side, float z, float mid, float len, float face)
         {
             const int cols = 9;
@@ -553,7 +640,6 @@ namespace DallasDash.Gameplay
 
             var awning = Block(parent, new Vector3(side * 6.6f, 2.95f, mid - 2f), new Vector3(1.3f, 0.12f, len * 0.6f), awningMat);
             awning.transform.rotation = Quaternion.Euler(0f, 0f, side * 18f);
-            Block(parent, new Vector3(side * 6.86f, 3.62f, mid), new Vector3(0.3f, 0.3f, len - 0.4f), garlandMaterial);
             foreach (float end in new[] { -1f, 1f })
                 Block(parent, new Vector3(face - side * 0.02f, h / 2f, mid + end * (cols + 0.35f)), new Vector3(0.4f, h, 0.7f), paint ? paint : trimMaterial);
             RoofClutter(parent, side, mid, len, h);
@@ -582,7 +668,7 @@ namespace DallasDash.Gameplay
         }
 
         /// The lit shop window was a blank glowing slab. Glazing bars split it into panes, a cream sill runs along
-        /// the bottom, and a row of seasonal goods sits on it: wrapped presents, stacked boxes, a little tree, baubles.
+        /// the bottom, and everyday goods sit on it: stacked boxes, potted plants, a small menu board.
         void WindowDisplay(Transform parent, float side, float face, float cz, float width)
         {
             float glass = face - side * 0.08f; // street side of the window block
@@ -595,36 +681,23 @@ namespace DallasDash.Gameplay
             for (float zz = cz - width / 2f + 0.5f; zz < cz + width / 2f - 0.4f; zz += Random.Range(0.55f, 0.95f))
             {
                 float r = Random.value;
-                if (r < 0.45f)
-                {
-                    // A wrapped present with a ribbon band.
-                    float sz = Random.Range(0.22f, 0.4f);
-                    var box = Block(parent, new Vector3(itemX, 0.71f + sz / 2f, zz), new Vector3(sz, sz, sz), Pick(awningMaterials));
-                    box.transform.rotation = Quaternion.Euler(0f, Random.Range(-20f, 20f), 0f);
-                    Block(parent, new Vector3(itemX, 0.71f + sz / 2f, zz), new Vector3(sz + 0.02f, sz + 0.02f, 0.06f), trimMaterial);
-                }
-                else if (r < 0.7f)
+                if (r < 0.4f)
                 {
                     // Two stacked boxes.
                     Block(parent, new Vector3(itemX, 0.86f, zz), new Vector3(0.36f, 0.3f, 0.36f), trimMaterial);
                     Block(parent, new Vector3(itemX, 1.12f, zz), new Vector3(0.24f, 0.22f, 0.24f), Pick(awningMaterials));
                 }
-                else if (r < 0.85f && wreathMaterial)
+                else if (r < 0.75f && foliageMaterial)
                 {
-                    // A little potted tree.
-                    Block(parent, new Vector3(itemX, 0.8f, zz), new Vector3(0.18f, 0.18f, 0.18f), Pick(awningMaterials, 0));
-                    Block(parent, new Vector3(itemX, 1.02f, zz), new Vector3(0.34f, 0.26f, 0.34f), wreathMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
-                    Block(parent, new Vector3(itemX, 1.24f, zz), new Vector3(0.24f, 0.22f, 0.24f), wreathMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
-                    Block(parent, new Vector3(itemX, 1.42f, zz), new Vector3(0.12f, 0.16f, 0.12f), wreathMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
+                    // A potted plant.
+                    Block(parent, new Vector3(itemX, 0.82f, zz), new Vector3(0.22f, 0.22f, 0.22f), doorMaterial);
+                    Block(parent, new Vector3(itemX, 1.07f, zz), new Vector3(0.36f, 0.3f, 0.36f), foliageMaterial).transform.rotation = Quaternion.Euler(0f, 45f, 0f);
                 }
                 else
                 {
-                    // Baubles.
-                    for (int k = 0; k < 3; k++)
-                    {
-                        var b = Block(parent, new Vector3(itemX, 0.83f, zz + (k - 1) * 0.18f), Vector3.one * 0.13f, BulbMaterial(Random.Range(0, 8)));
-                        b.transform.rotation = Quaternion.Euler(45f, 0f, 45f);
-                    }
+                    // A chalk menu board on a little easel.
+                    Block(parent, new Vector3(itemX, 1.05f, zz), new Vector3(0.06f, 0.6f, 0.42f), lampPostMaterial).transform.rotation = Quaternion.Euler(0f, 0f, side * 8f);
+                    Block(parent, new Vector3(itemX - side * 0.035f, 1.05f, zz), new Vector3(0.02f, 0.5f, 0.34f), trimMaterial).transform.rotation = Quaternion.Euler(0f, 0f, side * 8f);
                 }
             }
         }
@@ -704,19 +777,17 @@ namespace DallasDash.Gameplay
 
         static Material Pick(Material[] set, int index) => set != null && set.Length > index ? set[index] : null;
 
-        /// Christmas trees and stacked presents on the sidewalk, set dressing only (not obstacles).
+        /// Planter boxes, benches and crates against the shopfronts: set dressing only (not obstacles).
         void SidewalkDecor(Transform parent, float side, float z)
         {
-            if (decorPrefabs == null || decorPrefabs.Length == 0 || Random.value > 0.45f) return;
+            if (decorPrefabs == null || decorPrefabs.Length == 0 || Random.value > 0.5f) return;
             var prefab = decorPrefabs[Random.Range(0, decorPrefabs.Length)];
             if (!prefab) return;
-            var go = Instantiate(prefab, parent);
-            go.transform.position = new Vector3(side * 5.9f, 0.2f, z + Random.Range(3f, segmentLength - 3f));
-            go.transform.rotation = Quaternion.Euler(0f, Random.Range(0f, 360f), 0f);
-            go.transform.localScale = Vector3.one * Random.Range(0.55f, 0.75f);
+            // Between the lamp posts, backed against the building line and turned to face the street.
+            Prop(parent, prefab, new Vector3(side * 6.3f, SidewalkTop, z + Random.Range(6.5f, 13.5f)), side > 0 ? -90f : 90f, 1f);
         }
 
-        /// Black Victorian-style street lamp with a wreath and red bow, as along the pack's Christmas street.
+        /// Black cast-iron street lamp.
         void LampPost(Transform parent, float side, float z)
         {
             float x = side * 4.6f;
@@ -724,7 +795,6 @@ namespace DallasDash.Gameplay
             {
                 // Cast-iron street lamp, its arm reaching out over the road.
                 Prop(parent, kitLamp, new Vector3(x, SidewalkTop, z), side > 0 ? 90f : -90f, 1.4f);
-                LampWreath(parent, side, x, z);
                 return;
             }
             var pole = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
@@ -740,20 +810,6 @@ namespace DallasDash.Gameplay
             lamp.transform.position = new Vector3(x, 5.3f, z);
             lamp.transform.localScale = Vector3.one * 0.36f;
             Paint(lamp, bulbMaterial);
-            LampWreath(parent, side, x, z);
-        }
-
-        /// Wreath on the lamp post: a green disc facing the street, with a red bow.
-        void LampWreath(Transform parent, float side, float x, float z)
-        {
-            var wreath = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-            Destroy(wreath.GetComponent<Collider>());
-            wreath.transform.SetParent(parent);
-            wreath.transform.position = new Vector3(x - side * 0.12f, 3.6f, z);
-            wreath.transform.rotation = Quaternion.Euler(0f, 0f, 90f);
-            wreath.transform.localScale = new Vector3(0.75f, 0.06f, 0.75f);
-            Paint(wreath, wreathMaterial);
-            Block(parent, new Vector3(x - side * 0.2f, 3.32f, z), new Vector3(0.12f, 0.18f, 0.34f), awningMaterials != null && awningMaterials.Length > 0 ? awningMaterials[0] : null);
         }
 
         const float SidewalkTop = 0.2f;
@@ -800,52 +856,6 @@ namespace DallasDash.Gameplay
         }
 
         static Material Pick(Material[] set) => set != null && set.Length > 0 ? set[Random.Range(0, set.Length)] : null;
-
-        void StringLights(Transform parent, float z)
-        {
-            // A dark wire sagging between the facades, small bulbs hanging just under it. Without the wire the
-            // bloomed bulbs read as loose glowing balls floating over the street.
-            const int bulbs = 15;
-            Vector3 Wire(float t) => new(Mathf.Lerp(-6.9f, 6.9f, t), 6.3f - 4f * t * (1f - t) * 1.1f, z);
-            const int links = 12;
-            for (int i = 0; i < links; i++)
-            {
-                Vector3 a = Wire(i / (float)links), c = Wire((i + 1) / (float)links);
-                var w = Block(parent, (a + c) / 2f, new Vector3(0.035f, 0.035f, Vector3.Distance(a, c) + 0.02f), lampPostMaterial);
-                w.transform.rotation = Quaternion.LookRotation(c - a);
-            }
-            for (int i = 1; i < bulbs - 1; i++)
-            {
-                float t = i / (float)(bulbs - 1);
-                // A tiny elongated diamond (8 triangles) reads as a glowing bulb up close and far away;
-                // spheres cost 768 triangles each, and cubes looked like boxes when the camera passed under.
-                var b = new GameObject("Bulb", typeof(MeshFilter), typeof(MeshRenderer));
-                b.GetComponent<MeshFilter>().sharedMesh = BulbMesh;
-                b.transform.SetParent(parent);
-                b.transform.position = Wire(t) + Vector3.down * 0.12f;
-                b.transform.localScale = new Vector3(0.11f, 0.17f, 0.11f);
-                // Alternate red, green, gold and warm white. One shared material per colour (not property blocks),
-                // so the bulbs batch with each other.
-                Paint(b, BulbMaterial(i));
-            }
-        }
-
-        static Mesh bulbMesh;
-
-        /// Octahedron, unit size, pointed top and bottom: the string-light bulb.
-        static Mesh BulbMesh
-        {
-            get
-            {
-                if (bulbMesh) return bulbMesh;
-                var v = new[] { Vector3.up * 0.5f, Vector3.down * 0.5f, new Vector3(0.5f, 0f, 0f), new Vector3(0f, 0f, 0.5f), new Vector3(-0.5f, 0f, 0f), new Vector3(0f, 0f, -0.5f) };
-                var tris = new[] { 0, 3, 2, 0, 4, 3, 0, 5, 4, 0, 2, 5, 1, 2, 3, 1, 3, 4, 1, 4, 5, 1, 5, 2 };
-                bulbMesh = new Mesh { name = "Bulb", vertices = v, triangles = tris };
-                bulbMesh.RecalculateNormals();
-                bulbMesh.RecalculateBounds();
-                return bulbMesh;
-            }
-        }
 
         static GameObject Block(Transform parent, Vector3 pos, Vector3 scale, Material m)
         {
@@ -920,7 +930,7 @@ namespace DallasDash.Gameplay
                     bush.transform.SetParent(parent);
                     bush.transform.position = new Vector3(side * 8.2f, 0.95f, z + pz + bz);
                     bush.transform.localScale = new Vector3(1.25f, 0.85f, 1.25f);
-                    Paint(bush, wreathMaterial ? wreathMaterial : garlandMaterial);
+                    Paint(bush, foliageMaterial);
                 }
             }
         }
@@ -965,10 +975,8 @@ namespace DallasDash.Gameplay
                         Collect(o);
                         break;
                     case TrackKind.Low:
-                        if (rider.transform.position.y < 0.8f) Hit(o);
-                        break;
-                    case TrackKind.High:
-                        if (!rider.Rolling) Hit(o);
+                        // The bike's wheels have to be above the top of the cones or barrier.
+                        if (rider.transform.position.y < o.height) Hit(o);
                         break;
                     case TrackKind.Block:
                         Hit(o);
@@ -1053,6 +1061,15 @@ namespace DallasDash.Gameplay
                 rider.BounceBack(laneFrom);
                 lastLane = laneFrom;
             }
+            else if (o.heavy)
+            {
+                // A van or a roadworks fence doesn't fall over: the rider clips it and swerves into the
+                // clearest lane beside it, losing speed.
+                int to = SwerveLane(o);
+                o.consumed = to < 0;
+                if (to >= 0) { rider.BounceBack(to); lastLane = to; laneFrom = o.lane; }
+                GameManager.Instance.Bonk();
+            }
             else
             {
                 o.gameObject.AddComponent<Topple>();
@@ -1062,6 +1079,29 @@ namespace DallasDash.Gameplay
             rider.Wobble();
             if (chase) chase.Stumble();
             else GameManager.Instance.Bust();
+        }
+
+        /// The neighbouring lane with the most room ahead, or -1 when both are blocked right here.
+        int SwerveLane(TrackObject from)
+        {
+            int best = -1;
+            float bestRoom = 1.5f;
+            float d = GameManager.Instance.Distance;
+            foreach (int lane in new[] { from.lane - 1, from.lane + 1 })
+            {
+                if (lane < 0 || lane >= Tuning.Lanes) continue;
+                float room = 60f;
+                foreach (var o in live)
+                {
+                    if (!o || o.consumed || o.kind == TrackKind.Pickup || o.lane != lane) continue;
+                    float near = o.transform.position.z - o.halfLength - d;
+                    float far = o.transform.position.z + o.halfLength - d;
+                    if (far < -Tuning.PlayerHalf) continue;
+                    room = Mathf.Min(room, Mathf.Max(0f, near));
+                }
+                if (room > bestRoom) { bestRoom = room; best = lane; }
+            }
+            return best;
         }
 
         void Cull(float d)

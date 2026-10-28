@@ -4,14 +4,11 @@ using UnityEngine.Rendering.Universal;
 
 namespace DallasDash.Core
 {
-    /// Applies the settings menu: graphics tier (render scale, shadows, anti-aliasing, post effects, snow)
+    /// Applies the settings menu: graphics tier (render scale, shadows, anti-aliasing, post effects)
     /// and audio (volume slider and mute). Called at startup and whenever a setting changes.
     public static class GameSettings
     {
         public static readonly string[] TierNames = { "Low", "Medium", "High" };
-
-        /// Snow density for the current tier, read by GameFeel.
-        public static float SnowRate { get; private set; } = 90f;
 
         public static void ApplyAll()
         {
@@ -44,7 +41,6 @@ namespace DallasDash.Core
                 data.antialiasing = tier == 0 ? AntialiasingMode.None : AntialiasingMode.FastApproximateAntialiasing;
             }
 
-            SnowRate = tier switch { 0 => 25f, 1 => 60f, _ => 90f };
             Application.targetFrameRate = 60;
         }
     }

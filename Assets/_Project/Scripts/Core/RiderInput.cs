@@ -6,9 +6,11 @@ namespace DallasDash.Core
     /// Swipe (touch) and arrow/WASD (keyboard) mapped to the four runner actions. Polled once per frame.
     public static class RiderInput
     {
-        public enum Action { None, Left, Right, Jump, Roll }
+        /// Down only does something in the air: a quick drop back to the road.
+        public enum Action { None, Left, Right, Jump, Down }
 
-        const float SwipeMinPixels = 50f;
+        /// About 6 mm of finger travel whatever the screen density (50 px was a long drag on high-dpi phones).
+        static float SwipeMinPixels => Screen.dpi > 0f ? Mathf.Clamp(Screen.dpi * 0.24f, 30f, 120f) : 50f;
         static Vector2 touchStart;
         static bool tracking;
         static int lastFrame = -1;
@@ -33,7 +35,7 @@ namespace DallasDash.Core
                 if (kb.leftArrowKey.wasPressedThisFrame || kb.aKey.wasPressedThisFrame) return Action.Left;
                 if (kb.rightArrowKey.wasPressedThisFrame || kb.dKey.wasPressedThisFrame) return Action.Right;
                 if (kb.upArrowKey.wasPressedThisFrame || kb.wKey.wasPressedThisFrame || kb.spaceKey.wasPressedThisFrame) return Action.Jump;
-                if (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame) return Action.Roll;
+                if (kb.downArrowKey.wasPressedThisFrame || kb.sKey.wasPressedThisFrame) return Action.Down;
             }
 
             var ts = Touchscreen.current;
@@ -50,7 +52,7 @@ namespace DallasDash.Core
                 if (d.magnitude < SwipeMinPixels) return Action.None;
                 tracking = false;
                 if (Mathf.Abs(d.x) > Mathf.Abs(d.y)) return d.x < 0 ? Action.Left : Action.Right;
-                return d.y > 0 ? Action.Jump : Action.Roll;
+                return d.y > 0 ? Action.Jump : Action.Down;
             }
             else if (t.press.wasReleasedThisFrame)
             {

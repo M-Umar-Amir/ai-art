@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace DallasDash.Core
 {
-    public enum MissionStat { Burgers, Distance, Score, NearMisses, Jumps, Rolls, PowerUps }
+    public enum MissionStat { Burgers, Distance, Score, NearMisses, Jumps, Overtakes, PowerUps }
 
     /// Three missions at a time. "In one run" goals keep the best single run; the others add up across runs.
     /// Finishing one pays coins and deals a new one; targets climb with every mission completed, and the
@@ -27,7 +27,7 @@ namespace DallasDash.Core
                 MissionStat.Score => $"Score {target:N0} points in one run",
                 MissionStat.NearMisses => $"Pull off {target} near misses",
                 MissionStat.Jumps => $"Jump {target} times",
-                MissionStat.Rolls => $"Roll under {target} times",
+                MissionStat.Overtakes => $"Overtake {target} other riders",
                 _ => $"Grab {target} power-ups",
             };
         }
@@ -56,7 +56,15 @@ namespace DallasDash.Core
                         target = PlayerPrefs.GetInt($"mission{i}_target", 10),
                         progress = PlayerPrefs.GetInt($"mission{i}_progress", 0),
                     };
+                    // Saves from before 28 Oct hold a "roll under" mission in this slot (rolling was removed):
+                    // it becomes an overtake mission with its own target.
+                    if (active[i].stat == MissionStat.Overtakes && PlayerPrefs.GetInt("missions_v", 1) < 2)
+                    {
+                        active[i].target = Target(MissionStat.Overtakes, Level);
+                        active[i].progress = 0;
+                    }
                 }
+                PlayerPrefs.SetInt("missions_v", 2);
                 Save();
                 return active;
             }
@@ -69,7 +77,7 @@ namespace DallasDash.Core
             MissionStat.Score => 5000 + lvl * 4000,
             MissionStat.NearMisses => 3 + lvl,
             MissionStat.Jumps => 20 + lvl * 10,
-            MissionStat.Rolls => 15 + lvl * 8,
+            MissionStat.Overtakes => 8 + lvl * 4,
             _ => 2 + lvl,
         };
 
@@ -90,7 +98,7 @@ namespace DallasDash.Core
 
         public static void BeginRun() => Array.Clear(runValue, 0, runValue.Length);
 
-        /// Counted events: burgers, near misses, jumps, rolls, power-ups.
+        /// Counted events: burgers, near misses, jumps, overtakes, power-ups.
         public static void Add(MissionStat stat, int amount)
         {
             runValue[(int)stat] += amount;

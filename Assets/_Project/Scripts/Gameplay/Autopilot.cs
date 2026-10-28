@@ -8,39 +8,62 @@ namespace DallasDash.Gameplay
         public static RiderInput.Action Steer(TrackSpawner track, RiderController rider)
         {
             if (!track || !rider) return RiderInput.Action.None;
-            float d = GameManager.Instance.Distance;
+            var gm = GameManager.Instance;
+            float d = gm.Distance;
+            float speed = UnityEngine.Mathf.Max(gm.Speed, 1f);
+            // Looks about two thirds of a second ahead (vans and roadworks are 5-6 m long; 9 m was too late at speed).
+            float look = UnityEngine.Mathf.Max(10f, speed * 0.7f);
             TrackObject next = null;
+            float nextAhead = float.MaxValue;
             foreach (var o in track.Live)
             {
                 if (!o || o.consumed || o.kind == TrackKind.Pickup || o.lane != rider.Lane) continue;
-                float ahead = o.transform.position.z - d;
-                if (ahead > 0f && ahead < 9f && (next == null || ahead < next.transform.position.z - d)) next = o;
+                float ahead = o.transform.position.z - o.halfLength - d;
+                if (ahead > -o.halfLength * 2f && ahead < look && ahead < nextAhead) { next = o; nextAhead = ahead; }
             }
             if (next == null) return RiderInput.Action.None;
-            // Jumps and rolls go by time to impact, not distance: a jump is clear of a low obstacle only from
-            // about 0.1 s to 0.5 s after take-off, so going at 9 m (half a second early at speed) lands on it.
-            float eta = (next.transform.position.z - next.halfLength - d) / UnityEngine.Mathf.Max(GameManager.Instance.Speed, 1f);
-            switch (next.kind)
+            // Jumps go by time to impact, not distance: a jump is clear of a low obstacle only from about
+            // 0.1 s to 0.5 s after take-off, so going too early lands on it.
+            float eta = nextAhead / speed;
+            if (next.kind == TrackKind.Low)
             {
-                case TrackKind.Low: return rider.Airborne || eta > 0.25f ? RiderInput.Action.None : RiderInput.Action.Jump;
-                case TrackKind.High: return rider.Rolling || eta > 0.25f ? RiderInput.Action.None : RiderInput.Action.Roll;
-                default:
-                    foreach (int lane in new[] { rider.Lane - 1, rider.Lane + 1 })
-                        if (lane >= 0 && lane < Tuning.Lanes && LaneClear(track, lane, d))
-                            return lane < rider.Lane ? RiderInput.Action.Left : RiderInput.Action.Right;
-                    return RiderInput.Action.None;
+                // Steer round it if a neighbouring lane is open for longer; otherwise hop it on time.
+                int alt = BestLane(track, rider.Lane, d, look);
+                if (alt != rider.Lane && Room(track, alt, d, look) > nextAhead + 6f) return alt < rider.Lane ? RiderInput.Action.Left : RiderInput.Action.Right;
+                return rider.Airborne || eta > 0.25f ? RiderInput.Action.None : RiderInput.Action.Jump;
             }
+            int lane = BestLane(track, rider.Lane, d, look);
+            if (lane == rider.Lane) return RiderInput.Action.None;
+            return lane < rider.Lane ? RiderInput.Action.Left : RiderInput.Action.Right;
         }
 
-        static bool LaneClear(TrackSpawner track, int lane, float d)
+        /// The neighbouring lane (or this one) with the most open road ahead; low hurdles count as passable.
+        static int BestLane(TrackSpawner track, int from, float d, float look)
         {
+            int best = from;
+            float bestRoom = Room(track, from, d, look);
+            foreach (int lane in new[] { from - 1, from + 1 })
+            {
+                if (lane < 0 || lane >= Tuning.Lanes) continue;
+                float room = Room(track, lane, d, look);
+                if (room > bestRoom + 0.5f) { best = lane; bestRoom = room; }
+            }
+            return best;
+        }
+
+        /// Distance to the first lane-filling obstacle in a lane (0 if one is alongside right now).
+        static float Room(TrackSpawner track, int lane, float d, float look)
+        {
+            float room = look * 3f;
             foreach (var o in track.Live)
             {
-                if (!o || o.consumed || o.kind == TrackKind.Pickup || o.lane != lane) continue;
-                float ahead = o.transform.position.z - d;
-                if (ahead > -2f && ahead < 10f) return false;
+                if (!o || o.consumed || o.kind != TrackKind.Block || o.lane != lane) continue;
+                float near = o.transform.position.z - o.halfLength - d;
+                float far = o.transform.position.z + o.halfLength - d;
+                if (far < -Tuning.PlayerHalf - 0.3f) continue;
+                room = UnityEngine.Mathf.Min(room, UnityEngine.Mathf.Max(0f, near));
             }
-            return true;
+            return room;
         }
     }
 }

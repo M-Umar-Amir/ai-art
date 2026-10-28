@@ -25,6 +25,8 @@ namespace DallasDash.EditorTools
             /// Side-view sheets (rides) come in lengthwise along X; turn them to run along the street.
             public bool alongZ;
             public float outline;
+            /// Stretched across the street to this width after fitting (0 = keep proportions).
+            public float stretchX;
         }
 
         static readonly Dictionary<string, Spec> Specs = new()
@@ -42,8 +44,9 @@ namespace DallasDash.EditorTools
             ["police-bicycle"] = new Spec { size = 1.8f, fit = Fit.Longest, alongZ = true, yaw = 180f, outline = 0.01f },
             ["wagyu-bacon-burger"] = new Spec { size = 0.9f, fit = Fit.Longest, yaw = 180f, outline = 0.008f },
             ["presents"] = new Spec { size = 1.0f, yaw = 180f, outline = 0.01f },
-            ["cone"] = new Spec { size = 0.85f, yaw = 180f, outline = 0.01f },
-            ["roadworks-barrier"] = new Spec { size = 1.15f, yaw = 180f, outline = 0.01f },
+            ["cone"] = new Spec { size = 0.75f, yaw = 180f, outline = 0.01f },
+            // A low A-frame barrier spanning the lane, so a hop clears it and the whole lane is visibly closed.
+            ["roadworks-barrier"] = new Spec { size = 0.9f, yaw = 180f, outline = 0.01f, stretchX = 1.9f },
             ["tree-planter"] = new Spec { size = 3.2f, yaw = 180f, outline = 0.012f },
             ["shopper"] = new Spec { size = 1.7f, yaw = 180f, outline = 0.012f },
             ["reunion-tower"] = new Spec { size = 70f },
@@ -91,6 +94,13 @@ namespace DallasDash.EditorTools
                 k = spec.size / Mathf.Max(measure, 1e-4f);
                 model.transform.localScale *= k;
                 b = Bounds(model);
+                if (spec.stretchX > 0f)
+                {
+                    var sc = model.transform.localScale;
+                    sc.x *= spec.stretchX / Mathf.Max(b.size.x, 1e-4f);
+                    model.transform.localScale = sc;
+                    b = Bounds(model);
+                }
                 model.transform.localPosition -= new Vector3(b.center.x, b.min.y, b.center.z);
             }
 

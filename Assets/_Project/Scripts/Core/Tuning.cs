@@ -9,7 +9,8 @@ namespace DallasDash.Core
         public const float JumpV = 9.4f;
         public const float DiveV = -22f;
         public const float Gravity = 31f;
-        public const float SlideSeconds = 32f / 60f;
+        /// A jump swiped just before landing still fires on touchdown.
+        public const float JumpBufferSeconds = 0.15f;
         public const float LaneSlewPerSecond = 22f;
 
         public const float SpeedBase = 20f;

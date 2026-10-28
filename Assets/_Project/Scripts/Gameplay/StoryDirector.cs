@@ -41,6 +41,8 @@ namespace DallasDash.Gameplay
         void StageTitle()
         {
             look.Apply(PlayerProfile.Character, true);
+            rider.ResetRider();
+            rider.cruiseSpeed = 0f;
             rider.transform.position = new Vector3(0f, 0f, CurbZ + 6f);
             if (bag) bag.gameObject.SetActive(false);
             trafficLight.Set(TrafficLight.Phase.Green);
@@ -60,7 +62,10 @@ namespace DallasDash.Gameplay
             follow.cinematic = true;
             var cam = follow.transform;
 
-            // ---- 13 Loading Up: standing beside the bike at the curb, bag into the box.
+            // ---- 13 Loading Up: standing beside the bike at the curb, bag into the box. The bike is parked:
+            // no pedalling motion, no leftover wobble from the last run.
+            rider.ResetRider();
+            rider.cruiseSpeed = 0f;
             look.Apply(PlayerProfile.Character, false);
             rider.transform.position = new Vector3(CurbX, 0f, CurbZ);
             chase.Place(new Vector3(-6f, 0f, CurbZ - 14f));
@@ -96,6 +101,7 @@ namespace DallasDash.Gameplay
                 if (Skip()) { yield return Finish(); yield break; }
                 speed = Mathf.MoveTowards(speed, 13f, Time.deltaTime * 6f);
                 z += speed * Time.deltaTime;
+                rider.cruiseSpeed = speed;
                 x = Mathf.MoveTowards(x, 0f, Time.deltaTime * 2.2f);
                 rider.transform.position = new Vector3(x, 0f, z);
                 trafficLight.Set(t < 0.6f ? TrafficLight.Phase.Green : t < 1.2f ? TrafficLight.Phase.Amber : TrafficLight.Phase.Red);
@@ -126,7 +132,7 @@ namespace DallasDash.Gameplay
         IEnumerator Pursuit(float z, float speed)
         {
             var cam = follow.transform;
-            MenuUI.Instance.Caption("THE PURSUIT", "Swipe to dodge. Two slips and you're busted.", 2.2f);
+            MenuUI.Instance.Caption("THE PURSUIT", "Swipe to dodge, up to hop. Two slips and you're busted.", 2.2f);
             chase.SirenBurst();
             Vector3 officerFrom = new(-4f, 0f, z - 9f);
             for (float t = 0f; t < 2.2f; t += Time.deltaTime)
@@ -136,6 +142,7 @@ namespace DallasDash.Gameplay
                 float remaining = 2.2f - t;
                 speed = Mathf.Max(speed, -z / Mathf.Max(remaining, 0.05f));
                 z = Mathf.Min(0f, z + speed * Time.deltaTime);
+                rider.cruiseSpeed = speed;
                 rider.transform.position = new Vector3(0f, 0f, z);
                 float k = Mathf.SmoothStep(0f, 1f, t / 2.2f);
                 chase.Place(Vector3.Lerp(officerFrom, new Vector3(0f, 0f, z - 4f), k));

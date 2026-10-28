@@ -155,7 +155,7 @@ namespace DallasDash.Gameplay
             StoryDirector.Instance.Play();
             while (GameManager.Instance.State != RunState.Running) yield return null;
 
-            Say("THE RUN", "Swipe left and right to change lanes, up to jump, down to roll. Downtown Dallas at Christmas.", 4f);
+            Say("THE RUN", "Swipe left and right to change lanes, up to hop. Roadworks, delivery vans and other couriers fill downtown Dallas.", 4f);
             yield return new WaitForSeconds(6f);
             Say("COLLECT BURGERS", "Every burger is a coin. The score multiplier grows the further you ride.", 4f);
             yield return new WaitForSeconds(5f);

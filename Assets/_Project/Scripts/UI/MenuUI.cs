@@ -144,7 +144,7 @@ namespace DallasDash.UI
             UiKit.Label(ribbon.transform, "GAME", 92, new Vector2(0, 4), new Vector2(440, 116), Color.white);
             var tag = UiKit.Panel(logo, "Tagline", new Vector2(0, -172), new Vector2(1000, 64), new Color(0.05f, 0.08f, 0.25f, 0.78f));
             tag.raycastTarget = false;
-            UiKit.Label(tag.transform, "Deliver across Dallas. Dodge the Christmas rush. Outride the officer.", 32, new Vector2(0, 2), new Vector2(980, 60), UiKit.Cream);
+            UiKit.Label(tag.transform, "Deliver across Dallas. Beat the lunch rush. Outride the officer.", 32, new Vector2(0, 2), new Vector2(980, 60), UiKit.Cream);
 
             var play = UiKit.Button(t, "PLAY", new Vector2(0, -360), new Vector2(660, 210), UiKit.Green, Play, 104, "play");
             play.transform.Find("Face").gameObject.AddComponent<UiPulse>(); // the root's scale belongs to ButtonBounce
@@ -317,18 +317,46 @@ namespace DallasDash.UI
             pause.SetActive(false);
         }
 
+        Coroutine countdown;
+
         void Pause()
         {
             if (GameManager.Instance.State != RunState.Running) return;
+            if (countdown != null) { StopCoroutine(countdown); countdown = null; popup.text = ""; }
             GameManager.Instance.SetPaused(true);
             pause.SetActive(true);
         }
 
+        /// Back into the run after a 3-2-1, so the rider isn't dropped straight into an obstacle.
         void Resume()
         {
             pause.SetActive(false);
             settings.SetActive(false);
+            if (countdown != null) StopCoroutine(countdown);
+            countdown = StartCoroutine(Countdown());
+        }
+
+        IEnumerator Countdown()
+        {
+            foreach (var n in new[] { "3", "2", "1" })
+            {
+                Popup(n);
+                for (float t = 0f; t < 0.55f; t += Time.unscaledDeltaTime) yield return null;
+            }
+            Popup("GO!");
+            countdown = null;
             GameManager.Instance.SetPaused(false);
+        }
+
+        // Phone call, notification shade, app switch: pause the run rather than let it play on unseen.
+        // Not in the autopilot capture modes, where the window may never have focus.
+        void OnApplicationPause(bool paused) { if (paused) AutoPause(); }
+        void OnApplicationFocus(bool focused) { if (!focused) AutoPause(); }
+
+        void AutoPause()
+        {
+            if (RiderInput.Override != null || !GameManager.Instance || GameManager.Instance.Paused && countdown == null) return;
+            Pause();
         }
 
         void QuitRun()
@@ -682,6 +710,8 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
             pause.SetActive(false);
             skipHint.SetActive(s == RunState.Intro && ShowSkipHint);
             if (s == RunState.Ready || s == RunState.Busted) captionTimer = 0.01f;
+            if (s == RunState.Running) coachedHop = coachedSteer = false;
+            if (s == RunState.Busted) PlayerPrefs.SetInt("coached_runs", PlayerPrefs.GetInt("coached_runs", 0) + 1);
             if (s == RunState.Busted)
             {
                 StartCoroutine(ShowBustedAfter(1.4f));
@@ -738,6 +768,7 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
                 toast.transform.localScale = Vector3.one * (1f + Mathf.Max(0f, toastTimer - 1.7f) * 1.5f);
                 if (toastTimer <= 0f) toast.text = "";
             }
+            Coach();
             // Escape / Android back: pause during a run, close the top panel otherwise.
             if (UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true)
             {
@@ -751,6 +782,32 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
             }
         }
 
+        // ---------- First-run coaching: the first two runs name the move the first time each kind of hurdle
+        // comes up in the rider's lane (hop the low ones, steer round the ones that fill the lane).
+
+        TrackSpawner coachTrack;
+        RiderController coachRider;
+        bool coachedHop, coachedSteer;
+
+        void Coach()
+        {
+            var gm = GameManager.Instance;
+            if (gm.State != RunState.Running || gm.Paused || PlayerPrefs.GetInt("coached_runs", 0) >= 2) return;
+            if (coachedHop && coachedSteer) return;
+            if (!coachTrack) coachTrack = FindFirstObjectByType<TrackSpawner>();
+            if (!coachRider) coachRider = FindFirstObjectByType<RiderController>();
+            if (!coachTrack || !coachRider) return;
+            foreach (var o in coachTrack.Live)
+            {
+                if (!o || o.consumed || o.kind == TrackKind.Pickup || o.lane != coachRider.Lane) continue;
+                float ahead = o.transform.position.z - gm.Distance;
+                if (ahead < 6f || ahead > 26f) continue;
+                if (o.kind == TrackKind.Low && !coachedHop) { coachedHop = true; Caption("SWIPE UP", "Hop over cones and barriers", 1.6f); }
+                else if (o.kind == TrackKind.Block && !coachedSteer) { coachedSteer = true; Caption("SWIPE LEFT OR RIGHT", "Steer round roadworks, vans and riders", 1.8f); }
+                return;
+            }
+        }
+
         /// For screenshot mode.
         public void Open(string panel)
         {
@@ -759,6 +816,7 @@ UiKit.Button(p, "RIDE AGAIN", new Vector2(0, -180), new Vector2(640, 170), UiKit
             if (panel == "crew") ShowCrew();
             if (panel == "shop") ShowShop();
             if (panel == "missions") ShowMissions();
+            if (panel == "pause") Pause();
             if (panel == "none")
             {
                 daily.SetActive(false); settings.SetActive(false); CloseCrew();

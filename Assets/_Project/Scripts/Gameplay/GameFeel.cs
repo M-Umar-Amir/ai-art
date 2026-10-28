@@ -4,7 +4,7 @@ using UnityEngine;
 namespace DallasDash.Gameplay
 {
     /// Run feedback in one place: burger pickup bursts, stumble dust and shake, speed lines,
-    /// falling snow, and the synthesised sound effects. Listens to the track and rider events.
+    /// and the synthesised sound effects. Listens to the track and rider events.
     public class GameFeel : MonoBehaviour
     {
         public FollowCamera cam;
@@ -12,9 +12,9 @@ namespace DallasDash.Gameplay
         /// URP Particles/Unlit material, referenced from the scene so the shader survives build stripping.
         public Material particleMaterial;
 
-        ParticleSystem burst, dust, speedLines, snow;
+        ParticleSystem burst, dust, speedLines;
         AudioSource sfx, siren;
-        AudioClip coin, jump, roll, thud, whoosh;
+        AudioClip coin, jump, drop, thud, whoosh;
         int combo;
         float comboTimer;
 
@@ -23,7 +23,6 @@ namespace DallasDash.Gameplay
             burst = Particles("PickupBurst", 0.35f, 0.12f, new Color(1f, 0.85f, 0.3f), 9f, -3f);
             dust = Particles("Dust", 0.6f, 0.35f, new Color(0.85f, 0.8f, 0.72f), 4f, 0.5f);
             speedLines = SpeedLines();
-            snow = Snow();
 
             sfx = gameObject.AddComponent<AudioSource>();
             siren = gameObject.AddComponent<AudioSource>();
@@ -31,7 +30,7 @@ namespace DallasDash.Gameplay
             siren.volume = 0f;
             siren.clip = Synth.Siren();
             siren.Play();
-            // Background music under the menus and the run (public-domain Jingle Bells, synthesised).
+            // Background music under the menus and the run (an original synthesised loop).
             music = gameObject.AddComponent<AudioSource>();
             music.clip = Synth.Music();
             music.loop = true;
@@ -39,7 +38,7 @@ namespace DallasDash.Gameplay
             music.Play();
             coin = Synth.Coin();
             jump = Synth.Sweep(320f, 760f, 0.16f, 0.35f);
-            roll = Synth.Sweep(500f, 180f, 0.18f, 0.3f);
+            drop = Synth.Sweep(500f, 180f, 0.14f, 0.3f);
             whoosh = Synth.Noise(0.12f, 0.18f);
             thud = Synth.Thud();
 
@@ -50,7 +49,7 @@ namespace DallasDash.Gameplay
             PowerUps.Activated += OnPowerUp;
             powerUp = Synth.Sweep(400f, 1200f, 0.35f, 0.4f);
             rider.Jumped += () => { sfx.PlayOneShot(jump); cam.Kick(0.6f); };
-            rider.Rolled += () => sfx.PlayOneShot(roll);
+            rider.Dropped += () => sfx.PlayOneShot(drop);
             rider.Landed += () => dust.Emit(Params(rider.transform.position), 6);
             rider.LaneChanged += () => sfx.PlayOneShot(whoosh, 0.6f);
             GameManager.Instance.StateChanged += s => { if (s == RunState.Busted) { sfx.PlayOneShot(thud); cam.Shake(0.5f); } };
@@ -144,9 +143,6 @@ namespace DallasDash.Gameplay
             em.rateOverTime = running ? Mathf.Lerp(8f, 60f, speed01) * (PowerUps.Active(PowerUp.Rush) ? 3f : 1f) : 0f;
             speedLines.transform.position = cam.transform.position + cam.transform.forward * 14f;
             speedLines.transform.rotation = cam.transform.rotation;
-            snow.transform.position = cam.transform.position + new Vector3(0f, 8f, 18f);
-            var snowEm = snow.emission;
-            snowEm.rateOverTime = GameSettings.SnowRate;
 
             // Siren swells while the officer is close behind.
             var chase = FindChase();
@@ -204,32 +200,6 @@ namespace DallasDash.Gameplay
             r.renderMode = ParticleSystemRenderMode.Stretch;
             r.lengthScale = 6f;
             r.velocityScale = 0.08f;
-            return ps;
-        }
-
-        ParticleSystem Snow()
-        {
-            var ps = NewSystem("Snow");
-            var main = ps.main;
-            main.startLifetime = 5f;
-            main.startSpeed = 0.5f;
-            main.startSize = new ParticleSystem.MinMaxCurve(0.06f, 0.14f);
-            main.startColor = new Color(1f, 1f, 1f, 0.9f);
-            main.gravityModifier = 0.05f;
-            main.maxParticles = 600;
-            main.simulationSpace = ParticleSystemSimulationSpace.World;
-            var shape = ps.shape;
-            shape.shapeType = ParticleSystemShapeType.Box;
-            // Starts 5 m ahead of the lens: flakes falling right past the camera blew up into big blurry discs.
-            shape.scale = new Vector3(30f, 1f, 34f);
-            shape.position = new Vector3(0f, 0f, 4f);
-            ps.GetComponent<ParticleSystemRenderer>().maxParticleSize = 0.012f;
-            var em = ps.emission;
-            em.rateOverTime = 90f;
-            var noise = ps.noise;
-            noise.enabled = true;
-            noise.strength = 0.6f;
-            noise.frequency = 0.3f;
             return ps;
         }
 

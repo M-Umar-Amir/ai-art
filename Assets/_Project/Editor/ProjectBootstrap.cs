@@ -24,13 +24,14 @@ namespace DallasDash.EditorTools
         const string MatDir = Root + "/Materials";
         const string ScenePath = Root + "/Scenes/Main.unity";
 
-        // Palette from the pack: Finn's royal blue, cream, warm yellow rides, festive red and green.
+        // Palette from the pack: Finn's royal blue, cream, warm yellow rides; sign red and park green for the street.
         static readonly Color RoyalBlue = new(0.11f, 0.27f, 0.85f);
         static readonly Color Cream = new(0.96f, 0.93f, 0.84f);
         static readonly Color Charcoal = new(0.2f, 0.2f, 0.22f);
         static readonly Color WarmYellow = new(1f, 0.8f, 0.15f);
-        static readonly Color FestiveRed = new(0.85f, 0.12f, 0.15f);
-        static readonly Color FestiveGreen = new(0.1f, 0.5f, 0.22f);
+        static readonly Color SignRed = new(0.85f, 0.12f, 0.15f);
+        static readonly Color ParkGreen = new(0.1f, 0.5f, 0.22f);
+        static readonly Color SafetyOrange = new(1f, 0.45f, 0.08f);
 
         [MenuItem("Dallas Dash/Bootstrap Project")]
         public static void Run()
@@ -41,8 +42,7 @@ namespace DallasDash.EditorTools
             var data = CreateData();
             var truck = data.obstacles.Find(o => o.id == "food-truck");
             if (truck) { truck.prefab = BuildFoodTruck(mats); EditorUtility.SetDirty(truck); }
-            var banner = data.obstacles.Find(o => o.id == "garland-banner");
-            if (banner) { banner.prefab = BuildGarlandBanner(mats); EditorUtility.SetDirty(banner); }
+            BuildStreetHurdles(mats, data);
             BuildScene(mats, data);
             TrimOutlinePasses();
             AssetDatabase.SaveAssets();
@@ -100,8 +100,11 @@ namespace DallasDash.EditorTools
                 ["Sidewalk"] = new(0.86f, 0.78f, 0.68f),
                 ["Landmark"] = new(0.55f, 0.7f, 0.85f),
                 ["WarmYellow"] = WarmYellow,
-                ["FestiveRed"] = FestiveRed,
-                ["FestiveGreen"] = FestiveGreen,
+                ["SignRed"] = SignRed,
+                ["ParkGreen"] = ParkGreen,
+                ["SafetyOrange"] = SafetyOrange,
+                ["Amber"] = new(1f, 0.62f, 0.1f),
+                ["BrakeRed"] = new(1f, 0.12f, 0.1f),
                 ["Bulb"] = new(1f, 0.9f, 0.6f),
                 ["Tint"] = Color.white,
                 ["BrickRed"] = new(0.62f, 0.28f, 0.2f),
@@ -128,7 +131,7 @@ namespace DallasDash.EditorTools
                 ["Trim"] = new(0.96f, 0.92f, 0.82f),
                 ["Lamp"] = Color.white,
                 ["LampPost"] = new(0.14f, 0.16f, 0.2f),
-                ["Wreath"] = new(0.1f, 0.42f, 0.2f),
+                ["Foliage"] = new(0.1f, 0.42f, 0.2f),
                 ["Skyline"] = new(0.62f, 0.7f, 0.86f),
                 ["Door"] = new(0.36f, 0.2f, 0.12f),
                 ["Plaza"] = new(0.8f, 0.74f, 0.66f),
@@ -151,6 +154,8 @@ namespace DallasDash.EditorTools
                 m.SetColor("_EmissionColor", kv.Key switch
                 {
                     "Bulb" => kv.Value * 2.5f,
+                    "Amber" => kv.Value * 2.2f,
+                    "BrakeRed" => kv.Value * 1.6f,
                     "WindowWarm" => kv.Value * 0.28f, // was 0.6: shop windows bloomed into blank white slabs
                     _ => Color.black,
                 });
@@ -311,15 +316,22 @@ namespace DallasDash.EditorTools
             // One pickup only: Bellagreen's Wagyu Bacon Burger (menu read off bellagreen.com).
             d.pickups.Add(Pickup("wagyu-bacon-burger", "Wagyu Bacon Burger", 10, 1, new Color(0.85f, 0.55f, 0.2f)));
 
-            // Christmas obstacle set (sheet 21) plus the Slice House food truck from scene 13 (Loading Up).
-            d.obstacles.Add(Obstacle("presents", "Stack of presents", TrackKind.Low, new Vector3(1.6f, 0.9f, 1f), 3, FestiveRed));
-            d.obstacles.Add(Obstacle("cone", "Traffic cone", TrackKind.Low, new Vector3(0.8f, 0.8f, 0.8f), 2, new Color(1f, 0.45f, 0.1f)));
-            d.obstacles.Add(Obstacle("roadworks-barrier", "Roadworks barrier", TrackKind.Low, new Vector3(2f, 0.8f, 0.4f), 2, Color.white));
-            d.obstacles.Add(Obstacle("tree-planter", "Christmas tree in a planter", TrackKind.Block, new Vector3(1.8f, 3f, 1.8f), 2, FestiveGreen));
-            d.obstacles.Add(Obstacle("shopper", "Jaywalking shopper with gift bags", TrackKind.Block, new Vector3(0.9f, 1.8f, 0.6f), 2, new Color(0.3f, 0.6f, 0.35f)));
-            d.obstacles.Add(Obstacle("food-truck", "Parked food truck", TrackKind.Block, new Vector3(1.9f, 2.4f, 4.5f), 1, Cream));
-            // NOT in the pack: an overhead garland banner so the roll move still has something to roll under. Needs client approval.
-            d.obstacles.Add(Obstacle("garland-banner", "Low garland banner (proposed)", TrackKind.High, new Vector3(2f, 0.5f, 0.4f), 2, FestiveGreen));
+            // Everyday downtown hurdles (client feedback, 28 Oct: no Christmas theme, no ducking under things).
+            // Low ones get bunny-hopped; the rest fill the lane and are steered round. Sizes here are placeholders:
+            // MeasureHurdles sets each one from its built model, so the hit box is what the player sees.
+            d.obstacles.Add(Obstacle("cones", "Row of traffic cones", TrackKind.Low, new Vector3(2f, 0.75f, 0.5f), 3, SafetyOrange));
+            d.obstacles.Add(Obstacle("roadworks-barrier", "Roadworks barrier", TrackKind.Low, new Vector3(1.9f, 0.9f, 0.5f), 2, Color.white));
+            d.obstacles.Add(Obstacle("roadworks", "Lane closed for roadworks", TrackKind.Block, new Vector3(2.1f, 1.4f, 6f), 3, SafetyOrange, heavy: true));
+            d.obstacles.Add(Obstacle("delivery-van", "Delivery van stopped with its hazards on", TrackKind.Block, new Vector3(2f, 2.4f, 5f), 2, Color.white, heavy: true));
+            d.obstacles.Add(Obstacle("taxi", "Taxi pulled up for a fare", TrackKind.Block, new Vector3(1.9f, 1.6f, 4.4f), 1, WarmYellow, heavy: true));
+            d.obstacles.Add(Obstacle("garbage-truck", "Garbage truck on its round", TrackKind.Block, new Vector3(2.1f, 2.8f, 6f), 1, ParkGreen, heavy: true));
+            // Traffic going the same way, slower than the rider: other couriers on bikes and a scooter, and cars.
+            d.obstacles.Add(Obstacle("courier-a", "Courier on a bike", TrackKind.Block, new Vector3(0.8f, 1.8f, 1.8f), 3, ParkGreen, heavy: true, drift: 0.25f));
+            d.obstacles.Add(Obstacle("courier-b", "Courier on a bike", TrackKind.Block, new Vector3(0.8f, 1.8f, 1.8f), 2, SafetyOrange, heavy: true, drift: 0.3f));
+            d.obstacles.Add(Obstacle("scooter-courier", "Courier on a scooter", TrackKind.Block, new Vector3(0.8f, 1.8f, 1.8f), 2, RoyalBlue, heavy: true, drift: 0.38f));
+            d.obstacles.Add(Obstacle("slow-car", "Car in slow traffic", TrackKind.Block, new Vector3(1.9f, 1.5f, 4.4f), 2, Color.white, heavy: true, drift: 0.35f));
+            // The Slice House food truck from scene 13 (Loading Up).
+            d.obstacles.Add(Obstacle("food-truck", "Parked food truck", TrackKind.Block, new Vector3(1.9f, 2.4f, 4.5f), 1, Cream, heavy: true));
             return d;
         }
 
@@ -436,7 +448,6 @@ namespace DallasDash.EditorTools
             spawner.sidewalkMaterial = mats["Sidewalk"];
             spawner.landmarkMaterial = mats["Landmark"];
             spawner.facadeMaterials = new[] { mats["BrickRed"], mats["BrickTan"], mats["BrickBrown"], mats["PaintTeal"], mats["PaintMint"], mats["PaintPink"], mats["PaintCream"], mats["PaintNavy"] };
-            spawner.garlandMaterial = mats["FestiveGreen"];
             spawner.bulbMaterial = mats["Bulb"];
             spawner.tintMaterial = mats["Tint"];
             spawner.laneLineMaterial = mats["LaneLine"];
@@ -445,7 +456,7 @@ namespace DallasDash.EditorTools
             spawner.awningMaterials = new[] { mats["AwningRed"], mats["AwningGreen"], mats["AwningBlue"] };
             spawner.trimMaterial = mats["Trim"];
             spawner.lampPostMaterial = mats["LampPost"];
-            spawner.wreathMaterial = mats["Wreath"];
+            spawner.foliageMaterial = mats["Foliage"];
             spawner.skylineMaterials = new[] { mats["Skyline"], mats["SkylineWarm"] };
             spawner.haloMaterial = mats["Halo"];
             spawner.doorMaterial = mats["Door"];
@@ -479,9 +490,10 @@ namespace DallasDash.EditorTools
                 spawner.kitTrash = KitImport.GetProp("metal_trash_can");
                 spawner.kitUtility = KitImport.GetProp("utility_box_02");
                 spawner.kitBush = KitImport.GetProp("Bush_Common");
+                spawner.kitTrafficLight = Fitted("traffic-signal", KitImport.GetProp("road_traffic-light"), 4.2f, Fit.Height);
+                // Poly Haven furniture is already in metres.
+                spawner.decorPrefabs = System.Array.FindAll(new[] { KitImport.GetProp("planter_box_01"), KitImport.GetProp("wooden_crate_01") }, g => g);
             }
-            spawner.decorPrefabs = new[] { ModelImport.Get("tree-planter"), ModelImport.Get("presents") };
-            spawner.bulbColors = new[] { new Color(1f, 0.25f, 0.2f), new Color(0.3f, 1f, 0.4f), new Color(1f, 0.82f, 0.3f), new Color(1f, 0.95f, 0.85f) };
             ApplyGroundTextures(mats);
 
             var cam = Camera.main;
@@ -534,7 +546,7 @@ namespace DallasDash.EditorTools
             EditorBuildSettings.scenes = new[] { new EditorBuildSettingsScene(ScenePath, true) };
         }
 
-        /// Bright, punchy grade: bloom on the string lights, a little extra saturation and contrast, soft vignette.
+        /// Bright, punchy grade: bloom on the lit windows and lamps, a little extra saturation and contrast, soft vignette.
         static void BuildPostFx()
         {
             string path = Root + "/Settings/PostFx.asset";
@@ -729,7 +741,7 @@ namespace DallasDash.EditorTools
                 Part(root, PrimitiveType.Cube, new Vector3(1.16f, 2.08f - 0.02f * (i % 2), -0.3f + i * 0.36f), new Vector3(0.5f, 0.06f, 0.36f),
                      mats[i % 2 == 0 ? "AwningRed" : "Trim"], "Awning");
             // Rooftop sign board facing oncoming riders (it used to stand edge-on and read as a slab), on two posts.
-            Part(root, PrimitiveType.Cube, new Vector3(0f, 3.1f, -0.2f), new Vector3(1.7f, 0.62f, 0.12f), mats["FestiveRed"], "Roof sign");
+            Part(root, PrimitiveType.Cube, new Vector3(0f, 3.1f, -0.2f), new Vector3(1.7f, 0.62f, 0.12f), mats["SignRed"], "Roof sign");
             Part(root, PrimitiveType.Cube, new Vector3(0f, 3.1f, -0.27f), new Vector3(1.54f, 0.46f, 0.04f), mats["Cream"], "Roof sign face");
             foreach (float x in new[] { -0.6f, 0.6f })
                 Part(root, PrimitiveType.Cube, new Vector3(x, 2.68f, -0.2f), new Vector3(0.08f, 0.3f, 0.08f), mats["Charcoal"], "Sign post");
@@ -744,7 +756,7 @@ namespace DallasDash.EditorTools
                 rt.anchor = TextAnchor.MiddleCenter;
                 rt.characterSize = 0.05f;
                 rt.fontSize = 64;
-                rt.color = FestiveRed;
+                rt.color = SignRed;
                 rt.font = roofFont;
                 roofLabel.GetComponent<MeshRenderer>().sharedMaterial = mats["SignText"];
             }
@@ -770,7 +782,7 @@ namespace DallasDash.EditorTools
                 tm.anchor = TextAnchor.MiddleCenter;
                 tm.characterSize = 0.12f;
                 tm.fontSize = 48;
-                tm.color = FestiveRed;
+                tm.color = SignRed;
                 var truckFont = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
                 if (truckFont) { tm.font = truckFont; sign.GetComponent<MeshRenderer>().sharedMaterial = mats["SignText"]; }
                 else tm.fontStyle = FontStyle.Bold;
@@ -781,49 +793,255 @@ namespace DallasDash.EditorTools
             return prefab;
         }
 
-        /// Overhead obstacle to roll under: a "Season's Eatings" banner strung across one lane between two
-        /// lamp-post-style poles, trimmed with garland, bulbs and a bow. Origin is the banner's centre, which the
-        /// spawner hangs 1.6 m up; the poles reach down to the road.
-        static GameObject BuildGarlandBanner(Dictionary<string, Material> mats)
+        // ---------- Street hurdles built from the CC0 kits (Kenney cars and roadworks, the pack's bicycle and crew).
+
+        enum Fit { Height, Length, Width }
+
+        /// Wraps a kit prop in a prefab scaled to a real size (Kenney pieces come in kit units), standing on y = 0,
+        /// centred, and turned so its long side runs along the street when `alongZ`.
+        static GameObject Fitted(string id, GameObject piece, float size, Fit fit, bool alongZ = false)
         {
-            var root = new GameObject("garland-banner").transform;
-            foreach (float x in new[] { -1.12f, 1.12f })
-            {
-                Part(root, PrimitiveType.Cylinder, new Vector3(x, -0.45f, 0f), new Vector3(0.12f, 1.25f, 0.12f), mats["LampPost"], "Pole");
-                Part(root, PrimitiveType.Cylinder, new Vector3(x, -1.58f, 0f), new Vector3(0.34f, 0.04f, 0.34f), mats["LampPost"], "Foot");
-                Part(root, PrimitiveType.Sphere, new Vector3(x, 0.86f, 0f), new Vector3(0.2f, 0.2f, 0.2f), mats["WarmYellow"], "Finial");
-            }
-            Part(root, PrimitiveType.Cube, Vector3.zero, new Vector3(2.1f, 0.56f, 0.1f), mats["FestiveRed"], "Board");
-            Part(root, PrimitiveType.Cube, new Vector3(0f, 0f, -0.03f), new Vector3(1.96f, 0.42f, 0.1f), mats["Cream"], "Panel");
-            // Garland along the top edge with bulbs tucked in, and a bow at the centre.
-            for (int i = 0; i <= 10; i++)
-            {
-                float x = Mathf.Lerp(-1.1f, 1.1f, i / 10f);
-                Part(root, PrimitiveType.Sphere, new Vector3(x, 0.3f, 0f), new Vector3(0.26f, 0.22f, 0.24f), mats["Wreath"], "Garland");
-                if (i % 2 == 1) Part(root, PrimitiveType.Sphere, new Vector3(x, 0.26f, -0.13f), Vector3.one * 0.1f, mats["Bulb"], "Bulb");
-            }
-            Part(root, PrimitiveType.Sphere, new Vector3(-0.13f, 0.36f, -0.08f), new Vector3(0.24f, 0.16f, 0.1f), mats["FestiveRed"], "Bow");
-            Part(root, PrimitiveType.Sphere, new Vector3(0.13f, 0.36f, -0.08f), new Vector3(0.24f, 0.16f, 0.1f), mats["FestiveRed"], "Bow");
-            Part(root, PrimitiveType.Sphere, new Vector3(0f, 0.36f, -0.1f), Vector3.one * 0.11f, mats["WarmYellow"], "Knot");
-            var font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
-            {
-                // Lettered on the face the rider approaches (-Z). Text meshes draw over the board, so a second,
-                // back-facing copy would show through mirrored.
-                var label = new GameObject("Season's Eatings", typeof(TextMesh));
-                label.transform.SetParent(root, false);
-                label.transform.localPosition = new Vector3(0f, -0.01f, -0.085f);
-                var tm = label.GetComponent<TextMesh>();
-                tm.text = "SEASON'S EATINGS";
-                tm.anchor = TextAnchor.MiddleCenter;
-                tm.characterSize = 0.037f;
-                tm.fontSize = 64;
-                tm.color = FestiveRed;
-                if (font) { tm.font = font; label.GetComponent<MeshRenderer>().sharedMaterial = mats["SignText"]; }
-            }
+            if (!piece) return null;
+            var root = new GameObject(id).transform;
+            var go = FittedChild(root, piece, size, fit, alongZ);
+            if (!go) { Object.DestroyImmediate(root.gameObject); return null; }
+            return SavePrefab(root);
+        }
+
+        static GameObject FittedChild(Transform root, GameObject piece, float size, Fit fit, bool alongZ, float yaw = 0f)
+        {
+            if (!piece) return null;
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(piece);
+            go.transform.SetParent(root, false);
+            var mf = go.GetComponent<MeshFilter>();
+            if (!mf || !mf.sharedMesh) return go;
+            var b = mf.sharedMesh.bounds;
+            bool turn = alongZ && b.size.x > b.size.z;
+            float measure = fit == Fit.Height ? b.size.y : fit == Fit.Length ? Mathf.Max(b.size.x, b.size.z) : Mathf.Min(b.size.x, b.size.z);
+            float k = size / Mathf.Max(measure, 0.001f);
+            go.transform.localScale = Vector3.one * k;
+            go.transform.localRotation = Quaternion.Euler(0f, (turn ? 90f : 0f) + yaw, 0f);
+            go.transform.localPosition = go.transform.localRotation * new Vector3(-b.center.x * k, 0f, -b.center.z * k) + Vector3.up * (-b.min.y * k);
+            return go;
+        }
+
+        static GameObject SavePrefab(Transform root)
+        {
             Directory.CreateDirectory(Root + "/Prefabs");
-            var prefab = PrefabUtility.SaveAsPrefabAsset(root.gameObject, Root + "/Prefabs/garland-banner.prefab");
+            var prefab = PrefabUtility.SaveAsPrefabAsset(root.gameObject, $"{Root}/Prefabs/{root.name}.prefab");
             Object.DestroyImmediate(root.gameObject);
             return prefab;
+        }
+
+        static void SetPrefab(PackData data, string id, GameObject prefab)
+        {
+            var def = data.obstacles.Find(o => o.id == id);
+            if (!def || !prefab) return;
+            def.prefab = prefab;
+            EditorUtility.SetDirty(def);
+        }
+
+        static void BuildStreetHurdles(Dictionary<string, Material> mats, PackData data)
+        {
+            SetPrefab(data, "cones", BuildConeRow());
+            if (KitImport.Available)
+            {
+                SetPrefab(data, "roadworks", BuildRoadworks(mats));
+                SetPrefab(data, "delivery-van", BuildStoppedVehicle(mats, "delivery-van", "car_delivery", 5f, true));
+                SetPrefab(data, "taxi", BuildStoppedVehicle(mats, "taxi", "car_taxi", 4.4f, true));
+                SetPrefab(data, "garbage-truck", BuildStoppedVehicle(mats, "garbage-truck", "car_garbage-truck", 6f, true));
+                SetPrefab(data, "slow-car", BuildStoppedVehicle(mats, "slow-car", "car_sedan", 4.4f, false));
+            }
+            SetPrefab(data, "courier-a", BuildCourier(mats, "courier-a", "finn-ride", new Color(0.12f, 0.6f, 0.5f), "ZIPPY", false));
+            SetPrefab(data, "courier-b", BuildCourier(mats, "courier-b", "faye-ride", SafetyOrange, "QUIKBITE", false));
+            SetPrefab(data, "scooter-courier", BuildCourier(mats, "scooter-courier", "finn-ride", new Color(0.45f, 0.25f, 0.85f), "SNAPCHOW", true));
+            MeasureHurdles(data);
+        }
+
+        /// Hit boxes from the models themselves: each obstacle's size (and so its hit length along the street and,
+        /// for low ones, the height a hop has to clear) is the bounds of what is drawn.
+        static void MeasureHurdles(PackData data)
+        {
+            foreach (var def in data.obstacles)
+            {
+                if (!def.prefab) continue;
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(def.prefab);
+                Bounds b = default;
+                bool any = false;
+                foreach (var r in go.GetComponentsInChildren<MeshRenderer>())
+                {
+                    if (r.GetComponent<TextMesh>()) continue;
+                    if (!any) { b = r.bounds; any = true; } else b.Encapsulate(r.bounds);
+                }
+                Object.DestroyImmediate(go);
+                if (!any) continue;
+                def.size = new Vector3(b.size.x, b.max.y, Mathf.Max(0.3f, b.size.z));
+                EditorUtility.SetDirty(def);
+                Debug.Log($"[DallasDash] Hurdle {def.id}: {def.kind}, {def.size.x:F2} x {def.size.y:F2} x {def.size.z:F2} m");
+            }
+        }
+
+        /// Three of the pack's traffic cones across a lane, so the whole lane that the hit test covers is coned.
+        static GameObject BuildConeRow()
+        {
+            var cone = ModelImport.Get("cone");
+            if (!cone) return null;
+            var root = new GameObject("cones").transform;
+            foreach (float x in new[] { -0.72f, 0f, 0.72f })
+            {
+                var c = Model(root, cone, new Vector3(x, 0f, 0f), "Cone");
+                c.transform.localRotation = Quaternion.Euler(0f, x * 40f, 0f);
+            }
+            return SavePrefab(root);
+        }
+
+        /// A car from the Kenney kit facing the way the rider rides, so the rider comes up on its back end;
+        /// stopped ones blink their hazards, moving ones show brake lights.
+        static GameObject BuildStoppedVehicle(Dictionary<string, Material> mats, string id, string piece, float length, bool stopped)
+        {
+            var src = KitImport.GetProp(piece);
+            if (!src) return null;
+            var root = new GameObject(id).transform;
+            var car = FittedChild(root, src, length, Fit.Length, true);
+            float h = car.GetComponent<MeshFilter>() ? car.GetComponent<MeshRenderer>().bounds.size.y : 1.6f;
+            foreach (float x in new[] { -0.72f, 0.72f })
+            {
+                Part(root, PrimitiveType.Cube, new Vector3(x, h * 0.42f, -length / 2f - 0.02f), new Vector3(0.24f, 0.14f, 0.06f), mats[stopped ? "Amber" : "BrakeRed"], stopped ? "Hazard" : "Brake light");
+                if (stopped) root.GetChild(root.childCount - 1).gameObject.AddComponent<Blinker>();
+            }
+            return SavePrefab(root);
+        }
+
+        /// A lane closed for roadworks, 6 m long: the pack's striped barriers front and back with a flashing lamp,
+        /// concrete Jersey barriers down both sides, cones across the approach, a ROAD WORK sign, and the dug-up
+        /// trench with its spoil heap inside.
+        static GameObject BuildRoadworks(Dictionary<string, Material> mats)
+        {
+            var root = new GameObject("roadworks").transform;
+            var barrier = ModelImport.Get("roadworks-barrier");
+            var cone = ModelImport.Get("cone");
+            var jersey = KitImport.GetProp("concrete_road_barrier_02");
+            foreach (float z in new[] { -2.55f, 2.55f })
+            {
+                if (!barrier) break;
+                Model(root, barrier, new Vector3(0f, 0f, z), "Barrier");
+            }
+            Part(root, PrimitiveType.Cube, new Vector3(0.7f, 1.0f, -2.75f), new Vector3(0.16f, 0.16f, 0.06f), mats["Amber"], "Lamp");
+            root.GetChild(root.childCount - 1).gameObject.AddComponent<Blinker>().perSecond = 1.1f;
+            foreach (float x in new[] { -0.72f, 0.72f })
+                if (cone) Model(root, cone, new Vector3(x, 0f, -2.95f), "Cone");
+            foreach (float x in new[] { -0.92f, 0.92f })
+            foreach (float z in new[] { -1.05f, 1.05f })
+            {
+                var f = FittedChild(root, jersey, 2f, Fit.Length, true);
+                if (f) f.transform.localPosition += new Vector3(x, 0f, z);
+            }
+            // The trench and the spoil heap beside it.
+            Part(root, PrimitiveType.Cube, new Vector3(0f, 0.012f, -0.3f), new Vector3(1.3f, 0.02f, 2.6f), mats["Charcoal"], "Trench");
+            Part(root, PrimitiveType.Sphere, new Vector3(0.1f, 0.05f, 1.4f), new Vector3(1.1f, 0.7f, 1f), mats["Kraft"], "Spoil");
+            // ROAD WORK diamond on a post, just behind the front barrier.
+            Part(root, PrimitiveType.Cylinder, new Vector3(-0.55f, 0.9f, -2.2f), new Vector3(0.06f, 0.9f, 0.06f), mats["Charcoal"], "Sign post");
+            Part(root, PrimitiveType.Cube, new Vector3(-0.55f, 1.95f, -2.25f), new Vector3(0.66f, 0.66f, 0.04f), mats["SafetyOrange"], "Sign");
+            root.GetChild(root.childCount - 1).localRotation = Quaternion.Euler(0f, 0f, 45f);
+            var font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
+            if (font)
+            {
+                var label = new GameObject("ROAD WORK", typeof(TextMesh));
+                label.transform.SetParent(root, false);
+                label.transform.localPosition = new Vector3(-0.55f, 1.95f, -2.28f);
+                var tm = label.GetComponent<TextMesh>();
+                tm.text = "ROAD\nWORK";
+                tm.anchor = TextAnchor.MiddleCenter;
+                tm.alignment = TextAlignment.Center;
+                tm.characterSize = 0.028f;
+                tm.fontSize = 64;
+                tm.lineSpacing = 0.85f;
+                tm.color = new Color(0.08f, 0.08f, 0.1f);
+                tm.font = font;
+                label.GetComponent<MeshRenderer>().sharedMaterial = mats["SignText"];
+            }
+            return SavePrefab(root);
+        }
+
+        /// Another courier riding the same way: the pack's bicycle with a rider from the crew meshes, re-coloured
+        /// (a tint over their texture), in a helmet and with a big insulated backpack in an invented courier
+        /// service's colours, so from behind they read as someone else. The Ride child bobs as they pedal.
+        static GameObject BuildCourier(Dictionary<string, Material> mats, string id, string riderId, Color brand, string service, bool scooter)
+        {
+            var bike = ModelImport.Get("bicycle");
+            var person = ModelImport.Get(riderId);
+            var scooterPrefab = scooter ? ModelImport.Get("scooter") : null;
+            if (!bike || !person || (scooter && !scooterPrefab)) return null;
+            var root = new GameObject(id).transform;
+            var ride = new GameObject("Ride").transform;
+            ride.SetParent(root, false);
+            var seat = SaddleOffset;
+            if (scooter)
+            {
+                // Same fit as the player's scooter (BuildScene): scaled down a touch, rider lowered onto its seat.
+                var bikeProbe = Model(ride, bike, Vector3.zero, "Probe");
+                var sc = Model(ride, scooterPrefab, Vector3.zero, "Scooter");
+                float ratio = Height(sc) / Mathf.Max(0.01f, Height(bikeProbe));
+                Object.DestroyImmediate(bikeProbe);
+                sc.transform.localScale *= 0.85f;
+                seat += new Vector3(0f, SaddleOffset.y * (ratio * 0.85f * 0.92f - 1f) + 0.06f, -0.3f);
+            }
+            else Model(ride, bike, Vector3.zero, "Bicycle");
+            var rider = Model(ride, person, seat, "Rider");
+            // Tinted copies of the rider's materials.
+            foreach (var r in rider.GetComponentsInChildren<Renderer>())
+            {
+                var ms = r.sharedMaterials;
+                for (int i = 0; i < ms.Length; i++)
+                {
+                    if (!ms[i]) continue;
+                    string path = $"{MatDir}/Models/{id}-{i}.mat";
+                    var m = AssetDatabase.LoadAssetAtPath<Material>(path);
+                    if (!m) { m = new Material(ms[i]); AssetDatabase.CreateAsset(m, path); }
+                    m.CopyPropertiesFromMaterial(ms[i]);
+                    m.SetColor("_BaseColor", Color.Lerp(Color.white, brand, 0.35f));
+                    // Background traffic: no ink outline (it doubles the draw cost of every courier on screen).
+                    m.SetFloat("_OutlineWidth", 0f);
+                    EditorUtility.SetDirty(m);
+                    ms[i] = m;
+                }
+                r.sharedMaterials = ms;
+            }
+            var bounds = rider.GetComponentInChildren<Renderer>().bounds;
+            foreach (var r in rider.GetComponentsInChildren<Renderer>()) bounds.Encapsulate(r.bounds);
+            float top = bounds.max.y;
+            // Helmet over the hat/hair, backpack box on the back (the rider's back faces -Z, toward the player).
+            string brandPath = $"{MatDir}/Models/{id}-brand.mat";
+            var brandMat = AssetDatabase.LoadAssetAtPath<Material>(brandPath);
+            if (!brandMat) { brandMat = new Material(mats["Tint"]); AssetDatabase.CreateAsset(brandMat, brandPath); }
+            brandMat.CopyPropertiesFromMaterial(mats["Tint"]);
+            brandMat.SetColor("_BaseColor", brand);
+            brandMat.SetFloat("_OutlineWidth", 0f);
+            EditorUtility.SetDirty(brandMat);
+            Part(ride, PrimitiveType.Sphere, new Vector3(bounds.center.x, top - 0.1f, bounds.center.z - 0.02f), new Vector3(0.36f, 0.26f, 0.4f), brandMat, "Helmet");
+            float backZ = bounds.min.z + 0.05f;
+            Part(ride, PrimitiveType.Cube, new Vector3(bounds.center.x, top - 0.62f, backZ - 0.18f), new Vector3(0.5f, 0.5f, 0.36f), brandMat, "Backpack");
+            Part(ride, PrimitiveType.Cube, new Vector3(bounds.center.x, top - 0.62f, backZ - 0.37f), new Vector3(0.42f, 0.2f, 0.02f), mats["Trim"], "Backpack panel");
+            var font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
+            if (font)
+            {
+                var label = new GameObject(service, typeof(TextMesh));
+                label.transform.SetParent(ride, false);
+                label.transform.localPosition = new Vector3(bounds.center.x, top - 0.62f, backZ - 0.39f);
+                var tm = label.GetComponent<TextMesh>();
+                tm.text = service;
+                tm.anchor = TextAnchor.MiddleCenter;
+                tm.characterSize = 0.012f * 8f / Mathf.Max(6, service.Length);
+                tm.fontSize = 96;
+                tm.color = brand * 0.8f;
+                tm.font = font;
+                label.GetComponent<MeshRenderer>().sharedMaterial = mats["SignText"];
+            }
+            var bob = ride.gameObject.AddComponent<Bobber>();
+            bob.stepsPerSecond = 1.6f;
+            bob.bounce = 0.025f;
+            bob.sway = 2.5f;
+            return SavePrefab(root);
         }
 
         /// Toon materials with no outline skip the outline pass entirely. Otherwise every street prop still
@@ -839,10 +1057,11 @@ namespace DallasDash.EditorTools
             }
         }
 
-        static ObstacleDef Obstacle(string id, string name, TrackKind kind, Vector3 size, int weight, Color c)
+        static ObstacleDef Obstacle(string id, string name, TrackKind kind, Vector3 size, int weight, Color c, bool heavy = false, float drift = 0f)
         {
             var a = Load<ObstacleDef>($"{DataDir}/Obstacles/{id}.asset");
             a.id = id; a.displayName = name; a.kind = kind; a.size = size; a.weight = weight; a.placeholderColor = c;
+            a.heavy = heavy; a.drift = drift;
             a.prefab = ModelImport.Get(id);
             EditorUtility.SetDirty(a);
             return a;

@@ -54,6 +54,15 @@ namespace DallasDash.Gameplay
         }
         int shot;
 
+        /// `-branded`: client presentation stills with the client's restaurant brands on the shop signs
+        /// (TrackSpawner.BrandedPreview). Set before the scene loads so the first street is built with them.
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        static void Flags()
+        {
+            foreach (var a in System.Environment.GetCommandLineArgs())
+                if (a == "-branded") TrackSpawner.BrandedPreview = true;
+        }
+
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
         {
@@ -126,6 +135,7 @@ namespace DallasDash.Gameplay
                 }
             }
             else yield return Shot("ready");
+            if (TrackSpawner.BrandedPreview) yield return HurdleGallery();
 
             autopilot = true;
             var story = StoryDirector.Instance;
@@ -140,6 +150,17 @@ namespace DallasDash.Gameplay
                 while (GameManager.Instance.State != RunState.Running) yield return null;
             }
             else GameManager.Instance.StartRun();
+            // Client presentation stills: a longer look down the street with the brands on the shops, and a few
+            // frozen close-ups of the storefronts from the sidewalk.
+            if (TrackSpawner.BrandedPreview)
+            {
+                for (int i = 0; i < 8; i++)
+                {
+                    yield return new WaitForSeconds(1.3f);
+                    yield return Shot("street");
+                    if (i == 3 || i == 7) yield return Storefronts();
+                }
+            }
             float[] waits = { 1.5f, 2.5f, 3f, 3f, 4f };
             for (int i = 0; i < waits.Length; i++)
             {
@@ -171,6 +192,66 @@ namespace DallasDash.Gameplay
             yield return new WaitForSeconds(1.4f);
             yield return Shot("result");
             Application.Quit();
+        }
+
+        /// Freezes the run, hides the HUD and frames the shops on each side from the sidewalk, then hands back.
+        IEnumerator Storefronts()
+        {
+            var gm = GameManager.Instance;
+            if (gm.State != RunState.Running) yield break;
+            var follow = FindFirstObjectByType<FollowCamera>();
+            if (!follow) yield break;
+            gm.SetPaused(true);
+            follow.cinematic = true;
+            var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+            foreach (var c in canvases) c.enabled = false;
+            var cam = follow.transform;
+            Vector3 was = cam.position;
+            Quaternion rot = cam.rotation;
+            float d = gm.Distance;
+            // Clear the lanes for the frame so nothing stands between the lens and the shops.
+            var hidden = new System.Collections.Generic.List<GameObject>();
+            foreach (var o in track.Live)
+                if (o && o.gameObject.activeSelf) { o.gameObject.SetActive(false); hidden.Add(o.gameObject); }
+            foreach (float side in new[] { 1f, -1f })
+            {
+                // Looking along the shop fronts so several sign boards line up in the frame.
+                cam.position = new Vector3(-side * 3.4f, 3f, d - 2f);
+                cam.LookAt(new Vector3(side * 6.8f, 3.2f, d + 11f));
+                yield return null;
+                yield return Shot("storefront");
+            }
+            foreach (var g in hidden) if (g) g.SetActive(true);
+            cam.position = was;
+            cam.rotation = rot;
+            foreach (var c in canvases) c.enabled = true;
+            follow.cinematic = false;
+            gm.SetPaused(false);
+        }
+
+        /// One frame per hurdle, set on the street in front of the title spot and framed three-quarter on.
+        IEnumerator HurdleGallery()
+        {
+            var follow = FindFirstObjectByType<FollowCamera>();
+            if (!follow || track.obstacles == null) yield break;
+            follow.cinematic = true;
+            var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
+            foreach (var c in canvases) c.enabled = false;
+            var cam = follow.transform;
+            const float z = -22f;
+            foreach (var def in track.obstacles)
+            {
+                if (!def || !def.prefab) continue;
+                var go = Instantiate(def.prefab, new Vector3(Core.Tuning.LaneX[1], 0f, z), Quaternion.identity);
+                float reach = Mathf.Max(def.size.z, def.size.y * 1.6f, 2.2f);
+                cam.position = new Vector3(reach * 0.55f + 1.2f, Mathf.Max(1.5f, def.size.y * 0.8f), z - reach * 0.9f - 2.2f);
+                cam.LookAt(new Vector3(0f, def.size.y * 0.42f, z));
+                yield return new WaitForSeconds(0.3f);
+                yield return Shot("hurdle-" + def.id);
+                Destroy(go);
+            }
+            foreach (var c in canvases) c.enabled = true;
+            follow.cinematic = false;
         }
 
         IEnumerator Shot(string label)

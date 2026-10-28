@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 86c8713a1fc2fd04eafeac98bdd1d5b7, type: 3}
+  m_Name: delivery-van
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.ObstacleDef
+  id: delivery-van
+  displayName: Delivery van stopped with its hazards on
+  kind: 2
+  size: {x: 2.307352, y: 2.5382915, z: 5.05}
+  weight: 2
+  placeholderColor: {r: 1, g: 1, b: 1, a: 1}
+  prefab: {fileID: 7030059415490276194, guid: 4360361f6becb5f4796798bec25b38cb, type: 3}
+  drift: 0
+  heavy: 1
