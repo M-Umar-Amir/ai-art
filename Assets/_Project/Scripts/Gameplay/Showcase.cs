@@ -121,7 +121,7 @@ namespace DallasDash.Gameplay
             menu.Open("none");
             card.alpha = 1f;
             cardHead.text = "FOOD INC GAME";
-            cardSub.text = "Gameplay preview\nWork-in-progress build";
+            cardSub.text = "Gameplay preview: client feedback update\nWork-in-progress build";
             yield return new WaitForSeconds(2.5f);
             for (float t = 0.5f; t > 0f; t -= 1f / Fps) { card.alpha = t / 0.5f; yield return null; }
             card.alpha = 0f;
@@ -150,13 +150,18 @@ namespace DallasDash.Gameplay
             menu.Open("none");
             yield return new WaitForSeconds(0.6f);
 
+            yield return HurdleTour();
+
             autopilot = true;
             // The intro carries its own scene titles, so the strip stays out of the way.
             StoryDirector.Instance.Play();
             while (GameManager.Instance.State != RunState.Running) yield return null;
 
-            Say("THE RUN", "Swipe left and right to change lanes, up to hop. Roadworks, delivery vans and other couriers fill downtown Dallas.", 4f);
-            yield return new WaitForSeconds(6f);
+            Say("THE RUN", "Swipe left and right to change lanes, up to hop. No ducking: everything is hopped or steered round.", 4f);
+            yield return new WaitForSeconds(5f);
+            Say("EVERYDAY TRAFFIC", "Other couriers and slow cars ride the same way, slower than you. Pass them for the Overtake mission.", 4.5f);
+            yield return new WaitForSeconds(5.5f);
+            if (TrackSpawner.BrandedPreview) yield return StorefrontPan();
             Say("COLLECT BURGERS", "Every burger is a coin. The score multiplier grows the further you ride.", 4f);
             yield return new WaitForSeconds(5f);
             PowerUps.Activate(PowerUp.Magnet);
@@ -169,7 +174,7 @@ namespace DallasDash.Gameplay
             Say("POWER-UPS: SUGAR RUSH", "Faster, and obstacles go flying instead of slowing you down.", 4f);
             yield return new WaitForSeconds(6f);
             PowerUps.Clear();
-            Say("THE CHASE", "Hit an obstacle and it topples, you lose speed, and the officer closes in. Hit again while he's close and you're busted.", 5f);
+            Say("THE CHASE", "Clip a van, the roadworks or another rider and you glance off and lose speed; the officer closes in. Slip again while he's close and you're busted.", 5f);
             yield return new WaitForSeconds(3f);
 
             // Let go of the bars: the next hits pull the officer in and end the run.
@@ -185,6 +190,92 @@ namespace DallasDash.Gameplay
             AudioRenderer.Stop();
             WriteWav(Path.Combine(dir, "audio.wav"));
             Application.Quit();
+        }
+
+        /// Each street hurdle in turn on the title street, the camera easing round it, with its name.
+        IEnumerator HurdleTour()
+        {
+            var follow = FindFirstObjectByType<FollowCamera>();
+            if (!follow || track.obstacles == null) yield break;
+            var hidden = HideGameCanvases();
+            follow.cinematic = true;
+            var cam = follow.transform;
+            const float z = -22f;
+            bool first = true;
+            foreach (var def in track.obstacles)
+            {
+                if (!def || !def.prefab) continue;
+                var go = Instantiate(def.prefab, new Vector3(Tuning.LaneX[1], 0f, z), Quaternion.identity);
+                string how = def.kind == TrackKind.Low ? "Hop it" : def.drift > 0f ? "Moving the same way: overtake it" : "Steer round it";
+                string name = ShortNames.TryGetValue(def.id, out var n) ? n : def.displayName.ToUpper();
+                Say(first ? "THE NEW HURDLES" : name, first ? $"{def.displayName}. {how}." : how + ".", 1.9f);
+                first = false;
+                float reach = Mathf.Max(def.size.z, def.size.y * 1.6f, 2.2f);
+                for (int f = 0; f < 54; f++)
+                {
+                    float a = Mathf.Lerp(-28f, 18f, f / 54f) * Mathf.Deg2Rad;
+                    float r = reach * 1.05f + 2.4f;
+                    cam.position = new Vector3(Mathf.Sin(a) * r + 0.6f, Mathf.Max(1.5f, def.size.y * 0.8f), z - Mathf.Cos(a) * r);
+                    cam.LookAt(new Vector3(0f, def.size.y * 0.42f, z));
+                    yield return null;
+                }
+                Destroy(go);
+            }
+            follow.cinematic = false;
+            foreach (var c in hidden) c.enabled = true;
+        }
+
+        static readonly Dictionary<string, string> ShortNames = new()
+        {
+            ["cones"] = "CONE ROW", ["roadworks-barrier"] = "STRIPED BARRIER", ["roadworks"] = "ROADWORKS",
+            ["delivery-van"] = "DELIVERY VAN", ["taxi"] = "TAXI", ["garbage-truck"] = "GARBAGE TRUCK",
+            ["courier-a"] = "COURIER ON A BIKE", ["courier-b"] = "COURIER ON A BIKE", ["scooter-courier"] = "SCOOTER COURIER",
+            ["slow-car"] = "SLOW TRAFFIC", ["food-truck"] = "PARKED FOOD TRUCK",
+        };
+
+        /// Mid-run, the game frozen and the lanes cleared: a slow glide along the shop fronts on each side,
+        /// for the branded presentation cut. Same framing as the storefront stills.
+        IEnumerator StorefrontPan()
+        {
+            var gm = GameManager.Instance;
+            var follow = FindFirstObjectByType<FollowCamera>();
+            if (!follow || gm.State != RunState.Running) yield break;
+            gm.SetPaused(true);
+            var hidden = HideGameCanvases();
+            var cleared = new List<GameObject>();
+            foreach (var o in track.Live)
+                if (o && o.gameObject.activeSelf) { o.gameObject.SetActive(false); cleared.Add(o.gameObject); }
+            follow.cinematic = true;
+            var cam = follow.transform;
+            Vector3 was = cam.position;
+            Quaternion rot = cam.rotation;
+            float d = gm.Distance;
+            Say("BRANDED STOREFRONTS", "Presentation cut: Yum! Brands and Ampex Brands restaurants line the route.", 7.5f);
+            foreach (float side in new[] { 1f, -1f })
+            {
+                for (int f = 0; f < 110; f++)
+                {
+                    float z = d + Mathf.Lerp(-4f, 30f, Mathf.SmoothStep(0f, 1f, f / 110f));
+                    cam.position = new Vector3(-side * 3.4f, 3f, z);
+                    cam.LookAt(new Vector3(side * 6.8f, 3.2f, z + 13f));
+                    yield return null;
+                }
+            }
+            cam.position = was;
+            cam.rotation = rot;
+            foreach (var g in cleared) if (g) g.SetActive(true);
+            foreach (var c in hidden) c.enabled = true;
+            follow.cinematic = false;
+            gm.SetPaused(false);
+        }
+
+        /// The menus and HUD, so a cinematic shows only the street and the caption strip.
+        List<Canvas> HideGameCanvases()
+        {
+            var list = new List<Canvas>();
+            foreach (var c in FindObjectsByType<Canvas>(FindObjectsSortMode.None))
+                if (c.enabled && !c.transform.IsChildOf(transform)) { c.enabled = false; list.Add(c); }
+            return list;
         }
 
         /// 16-bit PCM WAV of everything AudioRenderer captured.
