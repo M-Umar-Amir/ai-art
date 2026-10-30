@@ -4,7 +4,10 @@ namespace DallasDash.Core
     public static class Tuning
     {
         public const int Lanes = 3;
-        public static readonly float[] LaneX = { -2.3f, 0f, 2.3f };
+        /// The fourth lane is the side route: an express deck in shortcut zones, building rooftops in
+        /// Skypark. It sits on the right-hand sidewalk, outside the three traffic lanes.
+        public const int RouteLane = 3;
+        public static readonly float[] LaneX = { -2.3f, 0f, 2.3f, 5.7f };
 
         public const float JumpV = 9.4f;
         public const float DiveV = -22f;

@@ -44,15 +44,18 @@ namespace DallasDash.EditorTools
             if (!File.Exists(glbPath)) return null;
             var (g, bytes, bin) = Load(glbPath);
             if (g.images == null || g.images.Length == 0) return null;
-            int image = 0;
+            int image = -1;
             if (!string.IsNullOrEmpty(material) && g.materials != null)
                 foreach (var m in g.materials)
-                    if (m.name == material && m.pbrMetallicRoughness?.baseColorTexture != null && m.pbrMetallicRoughness.baseColorTexture.index >= 0)
+                    if (m.name == material)
                     {
+                        if (m.pbrMetallicRoughness?.baseColorTexture == null || m.pbrMetallicRoughness.baseColorTexture.index < 0) return null;
                         int t = m.pbrMetallicRoughness.baseColorTexture.index;
                         if (g.textures != null && t < g.textures.Length && g.textures[t].source >= 0) image = g.textures[t].source;
                         break;
                     }
+            if (image < 0 && (g.materials == null || g.materials.Length <= 1)) image = 0;
+            if (image < 0) return null;
             var img = g.images[Mathf.Clamp(image, 0, g.images.Length - 1)];
             if (img.bufferView < 0) return null;
             var view = g.bufferViews[img.bufferView];
@@ -61,7 +64,7 @@ namespace DallasDash.EditorTools
 
             Directory.CreateDirectory(Dir);
             string path = $"{Dir}/{name}.{ext}";
-            if (!File.Exists(path))
+            if (!File.Exists(path) || File.GetLastWriteTimeUtc(glbPath) > File.GetLastWriteTimeUtc(path))
             {
                 var data = new byte[view.byteLength];
                 Buffer.BlockCopy(bytes, bin + view.byteOffset, data, 0, view.byteLength);

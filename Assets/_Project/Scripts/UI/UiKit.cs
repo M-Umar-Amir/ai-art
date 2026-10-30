@@ -11,13 +11,14 @@ namespace DallasDash.UI
     {
         public static Font Font;
 
-        // Palette: Finn's royal blue, cream, warm yellow, festive red and green.
-        public static readonly Color Blue = new(0.11f, 0.3f, 0.9f);
-        public static readonly Color Navy = new(0.07f, 0.11f, 0.32f, 0.92f);
+        // Pink identity, dark city chrome and distinct reward/action colours.
+        public static readonly Color Blue = new(0.055f, 0.085f, 0.14f);
+        public static readonly Color Navy = new(0.025f, 0.04f, 0.12f, 0.96f);
         public static readonly Color Cream = new(1f, 0.97f, 0.9f);
-        public static readonly Color Yellow = new(1f, 0.8f, 0.15f);
-        public static readonly Color Red = new(0.9f, 0.18f, 0.2f);
-        public static readonly Color Green = new(0.15f, 0.62f, 0.3f);
+        public static readonly Color Yellow = new(1f, 0.76f, 0.18f);
+        public static readonly Color Red = new(1f, 0.16f, 0.28f);
+        public static readonly Color Green = new(0.035f, 0.58f, 0.63f);
+        public static readonly Color Pink = new(0.96f, 0.015f, 0.5f);
         public static readonly Color Ink = new(0.1f, 0.12f, 0.3f);
 
         static Sprite rounded, gradient, soft;
@@ -99,12 +100,12 @@ namespace DallasDash.UI
             // The root is invisible (it only blocks taps); children draw in order: shadow, light rim,
             // gradient face, sheen. Content added later lands on top.
             var img = Panel(parent, "Card", pos, size, new Color(0, 0, 0, 0));
-            Shadow(img.transform, size, 26f);
-            Panel(img.transform, "Rim", Vector2.zero, size, new Color(0.42f, 0.6f, 1f)).raycastTarget = false;
-            var face = Panel(img.transform, "Face", Vector2.zero, size - new Vector2(16f, 16f), new Color(0.13f, 0.2f, 0.55f));
-            face.sprite = Gradient;
+            Shadow(img.transform, size, 14f);
+            Panel(img.transform, "Rim", Vector2.zero, size, new Color(0.35f, 0.44f, 0.6f, 0.8f)).raycastTarget = false;
+            var face = Panel(img.transform, "Face", Vector2.zero, size - new Vector2(5f, 5f), new Color(0.035f, 0.06f, 0.12f, 0.98f));
+            face.sprite = Rounded;
             face.raycastTarget = false;
-            var sheen = Panel(img.transform, "Sheen", new Vector2(0f, size.y * 0.5f - 60f), new Vector2(size.x - 60f, 70f), new Color(1f, 1f, 1f, 0.07f));
+            var sheen = Panel(img.transform, "Sheen", new Vector2(0f, size.y * 0.5f - 60f), new Vector2(size.x - 60f, 70f), new Color(1f, 1f, 1f, 0.025f));
             sheen.raycastTarget = false;
             img.gameObject.AddComponent<PanelPop>();
             return img;
@@ -137,11 +138,11 @@ namespace DallasDash.UI
             var bg = Panel(parent, icon + " Pill", pos, new Vector2(width, 100f), new Color(0.05f, 0.08f, 0.25f, 0.72f));
             bg.raycastTarget = false;
             root = bg.rectTransform;
-            Icon(bg.transform, icon, new Vector2(-width * 0.5f + 46f, 2f), 108f);
-            return Label(bg.transform, "", 56, new Vector2(30f, 2f), new Vector2(width - 110f, 90f), textColor);
+            Icon(bg.transform, icon, new Vector2(-width * 0.5f + 48f, 2f), 58f);
+            return Label(bg.transform, "", 48, new Vector2(30f, 2f), new Vector2(width - 110f, 90f), textColor);
         }
 
-        public static Text Label(Transform parent, string text, int size, Vector2 pos, Vector2 box, Color c, TextAnchor anchor = TextAnchor.MiddleCenter, bool outline = true)
+        public static Text Label(Transform parent, string text, int size, Vector2 pos, Vector2 box, Color c, TextAnchor anchor = TextAnchor.MiddleCenter, bool outline = false)
         {
             var rt = Centered(parent, "Label", pos, box);
             var t = rt.gameObject.AddComponent<Text>();
@@ -157,7 +158,7 @@ namespace DallasDash.UI
             {
                 var o = rt.gameObject.AddComponent<Outline>();
                 o.effectColor = new Color(Ink.r, Ink.g, Ink.b, 0.95f);
-                float w = size >= 80 ? 5f : size >= 48 ? 4f : 3f;
+                float w = size >= 80 ? 2f : size >= 48 ? 1.5f : 0.6f;
                 o.effectDistance = new Vector2(w, -w);
                 if (size >= 48)
                 {
@@ -172,18 +173,14 @@ namespace DallasDash.UI
         public static Button Button(Transform parent, string text, Vector2 pos, Vector2 size, Color c, UnityAction onClick, int fontSize = 56, string icon = null)
         {
             var img = Panel(parent, text + " Button", pos, size, c);
-            Shadow(img.transform, size, 22f);
+            Shadow(img.transform, size, 3f);
             // Ink rim, then a darker lip under the face for a chunky, pressable toy look.
-            var rim = Panel(img.transform, "Rim", new Vector2(0, -6), size + new Vector2(12, 24), new Color(Ink.r, Ink.g, Ink.b, 0.95f));
+            var rim = Panel(img.transform, "Rim", Vector2.zero, size + new Vector2(2, 2), new Color(.3f,.4f,.55f,.35f));
             rim.raycastTarget = false;
-            var lip = Panel(img.transform, "Lip", new Vector2(0, -12), size, new Color(c.r * 0.6f, c.g * 0.6f, c.b * 0.6f, 1f));
-            lip.raycastTarget = false;
-            var face = Panel(img.transform, "Face", Vector2.zero, size, Color.Lerp(c, Color.white, 0.12f));
-            face.sprite = Gradient;
+            var face = Panel(img.transform, "Face", Vector2.zero, size, c);
+            face.sprite = Rounded;
             face.raycastTarget = false;
             // Gloss band across the top half.
-            var gloss = Panel(face.transform, "Gloss", new Vector2(0, size.y * 0.22f), new Vector2(size.x - 28f, size.y * 0.4f), new Color(1, 1, 1, 0.22f));
-            gloss.raycastTarget = false;
             img.color = new Color(0, 0, 0, 0); // the root only catches taps
             img.gameObject.AddComponent<ButtonBounce>();
             var b = img.gameObject.AddComponent<Button>();
@@ -197,7 +194,7 @@ namespace DallasDash.UI
             {
                 // Icon alone is centred; with text it sits to the left of the label.
                 bool alone = string.IsNullOrEmpty(text);
-                float isz = size.y * 0.72f;
+                float isz = size.y * 0.44f;
                 float ix = alone ? 0f : -size.x * 0.5f + isz * 0.5f + 28f;
                 Icon(face.transform, icon, new Vector2(ix, 4f), isz);
                 if (!alone) Label(face.transform, text, fontSize, new Vector2(isz * 0.5f + 10f, 4f), size, Color.white);

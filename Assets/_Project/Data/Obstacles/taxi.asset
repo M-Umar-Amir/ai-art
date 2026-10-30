@@ -15,9 +15,9 @@ MonoBehaviour:
   id: taxi
   displayName: Taxi pulled up for a fare
   kind: 2
-  size: {x: 2.4001465, y: 2.3999586, z: 4.45}
+  size: {x: 1.9, y: 1.6, z: 4.4}
   weight: 1
   placeholderColor: {r: 1, g: 0.8, b: 0.15, a: 1}
-  prefab: {fileID: 427374473674130455, guid: 19b6e38f3c9968646bb9886054911fac, type: 3}
+  prefab: {fileID: 0}
   drift: 0
   heavy: 1

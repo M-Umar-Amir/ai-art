@@ -20,9 +20,9 @@ namespace DallasDash.Gameplay
         public void Apply(int character, bool onBike)
         {
             character = Mathf.Clamp(character, 0, seated.Length - 1);
-            bool rolling = character == 2;
+            bool rolling = character == 2 || character == 1 && PlayerProfile.Ride == 0 && !(DashRun.Instance && DashRun.Instance.Board);
             // The bike stays in shot at the curb too; only Fizz-11 never has one.
-            bool onScooter = scooter && PlayerProfile.Ride == 1;
+            bool onScooter = scooter && (PlayerProfile.Ride == 1 || DashRun.Instance && DashRun.Instance.Board);
             if (bicycle) bicycle.SetActive(!rolling && !onScooter);
             if (scooter) scooter.SetActive(!rolling && onScooter);
             if (seatBase == null)
@@ -32,7 +32,7 @@ namespace DallasDash.Gameplay
             }
             for (int i = 0; i < seated.Length; i++)
             {
-                if (seated[i] && i != 2) seated[i].transform.localPosition = seatBase[i] + (onScooter ? scooterSeat : Vector3.zero);
+                if (seated[i]) seated[i].transform.localPosition = seatBase[i] + (onScooter && i != 0 ? scooterSeat : Vector3.zero);
                 if (seated[i]) seated[i].SetActive(onBike && i == character);
                 if (i < standing.Length && standing[i]) standing[i].SetActive(!onBike && i == character);
             }

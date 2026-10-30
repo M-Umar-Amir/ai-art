@@ -15,7 +15,7 @@ MonoBehaviour:
   id: cones
   displayName: Row of traffic cones
   kind: 1
-  size: {x: 2.0528667, y: 0.75, z: 0.61172307}
+  size: {x: 1.9832242, y: 0.73, z: 0.54322416}
   weight: 3
   placeholderColor: {r: 1, g: 0.45, b: 0.08, a: 1}
   prefab: {fileID: 1057874046944912657, guid: a0bfd33f436d628428bcfc0878025acc, type: 3}

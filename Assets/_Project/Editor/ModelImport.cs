@@ -31,6 +31,19 @@ namespace DallasDash.EditorTools
 
         static readonly Dictionary<string, Spec> Specs = new()
         {
+            ["ace"] = new Spec { size = 2.0f, outline = 0.009f },
+            ["nova"] = new Spec { size = 1.95f, outline = 0.009f },
+            ["bolt"] = new Spec { size = 2.15f, outline = 0.009f },
+            ["neon-block-a"] = new Spec { fit = Fit.Keep },
+            ["neon-block-b"] = new Spec { fit = Fit.Keep },
+            ["skybridge"] = new Spec { fit = Fit.Keep },
+            ["electric-board"] = new Spec { fit = Fit.Keep },
+            ["glide-board"] = new Spec { fit = Fit.Keep },
+            ["electric-pod"] = new Spec { fit = Fit.Keep },
+            ["neon-hurdle"] = new Spec { fit = Fit.Keep },
+            ["cargo-slide-gate"] = new Spec { fit = Fit.Keep },
+            ["rooftop-apartment"] = new Spec { fit = Fit.Keep },
+            ["skypark-tower"] = new Spec { fit = Fit.Keep },
             ["finn"] = new Spec { size = 1.7f, outline = 0.012f },
             ["finn-ride"] = new Spec { fit = Fit.Keep, outline = 0.012f },
             ["faye-ride"] = new Spec { fit = Fit.Keep, outline = 0.012f },
@@ -61,13 +74,20 @@ namespace DallasDash.EditorTools
         {
             string prefabPath = $"{PrefabDir}/{id}.prefab";
             var existing = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
-            var src = AssetDatabase.LoadAssetAtPath<GameObject>($"{ModelDir}/{id}.glb");
+            string source = SourcePath(id);
+            var src = AssetDatabase.LoadAssetAtPath<GameObject>(source);
             if (!src) return existing;
-            var newest = File.GetLastWriteTimeUtc($"{ModelDir}/{id}.glb");
+            var newest = File.GetLastWriteTimeUtc(source);
             var self = File.GetLastWriteTimeUtc("Assets/_Project/Editor/ModelImport.cs");
             if (self > newest) newest = self;
             if (existing && File.GetLastWriteTimeUtc(prefabPath) > newest) return existing;
             return Build(id, src, Specs.TryGetValue(id, out var s) ? s : new Spec { size = 1f });
+        }
+
+        static string SourcePath(string id)
+        {
+            string dash = $"Assets/_Project/Art/Models/DashRiders/{id}.glb";
+            return File.Exists(dash) ? dash : $"{ModelDir}/{id}.glb";
         }
 
         static GameObject Build(string id, GameObject src, Spec spec)
@@ -108,6 +128,7 @@ namespace DallasDash.EditorTools
             foreach (var r in model.GetComponentsInChildren<Renderer>())
             {
                 var mats = r.sharedMaterials;
+                string importedSurface = mats.Length > 0 && mats[0] ? mats[0].name.ToLowerInvariant() : "";
                 for (int i = 0; i < mats.Length; i++)
                 {
                     string path = $"{MatDir}/{id}-{mi++}.mat";
@@ -115,19 +136,31 @@ namespace DallasDash.EditorTools
                     if (!m) { m = new Material(toon); AssetDatabase.CreateAsset(m, path); }
                     m.shader = toon;
                     // A compressed copy of the embedded image (TextureBake), not glTFast's raw RGBA32 one.
-                    Texture tex = TextureBake.FromGlb($"{ModelDir}/{id}.glb", mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
+                    Texture tex = TextureBake.FromGlb(SourcePath(id), mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", id is "ace" or "nova" ? 2048 : spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
                     if (!tex) tex = BaseTexture(mats[i]);
                     m.SetTexture("_BaseMap", tex);
-                    m.SetColor("_BaseColor", tex ? Color.white : (mats[i] ? mats[i].color : Color.white));
+                    m.SetColor("_BaseColor", BaseColor(mats[i]));
                     m.SetFloat("_OutlineWidth", spec.outline);
-                    m.SetFloat("_RimStrength", spec.size > 20f ? 0.15f : 0.35f);
+                    bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt";
+                    m.SetFloat("_SurfaceStyle", architecture ? 0.85f : id is "ace" or "nova" ? 0.3f : 0.5f);
+                    m.SetFloat("_Smoothness", architecture ? 0.6f : 0.3f);
+                    m.SetFloat("_Metallic", architecture ? 0.22f : 0f);
+                    m.SetShaderPassEnabled("Outline", false);
+                    string sourceName = mats[i] ? mats[i].name.ToLowerInvariant() : "";
+                    m.SetColor("_EmissionColor", sourceName.Contains("neon cyan") ? new Color(0.05f, 0.8f, 1f) * 1.7f
+                        : sourceName.Contains("neon pink") ? new Color(1f, 0.04f, 0.4f) * 1.7f
+                        : sourceName.Contains("warm interior") ? new Color(0.8f, 0.42f, 0.18f) * 0.5f : Color.black);
+                    m.SetFloat("_RimStrength", id is "ace" or "nova" ? 0.18f : 0.22f);
+                    if (id is "ace" or "nova") m.SetColor("_ShadeColor", new Color(0.9f, 0.9f, 0.96f));
                     EditorUtility.SetDirty(m);
                     mats[i] = m;
                 }
                 r.sharedMaterials = mats;
-                r.shadowCastingMode = spec.size > 20f ? UnityEngine.Rendering.ShadowCastingMode.Off : UnityEngine.Rendering.ShadowCastingMode.On;
+                bool structural = importedSurface.Contains("graphite") || importedSurface.Contains("stone") || importedSurface.Contains("titanium");
+                r.shadowCastingMode = id.StartsWith("neon-block") && !structural ? UnityEngine.Rendering.ShadowCastingMode.Off : UnityEngine.Rendering.ShadowCastingMode.On;
             }
 
+            if (id.StartsWith("neon-block")) CityLodBuilder.Attach(root, model);
             var prefab = PrefabUtility.SaveAsPrefabAsset(root, $"{PrefabDir}/{id}.prefab");
             Object.DestroyImmediate(root);
             Debug.Log($"[DallasDash] Model prefab {id}: scale {k:F3}, size {b.size}");
@@ -140,6 +173,14 @@ namespace DallasDash.EditorTools
             foreach (var p in new[] { "baseColorTexture", "_BaseMap", "_MainTex", "_BaseColorMap" })
                 if (m.HasProperty(p) && m.GetTexture(p)) return m.GetTexture(p);
             return null;
+        }
+
+        static Color BaseColor(Material m)
+        {
+            if (!m) return Color.white;
+            foreach (string property in new[] { "baseColorFactor", "_BaseColor", "_Color" })
+                if (m.HasProperty(property)) return m.GetColor(property);
+            return Color.white;
         }
 
         static Bounds Bounds(GameObject go)

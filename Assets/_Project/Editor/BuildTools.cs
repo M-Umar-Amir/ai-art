@@ -6,7 +6,7 @@ using UnityEngine;
 namespace DallasDash.EditorTools
 {
     /// Headless builds. Android: -executeMethod DallasDash.EditorTools.BuildTools.Android
-    /// Output goes to Builds/Android/food-inc-game.apk next to the project (outside Assets).
+    /// Output goes to Builds/Android/dash-riders.apk next to the project (outside Assets).
     public static class BuildTools
     {
         /// Quick Windows review build (Mono, no IL2CPP) for screenshots: -executeMethod DallasDash.EditorTools.BuildTools.Windows
@@ -19,7 +19,7 @@ namespace DallasDash.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/_Project/Scenes/Main.unity" },
-                locationPathName = "Builds/Windows/FoodIncGame.exe",
+                locationPathName = "Builds/Windows/DashRiders.exe",
                 target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.None,
             });
@@ -45,7 +45,7 @@ namespace DallasDash.EditorTools
             var report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = new[] { "Assets/_Project/Scenes/Main.unity" },
-                locationPathName = "Builds/Android/food-inc-game.apk",
+                locationPathName = "Builds/Android/dash-riders.apk",
                 target = BuildTarget.Android,
                 options = BuildOptions.None,
             });

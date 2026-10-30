@@ -15,9 +15,9 @@ MonoBehaviour:
   id: scooter-courier
   displayName: Courier on a scooter
   kind: 2
-  size: {x: 1.0253514, y: 1.8814667, z: 1.6376097}
+  size: {x: 0.8, y: 1.8, z: 1.8}
   weight: 2
   placeholderColor: {r: 0.11, g: 0.27, b: 0.85, a: 1}
-  prefab: {fileID: 2297100946627132504, guid: 64908a1bfc385ef4cadfdfb1d1d1d996, type: 3}
+  prefab: {fileID: 0}
   drift: 0.38
   heavy: 1

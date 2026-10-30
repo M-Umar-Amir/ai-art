@@ -29,7 +29,7 @@ namespace DallasDash.Gameplay
             score.gameObject.SetActive(false);
             pickups.gameObject.SetActive(false);
             banner.gameObject.SetActive(false);
-            pickups = UiKit.Pill(safe, "burger", Vector2.zero, 300, Color.white, out pickupPill);
+            pickups = UiKit.Pill(safe, "coin", Vector2.zero, 300, Color.white, out pickupPill);
             score = UiKit.Pill(safe, "star", Vector2.zero, 420, Color.white, out scorePill);
             score.alignment = TextAnchor.MiddleRight;
             score.rectTransform.anchoredPosition = new Vector2(10f, 2f);
@@ -142,9 +142,9 @@ namespace DallasDash.Gameplay
             var gm = GameManager.Instance;
             if (gm == null || !scorePill) return;
             score.text = gm.Score.ToString("N0");
-            pickups.text = gm.PickupCount.ToString();
+            pickups.text = gm.EnergyCollected.ToString();
             // The burger pill pulses on each pickup; the badge pops whenever the multiplier steps up.
-            if (gm.PickupCount != lastPickups) { pulse = 1f; lastPickups = gm.PickupCount; }
+            if (gm.EnergyCollected != lastPickups) { pulse = 1f; lastPickups = gm.EnergyCollected; }
             pulse = Mathf.MoveTowards(pulse, 0f, Time.deltaTime * 5f);
             pickupPill.localScale = Vector3.one * (1f + pulse * 0.12f);
             if (gm.Multiplier != lastMult) { badgePop = 1f; lastMult = gm.Multiplier; }

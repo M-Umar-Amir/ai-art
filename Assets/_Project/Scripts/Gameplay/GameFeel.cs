@@ -50,7 +50,12 @@ namespace DallasDash.Gameplay
             powerUp = Synth.Sweep(400f, 1200f, 0.35f, 0.4f);
             rider.Jumped += () => { sfx.PlayOneShot(jump); cam.Kick(0.6f); };
             rider.Dropped += () => sfx.PlayOneShot(drop);
-            rider.Landed += () => dust.Emit(Params(rider.transform.position), 6);
+            rider.Landed += () => {
+                float weight = Mathf.InverseLerp(4f, 16f, rider.LandingImpact);
+                dust.Emit(Params(rider.transform.position), 4 + Mathf.RoundToInt(weight * 8f));
+                sfx.PlayOneShot(thud, .12f + weight * .25f);
+                cam.Kick(weight * .35f);
+            };
             rider.LaneChanged += () => sfx.PlayOneShot(whoosh, 0.6f);
             GameManager.Instance.ComboMilestone += (c, pts) =>
             {
@@ -100,7 +105,7 @@ namespace DallasDash.Gameplay
         {
             sfx.PlayOneShot(whoosh, 1f);
             Haptics.Play(Haptics.Strength.Light);
-            cam.Kick(1f);
+            cam.Kick(1.2f); // Slightly stronger camera kick for better feedback
             StartCoroutine(SlowMo());
         }
 
@@ -127,17 +132,17 @@ namespace DallasDash.Gameplay
             combo = comboTimer > 0f ? combo + 1 : 0;
             comboTimer = 0.6f;
             sfx.pitch = 1f + Mathf.Min(combo, 8) * 0.06f;
-            sfx.PlayOneShot(coin, 0.7f);
+            sfx.PlayOneShot(coin, 0.75f); // Slightly louder for better feedback
             Haptics.Play(Haptics.Strength.Light);
-            burst.Emit(Params(o.transform.position), 14);
+            burst.Emit(Params(o.transform.position), 16); // More particles for better visual feedback
         }
 
         void OnStruck(TrackObject o)
         {
             sfx.pitch = 1f;
             sfx.PlayOneShot(thud);
-            dust.Emit(Params(o.transform.position + Vector3.up * 0.5f), 18);
-            cam.Shake(0.45f);
+            dust.Emit(Params(o.transform.position + Vector3.up * 0.5f), 22); // More dust for better impact feedback
+            cam.Shake(0.55f); // Stronger shake for better feedback
             Haptics.Play(Haptics.Strength.Medium);
             if (GameManager.Instance.State == RunState.Running) StartCoroutine(HitStop());
         }
@@ -165,7 +170,8 @@ namespace DallasDash.Gameplay
             {
                 float mv = (gm.State == RunState.Busted ? 0.12f : running && chase && chase.Close ? 0.2f : 0.32f) * PlayerProfile.MusicVolume;
                 music.volume = Mathf.MoveTowards(music.volume, mv, Time.unscaledDeltaTime * 0.6f);
-                music.pitch = Mathf.MoveTowards(music.pitch, running && PowerUps.Active(PowerUp.Rush) ? 1.08f : 1f, Time.unscaledDeltaTime * 0.5f);
+                float districtPitch = DashRun.District == 1 ? 0.88f : DashRun.District == 2 ? 1.13f : 1f;
+                music.pitch = Mathf.MoveTowards(music.pitch, (running && PowerUps.Active(PowerUp.Rush) ? 1.08f : 1f) * districtPitch, Time.unscaledDeltaTime * 0.5f);
             }
         }
 

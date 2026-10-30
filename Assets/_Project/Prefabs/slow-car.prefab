@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!1 &1312825438552797414
+--- !u!1 &2546247709062510072
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -8,9 +8,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 8693847012140953085}
-  - component: {fileID: 8652559879175573689}
-  - component: {fileID: 2421584288506666143}
+  - component: {fileID: 2029874996737811793}
+  - component: {fileID: 1509474444552876305}
+  - component: {fileID: 4752967064150372510}
   m_Layer: 0
   m_Name: Brake light
   m_TagString: Untagged
@@ -18,13 +18,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &8693847012140953085
+--- !u!4 &2029874996737811793
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1312825438552797414}
+  m_GameObject: {fileID: 2546247709062510072}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.72, y: 0.9421098, z: -2.22}
@@ -33,21 +33,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6441865275657488162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &8652559879175573689
+--- !u!33 &1509474444552876305
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1312825438552797414}
+  m_GameObject: {fileID: 2546247709062510072}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &2421584288506666143
+--- !u!23 &4752967064150372510
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1312825438552797414}
+  m_GameObject: {fileID: 2546247709062510072}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
@@ -120,11 +120,11 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5896988984762154665}
-  - {fileID: 364294441080553654}
-  - {fileID: 8693847012140953085}
+  - {fileID: 68479605626519805}
+  - {fileID: 2029874996737811793}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &5431489363912263859
+--- !u!1 &7677219158971307625
 GameObject:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -132,9 +132,9 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
-  - component: {fileID: 364294441080553654}
-  - component: {fileID: 9032029339145019868}
-  - component: {fileID: 8971508859319044304}
+  - component: {fileID: 68479605626519805}
+  - component: {fileID: 1890572766847355226}
+  - component: {fileID: 4022146350934756196}
   m_Layer: 0
   m_Name: Brake light
   m_TagString: Untagged
@@ -142,13 +142,13 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!4 &364294441080553654
+--- !u!4 &68479605626519805
 Transform:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5431489363912263859}
+  m_GameObject: {fileID: 7677219158971307625}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -0.72, y: 0.9421098, z: -2.22}
@@ -157,21 +157,21 @@ Transform:
   m_Children: []
   m_Father: {fileID: 6441865275657488162}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!33 &9032029339145019868
+--- !u!33 &1890572766847355226
 MeshFilter:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5431489363912263859}
+  m_GameObject: {fileID: 7677219158971307625}
   m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!23 &8971508859319044304
+--- !u!23 &4022146350934756196
 MeshRenderer:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5431489363912263859}
+  m_GameObject: {fileID: 7677219158971307625}
   m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1

@@ -13,8 +13,9 @@ namespace DallasDash.Gameplay
         float t;
         float baseY;
 
-        void Start()
+        void OnEnable()
         {
+            t = 0f;
             var gm = GameManager.Instance;
             float side = transform.position.x > 0.5f ? 1f : transform.position.x < -0.5f ? -1f : (Random.value < 0.5f ? -1f : 1f);
             velocity = new Vector3(side * 2.2f, 3.2f, (gm ? gm.Speed : 20f) * 0.9f + 4f);

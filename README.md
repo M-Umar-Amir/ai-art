@@ -1,42 +1,50 @@
-# Food Inc Game — Delivery Chase (Unity)
+﻿# Dash Riders
 
-Unity port of the Dallas Dash runner. It follows `ai-art/dallas-dash-docs/v3/food-inc-game-asset-pack.pdf` (24 Oct 2026). The 22 Oct pack is archived in `_archive/`, outside Assets.
+Unity 6000.3.27f1 / URP portrait delivery runner. Based on the client concept PDF and subsequent client corrections. Powered by PAGE STUDIO INC. FOOD INC rewards remain an explicitly local dummy integration.
 
-- **Engine:** Unity 6000.3.27f1 (Unity 6.3 LTS), URP, Input System. Portrait, Android-first (IL2CPP, ARM64, min API 26).
-- **Everything lives on D:.** Hub is at `G:\Unity\Hub (D:\Unity is a junction)`, editors are in `D:\Unity\Editors`, and downloads go to `D:\Unity\_downloads`.
+## Current gameplay
 
-## First open
-1. Open Unity Hub and sign in. A free Personal license is enough. Then **Add → Add project from disk →** `D:\ai-art\dallas-dash-unity`.
-2. Once the project has imported, run **Dallas Dash → Bootstrap Project**. This creates the data assets, the materials and `Scenes/Main.unity`.
-3. Press Play. Steer with the arrows/WASD or swipe. Up/Space jumps and Down rolls.
+The runner is endless. Each successful 450 m delivery starts another delivery window; the run ends when a delivery deadline is missed. There is no officer or pursuit scene. Hurdle impacts reduce speed; missed landings cost delivery time and recover the rider.
 
-Headless (after the license is activated):
-```
-"D:\Unity\Editors\6000.3.27f1\Editor\Unity.exe" -batchmode -quit -projectPath D:\ai-art\dallas-dash-unity -executeMethod DallasDash.EditorTools.ProjectBootstrap.Run -logFile -
-```
+Swipe or use arrows/WASD to change lane, jump and crouch. Q activates Delivery Dash, E the crew ability, and B protective equipment. Touch controls are available in the HUD.
 
-## Layout
-| Path | What |
-|---|---|
-| `Assets/_Project/Art/Reference/` | The 22 sheets pulled out of the asset pack: Characters, Rides, Landmarks, Scenes, Collectibles |
-| `Assets/_Project/Scripts/Data/` | `CharacterDef`, `RideDef`, `LandmarkDef` and `PickupDef` ScriptableObjects |
-| `Assets/_Project/Scripts/Core/` | `Tuning` (constants copied from the web `sim.js` so the pace matches), `GameManager`, `RiderInput` |
-| `Assets/_Project/Scripts/Gameplay/` | Rider (3 lanes, jump/roll), `TrackSpawner` (straight track with no junctions), `ChaseController` (2 police sport bikes, second stumble = busted), camera, HUD |
-| `Assets/_Project/Editor/ProjectBootstrap.cs` | One-click setup of data, materials, greybox scene and player settings |
+- Ace: orange bomber jacket, black cargos, electric board, short speed boost.
+- Nova: purple athletic courier, rooftop parkour, extended jump duration.
+- Bolt: the PDF image's helmeted magenta/silver mono-wheel courier with delivery cargo pods and one-hit protection. The old two-legged silver/yellow model is superseded.
 
-## Rules from the pack (24 Oct 2026)
-- The game is **Food Inc Game**. The map is Dallas only, dressed for Christmas: string lights, wreaths, garlands, trees and gifts. The track is straight and linear, with no junctions.
-- The characters are **Finn** (the player, royal blue), **Faye** (forest green) and **Fizz-11** (cream and yellow robot, unlocks at 25,000 points). All wear a Dallas western look.
-- Fizz-11 rolls on a single tire, so he needs a rolling-base rig rather than a biped rig.
-- Rides: the warm-yellow **bicycle** (starter) and the **scooter**, which is earned through play and never sold. The car and the hatch have been cut.
-- The chaser is **one officer on a police bicycle**: plain white POLICE saddle bag, red-and-blue bar light, hi-vis accents.
-- There is **one pickup only**: Bellagreen's Wagyu Bacon Burger.
-- Obstacles:
-  - Jump: presents, cone, roadworks barrier, wheelie bins.
-  - Change lane: Christmas tree in a planter, jaywalking shopper, parked food truck.
-- Signage uses invented outlets only: CLUCK & CO, SLICE HOUSE, BURGER BARN, DONUT DEPOT, TAQUERIA SOL. No real chain logos.
-- The HUD is a separate code layer, so the scenes stay clean. Busted ends the run, and the points earned are kept.
+Running, electric boards, glide boards and the mono-wheel have distinct steering inertia, jump/gravity values and collision dimensions. Swept collision checks cover thin hurdles and rapid movement; a shield does not erase heavy vehicles. Buffered jumps and a short coyote window help roof-edge inputs.
 
-## Still open
-- The art is still renders. Every model in the scene is a greybox placeholder until the meshes are built from the sheets. Drop a prefab into the matching `*Def` asset and the game uses it automatically.
-- **Proposed, needs client approval:** a low garland banner as the only roll-under obstacle. The pack has nothing to roll under.
+## Districts and routes
+
+Neon Downtown, Skypark and Festivals have separate lighting and route dressing. District progression uses lifetime points. The cyan fourth lane is a real, raised bypass with a sustained 35% speed benefit. It is entered through a marked lead-in and returns to the main course.
+
+Skypark is a high-rise rooftop course: occupied towers extend 40 m down to the city, with full-width roof gaps, terrace gardens, ventilation hurdles and suspended connections. Its playable surface uses roof panels rather than asphalt; street vehicles are excluded. Optional penthouse lines run on separate tower roofs. The showcase starts with a wider view to establish the elevation.
+
+Signature sections repeat on a shared 960 m schedule so side routes do not intersect solid tunnel walls. Wall running and gravity transitions use a shared contact frame with surface-relative jumps and collisions.
+
+## Art and presentation
+
+The current Ace, Nova and Bolt GLBs use clean reference inputs and native UV textures. Mobile geometry budgets are approximately 44k faces for Ace/Nova and 52k for Bolt. Nova uses lightweight vertex gait motion; skeletal action clips are not implemented.
+
+The interface uses Rajdhani under the SIL Open Font License, the client's pink wordmark, dark panels, flat action controls and a prominent delivery clock. The font license is included in Assets/_Project/Fonts. Distant city buildings use simplified LODs. Static streamed scenery is merged by material; generated meshes are disposed when their blocks are culled.
+
+## Dummy coupons
+
+Three delivery badges generate a unique local coupon. Each coupon expires exactly 24 UTC hours after issue and can be redeemed once. Used state, the serial counter and the observed expiry watermark survive restart. Codes use an installation namespace, expanding serial, random nonce and checksum. These are test coupons; there is no live FOOD INC integration or server-authoritative cross-device redemption.
+
+## Build and verification
+
+Open Assets/_Project/Scenes/Main.unity. Editor entry points:
+
+- DallasDash.EditorTools.ProjectBootstrap.Run
+- DallasDash.EditorTools.DashValidation.Run
+- DallasDash.EditorTools.BuildTools.Windows
+- DallasDash.EditorTools.BuildTools.Android
+
+Opt-in player modes include -dash-review, -dash-playtest, -dash-film and -dash-benchmark, followed by an output directory; -district selects a district. -dash-profile followed by a JSON path records real-time frame statistics. Movie export uses fixed simulation time and is not a performance measurement.
+
+Builds, Library, temporary files, logs, captures and videos are excluded from this source backup. The local staging workspace also contains Run.ps1 and Showcase.ps1 to apply changes, validate, record and encode the showcase.
+
+## Verification limits
+
+Editor assertions cover coupon lifecycle, progression, surface transitions and collision geometry. Input-driven desktop playtests cover the shortcut, rooftops, wall and ceiling routes. Their logs do not establish visual acceptance or mobile performance. The earlier 540x960 High-tier profile measured about 41 FPS on an Intel HD 620 after initial optimization; the rebuilt high-rise district requires its own final profile. A new Android device run and iOS validation remain outstanding. This is an in-progress client review build, not a claim of production acceptance.

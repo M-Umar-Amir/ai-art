@@ -174,13 +174,13 @@ namespace DallasDash.Gameplay
             Say("POWER-UPS: SUGAR RUSH", "Faster, and obstacles go flying instead of slowing you down.", 4f);
             yield return new WaitForSeconds(6f);
             PowerUps.Clear();
-            Say("THE CHASE", "Clip a van, the roadworks or another rider and you glance off and lose speed; the officer closes in. Slip again while he's close and you're busted.", 5f);
+            Say("SHORTCUTS", "A cyan gate in a side lane opens a clear run of double-value chips and a short surge. Missing one costs you the clock, not the run.", 5f);
             yield return new WaitForSeconds(3f);
 
-            // Let go of the bars: the next hits pull the officer in and end the run.
+            // Let go of the bars: the delivery clock runs out and ends the run.
             autopilot = false;
-            for (float t = 0f; GameManager.Instance.State == RunState.Running && t < 25f; t += Time.deltaTime) yield return null;
-            Say("BUSTED", "A two-shot cutscene, then the score, coins earned and mission progress.", 5f);
+            for (float t = 0f; GameManager.Instance.State == RunState.Running && t < 45f; t += Time.deltaTime) yield return null;
+            Say("TIME'S UP", "The clock ran out. Then the score, deliveries, shortcuts, chips earned and mission progress.", 5f);
             yield return new WaitForSeconds(6f);
 
             yield return Card("FOOD INC GAME", "Work-in-progress build\nNext: the Android build for phone testing.", 2.5f);
@@ -199,7 +199,7 @@ namespace DallasDash.Gameplay
             if (!follow || track.obstacles == null) yield break;
             var hidden = HideGameCanvases();
             follow.cinematic = true;
-            var cam = follow.transform;
+            var cam = follow.CinematicRig;
             const float z = -22f;
             bool first = true;
             foreach (var def in track.obstacles)
@@ -246,7 +246,7 @@ namespace DallasDash.Gameplay
             foreach (var o in track.Live)
                 if (o && o.gameObject.activeSelf) { o.gameObject.SetActive(false); cleared.Add(o.gameObject); }
             follow.cinematic = true;
-            var cam = follow.transform;
+            var cam = follow.CinematicRig;
             Vector3 was = cam.position;
             Quaternion rot = cam.rotation;
             float d = gm.Distance;

@@ -22,8 +22,8 @@ namespace DallasDash.Core
             public int Reward => 200 + 100 * Mathf.Min(Level, 10);
             public string Text => stat switch
             {
-                MissionStat.Burgers => $"Collect {target} burgers in one run",
-                MissionStat.Distance => $"Ride {target:N0} m in one run",
+                MissionStat.Burgers => $"Collect {target} food items and chips in one run",
+                MissionStat.Distance => $"Travel {target:N0} m in one run",
                 MissionStat.Score => $"Score {target:N0} points in one run",
                 MissionStat.NearMisses => $"Pull off {target} near misses",
                 MissionStat.Jumps => $"Jump {target} times",

@@ -30,9 +30,10 @@ namespace DallasDash.UI
         {
             "coin" => new[]
             {
-                new Layer(p => Circle(p, 0.86f), GoldDark),
-                new Layer(p => Circle(p - new Vector2(0f, 0.06f), 0.74f), Gold),
-                new Layer(p => Star(p - new Vector2(0f, 0.04f), 0.44f, 0.2f), GoldLight),
+                new Layer(p => Box(p, new Vector2(0.78f,0.78f),0.13f), new Color(0.05f,0.3f,0.44f)),
+                new Layer(p => Box(p, new Vector2(0.62f,0.62f),0.08f), new Color(0.03f,0.86f,1f)),
+                new Layer(p => Box(p, new Vector2(0.3f,0.3f),0.035f), White),
+                new Layer(p => Box(p, new Vector2(0.14f,0.14f),0.025f), new Color(0.04f,0.42f,0.62f)),
             },
             "burger" => new[]
             {
@@ -70,8 +71,19 @@ namespace DallasDash.UI
             {
                 new Layer(p => Circle(p - new Vector2(0f, 0.36f), 0.34f), White),
                 new Layer(p => Mathf.Max(Circle(p - new Vector2(0f, -0.86f), 0.78f), p.y + 0.86f - 0.78f), White),
-                new Layer(p => Box(p - new Vector2(0f, 0.62f), new Vector2(0.5f, 0.07f), 0.07f), new Color(0.3f, 0.5f, 1f)),
                 new Layer(p => Mathf.Max(Circle(p - new Vector2(0f, 0.52f), 0.36f), 0.56f - p.y), new Color(0.3f, 0.5f, 1f)),
+                new Layer(p => Box(p - new Vector2(0f,0.4f),new Vector2(0.29f,0.09f),0.06f),new Color(0.05f,0.8f,1f)),
+            },
+            "boot" => new[]
+            {
+                new Layer(p => Box(p-new Vector2(-0.15f,0.15f),new Vector2(0.3f,0.58f),0.09f),White),
+                new Layer(p => Box(p-new Vector2(0.15f,-0.4f),new Vector2(0.62f,0.24f),0.12f),White),
+                new Layer(p => Box(p-new Vector2(0.15f,-0.62f),new Vector2(0.62f,0.06f),0.03f),new Color(0.1f,0.9f,1f)),
+            },
+            "shield" => new[]
+            {
+                new Layer(p => Mathf.Max(Circle(p-new Vector2(0f,0.12f),0.78f),-p.y-0.8f),new Color(0.05f,0.75f,0.9f)),
+                new Layer(p => Box(p,new Vector2(0.16f,0.44f),0.04f),White),
             },
             "play" => new[] { new Layer(p => Triangle(p - new Vector2(0.08f, 0f), 0.62f) - 0.1f, White) },
             "pause" => new[]

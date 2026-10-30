@@ -6,15 +6,18 @@ namespace DallasDash.Core
     /// Swipe (touch) and arrow/WASD (keyboard) mapped to the four runner actions. Polled once per frame.
     public static class RiderInput
     {
-        /// Down only does something in the air: a quick drop back to the road.
+        /// Down slides on a surface and dives during a jump.
         public enum Action { None, Left, Right, Jump, Down }
 
         /// About 6 mm of finger travel whatever the screen density (50 px was a long drag on high-dpi phones).
-        static float SwipeMinPixels => Screen.dpi > 0f ? Mathf.Clamp(Screen.dpi * 0.24f, 30f, 120f) : 50f;
+        // Reduced slightly for more responsive input (quality of life)
+        static float SwipeMinPixels => Screen.dpi > 0f ? Mathf.Clamp(Screen.dpi * 0.22f, 25f, 110f) : 45f;
         static Vector2 touchStart;
         static bool tracking;
         static int lastFrame = -1;
         static Action lastAction;
+        static float lastInputTime;
+        const float InputBuffer = 0.15f; // Input buffer for better responsiveness
         /// Replaces device input when set (screenshot autopilot).
         public static System.Func<Action> Override;
 
@@ -22,7 +25,17 @@ namespace DallasDash.Core
         {
             if (Time.frameCount == lastFrame) return lastAction;
             lastFrame = Time.frameCount;
-            lastAction = Read();
+            Action current = Read();
+            // Clear buffered action if enough time has passed
+            if (Time.time - lastInputTime > InputBuffer)
+            {
+                lastAction = current;
+            }
+            if (current != Action.None)
+            {
+                lastAction = current;
+                lastInputTime = Time.time;
+            }
             return lastAction;
         }
 
@@ -59,6 +72,13 @@ namespace DallasDash.Core
                 tracking = false;
             }
             return Action.None;
+        }
+
+        /// Clear the input buffer (called when an action is consumed)
+        public static void ClearBuffer()
+        {
+            lastAction = Action.None;
+            lastInputTime = 0f;
         }
     }
 }

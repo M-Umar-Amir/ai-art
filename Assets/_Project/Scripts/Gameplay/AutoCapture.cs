@@ -180,19 +180,19 @@ namespace DallasDash.Gameplay
                 $"  cpu main {cpuMain / Mathf.Max(timed, 1):F1} ms, cpu render {cpuRender / Mathf.Max(timed, 1):F1} ms, gpu {gpu / Mathf.Max(timed, 1):F1} ms; " +
                 $"batches {batches / Mathf.Max(frames, 1)}, setpass {setPass / Mathf.Max(frames, 1)}, tris {tris / Mathf.Max(frames, 1) / 1000}k\n");
 
-            // Let go of the bars: the next hits pull the officer in and end the run.
+            // Let go of the bars: the delivery clock runs out and ends the run.
             autopilot = false;
             float wait = 0f;
-            while (GameManager.Instance.State == RunState.Running && wait < 20f)
+            while (GameManager.Instance.State == RunState.Running && wait < 45f)
             {
-                if (wait > 0f && Mathf.Repeat(wait, 1.2f) < Time.deltaTime) yield return Shot("chase");
+                if (wait > 0f && Mathf.Repeat(wait, 1.2f) < Time.deltaTime) yield return Shot("late-run");
                 wait += Time.deltaTime;
                 yield return null;
             }
-            File.AppendAllText(Path.Combine(dir, "fps.txt"), $"late run (top speed, chase): {lateFrames} frames, worst {lateWorst:F1} ms, hitches over 25 ms: {lateHitches}" + "\n");
+            File.AppendAllText(Path.Combine(dir, "fps.txt"), $"late run (top speed, clock running out): {lateFrames} frames, worst {lateWorst:F1} ms, hitches over 25 ms: {lateHitches}" + "\n");
             yield return new WaitForSeconds(0.8f);
-            yield return Shot("busted");
-            // The result card (with the mission strip) slides in after the two-shot.
+            yield return Shot("time-up");
+            // The result card (with the mission strip) slides in after the end shot.
             yield return new WaitForSeconds(1.4f);
             yield return Shot("result");
             // The ranks board with the run just recorded on it.

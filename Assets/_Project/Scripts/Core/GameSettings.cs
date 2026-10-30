@@ -39,7 +39,7 @@ namespace DallasDash.Core
             if (cam && cam.TryGetComponent<UniversalAdditionalCameraData>(out var data))
             {
                 data.renderPostProcessing = tier > 0;
-                data.antialiasing = tier == 0 ? AntialiasingMode.None : AntialiasingMode.FastApproximateAntialiasing;
+                data.antialiasing = tier == 1 ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.None;
             }
 
             Application.targetFrameRate = 60;

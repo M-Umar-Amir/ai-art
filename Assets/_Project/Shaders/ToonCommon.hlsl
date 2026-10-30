@@ -18,7 +18,39 @@ CBUFFER_START(UnityPerMaterial)
     half _OutlineWidth;
     half4 _OutlineColor;
     half _Cutoff;
+    half _SurfaceStyle;
+    half _Smoothness;
+    half _Metallic;
+    half _AmbientStrength;
+    half _RimPower;
+    half _ShadowSoftness;
+    float _GaitPhase;
+    float _GaitAmount;
+    float _GaitMin;
+    float _GaitHeight;
+    float _GaitCenter;
+    float _Portrait;
+    float _Outfit;
+    float _CrewIndex;
+    float _WardrobeMin;
+    float _WardrobeHeight;
 CBUFFER_END
+
+float3 DashPoseOS(float3 p)
+{
+    if (_GaitAmount < 0.001 || _GaitHeight < 0.001) return p;
+    float h = saturate((p.y - _GaitMin) / _GaitHeight);
+    float side = p.x < _GaitCenter ? -1 : 1;
+    float swing = sin(_GaitPhase + (side < 0 ? 0 : 3.14159265));
+    float leg = (1 - smoothstep(0.40,0.54,h));
+    float arm = smoothstep(0.57,0.65,h) * (1-smoothstep(0.8,0.87,h)) * smoothstep(0.10,0.20,abs(p.x-_GaitCenter)/_GaitHeight);
+    float angle = swing * (leg * 0.36 - arm * 0.14) * _GaitAmount;
+    float pivot = _GaitMin + _GaitHeight * (arm > leg ? 0.75 : 0.49);
+    float y = p.y - pivot;
+    p.y = pivot + y*cos(angle) - p.z*sin(angle);
+    p.z = y*sin(angle) + p.z*cos(angle);
+    return p;
+}
 
 float3 CurveWorld(float3 positionWS)
 {

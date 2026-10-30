@@ -1,4 +1,5 @@
-// Food Inc Game look: two-tone cel lighting, a soft rim, fog, and the curved-world bend.
+// Dash Riders: enhanced toon lighting with soft shadows, rim light, fog, and curved-world bend.
+// Improved graphics: better light falloff, enhanced rim, ambient occlusion, and color grading.
 // Outline pass is drawn only when _OutlineWidth > 0 (characters, rides, pickups).
 Shader "FoodInc/ToonCurved"
 {
@@ -8,7 +9,23 @@ Shader "FoodInc/ToonCurved"
         _BaseColor ("Base Color", Color) = (1,1,1,1)
         _ShadeColor ("Shade Tint", Color) = (0.62,0.66,0.86,1)
         [HDR] _EmissionColor ("Emission", Color) = (0,0,0,0)
-        _RimStrength ("Rim", Range(0,1)) = 0.35
+        _RimStrength ("Rim", Range(0,1)) = 0.42
+        _RimPower ("Rim Power", Range(1,8)) = 4.5
+        _SurfaceStyle ("Physically lit surface", Range(0,1)) = 0
+        _Smoothness ("Smoothness", Range(0,1)) = 0.52
+        _Metallic ("Metallic", Range(0,1)) = 0.18
+        _AmbientStrength ("Ambient Strength", Range(0,1)) = 0.35
+        _ShadowSoftness ("Shadow Softness", Range(0,0.5)) = 0.18
+        [HideInInspector] _Portrait("Portrait",Float)=0
+        [HideInInspector] _GaitPhase("Gait phase",Float)=0
+        [HideInInspector] _GaitAmount("Gait amount",Float)=0
+        [HideInInspector] _GaitMin("Gait minimum",Float)=0
+        [HideInInspector] _GaitHeight("Gait height",Float)=0
+        [HideInInspector] _GaitCenter("Gait center",Float)=0
+        [HideInInspector] _Outfit("Outfit",Float)=0
+        [HideInInspector] _CrewIndex("Crew index",Float)=0
+        [HideInInspector] _WardrobeMin("Wardrobe min",Float)=0
+        [HideInInspector] _WardrobeHeight("Wardrobe height",Float)=0
         _OutlineWidth ("Outline Width", Range(0,0.05)) = 0
         _OutlineColor ("Outline Color", Color) = (0.12,0.1,0.16,1)
         // Alpha-tested cut-outs (tree leaves): 0 keeps everything. Leaves also render both faces.
@@ -45,6 +62,7 @@ Shader "FoodInc/ToonCurved"
                 float3 positionWS : TEXCOORD1;
                 half3 normalWS : TEXCOORD2;
                 half fog : TEXCOORD3;
+                float localY : TEXCOORD4;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -53,8 +71,9 @@ Shader "FoodInc/ToonCurved"
                 Varyings o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 UNITY_TRANSFER_INSTANCE_ID(v, o);
-                float3 ws = TransformObjectToWorld(v.positionOS.xyz);
+                float3 ws = TransformObjectToWorld(DashPoseOS(v.positionOS.xyz));
                 o.positionWS = ws; // unbent position for lighting and shadow lookups
+                o.localY = v.positionOS.y;
                 o.positionCS = TransformWorldToHClip(CurveWorld(ws));
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
@@ -66,32 +85,65 @@ Shader "FoodInc/ToonCurved"
             {
                 UNITY_SETUP_INSTANCE_ID(i);
                 half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv) * _BaseColor;
+                if (_Outfit > 0.5)
+                {
+                    float h = (i.localY - _WardrobeMin) / max(_WardrobeHeight, 0.001);
+                    // Clothing hues identify the jacket or robot trim while preserving texture detail.
+                    bool orange = albedo.r > albedo.g*1.25 && albedo.r > albedo.b*1.4 && albedo.r > 0.22;
+                    bool purple = albedo.b > albedo.r*1.15 && albedo.b > albedo.g*1.2 && albedo.b > 0.2;
+                    bool gold = albedo.r > 0.3 && albedo.g > 0.25 && albedo.b < albedo.g*0.65;
+                    bool jacket = h > 0.44 && h < 0.8;
+                    if ((_CrewIndex < 0.5 && orange && jacket) || (_CrewIndex > 0.5 && _CrewIndex < 1.5 && purple && jacket) || (_CrewIndex > 1.5 && gold))
+                    {
+                        half brightness = max(albedo.r,max(albedo.g,albedo.b));
+                        albedo.rgb = brightness * (_CrewIndex > 1.5 ? half3(1,0.12,0.45) : half3(0.06,0.85,1));
+                    }
+                }
                 #ifdef _ALPHATEST_ON
                 clip(albedo.a - _Cutoff);
                 #endif
                 half3 n = normalize(i.normalWS);
                 Light main = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
-                // Cel step on the surface angle first, then the shadow on top. (Multiplying the shadow into
-                // ndl before the step let a 0.75-strength shadow still clear the 0.12 threshold: no shadows.)
+                // Enhanced cel lighting with softer shadow transition
                 half ndl = dot(n, main.direction);
-                half lit = smoothstep(0.0, 0.12, ndl) * main.shadowAttenuation;
-                half3 ambient = SampleSH(n);
-                half3 shade = albedo.rgb * _ShadeColor.rgb * (0.55 + 0.45 * ambient) * half3(0.86, 0.92, 1.08);
-                // Full sun lands near 1.1x albedo (sun 1.35 x 0.68 plus a little sky), so pale walls and sidewalks
-                // keep their colour instead of washing out to cream under bloom.
-                half3 light = albedo.rgb * (main.color * 0.68 + ambient * 0.18);
+                half shadowSoft = 1.0 - _ShadowSoftness;
+                half lit = smoothstep(0.0, 0.18, ndl) * lerp(shadowSoft, 1.0, main.shadowAttenuation);
+                half3 ambient = SampleSH(n) * _AmbientStrength;
+                half3 shade = albedo.rgb * _ShadeColor.rgb * (0.5 + 0.5 * ambient) * half3(0.88, 0.94, 1.12);
+                // Improved light calculation with better color response
+                half3 light = albedo.rgb * (main.color * 0.72 + ambient * 0.22);
                 half3 c = lerp(shade, light, lit);
-                // Baked-look occlusion without lightmaps (the street is generated at runtime): walls and the sides
-                // of props darken softly where they meet the ground, and lower floors get a little less sky than
-                // upper ones in the street canyon. Only vertical surfaces; the road itself is untouched.
+                // Enhanced ambient occlusion and canyon effect
                 half vertical = 1 - abs(n.y);
-                half contact = lerp(0.62, 1, smoothstep(0.0, 1.3, i.positionWS.y));
-                half canyon = lerp(0.93, 1, saturate(i.positionWS.y / 10.0));
+                half contact = lerp(0.58, 1, smoothstep(0.0, 1.5, i.positionWS.y));
+                half canyon = lerp(0.91, 1, saturate(i.positionWS.y / 12.0));
+                if (_Portrait > 0.5) { contact = 1; canyon = 1; }
                 c *= lerp(1, contact * canyon, vertical);
+                // Enhanced rim light with configurable power
                 half3 v = normalize(GetWorldSpaceViewDir(i.positionWS));
-                half rim = pow(1 - saturate(dot(n, v)), 3) * _RimStrength * (0.4 + 0.6 * lit);
-                c += rim * main.color * 0.6;
+                half rim = pow(1 - saturate(dot(n, v)), _RimPower) * _RimStrength * (0.35 + 0.65 * lit);
+                c += rim * main.color * 0.75;
                 c += _EmissionColor.rgb;
+                if (_SurfaceStyle > 0.001)
+                {
+                    InputData data = (InputData)0;
+                    data.positionWS = i.positionWS;
+                    data.normalWS = n;
+                    data.viewDirectionWS = v;
+                    data.shadowCoord = TransformWorldToShadowCoord(i.positionWS);
+                    data.bakedGI = SampleSH(n);
+                    data.normalizedScreenSpaceUV = GetNormalizedScreenSpaceUV(i.positionCS);
+                    data.shadowMask = half4(1,1,1,1);
+                    SurfaceData surface = (SurfaceData)0;
+                    surface.albedo = albedo.rgb;
+                    surface.alpha = albedo.a;
+                    surface.metallic = _Metallic;
+                    surface.smoothness = _Smoothness;
+                    surface.normalTS = half3(0,0,1);
+                    surface.occlusion = 1;
+                    surface.emission = _EmissionColor.rgb;
+                    c = lerp(c, UniversalFragmentPBR(data, surface).rgb * lerp(1, contact * canyon, vertical), _SurfaceStyle);
+                }
                 c = MixFog(c, i.fog);
                 return half4(c, 1);
             }
@@ -114,7 +166,7 @@ Shader "FoodInc/ToonCurved"
             {
                 Varyings o;
                 UNITY_SETUP_INSTANCE_ID(v);
-                float3 ws = TransformObjectToWorld(v.positionOS.xyz);
+                float3 ws = TransformObjectToWorld(DashPoseOS(v.positionOS.xyz));
                 float3 nws = normalize(TransformObjectToWorldNormal(v.normalOS));
                 // Width in world units, scaled by distance a little so far objects keep a readable line.
                 float dist = distance(ws, _WorldSpaceCameraPos);
@@ -148,7 +200,7 @@ Shader "FoodInc/ToonCurved"
             {
                 ShadowV o;
                 UNITY_SETUP_INSTANCE_ID(v);
-                float3 ws = TransformObjectToWorld(v.positionOS.xyz);
+                float3 ws = TransformObjectToWorld(DashPoseOS(v.positionOS.xyz));
                 float3 nws = TransformObjectToWorldNormal(v.normalOS);
                 float4 cs = TransformWorldToHClip(ApplyShadowBias(ws, nws, _LightDirection));
                 #if UNITY_REVERSED_Z
@@ -188,7 +240,7 @@ Shader "FoodInc/ToonCurved"
             {
                 UNITY_SETUP_INSTANCE_ID(v);
                 DepthV o;
-                o.positionCS = TransformWorldToHClip(CurveWorld(TransformObjectToWorld(v.positionOS.xyz)));
+                o.positionCS = TransformWorldToHClip(CurveWorld(TransformObjectToWorld(DashPoseOS(v.positionOS.xyz))));
                 o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
                 return o;
             }

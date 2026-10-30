@@ -15,9 +15,9 @@ MonoBehaviour:
   id: slow-car
   displayName: Car in slow traffic
   kind: 2
-  size: {x: 2.5881405, y: 2.2431188, z: 4.45}
+  size: {x: 1.9, y: 1.5, z: 4.4}
   weight: 2
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-  prefab: {fileID: 2635156750211826444, guid: 017d6bdf7cd295b4baffd2b3e4687e3d, type: 3}
+  prefab: {fileID: 0}
   drift: 0.35
   heavy: 1

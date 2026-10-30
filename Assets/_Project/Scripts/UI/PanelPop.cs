@@ -1,26 +1,21 @@
+using DallasDash.Core;
+using DG.Tweening;
 using UnityEngine;
-
 namespace DallasDash.UI
 {
-    /// Menu panels pop in with a small overshoot each time they open. Runs on unscaled time so it works while paused.
     public class PanelPop : MonoBehaviour
     {
-        float t;
-
+        Tween scale, fade;
+        CanvasGroup group;
         void OnEnable()
         {
-            t = 0f;
-            transform.localScale = Vector3.one * 0.8f;
+            group = GetComponent<CanvasGroup>() ?? gameObject.AddComponent<CanvasGroup>();
+            scale?.Kill(); fade?.Kill(); group.alpha = 0f;
+            transform.localScale = Vector3.one * (PlayerProfile.ReduceMotion ? 1f : 0.94f);
+            fade = group.DOFade(1f, 0.18f).SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDisable);
+            if (!PlayerProfile.ReduceMotion)
+                scale = transform.DOScale(1f, 0.28f).SetEase(Ease.OutCubic).SetUpdate(true).SetLink(gameObject, LinkBehaviour.KillOnDisable);
         }
-
-        void Update()
-        {
-            if (t >= 1f) return;
-            t = Mathf.Min(1f, t + Time.unscaledDeltaTime / 0.22f);
-            // Ease-out-back: overshoots to about 1.06, then settles.
-            float k = t - 1f;
-            float s = 1f + k * k * ((1.7f + 1f) * k + 1.7f);
-            transform.localScale = Vector3.one * Mathf.LerpUnclamped(0.8f, 1f, s);
-        }
+        void OnDisable() { scale?.Kill(); fade?.Kill(); }
     }
 }

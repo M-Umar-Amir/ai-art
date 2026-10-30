@@ -30,10 +30,26 @@ Material:
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
+    - _AmbientStrength: 0.35
+    - _CrewIndex: 0
     - _Cull: 2
     - _Cutoff: 0
+    - _GaitAmount: 0
+    - _GaitCenter: 0
+    - _GaitHeight: 0
+    - _GaitMin: 0
+    - _GaitPhase: 0
+    - _Metallic: 0.15
+    - _Outfit: 0
     - _OutlineWidth: 0
+    - _Portrait: 0
+    - _RimPower: 4.5
     - _RimStrength: 0.12
+    - _ShadowSoftness: 0.18
+    - _Smoothness: 0.45
+    - _SurfaceStyle: 0
+    - _WardrobeHeight: 0
+    - _WardrobeMin: 0
     m_Colors:
     - _BaseColor: {r: 0.42, g: 0.78, b: 0.8, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

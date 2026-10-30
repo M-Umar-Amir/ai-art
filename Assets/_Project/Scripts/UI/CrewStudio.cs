@@ -48,6 +48,11 @@ namespace DallasDash.UI
                 m.SetActive(true);
                 foreach (var t in m.GetComponentsInChildren<Transform>(true)) t.gameObject.layer = Layer;
                 var rs = m.GetComponentsInChildren<Renderer>();
+                foreach (var r in rs)
+                {
+                    var properties = new MaterialPropertyBlock(); r.GetPropertyBlock(properties);
+                    properties.SetFloat("_Portrait", 1f); r.SetPropertyBlock(properties);
+                }
                 var b = rs.Length > 0 ? rs[0].bounds : new Bounds(m.transform.position, Vector3.one * 1.6f);
                 foreach (var r in rs) b.Encapsulate(r.bounds);
                 bounds[i] = b;
@@ -100,7 +105,7 @@ namespace DallasDash.UI
             // Showroom sway around a front three-quarter view (a full turn showed the back half the time),
             // with a gentle idle bob. The models face +Z; the camera looks at them from -Z.
             spin += Time.unscaledDeltaTime;
-            turntable.rotation = Quaternion.Euler(0f, 180f + 18f + Mathf.Sin(spin * 0.9f) * 35f, 0f);
+            turntable.rotation = Quaternion.Euler(0f, 180f + 6f + Mathf.Sin(spin * 0.9f) * 12f, 0f);
             turntable.position = Origin + Vector3.up * Mathf.Sin(Time.unscaledTime * 2f) * 0.02f;
         }
     }

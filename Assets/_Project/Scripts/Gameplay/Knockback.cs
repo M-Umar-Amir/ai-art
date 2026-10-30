@@ -8,8 +8,9 @@ namespace DallasDash.Gameplay
         Vector3 velocity, spin;
         float life = 1.2f;
 
-        void Start()
+        void OnEnable()
         {
+            life = 1.2f;
             float side = transform.position.x >= 0f ? 1f : -1f;
             velocity = new Vector3(side * Random.Range(5f, 8f), Random.Range(6f, 9f), Random.Range(8f, 14f));
             spin = Random.insideUnitSphere * 720f;

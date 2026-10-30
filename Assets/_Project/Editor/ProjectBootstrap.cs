@@ -36,6 +36,7 @@ namespace DallasDash.EditorTools
         [MenuItem("Dallas Dash/Bootstrap Project")]
         public static void Run()
         {
+            DashAssets.ImportVisuals();
             ConfigurePlayer();
             ConfigureUrp();
             var mats = CreateMaterials();
@@ -51,8 +52,10 @@ namespace DallasDash.EditorTools
 
         static void ConfigurePlayer()
         {
-            PlayerSettings.companyName = "Epical Studio";
-            PlayerSettings.productName = "Food Inc Game";
+            PlayerSettings.companyName = "PAGE STUDIO INC";
+            PlayerSettings.productName = "Dash Riders";
+            PlayerSettings.SetUseDefaultGraphicsAPIs(BuildTarget.Android, false);
+            PlayerSettings.SetGraphicsAPIs(BuildTarget.Android, new[] { GraphicsDeviceType.OpenGLES3 });
             PlayerSettings.enableFrameTimingStats = true; // CPU vs GPU frame times in the review builds
             PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.Android, "art.epical.dallasdash");
             PlayerSettings.SetApplicationIdentifier(UnityEditor.Build.NamedBuildTarget.iOS, "art.epical.dallasdash");
@@ -96,8 +99,8 @@ namespace DallasDash.EditorTools
         {
             var colors = new Dictionary<string, Color>
             {
-                ["Road"] = new(0.4f, 0.4f, 0.43f),
-                ["Sidewalk"] = new(0.86f, 0.78f, 0.68f),
+                ["Road"] = new(0.055f, 0.075f, 0.14f),
+                ["Sidewalk"] = new(0.12f, 0.18f, 0.25f),
                 ["Landmark"] = new(0.55f, 0.7f, 0.85f),
                 ["WarmYellow"] = WarmYellow,
                 ["SignRed"] = SignRed,
@@ -293,19 +296,17 @@ namespace DallasDash.EditorTools
         {
             var d = new PackData();
 
-            d.characters.Add(Character("finn", "Finn", "Delivery rider - the player. Dallas western look in royal blue: cream cowboy hat with a blue band, blue denim jacket with cream stitching and pearl snaps over a white tee, blue bolo tie, indigo jeans, brown leather boots.",
+            d.characters.Add(Character("ace", "Ace", "Ace, the Speedster. Electric orange bomber jacket, black cargo trousers, futuristic sneakers. Electric board. Short speed boost.",
                 Unlock.Free, 0, false, "Characters/02-finn.jpeg"));
-            d.characters.Add(Character("faye", "Faye", "Delivery rider. Same western family in forest green: cream hat with a green band, green western shirt with cream piping, cream suede vest, red bandana, indigo jeans, tan boots.",
+            d.characters.Add(Character("nova", "Nova", "Nova, the parkour queen. Neon purple cropped jacket, athletic cargo trousers, high-tech sneakers. Extended jump duration.",
                 Unlock.Free, 0, false, "Characters/03-faye.jpeg"));
-            d.characters.Add(Character("fizz-11", "Fizz-11", "Courier robot on his own single tire: cream and yellow pod, one wide curved face screen with big expressive cartoon eyes, raised brows and an open smile. Never on a vehicle.",
+            d.characters.Add(Character("bolt", "Bolt", "Bolt, the experimental robot courier. Silver and yellow chassis, expressive LED eyes, magnetic wheels, delivery compartment. Temporary collision protection.",
                 Unlock.Points, 25000, true, "Characters/04-fizz-11.jpeg"));
 
             d.rides.Add(Ride("bicycle", "Delivery bicycle", "Starter ride. Warm yellow and cream frame, chunky tyres, front basket, insulated delivery backpack on the rear rack.",
                 Unlock.Free, false, 1.1f, "Rides/05-delivery-bicycle.jpeg"));
             d.rides.Add(Ride("scooter", "Courier scooter", "Compact warm yellow body, cream panels, front basket, rear insulated box. The single earnable ride, never sold.",
                 Unlock.Objective, false, 1f, "Rides/06-courier-scooter.jpeg"));
-            d.rides.Add(Ride("police-bicycle", "Police bicycle", "Black mountain-bike style bicycle, plain white POLICE saddle bag, small red-and-blue bar light, hi-vis yellow accents. One officer.",
-                Unlock.Free, true, 1.1f, "Rides/07-police-bicycle.jpeg"));
 
             d.landmarks.Add(Landmark("reunion-tower", "Reunion Tower", 300f, 1f, "Landmarks/08-reunion-tower.jpeg", "Reunion Blvd"));
             d.landmarks.Add(Landmark("margaret-hunt-hill-bridge", "Margaret Hunt Hill Bridge", 900f, -1f, "Landmarks/09-margaret-hunt-hill-bridge.jpeg", "Singleton Blvd"));
@@ -314,7 +315,11 @@ namespace DallasDash.EditorTools
             d.landmarks.Add(Landmark("omni-dallas", "Omni Dallas hotel", 2700f, 1f, "Landmarks/12-omni-dallas-hotel.jpeg", "Lamar Street"));
 
             // One pickup only: Bellagreen's Wagyu Bacon Burger (menu read off bellagreen.com).
-            d.pickups.Add(Pickup("wagyu-bacon-burger", "Wagyu Bacon Burger", 10, 1, new Color(0.85f, 0.55f, 0.2f)));
+            foreach (var id in new[] { "energy-chip", "burger", "pizza", "soft-drink", "taco" })
+            {
+                var pickup = Pickup(id, id.Replace('-', ' '), id == "energy-chip" ? 5 : 15, id == "energy-chip" ? 4 : 1, WarmYellow);
+                pickup.prefab = DashAssets.Pickup(id); EditorUtility.SetDirty(pickup); d.pickups.Add(pickup);
+            }
 
             // Everyday downtown hurdles (client feedback, 28 Oct: no Christmas theme, no ducking under things).
             // Low ones get bunny-hopped; the rest fill the lane and are steered round. Sizes here are placeholders:
@@ -332,6 +337,11 @@ namespace DallasDash.EditorTools
             d.obstacles.Add(Obstacle("slow-car", "Car in slow traffic", TrackKind.Block, new Vector3(1.9f, 1.5f, 4.4f), 2, Color.white, heavy: true, drift: 0.35f));
             // The Slice House food truck from scene 13 (Loading Up).
             d.obstacles.Add(Obstacle("food-truck", "Parked food truck", TrackKind.Block, new Vector3(1.9f, 2.4f, 4.5f), 1, Cream, heavy: true));
+            // Dash City's traffic replaces the old western rider cast and conventional cars.
+            d.obstacles.RemoveAll(o => o.id is "courier-a" or "courier-b" or "scooter-courier" or "slow-car" or "taxi" or "garbage-truck");
+            d.obstacles.Add(Obstacle("electric-pod", "Autonomous delivery pod", TrackKind.Block, new Vector3(1.9f, 2.2f, 3.6f), 4, RoyalBlue, heavy: true, drift: 0.28f));
+            d.obstacles.Add(Obstacle("delivery-bot", "Dash City robot courier", TrackKind.Block, new Vector3(1f, 1.8f, 0.7f), 3, WarmYellow, heavy: true, drift: 0.3f));
+            d.obstacles.Add(Obstacle("cargo-slide-gate", "Cargo transfer gate / slide", TrackKind.Overhead, new Vector3(1.95f, 2.32f, 0.8f), 2, RoyalBlue));
             return d;
         }
 
@@ -349,14 +359,14 @@ namespace DallasDash.EditorTools
             RenderSettings.ambientEquatorColor = new Color(0.8f, 0.86f, 0.96f);
             RenderSettings.ambientGroundColor = new Color(0.5f, 0.5f, 0.55f);
             var sky = mats["Sky"];
-            sky.SetColor("_Top", new Color(0.06f, 0.26f, 0.74f));
-            sky.SetColor("_Horizon", new Color(0.5f, 0.76f, 1f));
-            sky.SetColor("_Bottom", new Color(0.72f, 0.85f, 1f));
+            sky.SetColor("_Top", new Color(0.025f, 0.035f, 0.13f));
+            sky.SetColor("_Horizon", new Color(0.17f, 0.21f, 0.4f));
+            sky.SetColor("_Bottom", new Color(0.24f, 0.3f, 0.45f));
             sky.SetColor("_SunColor", new Color(1f, 0.95f, 0.78f));
             sky.SetVector("_SunDir", new Vector4(0.45f, 0.55f, 1f, 0f));
             sky.SetColor("_CloudColor", Color.white);
             sky.SetColor("_CloudShade", new Color(0.64f, 0.74f, 0.92f));
-            sky.SetFloat("_CloudCover", 0.5f);
+            sky.SetFloat("_CloudCover", 0.2f);
             sky.SetFloat("_CloudSpeed", 0.006f);
             EditorUtility.SetDirty(sky);
             RenderSettings.skybox = mats["Sky"];
@@ -366,12 +376,15 @@ namespace DallasDash.EditorTools
                 // High midday sun from behind-left: crisp, readable shadows without drowning the street in shade.
                 sun.transform.rotation = Quaternion.Euler(48f, -35f, 0f);
                 sun.color = new Color(1f, 0.96f, 0.86f);
-                sun.intensity = 1.45f;
+                sun.intensity = 1.15f;
+                RenderSettings.sun = sun;
                 sun.shadows = LightShadows.Soft;
                 sun.shadowStrength = 0.7f;
             }
 
             var gm = new GameObject("GameManager").AddComponent<GameManager>();
+            gm.gameObject.AddComponent<DashRun>();
+            gm.gameObject.AddComponent<DallasDash.UI.DashHud>();
 
             // Rider: Finn on the warm yellow starter bicycle, greybox until the meshes from the character sheets land.
             var rider = new GameObject("Rider (Finn)");
@@ -380,70 +393,44 @@ namespace DallasDash.EditorTools
             // The crew from the pack, as generated meshes. *-ride are bent into a seated pose by
             // tools/img2mesh/pose_rider.py with the seat at their origin; the standing ones are for Loading Up.
             var look = rider.AddComponent<RiderLook>();
-            var bike = ModelImport.Get("bicycle");
-            look.bicycle = bike ? Model(riderVisual, bike, Vector3.zero, "Bicycle")
-                : PartGo(riderVisual, PrimitiveType.Cube, new Vector3(0f, 0.45f, 0f), new Vector3(0.25f, 0.9f, 1.6f), mats["WarmYellow"], "Bicycle");
-            // The courier scooter (earned through missions) sits in the same spot, hidden until chosen. Its seat
-            // is lower than the bicycle saddle: scale the saddle height by the two rides' heights.
-            if (ModelImport.Get("scooter") is { } scooterPrefab && look.bicycle)
+            look.bicycle = Model(riderVisual, DashAssets.Board(), Vector3.zero, "Electric board");
+            look.scooter = Model(riderVisual, DashAssets.Board(true), Vector3.zero, "Glide board");
+            look.scooter.SetActive(false);
+            look.scooterSeat = Vector3.up * 0.2f;
+            look.seated = new GameObject[3]; look.standing = new GameObject[3];
+            for (int i = 0; i < 3; i++)
             {
-                look.scooter = Model(riderVisual, scooterPrefab, Vector3.zero, "Scooter");
-                float ratio = Height(look.scooter) / Mathf.Max(0.01f, Height(look.bicycle));
-                // Scooter scaled down a touch (its leg shield hid the rider), rider raised to sit on its seat.
-                look.scooter.transform.localScale *= 0.85f;
-                look.scooterSeat = new Vector3(0f, SaddleOffset.y * (ratio * 0.85f * 0.92f - 1f) + 0.06f, -0.3f);
-                look.scooter.SetActive(false);
+                var crew = DashAssets.Crew(i);
+                look.seated[i] = Model(riderVisual, crew, i==0 ? Vector3.up*.2f : Vector3.zero, "Crew riding " + i);
+                look.standing[i] = Model(riderVisual, crew, new Vector3(.75f,0f,-.35f), "Crew standing " + i);
+                if (i==1) look.seated[i].AddComponent<DashMeshMotion>();
+                look.seated[i].AddComponent<DashWardrobe>().character=i;
+                look.standing[i].AddComponent<DashWardrobe>().character=i;
             }
-            GameObject Seated(string id, Vector3 at) => ModelImport.Get(id) is { } m ? Model(riderVisual, m, at, id)
-                : PartGo(riderVisual, PrimitiveType.Capsule, at + new Vector3(0f, 0.4f, 0f), new Vector3(0.6f, 0.55f, 0.6f), mats["RoyalBlue"], id);
-            look.seated = new[] { Seated("finn-ride", SaddleOffset), Seated("faye-ride", SaddleOffset), Seated("fizz-11", Vector3.zero) };
-            // Standing at the curb beside the bike, turned toward its delivery box.
-            var curbSide = new Vector3(0.75f, 0f, -0.35f);
-            look.standing = new[] { Seated("finn", curbSide), Seated("faye", curbSide), Seated("fizz-11", curbSide) };
-            foreach (var g in look.standing) g.transform.localRotation = Quaternion.Euler(0f, -100f, 0f);
             look.Apply(0, true);
             var rc = rider.AddComponent<RiderController>();
             rc.visual = riderVisual;
             rc.handling = data.rides[0].handling;
 
-            // One officer on a police bicycle: black frame, white POLICE saddle bag, hi-vis vest, small red-and-blue bar light.
-            var chaseRoot = new GameObject("Police");
-            var chase = chaseRoot.AddComponent<ChaseController>();
-            chase.rider = rc;
-            chase.officerSpread = 0f;
-            var o = new GameObject("Officer").transform;
-            o.SetParent(chaseRoot.transform);
-            // Officer meshes generated from scene crops: riding (15 The Pursuit, seen from behind) for the chase,
-            // standing beside his bike (19 Busted) for the end of a run.
-            var riding = ModelImport.Get("officer-riding");
-            var standing = ModelImport.Get("officer-standing");
-            if (riding)
-            {
-                chase.ridingVisual = Model(o, riding, Vector3.zero, "Officer riding");
-                if (standing) chase.standingVisual = Model(o, standing, Vector3.zero, "Officer standing");
-            }
-            else
-            {
-                var policeBike = ModelImport.Get("police-bicycle");
-                if (policeBike) Model(o, policeBike, Vector3.zero, "Police bicycle");
-                Part(o, PrimitiveType.Capsule, new Vector3(0f, 1.3f, 0f), new Vector3(0.6f, 0.55f, 0.6f), mats["PoliceBlack"], "Officer");
-                Part(o, PrimitiveType.Cube, new Vector3(0f, 1.4f, 0f), new Vector3(0.64f, 0.4f, 0.64f), mats["HiVis"], "Hi-vis vest");
-            }
-            var lb = new GameObject("BarLight").AddComponent<Light>();
-            lb.transform.SetParent(o, false);
-            lb.transform.localPosition = new Vector3(0f, 1.1f, 0.7f);
-            lb.type = LightType.Point;
-            lb.range = 4f;
-            lb.intensity = 2.5f;
-            chase.officers = new[] { o };
-            chase.lightBars = new[] { lb };
-
+            // No pursuit: the game is a timed delivery course, so there is no officer and no chase rig.
             var spawner = new GameObject("Track").AddComponent<TrackSpawner>();
             spawner.rider = rc;
-            spawner.chase = chase;
+            spawner.dashBuildings = System.Array.FindAll(new[] { ModelImport.Get("neon-block-a"), ModelImport.Get("neon-block-b") }, g => g);
+            spawner.dashBridge = ModelImport.Get("skybridge");
+            spawner.rooftopBuilding = ModelImport.Get("rooftop-apartment");
+            // Authored street dressing: a lit contemporary lamp and a planted terrace box.
+            spawner.dashLamp = PropModels.Lamp();
+            spawner.dashPlanter = PropModels.Planter();
+            spawner.skyparkTower = ModelImport.Get("skypark-tower");
+            spawner.hologramTextures = new[] {
+                AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-ace.png"),
+                AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-nova.png"),
+                AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-food.png") };
+            spawner.hologramMaterial = DashAssets.HologramMaterial();
+            spawner.chase = null;
             spawner.pickups = data.pickups.ToArray();
             spawner.obstacles = data.obstacles.ToArray();
-            spawner.landmarks = data.landmarks.ToArray();
+            spawner.landmarks = System.Array.Empty<LandmarkDef>();
             spawner.roadMaterial = mats["Road"];
             spawner.sidewalkMaterial = mats["Sidewalk"];
             spawner.landmarkMaterial = mats["Landmark"];
@@ -525,14 +512,15 @@ namespace DallasDash.EditorTools
             BuildHud();
 
             var menus = new GameObject("MenuUI").AddComponent<DallasDash.UI.MenuUI>();
-            menus.font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
+            menus.font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/Rajdhani-SemiBold.ttf") ?? AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
+            menus.logoSprite = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "/Art/DashRiders/Visuals/dash-riders-logo.png");
             menus.crew = data.characters.ToArray();
 
-            // Scenes 13-15 (Loading Up, Ran the Red, The Pursuit) play from StoryDirector before each run.
+            // Loading Up + On the Clock play from StoryDirector before each run. No pursuit scene.
             var story = new GameObject("Story").AddComponent<StoryDirector>();
             story.rider = rc;
             story.look = look;
-            story.chase = chase;
+            story.chase = null;
             story.follow = follow;
             story.trafficLight = BuildTrafficLight(mats, -46f);
             var bag = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -566,17 +554,17 @@ namespace DallasDash.EditorTools
             }
             var bloom = Comp<Bloom>();
             bloom.threshold.Override(1.15f); // emissive bulbs and windows only, not sunlit walls
-            bloom.intensity.Override(1.1f);
+            bloom.intensity.Override(0.65f);
             bloom.scatter.Override(0.65f);
             var tone = Comp<Tonemapping>();
-            tone.mode.Override(TonemappingMode.Neutral);
+            tone.mode.Override(TonemappingMode.ACES);
             var grade = Comp<ColorAdjustments>();
-            grade.saturation.Override(25f);
-            grade.contrast.Override(18f);
-            grade.postExposure.Override(0.05f);
+            grade.saturation.Override(12f);
+            grade.contrast.Override(12f);
+            grade.postExposure.Override(0f);
             grade.colorFilter.Override(Color.white);
             var vignette = Comp<Vignette>();
-            vignette.intensity.Override(0.22f);
+            vignette.intensity.Override(0.15f);
             vignette.smoothness.Override(0.5f);
             EditorUtility.SetDirty(profile);
 
@@ -843,10 +831,19 @@ namespace DallasDash.EditorTools
 
         static void BuildStreetHurdles(Dictionary<string, Material> mats, PackData data)
         {
-            SetPrefab(data, "cones", BuildConeRow());
+            // Build every authored prop first. Each build rewrites its mesh assets, so a prefab that
+            // embeds a prop must be saved only after that prop's meshes are final; otherwise the
+            // embedded copy points at a deleted mesh and measures as zero size.
+            var cone = PropModels.Cone();
+            var barricade = PropModels.Barrier(false);
+            var neonBarrier = PropModels.Barrier(true);
+            var pod = PropModels.Pod();
+            var gate = PropModels.CargoGate();
+
+            SetPrefab(data, "cones", BuildConeRow(cone));
             if (KitImport.Available)
             {
-                SetPrefab(data, "roadworks", BuildRoadworks(mats));
+                SetPrefab(data, "roadworks", BuildRoadworks(mats, barricade, cone));
                 SetPrefab(data, "delivery-van", BuildStoppedVehicle(mats, "delivery-van", "car_delivery", 5f, true));
                 SetPrefab(data, "taxi", BuildStoppedVehicle(mats, "taxi", "car_taxi", 4.4f, true));
                 SetPrefab(data, "garbage-truck", BuildStoppedVehicle(mats, "garbage-truck", "car_garbage-truck", 6f, true));
@@ -855,6 +852,10 @@ namespace DallasDash.EditorTools
             SetPrefab(data, "courier-a", BuildCourier(mats, "courier-a", "finn-ride", new Color(0.12f, 0.6f, 0.5f), "ZIPPY", false));
             SetPrefab(data, "courier-b", BuildCourier(mats, "courier-b", "faye-ride", SafetyOrange, "QUIKBITE", false));
             SetPrefab(data, "scooter-courier", BuildCourier(mats, "scooter-courier", "finn-ride", new Color(0.45f, 0.25f, 0.85f), "SNAPCHOW", true));
+            SetPrefab(data, "electric-pod", pod);
+            SetPrefab(data, "roadworks-barrier", neonBarrier);
+            SetPrefab(data, "cargo-slide-gate", gate);
+            SetPrefab(data, "delivery-bot", CrewModels.Build(2, true));
             MeasureHurdles(data);
         }
 
@@ -862,10 +863,17 @@ namespace DallasDash.EditorTools
         /// for low ones, the height a hop has to clear) is the bounds of what is drawn.
         static void MeasureHurdles(PackData data)
         {
+            // The props just rewrote their mesh assets, so let the importer finish before measuring.
+            AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh();
             foreach (var def in data.obstacles)
             {
                 if (!def.prefab) continue;
-                var go = (GameObject)PrefabUtility.InstantiatePrefab(def.prefab);
+                // Re-load from disk: the in-session prefab object still holds null mesh references.
+                string path = AssetDatabase.GetAssetPath(def.prefab);
+                var source = string.IsNullOrEmpty(path) ? def.prefab : AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                if (!source) source = def.prefab;
+                var go = (GameObject)PrefabUtility.InstantiatePrefab(source);
                 Bounds b = default;
                 bool any = false;
                 foreach (var r in go.GetComponentsInChildren<MeshRenderer>())
@@ -873,6 +881,14 @@ namespace DallasDash.EditorTools
                     if (r.GetComponent<TextMesh>()) continue;
                     if (!any) { b = r.bounds; any = true; } else b.Encapsulate(r.bounds);
                 }
+                if (any && b.size.y < 0.01f)
+                    foreach (var r in go.GetComponentsInChildren<MeshRenderer>())
+                    {
+                        var mesh = r.GetComponent<MeshFilter>() ? r.GetComponent<MeshFilter>().sharedMesh : null;
+                        Debug.Log($"[DallasDash]   zero bounds {def.id}/{r.name}: mesh={(mesh ? mesh.name : "null")} " +
+                            $"verts={(mesh ? mesh.vertexCount : 0)} meshBounds={(mesh ? mesh.bounds.size.ToString("0.00") : "-")} " +
+                            $"rendererBounds={r.bounds.size.ToString("0.00")}");
+                    }
                 Object.DestroyImmediate(go);
                 if (!any) continue;
                 def.size = new Vector3(b.size.x, b.max.y, Mathf.Max(0.3f, b.size.z));
@@ -881,18 +897,28 @@ namespace DallasDash.EditorTools
             }
         }
 
-        /// Three of the pack's traffic cones across a lane, so the whole lane that the hit test covers is coned.
-        static GameObject BuildConeRow()
+        /// Three traffic cones across a lane, so the whole lane that the hit test covers is coned.
+        static GameObject BuildConeRow(GameObject cone)
         {
-            var cone = ModelImport.Get("cone");
             if (!cone) return null;
             var root = new GameObject("cones").transform;
             foreach (float x in new[] { -0.72f, 0f, 0.72f })
             {
-                var c = Model(root, cone, new Vector3(x, 0f, 0f), "Cone");
+                var c = Embedded(root, cone, new Vector3(x, 0f, 0f), "Cone");
                 c.transform.localRotation = Quaternion.Euler(0f, x * 40f, 0f);
             }
             return SavePrefab(root);
+        }
+
+        /// Bakes a prop into the prefab being built as plain geometry. A nested prefab instance would
+        /// keep a live link to the prop prefab, and the prop's meshes are rewritten (new GUIDs) on the
+        /// next bootstrap run, which leaves stale references behind.
+        static GameObject Embedded(Transform parent, GameObject prefab, Vector3 pos, string name)
+        {
+            var go = Model(parent, prefab, pos, name);
+            if (go && PrefabUtility.IsPartOfPrefabInstance(go))
+                PrefabUtility.UnpackPrefabInstance(go, PrefabUnpackMode.Completely, InteractionMode.AutomatedAction);
+            return go;
         }
 
         /// A car from the Kenney kit facing the way the rider rides, so the rider comes up on its back end;
@@ -915,21 +941,19 @@ namespace DallasDash.EditorTools
         /// A lane closed for roadworks, 6 m long: the pack's striped barriers front and back with a flashing lamp,
         /// concrete Jersey barriers down both sides, cones across the approach, a ROAD WORK sign, and the dug-up
         /// trench with its spoil heap inside.
-        static GameObject BuildRoadworks(Dictionary<string, Material> mats)
+        static GameObject BuildRoadworks(Dictionary<string, Material> mats, GameObject barrier, GameObject cone)
         {
             var root = new GameObject("roadworks").transform;
-            var barrier = ModelImport.Get("roadworks-barrier");
-            var cone = ModelImport.Get("cone");
             var jersey = KitImport.GetProp("concrete_road_barrier_02");
             foreach (float z in new[] { -2.55f, 2.55f })
             {
                 if (!barrier) break;
-                Model(root, barrier, new Vector3(0f, 0f, z), "Barrier");
+                Embedded(root, barrier, new Vector3(0f, 0f, z), "Barrier");
             }
             Part(root, PrimitiveType.Cube, new Vector3(0.7f, 1.0f, -2.75f), new Vector3(0.16f, 0.16f, 0.06f), mats["Amber"], "Lamp");
             root.GetChild(root.childCount - 1).gameObject.AddComponent<Blinker>().perSecond = 1.1f;
             foreach (float x in new[] { -0.72f, 0.72f })
-                if (cone) Model(root, cone, new Vector3(x, 0f, -2.95f), "Cone");
+                if (cone) Embedded(root, cone, new Vector3(x, 0f, -2.95f), "Cone");
             foreach (float x in new[] { -0.92f, 0.92f })
             foreach (float z in new[] { -1.05f, 1.05f })
             {
@@ -963,54 +987,27 @@ namespace DallasDash.EditorTools
             return SavePrefab(root);
         }
 
-        /// Another courier riding the same way: the pack's bicycle with a rider from the crew meshes, re-coloured
-        /// (a tint over their texture), in a helmet and with a big insulated backpack in an invented courier
-        /// service's colours, so from behind they read as someone else. The Ride child bobs as they pedal.
+        /// Another courier riding the same way: an authored crew model on a board with a big insulated
+        /// backpack in an invented courier service's colours, so from behind they read as someone else.
+        /// The Ride child bobs as they ride.
         static GameObject BuildCourier(Dictionary<string, Material> mats, string id, string riderId, Color brand, string service, bool scooter)
         {
-            var bike = ModelImport.Get("bicycle");
-            var person = ModelImport.Get(riderId);
-            var scooterPrefab = scooter ? ModelImport.Get("scooter") : null;
-            if (!bike || !person || (scooter && !scooterPrefab)) return null;
+            int who = riderId.Contains("nova") || riderId.Contains("faye") ? 1
+                : riderId.Contains("bolt") || riderId.Contains("fizz") ? 2 : 0;
             var root = new GameObject(id).transform;
             var ride = new GameObject("Ride").transform;
             ride.SetParent(root, false);
-            var seat = SaddleOffset;
-            if (scooter)
+            // Rival couriers ride the same authored crew models as the player, on a board. Bolt keeps his wheel.
+            if (who != 2)
             {
-                // Same fit as the player's scooter (BuildScene): scaled down a touch, rider lowered onto its seat.
-                var bikeProbe = Model(ride, bike, Vector3.zero, "Probe");
-                var sc = Model(ride, scooterPrefab, Vector3.zero, "Scooter");
-                float ratio = Height(sc) / Mathf.Max(0.01f, Height(bikeProbe));
-                Object.DestroyImmediate(bikeProbe);
-                sc.transform.localScale *= 0.85f;
-                seat += new Vector3(0f, SaddleOffset.y * (ratio * 0.85f * 0.92f - 1f) + 0.06f, -0.3f);
+                var board = DashAssets.Board(scooter);
+                if (board) Model(ride, board, Vector3.zero, "Board");
             }
-            else Model(ride, bike, Vector3.zero, "Bicycle");
-            var rider = Model(ride, person, seat, "Rider");
-            // Tinted copies of the rider's materials.
-            foreach (var r in rider.GetComponentsInChildren<Renderer>())
-            {
-                var ms = r.sharedMaterials;
-                for (int i = 0; i < ms.Length; i++)
-                {
-                    if (!ms[i]) continue;
-                    string path = $"{MatDir}/Models/{id}-{i}.mat";
-                    var m = AssetDatabase.LoadAssetAtPath<Material>(path);
-                    if (!m) { m = new Material(ms[i]); AssetDatabase.CreateAsset(m, path); }
-                    m.CopyPropertiesFromMaterial(ms[i]);
-                    m.SetColor("_BaseColor", Color.Lerp(Color.white, brand, 0.35f));
-                    // Background traffic: no ink outline (it doubles the draw cost of every courier on screen).
-                    m.SetFloat("_OutlineWidth", 0f);
-                    EditorUtility.SetDirty(m);
-                    ms[i] = m;
-                }
-                r.sharedMaterials = ms;
-            }
+            var rider = Model(ride, CrewModels.Build(who, true), Vector3.zero, "Rider");
             var bounds = rider.GetComponentInChildren<Renderer>().bounds;
             foreach (var r in rider.GetComponentsInChildren<Renderer>()) bounds.Encapsulate(r.bounds);
             float top = bounds.max.y;
-            // Helmet over the hat/hair, backpack box on the back (the rider's back faces -Z, toward the player).
+            // Branded delivery box on the rider's back (the rider faces +Z, so the back is -Z).
             string brandPath = $"{MatDir}/Models/{id}-brand.mat";
             var brandMat = AssetDatabase.LoadAssetAtPath<Material>(brandPath);
             if (!brandMat) { brandMat = new Material(mats["Tint"]); AssetDatabase.CreateAsset(brandMat, brandPath); }
@@ -1018,7 +1015,6 @@ namespace DallasDash.EditorTools
             brandMat.SetColor("_BaseColor", brand);
             brandMat.SetFloat("_OutlineWidth", 0f);
             EditorUtility.SetDirty(brandMat);
-            Part(ride, PrimitiveType.Sphere, new Vector3(bounds.center.x, top - 0.1f, bounds.center.z - 0.02f), new Vector3(0.36f, 0.26f, 0.4f), brandMat, "Helmet");
             float backZ = bounds.min.z + 0.05f;
             Part(ride, PrimitiveType.Cube, new Vector3(bounds.center.x, top - 0.62f, backZ - 0.18f), new Vector3(0.5f, 0.5f, 0.36f), brandMat, "Backpack");
             Part(ride, PrimitiveType.Cube, new Vector3(bounds.center.x, top - 0.62f, backZ - 0.37f), new Vector3(0.42f, 0.2f, 0.02f), mats["Trim"], "Backpack panel");

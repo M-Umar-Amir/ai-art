@@ -10,7 +10,7 @@ namespace DallasDash.Gameplay
 
         float baseY, phase;
 
-        void Start()
+        void OnEnable()
         {
             baseY = transform.position.y;
             phase = transform.position.z * 0.7f;

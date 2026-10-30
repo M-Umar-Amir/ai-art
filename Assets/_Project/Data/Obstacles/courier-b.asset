@@ -15,9 +15,9 @@ MonoBehaviour:
   id: courier-b
   displayName: Courier on a bike
   kind: 2
-  size: {x: 1.160115, y: 1.9281411, z: 1.8}
+  size: {x: 0.8, y: 1.8, z: 1.8}
   weight: 2
   placeholderColor: {r: 1, g: 0.45, b: 0.08, a: 1}
-  prefab: {fileID: 457035540181195168, guid: 412391455fd2e674f9451eed24996796, type: 3}
+  prefab: {fileID: 0}
   drift: 0.3
   heavy: 1
