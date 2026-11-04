@@ -8,19 +8,26 @@ namespace DallasDash.UI
 {
     /// Graphical in-run HUD: every value is an icon plus a gauge or a short number.
     /// Top-left: score, multiplier, combo and power-up timers.
-    /// Top-right: charge gauge and the burger wallet. Top-centre: delivery clock and progress.
-    /// Bottom: equipment, dash, crew ability and the charging kiosk control.
+    /// Top-right: coupon progress and the burger wallet. Top-centre: the police chase meter.
+    /// Bottom: equipment, dash and Ace's ability. A chip announces the shortcut portal and the coupon.
     public class DashHud : MonoBehaviour
     {
         GameObject root;
         Text deliveryNo, deliveryDistance, clock, battery, abilityLabel, move, routeText, equipment, foodText, fuelText;
-        Text chargeHintText, chargeText;
-        Image routeChip, moveIcon, equipmentIcon, chargeHintIcon;
-        Image fuelFill, deliveryBar, batteryFill, chargeFill;
-        Button ability, dash, charge;
-        GameObject movePill, chargeHintPill;
+                Image routeChip, moveIcon, equipmentIcon;
+        Image fuelFill, deliveryBar, batteryFill;
+        Button ability, dash;
+        GameObject movePill;
         int lastZone = -1;
         RiderController rider;
+        TrackSpawner track;
+
+        /// Which way to steer for a lane, from the rider's lane.
+        string LaneArrow(int lane)
+        {
+            int at = rider ? rider.Lane : 1;
+            return lane < at ? "<<" : lane > at ? ">>" : "AHEAD";
+        }
 
         static void Pin(RectTransform rt, Vector2 corner, Vector2 offset)
         {
@@ -37,15 +44,15 @@ namespace DallasDash.UI
             scaler.referenceResolution = new Vector2(1080, 1920); scaler.matchWidthOrHeight = 0.5f;
             root = SafeArea.Create(canvasGo.transform).gameObject;
 
-            // ---------- Top right: fuel gauge and food wallet
-            var fuelPill = UiKit.Panel(root.transform, "Fuel", Vector2.zero, new Vector2(230, 72), new Color(.035f, .05f, .1f, .92f));
+            // ---------- Top right: coupon progress and the burger wallet
+            var fuelPill = UiKit.Panel(root.transform, "Coupon", Vector2.zero, new Vector2(230, 72), new Color(.035f, .05f, .1f, .92f));
             fuelPill.raycastTarget = false;
             Pin(fuelPill.rectTransform, new Vector2(1, 1), new Vector2(-30, -36));
-            UiKit.Icon(fuelPill.transform, "fuel", new Vector2(-78, 2), 44);
-            fuelText = UiKit.Label(fuelPill.transform, "100", 32, new Vector2(24, 10), new Vector2(104, 34), Color.white, TextAnchor.MiddleRight);
+            UiKit.Icon(fuelPill.transform, "star", new Vector2(-78, 2), 44);
+            fuelText = UiKit.Label(fuelPill.transform, "0%", 30, new Vector2(24, 10), new Vector2(118, 34), Color.white, TextAnchor.MiddleRight);
             var fuelTrack = UiKit.Panel(fuelPill.transform, "Track", new Vector2(24, -18), new Vector2(118, 8), new Color(1, 1, 1, .16f));
             fuelTrack.raycastTarget = false;
-            fuelFill = UiKit.Panel(fuelTrack.transform, "Fill", Vector2.zero, new Vector2(118, 8), UiKit.Green);
+            fuelFill = UiKit.Panel(fuelTrack.transform, "Fill", Vector2.zero, new Vector2(118, 8), UiKit.Gold);
             fuelFill.raycastTarget = false;
             fuelFill.rectTransform.pivot = new Vector2(0, .5f);
             fuelFill.rectTransform.anchoredPosition = new Vector2(-59, 0);
@@ -54,7 +61,7 @@ namespace DallasDash.UI
             foodPill.raycastTarget = false;
             Pin(foodPill.rectTransform, new Vector2(1, 1), new Vector2(-30, -116));
             UiKit.Icon(foodPill.transform, "burger", new Vector2(-78, 2), 48);
-            foodText = UiKit.Label(foodPill.transform, "0", 40, new Vector2(24, 0), new Vector2(104, 52), Color.white, TextAnchor.MiddleRight);
+            foodText = UiKit.Label(foodPill.transform, "0", 34, new Vector2(24, 0), new Vector2(130, 52), Color.white, TextAnchor.MiddleRight);
 
             // ---------- Top centre: delivery clock, target and progress
             var panel = UiKit.Panel(root.transform, "Delivery", new Vector2(0, 700), new Vector2(560, 150), UiKit.Navy);
@@ -66,17 +73,17 @@ namespace DallasDash.UI
             face.sprite = UiKit.Gradient2D;
             face.raycastTarget = false;
 
-            // Each value sits in a fixed column after its icon, so the three rows line up.
-            UiKit.Icon(panel.transform, "package", new Vector2(-242, 30), 52);
-            deliveryNo = UiKit.Label(panel.transform, "01", 42, new Vector2(-170, 30), new Vector2(78, 54), Color.white, TextAnchor.MiddleLeft);
-            UiKit.Icon(panel.transform, "clock", new Vector2(-84, 28), 44);
-            clock = UiKit.Label(panel.transform, "0.0s", 36, new Vector2(2, 28), new Vector2(116, 54), Color.white, TextAnchor.MiddleLeft);
+            // The chase: a siren icon, how far back the officer is, and a gauge that fills red as he closes in.
+            UiKit.Icon(panel.transform, "shield", new Vector2(-242, 30), 52);
+            deliveryNo = UiKit.Label(panel.transform, "POLICE", 38, new Vector2(-120, 30), new Vector2(200, 54), Color.white, TextAnchor.MiddleLeft);
             UiKit.Icon(panel.transform, "flag", new Vector2(116, 28), 44);
             deliveryDistance = UiKit.Label(panel.transform, "0 m", 34, new Vector2(200, 28), new Vector2(112, 54), UiKit.Cream, TextAnchor.MiddleLeft);
+            clock = UiKit.Label(panel.transform, "", 30, new Vector2(6, 28), new Vector2(150, 54), UiKit.Cream, TextAnchor.MiddleLeft);
+            clock.gameObject.SetActive(false);
 
             var track = UiKit.Panel(panel.transform, "Track", new Vector2(0, -48), new Vector2(500, 9), new Color(1, 1, 1, .14f));
             track.raycastTarget = false;
-            deliveryBar = UiKit.Panel(track.transform, "Progress", Vector2.zero, new Vector2(500, 9), UiKit.Pink);
+            deliveryBar = UiKit.Panel(track.transform, "Heat", Vector2.zero, new Vector2(500, 9), UiKit.Red);
             deliveryBar.raycastTarget = false;
             deliveryBar.rectTransform.pivot = new Vector2(0, .5f);
             deliveryBar.rectTransform.anchoredPosition = new Vector2(-250, 0);
@@ -122,32 +129,7 @@ namespace DallasDash.UI
             var dashPulse = dash.transform.Find("Face").gameObject.AddComponent<UiPulse>();
             dashPulse.scale = 0.008f; dashPulse.speed = 2f;
 
-            // ---------- Charging kiosk control
-            charge = UiKit.Button(root.transform, "CHARGE AT KIOSK", new Vector2(0, -760), new Vector2(520, 70), UiKit.Yellow, ActivateCharge, 24, "kiosk");
-            chargeText = charge.GetComponentInChildren<Text>();
-            var chargeFace = charge.transform.Find("Face");
-            var chargeTrack = UiKit.Panel(chargeFace, "Track", new Vector2(0, -25), new Vector2(460, 8), new Color(0, 0, 0, .22f));
-            chargeTrack.raycastTarget = false;
-            chargeFill = UiKit.Panel(chargeTrack.transform, "Fill", Vector2.zero, new Vector2(460, 8), Color.white);
-            chargeFill.raycastTarget = false;
-            chargeFill.rectTransform.pivot = new Vector2(0, .5f);
-            chargeFill.rectTransform.anchoredPosition = new Vector2(-230, 0);
-
-            var hintRow = UiKit.Panel(root.transform, "Charge hint", new Vector2(0, -690), new Vector2(430, 38), new Color(.035f, .05f, .1f, .8f));
-            hintRow.raycastTarget = false;
-            chargeHintPill = hintRow.gameObject;
-            chargeHintIcon = UiKit.Icon(hintRow.transform, "burger", new Vector2(-118, 0), 26);
-            chargeHintText = UiKit.Label(hintRow.transform, "", 22, new Vector2(43, 0), new Vector2(280, 34), UiKit.Cream, TextAnchor.MiddleLeft);
-            chargeHintPill.SetActive(false);
-
             root.SetActive(false);
-        }
-
-        public void ActivateCharge()
-        {
-            if (!FuelStops.Instance) return;
-            FuelStops.Instance.TryStartPit(out string message);
-            MenuUI.Instance?.Shout(message);
         }
 
         void Update()
@@ -158,34 +140,15 @@ namespace DallasDash.UI
             root.SetActive(running);
             if (!running) { lastZone = -1; return; }
 
-            // Fuel and food, as gauges rather than a sentence.
-            float fuel = RidersEconomy.FuelPercent;
-            fuelText.text = Mathf.RoundToInt(fuel * 100f) + "%";
-            fuelText.color = RidersEconomy.Low ? UiKit.Red : Color.white;
-            fuelFill.rectTransform.localScale = new Vector3(Mathf.Clamp01(fuel), 1, 1);
-            fuelFill.color = RidersEconomy.Low ? UiKit.Red : UiKit.Green;
-            foodText.text = RidersEconomy.Burgers.ToString();
-
-            var stop = FuelStops.Instance;
-            bool pitting = stop && stop.Pitting, near = stop && stop.NearStation;
-            bool showCharge = near || pitting;
-            charge.gameObject.SetActive(showCharge);
-            chargeHintPill.SetActive(showCharge && !pitting);
-            var plan = RidersEconomy.PitPlan(1 - RidersEconomy.Fuel, RidersEconomy.Burgers);
-            charge.interactable = near && !pitting && !gm.Paused && RidersEconomy.Fuel < .99f && (plan.cost > 0 || stop.EmergencyAvailable);
-            chargeText.text = pitting ? "CHARGING" : RidersEconomy.Fuel >= .99f ? "TANK FULL" : plan.cost > 0 ? "CHARGE AT KIOSK" : stop && stop.EmergencyAvailable ? "EMERGENCY CHARGE" : "CHARGE AT KIOSK";
-            chargeFill.rectTransform.localScale = new Vector3(pitting ? stop.PitProgress : 0f, 1, 1);
-            chargeFill.color = pitting ? UiKit.Yellow : Color.white;
-            if (!pitting && near)
-            {
-                bool free = plan.cost <= 0 && stop.EmergencyAvailable;
-                chargeHintIcon.gameObject.SetActive(plan.cost > 0);
-                chargeHintText.text = (plan.cost > 0 ? plan.cost + (plan.cost == 1 ? " BURGER" : " BURGERS") : free ? "FREE" : "NO BURGERS") + "   ·   F";
-            }
-            if (charge.interactable && Keyboard.current?.fKey.wasPressedThisFrame == true) ActivateCharge();
+            // Coupon progress and the burger wallet.
+            float progress = Mathf.Clamp01(PlayerProfile.CouponProgress / (float)BurgerPrices.CouponThreshold);
+            fuelText.text = Mathf.FloorToInt(progress * 100f) + "%";
+            fuelText.color = progress >= 1f ? UiKit.Gold : Color.white;
+            fuelFill.rectTransform.localScale = new Vector3(progress, 1, 1);
+            foodText.text = RidersEconomy.Burgers.ToString("N0");
 
             // Ability: name, full gauge, READY when charged.
-            abilityLabel.text = DashRun.AbilityNames[Mathf.Clamp(PlayerProfile.Character, 0, 2)];
+            abilityLabel.text = DashRun.AbilityNames[0];
             batteryFill.rectTransform.localScale = new Vector3(Mathf.Clamp01(run.Battery), 1, 1);
             batteryFill.color = run.Battery >= .999f ? UiKit.Green : UiKit.Cyan;
             battery.text = run.Battery >= .999f ? "READY" : "";
@@ -194,45 +157,53 @@ namespace DallasDash.UI
             dash.interactable = run.DashCooldown <= 0f && !gm.Paused;
             dash.GetComponentInChildren<Text>().text = run.DashTime > 0f ? "DASHING" : run.DashCooldown > 0f ? $"{run.DashCooldown:0.0}s" : "DASH";
 
-            equipmentIcon.sprite = Icons.Get(PlayerProfile.Character == 2 ? "wheel" : "bike");
-            equipment.text = PlayerProfile.Character == 2 ? "MAGNETIC WHEEL"
-                : run.OnFoot ? (run.BikeAt > gm.Distance ? $"BIKE {run.BikeAt - gm.Distance:0} m" : "ON FOOT")
-                : "E-BIKE";
+            equipmentIcon.sprite = Icons.Get(run.OnFoot ? "rider" : "bike");
+            equipment.text = run.OnFoot ? (!DashRun.InSkypark && run.BikeAt > gm.Distance ? $"BIKE {run.BikeAt - gm.Distance:0} m" : "ON FOOT") : "E-BIKE";
 
-            float left = Mathf.Max(0f, (run.Deliveries + 1) * 450f - gm.Distance);
-            deliveryNo.text = (run.Deliveries + 1).ToString("00");
-            deliveryDistance.text = $"{left:0} m";
-            // Endless run: the clock is the on-time bonus window, and a dry tank shows its countdown instead.
-            if (run.DrySeconds > 0f) { clock.text = $"DRY {DashRun.DryLimit - run.DrySeconds:0.0}s"; clock.color = UiKit.Red; }
-            else if (run.DeliveryTime > 0f) { clock.text = $"{run.DeliveryTime:0.0}s"; clock.color = run.DeliveryTime < 6f ? UiKit.Yellow : Color.white; }
-            else { clock.text = "LATE"; clock.color = UiKit.Muted; }
-            deliveryBar.rectTransform.localScale = new Vector3(run.DeliveryFraction, 1, 1);
-            var barColor = deliveryBar.GetComponent<Image>();
-            barColor.color = run.DeliveryTime <= 0f ? UiKit.Muted : run.DeliveryTime < 6f ? UiKit.Yellow : UiKit.Green;
+            // The chase meter: the officer's distance and how hot the pursuit is. In the Skypark he is shaken off.
+            if (!run.PoliceActive)
+            {
+                deliveryNo.text = "SKYPARK";
+                deliveryNo.color = UiKit.Cyan;
+                deliveryDistance.text = $"{Mathf.Max(0f, DashRun.SkyTo - gm.Distance):0} m";
+                deliveryBar.rectTransform.localScale = new Vector3(Mathf.Clamp01((gm.Distance - DashRun.SkyFrom) / DashRun.SkyLength), 1, 1);
+                deliveryBar.color = UiKit.Cyan;
+            }
+            else
+            {
+                float heat = run.Heat;
+                deliveryNo.text = heat > 0.75f ? "COP CLOSE!" : "POLICE";
+                deliveryNo.color = heat > 0.75f ? UiKit.Red : Color.white;
+                deliveryDistance.text = $"{run.PoliceGap:0} m";
+                deliveryBar.rectTransform.localScale = new Vector3(Mathf.Max(0.02f, heat), 1, 1);
+                deliveryBar.color = heat > 0.75f ? (Mathf.Repeat(Time.unscaledTime * 4f, 1f) < 0.5f ? UiKit.Red : UiKit.Yellow) : heat > 0.45f ? UiKit.Orange : UiKit.Red;
+            }
 
             // 1 while wall running; the wall can be run anywhere, so there is no zone to announce.
             int zone = run.WallRunning ? 1 : 0;
             if (!rider) rider = FindFirstObjectByType<RiderController>();
-            bool onRoute = run.OnRooftops;
-            float roofStart = RooftopCourse.ZoneStartAt(gm.Distance);
-            bool routeAhead = !onRoute && gm.Distance > roofStart - 70f && gm.Distance < roofStart + 1f && gm.Distance > RooftopCourse.Start - 70f;
-            routeChip.gameObject.SetActive(onRoute || routeAhead);
-            if (onRoute)
+            if (!track) track = FindFirstObjectByType<TrackSpawner>();
+            bool onRoute = false;
+            var portalAhead = track ? track.Portal : null;
+            var couponAhead = track ? track.Coupon : null;
+            bool routeAhead = false;
+            if (couponAhead && couponAhead.transform.position.z - gm.Distance < 160f)
             {
-                routeChip.color = UiKit.Purple;
-                routeText.color = Color.white;
-                routeText.text = "ROOFTOP   +" + Mathf.RoundToInt((DashRun.RouteSpeedFactor - 1f) * 100f) + "%"
-                    + (run.Shortcuts > 1 ? "   x" + run.Shortcuts : "");
-            }
-            else if (routeAhead)
-            {
-                routeChip.color = UiKit.Yellow;
+                routeAhead = true;
+                routeChip.color = UiKit.Gold;
                 routeText.color = UiKit.Ink;
-                routeText.text = !DashRun.CanTakeRooftops ? "ROOFTOPS   /   BIKE ONLY"
-                    : rider && rider.Lane == RooftopCourse.EntryLane ? "RAMP AHEAD   /   RIGHT LANE" : "ROOFTOP   /   RIGHT LANE RAMP";
+                routeText.text = "10% COUPON  " + LaneArrow(couponAhead.lane) + "  " + Mathf.Max(0f, couponAhead.transform.position.z - gm.Distance).ToString("0") + " m";
             }
+            else if (portalAhead && portalAhead.transform.position.z - gm.Distance < 140f)
+            {
+                routeAhead = true;
+                routeChip.color = UiKit.Cyan;
+                routeText.color = UiKit.Ink;
+                routeText.text = "SHORTCUT PORTAL  " + LaneArrow(portalAhead.lane) + "  " + Mathf.Max(0f, portalAhead.transform.position.z - gm.Distance).ToString("0") + " m";
+            }
+            routeChip.gameObject.SetActive(routeAhead);
 
-            float edge = onRoute && rider ? RooftopCourse.NextEdge(gm.Distance, Tuning.LaneX[rider.Lane]) : float.PositiveInfinity;
+            float edge = float.PositiveInfinity;
             string hintText; float iconAngle = 0f;
             if (onRoute && edge < gm.Speed * 0.9f) { hintText = "JUMP"; iconAngle = 90f; }
             else if (routeAhead) hintText = "";

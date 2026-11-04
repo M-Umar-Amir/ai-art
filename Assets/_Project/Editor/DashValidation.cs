@@ -45,12 +45,18 @@ namespace DallasDash.EditorTools
             Check(!VehicleDynamics.Sweep(Vector3.zero, new Vector3(0, 0, 20), beam, 0.3f, 0.5f, 1f), "crouched body clears the overhead beam");
             Check(VehicleDynamics.Runner.acceleration > VehicleDynamics.Wheel.acceleration && VehicleDynamics.Wheel.radius > VehicleDynamics.Runner.radius, "vehicle inertia and collision bodies are distinct");
             var ledger = new CouponLedger();
-            // Burgers only: every price is positive burgers, the free district is free, payouts are in burgers.
-            Check(BurgerPrices.District[0] == 0 && BurgerPrices.District[1] > 0 && BurgerPrices.District[2] > BurgerPrices.District[1], "district unlocks are burger purchases");
-            Check(BurgerPrices.Bolt > 0 && BurgerPrices.Outfit > 0 && BurgerPrices.Coupon > 0, "crew, outfit and coupon prices are burgers");
-            Check(PowerUps.UpgradeCost.Length == PowerUps.MaxLevel && PlayerProfile.DailyRewards.Length == 7, "upgrade and daily tables are burger tables");
-            Check(BurgerPrices.OnTimeTip > BurgerPrices.LateTip && BurgerPrices.LateTip > 0, "deliveries tip burgers, more when on time");
-            Check(RidersEconomy.PitPlan(1f, 100).cost == 4 && RidersEconomy.PitPlan(1f, 2).cost == 2 && RidersEconomy.PitPlan(0.1f, 0).cost == 0, "kiosk charge is priced in burgers and never overspends");
+            // Burgers only (client, 4 Nov 2026): revives, upgrades and the outfit cost burgers; coupons are earned.
+            Check(BurgerPrices.PickupValue > 1 && BurgerPrices.CouponThreshold == 100000, "a 10% coupon is earned with 100,000 collected burgers");
+            Check(BurgerPrices.Revive(0) > 0 && BurgerPrices.Revive(1) > BurgerPrices.Revive(0) && BurgerPrices.Revive(9) == BurgerPrices.Revive(4), "revives cost burgers, rising per revive, capped");
+            Check(PowerUps.UpgradeCost.Length == PowerUps.MaxLevel && PlayerProfile.DailyRewards.Length == 7 && BurgerPrices.Outfit > 0, "upgrade, daily and outfit tables are burger tables");
+            // An hour of steady play should come to about one coupon: with ~0.1 pickups per metre at ~32 m/s.
+            float perHour = 0.1f * 32f * 3600f * BurgerPrices.PickupValue;
+            Check(perHour > 60000f && perHour < 220000f, "burger rate is about 100,000 an hour: " + perHour.ToString("0"));
+            // The police chase replaces the delivery clock.
+            Check(DashRun.StartGap > 0f && DashRun.MaxGap > DashRun.StartGap && DashRun.GainOnFoot > DashRun.LoseOnBike, "the officer gains on a runner and drops back from the e-bike");
+            Check(DashRun.CrashOnFoot > DashRun.CrashOnBike && DashRun.StartGap / DashRun.GainOnFoot > 5f, "a crash costs ground; on foot there is time to reach the bike");
+            Check(DashRun.CrewNames.Length == 1 && DashRun.DistrictNames[0] == "NEON DOWNTOWN", "one rider (Ace) and one map (Downtown)");
+            Check(DashRun.SkyLength > 200f && TrackSpawner.FirstPortalAt > 100f && TrackSpawner.PortalEvery > DashRun.SkyLength, "the Skypark shortcut has room between portals");
             var codes = new HashSet<string>();
             for (int i = 0; i < 1000; i++)
             {
@@ -89,23 +95,12 @@ namespace DallasDash.EditorTools
                 Check((int)p < PowerUps.Count && PowerUps.Names[(int)p] != null && PowerUps.IconKeys[(int)p] != null, "every power-up has HUD/shop metadata");
                 Check(PowerUps.Duration(p) > 0, "positive power-up duration");
             }
-            // Wall runs anywhere a facade stands (client, 3 Nov); never across a junction, the rooftop block row or a kiosk.
-            Check(!DashRun.WallZone(420) && DashRun.WallAvailable(-1, 430f) && DashRun.WallAvailable(1, 430f), "wall runs are not zoned");
+            // Wall runs anywhere a facade stands; never across a junction. The rooftop ramp course is retired.
+            Check(!DashRun.CanRideWalls, "wall running is removed");
             Check(!DashRun.WallAvailable(-1, 70f) && !DashRun.WallAvailable(1, 490f), "no wall across a cross street");
-            Check(!DashRun.WallAvailable(1, RooftopCourse.Start + 40f) && DashRun.WallAvailable(-1, RooftopCourse.Start + 40f), "right wall belongs to the rooftop block row on the shortcut");
-            Check(!DashRun.WallAvailable(1, FuelStops.FirstStation) && DashRun.WallAvailable(-1, FuelStops.FirstStation), "no right wall along a kiosk");
             Check(SurfaceTraversal.Anchor(RunSurface.LeftWall).y - 0.4f > 3.2f && SurfaceTraversal.Anchor(RunSurface.LeftWall).y + 0.4f < 6.85f, "wall-run line clears awnings and terraces");
-            // Two rooftop shortcuts per 960 m, each clear of junctions and kiosks.
-            Check(Mathf.Approximately(RooftopCourse.ZoneStart(1) - RooftopCourse.ZoneStart(0), 480f), "rooftop shortcut every 480 m");
-            for (int roofZone = 0; roofZone < 8; roofZone++)
-                for (float z = RooftopCourse.ZoneStart(roofZone) - 60f; z <= RooftopCourse.ZoneStart(roofZone) + RooftopCourse.StreetLanding + 12f; z += 2f)
-                {
-                    Check(!TrackSpawner.NearJunction(z) || DashRun.District == 1, "no junction inside a rooftop shortcut");
-                    Check(!FuelStops.KioskNear(z, 0f), "no kiosk inside a rooftop shortcut");
-                }
+            Check(!RooftopCourse.Near(160f) && !RooftopCourse.OnRamp(160f) && !RooftopCourse.OwnsRightSide(640f), "the rooftop ramp shortcut is retired");
             Check(!DashRun.GravityZone(700) && !DashRun.GravityZone(745), "gravity flip removed (real-world physics)");
-            Check(DashRun.District == 1 || TrackSpawner.Junction(480f) && !TrackSpawner.Junction(500f) && !TrackSpawner.Junction(RooftopCourse.Start), "junctions sit on their own segments, clear of the rooftop ramp");
-            Check(!DashCity.FacadeZone(RooftopCourse.Start - 20f, 20f) && !DashRun.WallZone(RooftopCourse.Start + RooftopCourse.Length + 40f), "rooftop shortcut and wall ride never overlap");
             var traversal = new SurfaceTraversal();
             foreach (RunSurface surface in Enum.GetValues(typeof(RunSurface)))
             {
@@ -126,36 +121,11 @@ namespace DallasDash.EditorTools
             traversal.Change(RunSurface.Road, interrupted, 0f);
             Check(traversal.Origin == interrupted, "zone exit does not teleport mid-transition");
             traversal.Tick(1f); Check(traversal.Origin == Vector3.zero, "zone exit returns to road");
-            // Rooftop shortcut: from the right-hand lane, up the facade (wheels on the wall), onto the roofs.
-            traversal.Reset();
-            var start = new Vector3(Tuning.LaneX[2], 0f, 0f);
-            // Rooftop parkour: every hop lands on a real object (truck roof, fire-escape landing, roof).
-            const float speed = 25f, zone = RooftopCourse.Start;
-            traversal.Ascend(start, Tuning.LaneX[0], speed, zone, zone);
-            Check(Vector3.Distance(traversal.Position(Tuning.LaneX[0], 0f, 0f), start) < 0.01f, "ascent starts where the rider is");
-            bool onTruck = false, onLanding = false; float clock = 0f;
-            for (int frame = 0; frame < 120 && traversal.Moving; frame++)
-            {
-                traversal.Tick(1f / 60f); clock += 1f / 60f;
-                var at = traversal.Position(Tuning.LaneX[0], 0, 0); float z = zone + clock * speed;
-                if (Mathf.Abs(at.y - RooftopCourse.Truck.top) < 0.15f && Mathf.Abs(at.x - RooftopCourse.Truck.x) < 0.3f && z > zone + RooftopCourse.Truck.z0 && z < zone + RooftopCourse.Truck.z1) onTruck = true;
-                if (Mathf.Abs(at.y - RooftopCourse.Landing.top) < 0.15f && Mathf.Abs(at.x - RooftopCourse.Landing.x) < 0.3f && z > zone + RooftopCourse.Landing.z0 && z < zone + RooftopCourse.Landing.z1) onLanding = true;
-            }
-            Check(onTruck, "parkour line lands on the parked truck's roof");
-            Check(onLanding, "parkour line lands on the fire-escape landing");
-            Check(!traversal.Moving && traversal.Surface == RunSurface.Rooftop && Mathf.Abs(traversal.Position(Tuning.LaneX[0], 0, 0).y - SurfaceTraversal.RoofHeight) < 0.01f, "parkour line lands on the roofs");
-            traversal.Descend(traversal.Position(Tuning.LaneX[1], 0, 0), Tuning.LaneX[2], speed, zone, zone + RooftopCourse.DropAt);
-            for (int frame = 0; frame < 120; frame++) traversal.Tick(1f / 60f);
-            Check(traversal.Surface == RunSurface.Road && Vector3.Distance(traversal.Position(Tuning.LaneX[2], 0, 0), start) < 0.01f, "way down lands in the street's right-hand lane");
-            var blocks = RooftopCourse.Blocks(0);
-            Check(blocks.Count >= 3 && blocks[0].z0 < RooftopCourse.Start - 1f && blocks[0].z1 - RooftopCourse.Start > 26f, "first roof takes the whole climb");
-            for (int i = 1; i < blocks.Count; i++) Check(blocks[i].z0 - blocks[i - 1].z1 < 7f && blocks[i].z0 > blocks[i - 1].z1, "alley gaps are jumpable");
-            Check(RooftopCourse.Supported(blocks[0].z1 - 1f, 0f) && (blocks[1].bridgeLane == 1 || !RooftopCourse.Supported(blocks[0].z1 + 1f, 0f)), "alley gaps have no roof except skybridges");
             traversal.Reset(); Check(traversal.Normal == Vector3.up && !traversal.Moving, "retry resets contact frame");
-            foreach (string id in new[] { "ace", "nova", "bolt", "neon-block-a", "neon-block-b", "skybridge", "electric-board", "electric-pod" })
+            foreach (string id in new[] { "ace", "neon-block-a", "neon-block-b", "skybridge", "ace-gear-ride", "ace-gear-run", "police-ride", "police-gear-ride", "ebike-police" })
             {
                 var prefab = ModelImport.Get(id);
-                Check(prefab && prefab.GetComponentInChildren<MeshFilter>(), "real model imported: " + id);
+                Check(prefab && (prefab.GetComponentInChildren<MeshFilter>() || prefab.GetComponentInChildren<SkinnedMeshRenderer>()), "real model imported: " + id);
             }
             var city = ModelImport.Get("neon-block-a"); bool hasDarkMaterial = false;
             foreach (var renderer in city.GetComponentsInChildren<Renderer>()) foreach (var material in renderer.sharedMaterials)
@@ -168,7 +138,19 @@ namespace DallasDash.EditorTools
             // The client's original meshes must remain the live crew, rather than replacement people.
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/_Project/Scenes/Main.unity");
             var liveLook = UnityEngine.Object.FindFirstObjectByType<RiderLook>(FindObjectsInactive.Include);
-            Check(liveLook && liveLook.seated.Length == 3 && liveLook.standing.Length == 3, "all original crew slots exist");
+            Check(liveLook && liveLook.seated.Length == 1 && liveLook.standing.Length == 1, "Ace's riding and on-foot slots exist");
+            var liveChase = UnityEngine.Object.FindFirstObjectByType<ChaseController>(FindObjectsInactive.Include);
+            Check(liveChase && liveChase.officerPrefab, "the police chase rig has its officer");
+            if (liveChase && liveChase.officerPrefab)
+            {
+                var officerBounds = RenderBounds(liveChase.officerPrefab);
+                Check(officerBounds.size.y > 1.6f && officerBounds.size.y < 2.4f && officerBounds.min.y > -0.06f, "the officer on his e-bike is rider height and on the road: " + officerBounds.size.ToString("0.00"));
+                bool red = false, blue = false;
+                foreach (var r in liveChase.officerPrefab.GetComponentsInChildren<Renderer>(true))
+                { if (r.gameObject.name.Contains("Light bar red")) red = true; if (r.gameObject.name.Contains("Light bar blue")) blue = true; }
+                Check(red && blue, "the police e-bike has red and blue light-bar parts");
+                Check(liveChase.officerPrefab.GetComponentInChildren<CyclistMotion>(true), "the officer pedals");
+            }
             var liveTrack = UnityEngine.Object.FindFirstObjectByType<TrackSpawner>(FindObjectsInactive.Include);
             Check(liveTrack && liveTrack.powerUpModels != null && liveTrack.powerUpModels.Length == 6, "all six power-up models assigned");
             foreach (var model in liveTrack.powerUpModels)
@@ -179,9 +161,9 @@ namespace DallasDash.EditorTools
                 Check(obstacle && obstacle.prefab && obstacle.prefab.GetComponentsInChildren<Renderer>(true).Length > 0, "obstacle has a real model: " + obstacle.name);
             Check(liveTrack.routeHurdleModel, "traversal hurdle model assigned");
             Check(liveTrack.pickups.Length == 1 && liveTrack.pickups[0].id == "burger", "burgers are the only pickup");
-            for (int character = 0; character < 3; character++)
+            for (int character = 0; character < 1; character++)
             {
-                string id = character == 0 ? "ace" : character == 1 ? "nova" : "bolt";
+                string id = "ace";
                 var original = ModelImport.Get(id);
                 Check(original, "original crew prefab exists: " + id);
                 var bounds = RenderBounds(original);
@@ -203,6 +185,10 @@ namespace DallasDash.EditorTools
                     int originalVertices = 0;
                     foreach (var mesh in meshes) originalVertices += mesh.vertexCount;
                     Check(skin && skin.sharedMesh && skin.sharedMesh.vertexCount == originalVertices, "cyclist is the original mesh re-posed: " + id);
+                    int gearSkins = 0;
+                    foreach (var other in slot.GetComponentsInChildren<SkinnedMeshRenderer>(true))
+                        if (other != skin && other.sharedMesh && other.sharedMesh.GetBlendShapeIndex("Pedal180") >= 0) gearSkins++;
+                    Check(gearSkins >= 1, "Ace wears the heavy hero gear, posed with the same pedal morphs");
                     Check(skin && skin.sharedMesh.GetBlendShapeIndex("Pedal180") >= 0 && skin.sharedMesh.GetBlendShapeIndex("Stand") >= 0, "cyclist has pedal and stand morphs: " + id);
                     var motion = slot.GetComponentInChildren<CyclistMotion>(true);
                     Check(motion && motion.crank && motion.frontWheel && motion.rearWheel, "e-bike crank and wheels are animated: " + id);

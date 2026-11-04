@@ -19,17 +19,16 @@ namespace DallasDash.UI
         void BuildDashMenus(Transform root)
         {
             UiKit.Label(title.transform, "FOOD INC  /  POWERED BY PAGE STUDIO INC.", 26, new Vector2(0, -920), new Vector2(1040, 48), UiKit.Cream);
-            // District picker beside FREE ROAM (CityHubUI), then the rewards wallet, above the tile row.
-            var city = UiKit.Button(title.transform, "", new Vector2(-210, -425), new Vector2(405, 95), UiKit.Blue, ShowDistricts, 30);
-            districtChip = city.GetComponentInChildren<Text>();
-            districtChip.text = DashRun.DistrictNames[DashRun.District] + "  >";
+            // One map (client, 4 Nov 2026): no district picker. The coupon meter and the rewards wallet sit
+            // above the tile row.
+            BuildCouponMeter(title.transform);
             UiKit.Button(title.transform, "FOOD INC REWARDS", new Vector2(0, -550), new Vector2(830, 100), UiKit.Red, ShowRewards, 36, "star");
 
             districtPanel = UiKit.Shade(root, "Districts").gameObject;
             var p = UiKit.FancyCard(districtPanel.transform, Vector2.zero, new Vector2(1040, 1660), UiKit.Teal).transform;
             UiKit.Header(p, "CHOOSE YOUR DISTRICT", 710, UiKit.Teal, 66, 940);
             string[] blurbs = { "Neon blocks, cross traffic, street food.\nRamp onto the rooftops; run the building walls on foot.", "Rooftop gardens above Dash City.\nJump the gaps and chase sky deliveries.", "Light installations, music and food stalls.\nSlide under the stage trusses on the beat." };
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 1; i++)
             {
                 int index = i;
                 var card = UiKit.Panel(p, "District " + i, new Vector2(0, 430 - i * 440), new Vector2(940, 390), new Color(0.09f, 0.13f, 0.25f));
@@ -45,8 +44,8 @@ namespace DallasDash.UI
             UiKit.Header(r, "FOOD INC REWARDS", 790, UiKit.Gold, 66, 980);
             UiKit.Label(r, "DEMO COUPONS  /  10% OFF A TEST ORDER", 34, new Vector2(0, 685), new Vector2(1000, 65), UiKit.Cream);
             badgeBalance = UiKit.Label(r, "", 40, new Vector2(0, 600), new Vector2(940, 75), Color.white);
-            UiKit.Button(r, $"GENERATE  /  {BurgerPrices.Coupon} BURGERS", new Vector2(0, 480), new Vector2(840, 125), UiKit.Green, GenerateCoupon, 44);
-            UiKit.Label(r, "Collect burgers on every run to pay for coupons.\nEach code expires in 24 hours and can be used once.", 32, new Vector2(0, 355), new Vector2(980, 105), UiKit.Cream);
+            UiKit.Label(r, "Collect 100,000 burgers and a 10% coupon appears on the road.\nRide into it to win it. Miss it and the count starts again.", 32, new Vector2(0, 470), new Vector2(980, 105), UiKit.Cream);
+            UiKit.Label(r, "Each code expires in 24 hours and can be used once.", 30, new Vector2(0, 375), new Vector2(980, 50), UiKit.Muted);
             for (int i = 0; i < 3; i++)
             {
                 int row = i;
@@ -68,28 +67,40 @@ namespace DallasDash.UI
         }
         void ShowDistricts()
         {
-            for (int i = 0; i < 3; i++) districtButtons[i].text = !BurgerPrices.DistrictOpen(i)
-                ? $"UNLOCK  /  {BurgerPrices.District[i]:N0} BURGERS" : DashRun.District == i ? "SELECTED" : "SELECT";
-            districtPanel.SetActive(true);
+            districtPanel.SetActive(false); // one map only
         }
         void PickDistrict(int i)
         {
-            if (!BurgerPrices.DistrictOpen(i))
-            {
-                if (!DashRun.BuyDistrict(i)) { Toast($"Need {BurgerPrices.District[i] - PlayerProfile.Burgers:N0} more burgers"); return; }
-                Toast($"{DashRun.DistrictNames[i]} UNLOCKED  /  -{BurgerPrices.District[i]:N0} BURGERS");
-            }
-            DashRun.District = i;
-            districtChip.text = DashRun.DistrictNames[i] + "  >";
+            DashRun.District = 0;
             FindFirstObjectByType<TrackSpawner>()?.RefreshDistrict();
             districtPanel.SetActive(false);
         }
         void ShowRewards() { rewardsPage = 0; rewardsPanel.SetActive(true); RefreshRewards(); }
-        void GenerateCoupon()
+        // ---- The coupon meter on the home screen: how far to the next on-track 10% coupon.
+        Image couponMeterFill;
+        Text couponMeterText;
+        void BuildCouponMeter(Transform t)
         {
-            var coupon = DemoRewards.Issue();
-            rewardsHint.text = coupon == null ? $"Need {BurgerPrices.Coupon - PlayerProfile.Burgers:N0} more burgers for a coupon." : "New unique coupon saved. Valid for the next 24 hours.";
-            rewardsPage = 0; RefreshRewards();
+            var bar = UiKit.Panel(t, "Coupon meter", new Vector2(0, -425), new Vector2(830, 95), UiKit.Surface);
+            bar.sprite = UiKit.Rounded;
+            bar.raycastTarget = false;
+            UiKit.Icon(bar.transform, "star", new Vector2(-370, 0), 52);
+            couponMeterText = UiKit.Label(bar.transform, "", 30, new Vector2(30, 16), new Vector2(700, 44), Color.white, TextAnchor.MiddleLeft);
+            var track = UiKit.Panel(bar.transform, "Track", new Vector2(30, -22), new Vector2(700, 12), new Color(1, 1, 1, .14f));
+            track.raycastTarget = false;
+            couponMeterFill = UiKit.Panel(track.transform, "Fill", Vector2.zero, new Vector2(700, 12), UiKit.Gold);
+            couponMeterFill.raycastTarget = false;
+            couponMeterFill.rectTransform.pivot = new Vector2(0, .5f);
+            couponMeterFill.rectTransform.anchoredPosition = new Vector2(-350, 0);
+            RefreshCouponMeter();
+        }
+        void RefreshCouponMeter()
+        {
+            if (!couponMeterText) return;
+            int have = Mathf.Min(PlayerProfile.CouponProgress, BurgerPrices.CouponThreshold);
+            couponMeterText.text = have >= BurgerPrices.CouponThreshold ? "10% COUPON READY  /  it appears on your next run"
+                : $"10% COUPON   {have:N0} / {BurgerPrices.CouponThreshold:N0} burgers";
+            couponMeterFill.rectTransform.localScale = new Vector3(have / (float)BurgerPrices.CouponThreshold, 1f, 1f);
         }
         DemoCoupon CouponAt(int row)
         {
@@ -110,7 +121,7 @@ namespace DallasDash.UI
         }
         void RefreshRewards()
         {
-            badgeBalance.text = $"BURGERS  {PlayerProfile.Burgers:N0}   /   {BurgerPrices.Coupon} per coupon";
+            badgeBalance.text = $"COUPON PROGRESS  {Mathf.Min(PlayerProfile.CouponProgress, BurgerPrices.CouponThreshold):N0} / {BurgerPrices.CouponThreshold:N0}";
             var now = DateTime.UtcNow;
             for (int i = 0; i < 3; i++)
             {
@@ -125,7 +136,7 @@ namespace DallasDash.UI
             }
             int count = DemoRewards.Ledger.coupons.Count;
             pageText.text = count == 0 ? "No coupons yet" : $"{rewardsPage + 1} / {Mathf.Max(1, (count + 2) / 3)}";
-            if (count == 0 && string.IsNullOrEmpty(rewardsHint.text)) rewardsHint.text = "Collect burgers, then generate your first test coupon.";
+            if (count == 0 && string.IsNullOrEmpty(rewardsHint.text)) rewardsHint.text = "No coupons yet: keep collecting burgers.";
         }
         void TickDashMenus(float dt)
         {

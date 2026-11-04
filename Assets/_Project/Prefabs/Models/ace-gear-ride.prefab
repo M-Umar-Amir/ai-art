@@ -1,0 +1,169 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2019802256249460697
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 554397647394435586}
+  m_Layer: 0
+  m_Name: ace-gear-ride
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &554397647394435586
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2019802256249460697}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 2080301795427845901}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &4026098798161407099
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2080301795427845901}
+  - component: {fileID: 5556711772509794374}
+  m_Layer: 0
+  m_Name: Model
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2080301795427845901
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4026098798161407099}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 554397647394435586}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &5556711772509794374
+SkinnedMeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4026098798161407099}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: baa048bca0be1724396a5f2ed05ff61d, type: 2}
+  - {fileID: 2100000, guid: a52e32a8bd175c14f9dbcd4befe5857e, type: 2}
+  - {fileID: 2100000, guid: 2f539719882f0ed47a529c16200a450f, type: 2}
+  - {fileID: 2100000, guid: c65ecf9b4131b52428f2344bd66dbbd4, type: 2}
+  - {fileID: 2100000, guid: ae2e5892a8ea6094da043e801d6ffa85, type: 2}
+  - {fileID: 2100000, guid: bab2036b1c9891e4684871e63d98e72c, type: 2}
+  - {fileID: 2100000, guid: 046b0a4e35fdda548a41ea79ea69f430, type: 2}
+  - {fileID: 2100000, guid: f5b207a0af02bd344a1e66161013e35b, type: 2}
+  - {fileID: 2100000, guid: 3ef64194189c05742973d99e851a1313, type: 2}
+  - {fileID: 2100000, guid: cd3781fe9807a5d42b6f42e210d0c825, type: 2}
+  - {fileID: 2100000, guid: 64fc17dbfc4041b498be0856453de77c, type: 2}
+  - {fileID: 2100000, guid: 002a1c9f77ad0c844ab9e61367e48bea, type: 2}
+  - {fileID: 2100000, guid: b645342bba6459b47869ac6b7bd7ac98, type: 2}
+  - {fileID: 2100000, guid: 43640a73743be714fb4f999cee1c80dd, type: 2}
+  - {fileID: 2100000, guid: 04f57c547765b4f4f80201c0e24be7ca, type: 2}
+  - {fileID: 2100000, guid: dccf99e2ffc132644b50d0a08b2ab982, type: 2}
+  - {fileID: 2100000, guid: a18dc0966f8d6d44b9120f3676c91c93, type: 2}
+  - {fileID: 2100000, guid: d973e13e9ae64d540b0437c28cef7d08, type: 2}
+  - {fileID: 2100000, guid: 6403681ad15f2de4c93d7c9750a8d45f, type: 2}
+  - {fileID: 2100000, guid: a798d0c424a7d8948b13adc28f8458a2, type: 2}
+  - {fileID: 2100000, guid: e17c2650f2de9d547adeea9ac22791fb, type: 2}
+  - {fileID: 2100000, guid: d94ffe87d8b847546a9bb98fbb8fc8cf, type: 2}
+  - {fileID: 2100000, guid: 67f15af88c20da64e9a80e8f7e7f9ce7, type: 2}
+  - {fileID: 2100000, guid: 7161b117ab477dd46b980b09ec641f05, type: 2}
+  - {fileID: 2100000, guid: 7b3223553176d0346894a90ac5d68618, type: 2}
+  - {fileID: 2100000, guid: 6c8d476020f19f546a8ffadb34e967f3, type: 2}
+  - {fileID: 2100000, guid: 5038baa793de3554a857443ddbb78087, type: 2}
+  - {fileID: 2100000, guid: 484d974091c25724ba8725b4111650cd, type: 2}
+  - {fileID: 2100000, guid: 8a892cf4fd3a71f4e9dd899d94cc2d96, type: 2}
+  - {fileID: 2100000, guid: f49324e7e675eef4bb623d808c34c47f, type: 2}
+  - {fileID: 2100000, guid: eca13009261dfef449b8219839769477, type: 2}
+  - {fileID: 2100000, guid: ccee5c410050a204db76761c41dd1e7f, type: 2}
+  - {fileID: 2100000, guid: a2413c3e1b81afe43a91a44e8977140b, type: 2}
+  - {fileID: 2100000, guid: e153fcaf25151c3478528682f8773aab, type: 2}
+  - {fileID: 2100000, guid: 1139481ddd77c394fa4e5d66af69f379, type: 2}
+  - {fileID: 2100000, guid: ecbd3ba00b0432440bb448aed5195add, type: 2}
+  - {fileID: 2100000, guid: 52cda311eaacf274384c4b3cc38e2f89, type: 2}
+  - {fileID: 2100000, guid: 3a5afe66da6b47349a2ae16e434e1c49, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  serializedVersion: 2
+  m_Quality: 0
+  m_UpdateWhenOffscreen: 1
+  m_SkinnedMotionVectors: 1
+  m_Mesh: {fileID: -3280953818398637218, guid: 7bff029a9daec0c4a84ae71d22fcc894, type: 3}
+  m_Bones: []
+  m_BlendShapeWeights:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  m_RootBone: {fileID: 0}
+  m_AABB:
+    m_Center: {x: 0, y: 1.3130376, z: 0.00223431}
+    m_Extent: {x: 0.40320015, y: 0.7292948, z: 0.41777062}
+  m_DirtyAABB: 0

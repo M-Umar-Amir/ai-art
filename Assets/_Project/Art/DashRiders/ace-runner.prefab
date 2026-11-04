@@ -31,6 +31,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 5120119564151694918}
+  - {fileID: 7297624975355621371}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3971539832541371756
@@ -46,6 +47,75 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Gameplay.RunnerMotion
   body: {fileID: 1564251023983911780}
+  gear:
+  - {fileID: 7275946331782372163}
+--- !u!1001 &2154649866207006981
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2495206125831953565}
+    m_Modifications:
+    - target: {fileID: 8224349920215278575, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_Name
+      value: Hero gear
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+--- !u!137 &7275946331782372163 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8727835343244315206, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+  m_PrefabInstance: {fileID: 2154649866207006981}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7297624975355621371 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8692094491274493694, guid: 831072bf21898b14a93d022f4f355637, type: 3}
+  m_PrefabInstance: {fileID: 2154649866207006981}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &7231005636633859555
 PrefabInstance:
   m_ObjectHideFlags: 0

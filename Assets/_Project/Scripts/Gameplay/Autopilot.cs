@@ -17,8 +17,13 @@ namespace DallasDash.Gameplay
             float look = UnityEngine.Mathf.Max(12f, speed * 1.05f);
             var surface = rider.Traversal.Surface;
             var dash = DashRun.Instance;
-            if (dash && dash.OnFoot && surface == RunSurface.Road && dash.BikeAt > d && dash.BikeAt - d < 60f && rider.Lane != dash.BikeLane)
-                return rider.Lane < dash.BikeLane ? RiderInput.Action.Right : RiderInput.Action.Left;
+            if (dash && dash.OnFoot && surface == RunSurface.Road && dash.BikeAt > d && dash.BikeAt - d < 60f && rider.Lane != dash.BikeLane && !rider.Traversal.Moving)
+            {
+                // Head for the parked bike one lane at a time, and only into a lane that is open for a while.
+                int toward = rider.Lane < dash.BikeLane ? rider.Lane + 1 : rider.Lane - 1;
+                if (Room(track, rider, toward, d, look) > UnityEngine.Mathf.Max(10f, speed * 0.6f))
+                    return toward > rider.Lane ? RiderInput.Action.Right : RiderInput.Action.Left;
+            }
             if (rider.Traversal.Moving) return RiderInput.Action.None;
             // Wall runs (client, 3 Nov: anywhere there is a facade; on foot for Ace and Nova, always for Bolt):
             // from an outer lane with a long clear facade ahead, steer into the building. Spaced out so the bot
@@ -32,19 +37,14 @@ namespace DallasDash.Gameplay
                 { lastWallRun = d; return side < 0 ? RiderInput.Action.Left : RiderInput.Action.Right; }
             }
             if (d < lastWallRun) lastWallRun = -1000f; // a new run
-            if (surface == RunSurface.Road && DashRun.CanTakeRooftops)
+            // The shortcut portal and the 10% coupon are ridden into: be in their lane well before them.
+            foreach (var target in new[] { track.Coupon, track.Portal })
             {
-                // Take the rooftop shortcut: be in the ramp lane well before the kicker.
-                float s = RooftopCourse.ZoneStartAt(d);
-                if (d > s - 48f && d < s && d > RooftopCourse.Start - 48f && rider.Lane != RooftopCourse.EntryLane)
-                    return rider.Lane < RooftopCourse.EntryLane ? RiderInput.Action.Right : RiderInput.Action.Left;
-                if (d > s - 48f && d < s + 1f && d > RooftopCourse.Start - 48f) return RiderInput.Action.None;
-            }
-            else if (surface == RunSurface.Rooftop)
-            {
-                // Alley gaps are jumped on time; a skybridge lane needs no jump.
-                float edge = RooftopCourse.NextEdge(d, Tuning.LaneX[rider.Lane]);
-                if (!rider.Airborne && edge / speed < 0.12f && edge > -0.5f) return RiderInput.Action.Jump;
+                if (!target || surface != RunSurface.Road) continue;
+                float ahead = target.transform.position.z - d;
+                if (ahead < 0f || ahead > 70f) continue;
+                if (rider.Lane != target.lane) return rider.Lane < target.lane ? RiderInput.Action.Right : RiderInput.Action.Left;
+                if (ahead < 25f) return RiderInput.Action.None;
             }
             TrackObject next = null;
             float nextAhead = float.MaxValue;

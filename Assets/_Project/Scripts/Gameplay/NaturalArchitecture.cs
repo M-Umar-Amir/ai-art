@@ -34,6 +34,11 @@ namespace DallasDash.Gameplay
             var coolGlass = DashCity.Mat(track,"office-window",new Color(.35f,.65f,1f),.65f);
             warmGlass.SetFloat("_WindowInterior",1); coolGlass.SetFloat("_WindowInterior",1);
             var canopy = DashCity.Mat(track,"canvas-"+variant,variant%2==0 ? new Color(.22f,.26f,.18f) : new Color(.29f,.13f,.075f));
+            // One ordered rotation along the street (client, 4 Nov 2026): KFC, Taco Bell, Pizza Hut, The Habit, again,
+            // left then right on each block, so every brand gets the same number of signs, in sequence.
+            int brandIndex = TrackSpawner.BrandAt(block * 2 + (side > 0 ? 1 : 0));
+            var brand = TrackSpawner.YumBrands[brandIndex];
+            if (district == 0) canopy = DashCity.Mat(track, "brandCanvas-" + brandIndex, brand.board * .8f);
             void Box(float x,float y,float pz,float sx,float sy,float sz,Material mat) =>
                 DashCity.Part(parent,new Vector3(x,y,pz),new Vector3(sx,sy,sz),mat);
             // A solid inner volume provides honest shadowing behind the recessed glazing.
@@ -61,6 +66,7 @@ namespace DallasDash.Gameplay
                 Box(face-side*1.62f,baseY+2.86f,wz,.08f,.28f,5.15f,canopy);
             }
             Box(face-side*.16f,baseY+.23f,z+10,.5f,.46f,19.1f,trim);
+            BrandShopfront(track, parent, side, z, face, brandIndex, district == 1 ? 4f : 0f);
             Box(front+side*4.9f,baseY+height+.12f,z+10,10.5f,.24f,19.35f,trim);
             // Festivals (snowy Christmas): snow lies on every roof, awning and window ledge.
             if (district == 2) {
@@ -74,6 +80,26 @@ namespace DallasDash.Gameplay
             Box(front+side*3f,baseY+height+.8f,z+5,1.1f,1.6f,1.2f,stone);
             Box(front+side*5f,baseY+height+.55f,z+13,2.4f,1.1f,3,frame);
             FutureLayers(track,parent,side,z,front,baseY,height,variant);
+        }
+
+        /// Yum! Brands shopfront (client, 4 Nov 2026: official logos, not text): lit logo panels along the fascia
+        /// above the shop bays, and a square blade sign standing out from the facade, facing down the street, so the
+        /// logo reads from the chase camera long before the rider passes it.
+        static void BrandShopfront(TrackSpawner track, Transform parent, float side, float z, float face, int brandIndex, float lift)
+        {
+            var frame = DashCity.Mat(track, "brandFrame", new Color(.06f, .065f, .08f));
+            if (lift <= 0f)
+            {
+                DashCity.Part(parent, new Vector3(face - side * .2f, 3.75f, z + 10f), new Vector3(.16f, .9f, 15f), frame);
+                var along = Quaternion.Euler(0f, side > 0 ? 90f : -90f, 0f);
+                foreach (float wz in new[] { z + 4.5f, z + 10f, z + 15.5f })
+                    BrandVisibility.Face(track, parent, brandIndex, "wide", new Vector3(face - side * .3f, 3.75f, wz), along, 2.5f, .78f);
+            }
+            float bx = face - side * 1.45f, by = 6.3f + lift, bz = z + 2.2f;
+            DashCity.Part(parent, new Vector3(face - side * .45f, by + 1.3f, bz), new Vector3(1.1f, .14f, .14f), frame);
+            DashCity.Part(parent, new Vector3(bx, by, bz), new Vector3(2.3f, 2.3f, .2f), frame);
+            BrandVisibility.Face(track, parent, brandIndex, "square", new Vector3(bx, by, bz - .105f), Quaternion.identity, 2.18f, 2.18f);
+            BrandVisibility.Face(track, parent, brandIndex, "square", new Vector3(bx, by, bz + .105f), Quaternion.Euler(0f, 180f, 0f), 2.18f, 2.18f);
         }
 
         static void FutureLayers(TrackSpawner track,Transform parent,float side,float z,float front,float baseY,float height,int variant)
@@ -92,11 +118,8 @@ namespace DallasDash.Gameplay
                 planter.name="Elevated planted terrace";
             }
             // Illuminated advertising is mounted on architecture, with brackets and a deep housing.
-            if(block%3!=variant%3 || track.hologramTextures==null || track.hologramTextures.Length==0) return;
-            int index=(block+variant)%track.hologramTextures.Length;
-            var display=DashCity.Mat(track,"nightDisplay-"+index,Color.white,2.5f);
-            display.SetTexture("_BaseMap",track.hologramTextures[index]);
-            display.SetFloat("_EmissionUsesAlbedo",1); display.SetFloat("_Smoothness",.7f);
+            if(block%2!=(side>0?1:0)) return;
+            int index=TrackSpawner.BrandAt(Mathf.FloorToInt(z/20f)); // one billboard per block, alternating sides, brands in order
             // Mounted clear of the wall-run line (5.2 m, the screen is 4.3 m tall).
             float y=DashRun.District==1 ? 10f : 12f;
             var screen=new GameObject("Architectural digital billboard").transform;
@@ -104,8 +127,8 @@ namespace DallasDash.Gameplay
             screen.rotation=Quaternion.Euler(0,side>0 ? -125 : 125,0);
             var housing=DashCity.Part(screen,Vector3.zero,new Vector3(6.5f,4.3f,.28f),graphite);
             housing.transform.localPosition=Vector3.zero; housing.transform.localRotation=Quaternion.identity;
-            var face=DashCity.Part(screen,Vector3.zero,new Vector3(6.1f,3.9f,.045f),display);
-            face.transform.localPosition=new Vector3(0,0,-.17f); face.transform.localRotation=Quaternion.identity;
+            // The ad face: the brand's official logo on a lit board.
+            BrandVisibility.Face(track,screen,index,"board",screen.TransformPoint(new Vector3(0,0,-.16f)),screen.rotation,6.1f,3.85f);
             foreach(float ry in new[]{-2.1f,2.1f}) {
                 var trim=DashCity.Part(screen,Vector3.zero,new Vector3(6.5f,.045f,.08f),side<0 ? cyan : magenta);
                 trim.transform.localPosition=new Vector3(0,ry,-.17f); trim.transform.localRotation=Quaternion.identity;

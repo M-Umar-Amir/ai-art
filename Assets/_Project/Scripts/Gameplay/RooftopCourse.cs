@@ -10,8 +10,9 @@ namespace DallasDash.Gameplay
     /// ground test, the spawn rules and the bots all agree.
     public static class RooftopCourse
     {
-        /// Two rooftop shortcuts in every 960 m of street (client, 3 Nov: "add more shortcuts"), at 160 and 640 m.
-        public const float Start = 160f, Every = 480f, Length = 150f;
+        /// RETIRED (client, 4 Nov 2026): the shortcut is now the Skypark portal. Start is pushed out of reach so
+        /// every predicate here is false and no rooftop block row is built; the layout code is kept for reference.
+        public const float Start = 1e7f, Every = 480f, Length = 150f;
         /// The kicker ramp in the right-hand lane ends at the zone start.
         public const float RampLength = 7f, RampHeight = 0.9f;
         public const int EntryLane = 2;

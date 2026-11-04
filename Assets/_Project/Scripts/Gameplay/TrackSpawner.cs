@@ -156,9 +156,6 @@ namespace DallasDash.Gameplay
 
         void Start()
         {
-            // Older authored scenes predate district services. Ensure kiosks are
-            // live in every district, including existing builds/scenes.
-            if (!FindFirstObjectByType<FuelStops>()) gameObject.AddComponent<FuelStops>();
             // The font atlas is dynamic: keep the curved text material pointed at it as glyphs get added.
             if (signTextMaterial && signFont)
             {
@@ -173,6 +170,7 @@ namespace DallasDash.Gameplay
                 if (s == RunState.Busted) ClearForBustShot();
                 lastState = s;
             };
+            GameManager.Instance.CouponReady += OnCouponReady;
             ResetTrack();
         }
 
@@ -196,6 +194,7 @@ namespace DallasDash.Gameplay
             brandIndex = 0;
             lastOpen = 1;
             builtRooftops.Clear();
+            ResetSpecials(0f);
             landmarkIndex = 0;
             segmentIndex = 0;
             Build(0f);
@@ -236,10 +235,12 @@ namespace DallasDash.Gameplay
                 if (rider.Lane != lastLane) { laneFrom = lastLane; laneChangedAt = Time.time; lastLane = rider.Lane; }
                 MoveTraffic(d);
                 Resolve(d);
+                if (portalPending) { portalPending = false; DashRun.Instance?.EnterSkypark(); return; }
                 PedestrianContacts();
                 previousRiderPosition = rider.transform.position;
                 previousDistance = d;
                 Announce(d);
+                CheckMissedSpecials(d);
                 Cull(d);
             }
             else lastLane = rider.Lane;
@@ -247,11 +248,13 @@ namespace DallasDash.Gameplay
 
         void Build(float d)
         {
-            while (landmarkIndex < (landmarks?.Length ?? 0) && landmarks[landmarkIndex].atDistance < d + Tuning.FarEdge * 2f)
+            while (DashRun.District == 0 && landmarkIndex < (landmarks?.Length ?? 0) && landmarks[landmarkIndex].atDistance < d + Tuning.FarEdge * 2f)
             {
-                SpawnLandmark(landmarks[landmarkIndex++]);
+                if (landmarks[landmarkIndex].atDistance > d - 20f) SpawnLandmark(landmarks[landmarkIndex]);
+                landmarkIndex++;
             }
             BuildRooftops(d);
+            BuildSpecials(d);
             while (builtTo < d + Tuning.FarEdge + segmentLength * 2f)
             {
                 var root = new GameObject("Segment");
@@ -279,6 +282,7 @@ namespace DallasDash.Gameplay
             if (DashRun.District == 1)
             {
                 SkyparkRoof(t, z);
+                if (DashRun.SkyTo >= z && DashRun.SkyTo < z + segmentLength) SkyparkReturnPortal(t, DashRun.SkyTo);
                 DashCity.Signature(this, t, z);
                 Combine(root);
                 yield return null;
@@ -464,10 +468,12 @@ namespace DallasDash.Gameplay
             if (NearJunction(z)) { for (int lane = 0; lane < Tuning.Lanes; lane++) SpawnPickupLine(lane, z); return 0f; }
             bool rampLane = RooftopCourse.KeepLaneClear(z);
             int bikeLane = z > BikeReservedFrom && z < BikeReservedTo ? BikeReservedLane : -1;
+            for (int l = 0; l < Tuning.Lanes; l++) if (LaneReserved(l, z)) { open = l; lastOpen = l; } // the portal/coupon lane is the way through
             if (rampLane) { open = RooftopCourse.EntryLane; lastOpen = open; }
             for (int lane = 0; lane < Tuning.Lanes; lane++)
             {
                 if (lane == bikeLane) continue;
+                if (LaneReserved(lane, z)) { SpawnPickupLine(lane, z); continue; }
                 if (rampLane && lane == RooftopCourse.EntryLane) { if (!RooftopCourse.OnRamp(z) && !RooftopCourse.OnRamp(z + 5f)) SpawnPickupLine(lane, z); continue; }
                 if (token && lane == open) { SpawnPowerUp((PowerUp)Random.Range(0, PowerUps.Count), lane, z); continue; }
                 if (lane == open || Random.value < 0.45f || obstacles == null || obstacles.Length == 0)
@@ -491,6 +497,7 @@ namespace DallasDash.Gameplay
         /// facade at the wall-run height: a reward for running the wall, out of reach from the road.
         void SpawnWallBurgers(float z)
         {
+            if (!DashRun.CanRideWalls) return; // wall running removed (4 Nov 2026)
             int row = Mathf.Abs(Mathf.FloorToInt(z / rowSpacing));
             if (row % 5 != 2) return;
             int side = (row / 5) % 2 == 0 ? -1 : 1;
@@ -674,6 +681,7 @@ namespace DallasDash.Gameplay
             go.name = def.displayName;
             go.transform.SetParent(transform);
             go.transform.position = new Vector3(Tuning.LaneX[lane], def.prefab ? 0f : def.size.y / 2f, z);
+            BrandVehicle(go, def.id);
             if (!def.prefab)
             {
                 go.transform.localScale = def.size;
@@ -787,10 +795,10 @@ namespace DallasDash.Gameplay
             var boardMat = style == 0 ? Pick(awningMaterials, 0) : style == 1 ? trimMaterial : Pick(awningMaterials, 1);
             Color ink = style == 1 ? new Color(0.78f, 0.1f, 0.12f) : new Color(1f, 0.95f, 0.85f);
             string name = Outlets[Random.Range(0, Outlets.Length)];
-            if (BrandedPreview)
+            // Yum! Brands storefronts (client, 4 Nov 2026), cycled so every block shows a spread of them;
+            // the presentation flag adds the wider client portfolio.
             {
-                // Cycle through the brands so every still shows a spread of them.
-                var b = Brands[brandIndex++ % Brands.Length];
+                var b = BrandedPreview ? Brands[brandIndex++ % Brands.Length] : YumBrands[brandIndex++ % YumBrands.Length];
                 name = b.name;
                 ink = b.ink;
                 boardMat = BrandMaterial(b.board);
@@ -822,6 +830,9 @@ namespace DallasDash.Gameplay
             if (brandMats.TryGetValue(c, out var m) && m) return m;
             m = new Material(trimMaterial) { name = "Brand board" };
             m.SetColor("_BaseColor", c);
+            // A lit lightbox sign, the way the chains' boards read at dusk.
+            m.SetColor("_EmissionColor", c * 0.85f);
+            m.EnableKeyword("_EMISSION");
             return brandMats[c] = m;
         }
 
@@ -1208,7 +1219,7 @@ namespace DallasDash.Gameplay
             t.surface = RunSurface.Road; t.powerUp = -1; t.drift = t.meetZ = 0f; t.height = 0.8f;
             t.baseHeight = 0f;
             t.halfWidth = 0.85f; t.clearance = 1.4f;
-            t.lateral = false; t.bike = false;
+            t.lateral = false; t.bike = false; t.portal = t.coupon = false;
             t.kind = k;
             t.lane = lane;
             t.halfLength = half;
@@ -1224,7 +1235,7 @@ namespace DallasDash.Gameplay
             if (GameManager.Instance.Paused) return;
             foreach (var o in live)
             {
-                if (magnet && o && !o.consumed && !o.bike && o.kind == TrackKind.Pickup && o.powerUp < 0 && Pull(o, d)) continue;
+                if (magnet && o && !o.consumed && !o.bike && !o.portal && !o.coupon && o.kind == TrackKind.Pickup && o.powerUp < 0 && Pull(o, d)) continue;
                 if (!o || o.consumed || o.struck) continue;
                 var contact = SurfaceTraversal.Point(o.surface, Tuning.LaneX[o.lane], 0f);
                 // Route objects stand on a deck or a roof: measure the rider against that surface.
@@ -1294,6 +1305,9 @@ namespace DallasDash.Gameplay
         {
             o.consumed = true;
             if (o.bike) { DashRun.Instance?.Remount(); ClearBikeReservation(); o.gameObject.SetActive(false); return; }
+            // The teleport rebuilds the world (and this list): run it after the hit-test loop, not inside it.
+            if (o.portal) { o.gameObject.SetActive(false); portal = null; portalPending = true; return; }
+            if (o.coupon) { TakeCoupon(o); return; }
             if (o.powerUp >= 0) PowerUps.Activate((PowerUp)o.powerUp);
             else
             {

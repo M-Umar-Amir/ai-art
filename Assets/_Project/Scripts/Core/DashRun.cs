@@ -5,36 +5,46 @@ using UnityEngine.InputSystem;
 
 namespace DallasDash.Core
 {
-    // Delivery progress, signature moves and character abilities belong to the current run.
+    /// The run's rules (client round, 4 Nov 2026):
+    /// - One map, Neon Downtown, and one rider, Ace on his e-bike.
+    /// - A POLICE CHASE replaces the delivery clock: an officer rides behind; crashes and running on foot let him
+    ///   close in, riding clean on the bike opens the gap again. When he reaches Ace the run is BUSTED.
+    /// - The shortcut is a portal in a street lane ("GO THROUGH HERE FOR SHORTCUT"): it teleports Ace, on foot,
+    ///   to the Skypark rooftops; a compulsory portal later sends him back to Downtown on his bike, police shaken off.
+    /// - A busted or wiped-out run can be revived on the spot with burgers (BurgerPrices.Revive).
+    /// - No kiosks, no fuel, no delivery timer.
     public class DashRun : MonoBehaviour
     {
         public static DashRun Instance { get; private set; }
-        public static readonly string[] CrewNames = { "ACE", "NOVA", "BOLT" };
-        public static readonly string[] AbilityNames = { "SPEED BOOST", "AIR TIME", "SHIELD DRONE" };
-        public static readonly string[] DistrictNames = { "NEON DOWNTOWN", "SKYPARK DISTRICT", "FESTIVALS" };
-        /// The selected district; locked districts are bought with burgers (BurgerPrices.District).
-        public static int District
-        {
-            get { int d = Mathf.Clamp(PlayerPrefs.GetInt("dash_district", 0), 0, 2); return BurgerPrices.DistrictOpen(d) ? d : 0; }
-            set { if (value >= 0 && value < 3 && BurgerPrices.DistrictOpen(value)) { PlayerPrefs.SetInt("dash_district", value); PlayerPrefs.Save(); } }
-        }
-        public static bool BuyDistrict(int d) => d <= 0 || d < 3 && PlayerProfile.Buy(BurgerPrices.DistrictItem(d), BurgerPrices.District[d]);
+        public static readonly string[] CrewNames = { "ACE" };
+        public static readonly string[] AbilityNames = { "SPEED BOOST" };
+        public static readonly string[] DistrictNames = { "NEON DOWNTOWN", "SKYPARK SHORTCUT" };
+
+        /// Which world is being built: 0 Downtown, 1 the Skypark shortcut. Runtime state only (never saved):
+        /// the portal switches it mid-run and every run starts in Downtown.
+        public static int District { get; set; }
+        /// The Skypark stretch of the current shortcut, in run distance: entry portal to compulsory return portal.
+        public static float SkyFrom { get; private set; } = -1f;
+        public static float SkyTo { get; private set; } = -1f;
+        public const float SkyLength = 380f;
+        public static bool InSkypark => District == 1;
+
         public float Battery { get; private set; } = 1f;
         public float Boost { get; private set; }
         public float FloatTime { get; private set; }
         public bool Shield { get; private set; }
-        public bool Board { get; private set; }
-        /// Knocked off the e-bike by a crash: on foot until the rider reaches the parked bike again.
-        /// Client rules (3 Nov): Ace and Nova wall-run ONLY on foot and take the rooftops ONLY on the bike;
-        /// Bolt's magnetic monowheel does both.
+        /// Retired hoverboard power-up state; always false.
+        public bool Board => false;
+        /// Knocked off the e-bike by a crash (or in the Skypark shortcut): on foot until the bike is back.
         public bool OnFoot { get; private set; }
-        /// Where the parked e-bike waits (distance and lane) while the rider is on foot.
+        /// Where the parked e-bike waits (distance and lane) while the rider is on foot in Downtown.
         public float BikeAt { get; private set; }
         public int BikeLane { get; private set; } = 1;
-        public static bool CanRideWalls => PlayerProfile.Character == 2 || Instance && Instance.OnFoot;
-        public static bool CanTakeRooftops => PlayerProfile.Character == 2 || !(Instance && Instance.OnFoot);
-        bool warnedWall, warnedRoof, parkPending;
-        /// -1 on the left facade, +1 on the right, 0 off the walls.
+        /// Wall running was removed (client, 4 Nov 2026, later the same day). Kept so older call sites read naturally.
+        public static bool CanRideWalls => false;
+        /// The old ramp-up rooftop course is retired; the Skypark portal is the shortcut now.
+        public static bool CanTakeRooftops => false;
+        bool warnedWall, parkPending;
         public int WallSide => Surface == RunSurface.LeftWall ? -1 : Surface == RunSurface.RightWall ? 1 : 0;
         public RunSurface Surface => rider ? rider.Traversal.Surface : RunSurface.Road;
         public bool Flipped => Surface == RunSurface.Ceiling;
@@ -42,80 +52,91 @@ namespace DallasDash.Core
         public float DashTime { get; private set; }
         public float DashCooldown { get; private set; }
         public float Slide { get; private set; }
-        public int Deliveries { get; private set; }
-        bool warned;
-        /// Shortcuts the player actually took this run.
+        /// Skypark shortcuts taken this run.
         public int Shortcuts { get; private set; }
         /// Seconds of the shortcut surge still running.
         public float ShortcutTime { get; private set; }
         public int TrickCombo { get; private set; }
-        /// Endless run (client, 2 Nov): deliveries never end the run. This is the on-time window for the
-        /// current drop: arrive before it reaches zero for the full bonus; late drops still count.
-        public float DeliveryTime { get; private set; } = 28f;
-        public int OnTimeDeliveries { get; private set; }
         /// Why the last run ended, shown on the results card.
         public static string EndReason { get; private set; } = "";
-        /// Seconds the rider has been coasting on a dry tank; the run ends at DryLimit.
-        public float DrySeconds { get; private set; }
-        public const float DryLimit = 6f;
-        /// Bolt has no bike to lose: a second head-on hit inside this window wipes him out.
-        float stumbleWindow;
-        public float DeliveryFraction => Mathf.Clamp01((GameManager.Instance.Distance - Deliveries * 450f) / 450f);
-        /// Wall runs are no longer zoned (client, 3 Nov): any street facade can be run, see WallAvailable.
-        /// Kept as a predicate (always false) so the older zone call sites read naturally.
+        public int WallRuns { get; private set; }
+
+        // ---------- Police chase
+        /// Metres between Ace and the officer. 0 = caught.
+        public float PoliceGap { get; private set; } = StartGap;
+        public const float StartGap = 14f, MaxGap = 24f;
+        /// The officer's bike outpaces a runner; the e-bike pulls away from him.
+        public const float GainOnFoot = 1.7f, LoseOnBike = 0.55f;
+        public const float CrashOnBike = 5f, CrashOnFoot = 9f, MissedLanding = 6f;
+        /// 1 when the officer is right behind, 0 when he is at the far edge (HUD meter, siren loudness).
+        public float Heat => Mathf.Clamp01(1f - PoliceGap / MaxGap);
+        /// The officer is off the rider's tail while Ace is in the Skypark (the portal shakes him off).
+        public bool PoliceActive => !InSkypark;
+
+        // ---------- Revive
+        public int Revives { get; private set; }
+        public int ReviveCost => BurgerPrices.Revive(Revives);
+        /// Seconds of protection after a revive: hits bounce off, the officer can't close in.
+        public float ReviveGrace { get; private set; }
+        /// True while the revive offer is on screen (the run is frozen).
+        public bool AwaitingRevive { get; private set; }
+        /// Review and bot modes: decline revives automatically unless a test asks for one.
+        public static bool AutoDeclineRevive;
+
         public static bool WallZone(float d) => false;
 
-        /// A building face lines this side of the street at z: not across a junction's cross road, not over
-        /// the rooftop course's own block row (its alley gaps), and not along a kiosk on the right-hand kerb.
+        /// A building face lines this side of the street at z: not across a junction's cross road.
         public static bool WallAvailable(int side, float z)
         {
             if (side == 0 || z < 20f || TrackSpawner.NearJunction(z)) return false;
-            if (side > 0 && (RooftopCourse.OwnsRightSide(z) || FuelStops.KioskNear(z))) return false;
+            if (InSkypark) return false; // the Skypark is a roof course with open edges, no facade beside it
             return true;
         }
-        /// Seconds a wall run lasts before the rider drops back to the street.
         public float WallRunSeconds => PowerUps.Active(PowerUp.Boots) ? 4f : 2.6f;
-        public static int RoofGapLane(float z) => District == 1 && z >= 160f && Mathf.FloorToInt(z / 20f) % 4 == 0 ? Mathf.FloorToInt(z / 80f) % 3 : -1;
-        /// The gravity flip (floor > wall > ceiling > wall) was removed at the client's request: real-world
-        /// physics only. Kept as a predicate so older call sites read naturally.
+        public static int RoofGapLane(float z) => -1;
         public static bool GravityZone(float d) => false;
         public static float GravityZoneStart(float d) => d - Mathf.Repeat(d - 700f, 960f);
 
-        /// The rooftop course keeps a speed surge alive for its whole length: running the roofs pays for the
-        /// climb even against a perfect street line.
-        public const float RouteSpeedFactor = 1.35f;
-
-        /// True while the rider is up on the roofs; counts the shortcut once per climb and keeps the surge alive.
-        float lastRouteStart = -1f;
-        public bool OnRoute { get; private set; }
+        /// The Skypark shortcut keeps a speed surge alive for its whole length: it really is a short cut.
+        public const float RouteSpeedFactor = 1.3f;
+        public bool OnRoute => InSkypark;
         public bool OnRooftops => Surface == RunSurface.Rooftop;
         public float SurfaceHeight => rider ? rider.Traversal.Origin.y : 0f;
         public float JumpGravityFactor => FloatTime > 0f || PowerUps.Active(PowerUp.Boots) ? 0.68f : 1f;
-        float boardTime, trickTime, wallTime;
+        float trickTime, wallTime;
         int lastTrick = -1;
         int pendingTrickKind = -1;
         RiderController rider;
-        void Awake() => Instance = this;
+        TrackSpawner track;
+
+        void Awake() { Instance = this; District = 0; }
         void Start()
         {
             rider = FindFirstObjectByType<RiderController>();
+            track = FindFirstObjectByType<TrackSpawner>();
             GameManager.Instance.StateChanged += State;
         }
         void OnDestroy() { if (GameManager.Instance) GameManager.Instance.StateChanged -= State; }
+
         void State(RunState s)
         {
             if (s == RunState.Running)
             {
-                Battery = 1f; Boost = FloatTime = Slide = boardTime = wallTime = trickTime = 0f;
-                Shield = Board = false;
-                OnFoot = warnedWall = warnedRoof = false; BikeAt = 0f;
-                FindFirstObjectByType<RiderLook>()?.Apply(PlayerProfile.Character, true);
+                Battery = 1f; Boost = FloatTime = Slide = wallTime = trickTime = 0f;
+                Shield = false;
+                OnFoot = warnedWall = false; BikeAt = 0f;
+                FindFirstObjectByType<RiderLook>()?.Apply(0, true);
                 DashTime = DashCooldown = 0f;
-                Deliveries = TrickCombo = 0; lastTrick = -1; pendingTrickKind = -1;
-                Shortcuts = 0; WallRuns = 0; ShortcutTime = 0f; OnRoute = false; lastRouteStart = -1f;
-                DeliveryTime = 28f;
-                OnTimeDeliveries = 0; DrySeconds = 0f; stumbleWindow = 0f; EndReason = "";
-                warned = false;
+                TrickCombo = 0; lastTrick = -1; pendingTrickKind = -1;
+                Shortcuts = 0; WallRuns = 0; ShortcutTime = 0f;
+                PoliceGap = StartGap; Revives = 0; ReviveGrace = 0f; AwaitingRevive = false;
+                EndReason = "";
+                SkyFrom = SkyTo = -1f;
+            }
+            if (s == RunState.Ready || s == RunState.Intro)
+            {
+                AwaitingRevive = false;
+                if (District != 0) { District = 0; SkyFrom = SkyTo = -1f; }
             }
             if (s != RunState.Running) { rider?.Traversal.Reset(); Slide = 0f; }
         }
@@ -123,83 +144,63 @@ namespace DallasDash.Core
         {
             if (!CanAct() || DashCooldown > 0f) return false;
             DashTime = 2.2f; DashCooldown = 12f;
-            MenuUI.Instance?.Shout("DELIVERY DASH");
+            MenuUI.Instance?.Shout("DASH!");
             Haptics.Play(Haptics.Strength.Medium);
             return true;
         }
-        /// The player rode onto the side route: counted once per entry, and the surge is refreshed
-        /// every frame the rider stays on it.
-        public void RideRoute(bool on)
-        {
-            float routeStart = RooftopCourse.ZoneStartAt(GameManager.Instance.Distance);
-            if (on && routeStart != lastRouteStart && CanAct())
-            {
-                lastRouteStart = routeStart;
-                Shortcuts++;
-                ShortcutTime = 3f;
-                GameManager.Instance.AddBonus(150);
-                MenuUI.Instance?.Shout(Shortcuts > 1 ? "ROOFTOP SHORTCUT! x" + Shortcuts : "ROOFTOP SHORTCUT!");
-                Haptics.Play(Haptics.Strength.Medium);
-            }
-            OnRoute = on;
-            if (on) ShortcutTime = Mathf.Max(ShortcutTime, 0.4f);
-        }
+
         public void TryAbility()
         {
             if (!CanAct() || Battery < 0.999f) return;
             Battery = 0f;
-            switch (PlayerProfile.Character)
-            {
-                case 0: Boost = 4.5f; break;
-                case 1: FloatTime = 7f; break;
-                default: Shield = true; break;
-            }
-            MenuUI.Instance?.Shout(AbilityNames[Mathf.Clamp(PlayerProfile.Character, 0, 2)]);
+            Boost = 4.5f;
+            MenuUI.Instance?.Shout(AbilityNames[0]);
             Haptics.Play(Haptics.Strength.Medium);
         }
+
         public bool AbsorbHit()
         {
-            if (Boost > 0f) return true;
+            if (Boost > 0f || ReviveGrace > 0f) return true;
             if (Shield || PowerUps.Active(PowerUp.Shield))
             {
                 Shield = false; PowerUps.Consume(PowerUp.Shield); return true;
             }
-            if (!Board) return false;
-            Board = false; boardTime = 0f;
-            FindFirstObjectByType<RiderLook>()?.Apply(PlayerProfile.Character, true);
-            return true;
+            return false;
         }
         public void Recharge() => Battery = Mathf.Min(1f, Battery + 0.4f);
-        public void PenalizeTime(float seconds)
+
+        /// Kept for older callers (a missed landing): the officer gains ground instead of a time penalty.
+        public void PenalizeTime(float seconds) => PoliceGains(seconds * 1.5f, "MISSED LANDING");
+
+        /// The officer closes in by `metres`; at zero the run is busted.
+        public void PoliceGains(float metres, string why = null)
         {
-            if (CanAct()) DeliveryTime = Mathf.Max(0f, DeliveryTime - Mathf.Max(0f, seconds));
+            if (!CanAct() || !PoliceActive || ReviveGrace > 0f) return;
+            PoliceGap = Mathf.Max(0f, PoliceGap - Mathf.Max(0f, metres));
+            if (PoliceGap <= 0f) { End("BUSTED!"); return; }
+            if (!string.IsNullOrEmpty(why) && PoliceGap < 8f) MenuUI.Instance?.Shout(why + "  /  COP CLOSING IN!");
         }
-        bool CanAct() => GameManager.Instance && GameManager.Instance.State == RunState.Running && !GameManager.Instance.Paused;
+
+        bool CanAct() => GameManager.Instance && GameManager.Instance.State == RunState.Running && !GameManager.Instance.Paused && !AwaitingRevive;
         public bool JumpMove()
         {
             Slide = 0f;
             if (!CanAct() || !rider) return false;
-            // On the roofs a jump is just a jump (over the alley gaps): wall and ceiling moves belong to the street.
             if (OnRooftops) return false;
             if (rider.Traversal.Moving) return true;
             if (WallRunning)
             {
                 rider.AttachSurface(RunSurface.Road);
-                return true; // up on a wall kicks off it, back down into the street
+                return true;
             }
             return false;
         }
 
-        /// Steering into the building beside an outer lane starts a wall run along its facade, anywhere on the
-        /// street where a facade stands. Returns false when the move is not allowed, so the steer is ignored.
+        /// Steering into the building beside an outer lane starts a wall run along its facade (on foot only).
         public bool TryWallRun(int side)
         {
-            if (!CanAct() || !rider || rider.Traversal.Moving || Surface != RunSurface.Road) return false;
-            if (!CanRideWalls)
-            {
-                if (!warnedWall) { warnedWall = true; MenuUI.Instance?.Shout("WALL RUN: ON FOOT ONLY"); }
-                return false;
-            }
+            // Wall running is gone: steering into a building is simply ignored.
+            if (!CanRideWalls || !CanAct() || !rider || rider.Traversal.Moving || Surface != RunSurface.Road) return false;
             float d = GameManager.Instance.Distance;
             float reach = d + GameManager.Instance.Speed * (SurfaceTraversal.TransitionSeconds + 0.4f);
             if (!WallAvailable(side, d) || !WallAvailable(side, reach)) { MenuUI.Instance?.Shout("NO WALL HERE"); return false; }
@@ -210,76 +211,111 @@ namespace DallasDash.Core
             Haptics.Play(Haptics.Strength.Light);
             return true;
         }
-        /// Wall runs started this run (results card, bot checks).
-        public int WallRuns { get; private set; }
 
-        /// Steering away from the wall ends the wall run.
         public void LeaveWall() { if (WallRunning && rider && !rider.Traversal.Moving) rider.AttachSurface(RunSurface.Road); }
         public void StartSlide() { if (CanAct()) Slide = 0.85f; }
 
-        /// Endless-runner fail rule: the first head-on crash knocks Ace or Nova off the e-bike (Bolt
-        /// staggers); crashing again before getting back on (or, for Bolt, within 6 s) ends the run.
+        /// A head-on crash: on the bike it knocks Ace off (the officer gains); on foot the officer gains a lot,
+        /// and in the Skypark (no police) a crash on foot is a wipe-out.
         public static string LastStruck = "";
         public void Crash()
         {
             if (!CanAct() || !rider) return;
-            // A wall run is already an on-foot move: a facade hazard only bumps the rider off the wall.
             if (Surface != RunSurface.Road && Surface != RunSurface.Rooftop) return;
-            bool secondHit = PlayerProfile.Character == 2 ? stumbleWindow > 0f : OnFoot;
-            Debug.Log($"[DashCrash] at {GameManager.Instance.Distance:0.0} lane={rider.Lane} surface={Surface} onFoot={OnFoot} second={secondHit} object={LastStruck}");
-            if (secondHit) { End("WIPED OUT"); return; }
-            if (PlayerProfile.Character == 2)
+            Debug.Log($"[DashCrash] at {GameManager.Instance.Distance:0.0} lane={rider.Lane} surface={Surface} onFoot={OnFoot} gap={PoliceGap:0.0} sky={InSkypark} object={LastStruck}");
+            if (InSkypark)
             {
-                stumbleWindow = 6f;
-                MenuUI.Instance?.Shout("STAGGERED! ONE MORE HIT ENDS THE RUN");
+                if (OnFoot && crashedInSky) { End("WIPED OUT"); return; }
+                crashedInSky = true;
+                MenuUI.Instance?.Shout("STUMBLED! CAREFUL");
                 Haptics.Play(Haptics.Strength.Medium);
                 return;
             }
+            if (OnFoot) { PoliceGains(CrashOnFoot, "CRASHED"); Haptics.Play(Haptics.Strength.Medium); return; }
             KnockOffBike();
+            PoliceGains(CrashOnBike, "KNOCKED OFF");
         }
+        bool crashedInSky;
 
+        /// The run is over for `reason` unless the player revives with burgers.
         public void End(string reason)
         {
-            if (!GameManager.Instance || GameManager.Instance.State != RunState.Running) return;
+            if (!GameManager.Instance || GameManager.Instance.State != RunState.Running || AwaitingRevive) return;
             EndReason = reason;
-            if (FuelStops.Instance && FuelStops.Instance.Pitting) FuelStops.Instance.CancelPit(true);
             MenuUI.Instance?.Shout(reason);
+            bool offered = false;
+            if (!AutoDeclineRevive && MenuUI.Instance)
+            {
+                // Never let a UI fault leave the run stuck at zero gap: no offer, the run just ends.
+                try { offered = MenuUI.Instance.OfferRevive(reason, ReviveCost); }
+                catch (System.Exception e) { Debug.LogException(e); offered = false; }
+            }
+            if (offered)
+            {
+                AwaitingRevive = true;
+                GameManager.Instance.SetPaused(true);
+                return;
+            }
+            FinishRun();
+        }
+
+        /// The revive offer was declined or ran out: the run ends here.
+        public void FinishRun()
+        {
+            AwaitingRevive = false;
+            if (!GameManager.Instance || GameManager.Instance.State != RunState.Running) return;
+            GameManager.Instance.SetPaused(false);
             GameManager.Instance.Bust();
         }
 
-        /// A crash throws Ace or Nova off the e-bike: the bike is left lying in the road and they run on.
+        /// Pays the revive price and carries on: back on the bike, the officer pushed back, the road ahead cleared.
+        public bool Revive()
+        {
+            var gm = GameManager.Instance;
+            if (!gm || gm.State != RunState.Running) return false;
+            if (!PlayerProfile.TrySpend(ReviveCost)) return false;
+            Revives++;
+            AwaitingRevive = false;
+            gm.SetPaused(false);
+            EndReason = "";
+            PoliceGap = MaxGap;
+            ReviveGrace = 2.5f;
+            crashedInSky = false;
+            rider?.ResetRider();
+            if (!InSkypark && OnFoot) { Remount(); track?.ClearBikeReservation(); track?.RemoveParkedBike(); }
+            track?.ClearAhead(gm.Distance, 45f);
+            MenuUI.Instance?.Caption("REVIVED!", "-" + BurgerPrices.Revive(Revives - 1).ToString("N0") + " burgers  /  keep riding", 1.6f);
+            Haptics.Play(Haptics.Strength.Heavy);
+            return true;
+        }
+
+        /// A crash throws Ace off the e-bike: the bike is left lying in the road and he runs on.
         public void KnockOffBike()
         {
-            if (!CanAct() || OnFoot || PlayerProfile.Character == 2 || !rider) return;
+            if (!CanAct() || OnFoot || !rider || InSkypark) return;
             if (Surface != RunSurface.Road || rider.Traversal.Moving) return;
             OnFoot = true;
-            MenuUI.Instance?.Shout("KNOCKED OFF! ON FOOT: RUN THE WALLS");
+            MenuUI.Instance?.Shout("KNOCKED OFF! GRAB THE BIKE");
             parkPending = true; // parked next frame: this runs inside the track's hit-test loop
             var look = FindFirstObjectByType<RiderLook>();
-            look?.DropBike(PlayerProfile.Character, rider.transform.position);
-            look?.Apply(PlayerProfile.Character, false);
+            look?.DropBike(0, rider.transform.position);
+            look?.Apply(0, false);
             Haptics.Play(Haptics.Strength.Medium);
         }
 
-        /// Puts the e-bike in a lane a few seconds ahead, never inside the facade run, the rooftop line or a
-        /// junction, so there is always a fair chance to grab it.
+        /// Puts the e-bike in a lane a few seconds ahead, never in a junction or the portal's lane.
         void ParkBikeAhead(float d)
         {
-            float z = d + Mathf.Max(70f, GameManager.Instance.Speed * 4f);
+            float z = d + Mathf.Max(60f, GameManager.Instance.Speed * 3.5f);
             for (int guard = 0; guard < 8; guard++)
             {
-                if (RooftopCourse.Near(z, 40f, RooftopCourse.StreetLanding - RooftopCourse.Length + 15f)) { z = RooftopCourse.ZoneStartAt(z) + RooftopCourse.StreetLanding + 25f; continue; }
                 if (TrackSpawner.NearJunction(z) || TrackSpawner.NearJunction(z + 8f)) { z += 30f; continue; }
-                // Skypark: never over (or just before) a gap between towers, where the rider is mid-jump.
-                if (SkyparkGapNear(z)) { z += 12f; continue; }
                 break;
             }
-            // Free space only: walk forward until a lane is clear for 12 m either side of the spot.
-            var track = FindFirstObjectByType<TrackSpawner>();
             int lane = -1;
             for (int tries = 0; tries < 24 && track; tries++, z += 6f)
             {
-                if (RooftopCourse.Near(z, 20f, 20f) || TrackSpawner.NearJunction(z) || SkyparkGapNear(z)) continue;
+                if (TrackSpawner.NearJunction(z)) continue;
                 int first = rider ? rider.Lane : 1;
                 for (int k = 0; k < Tuning.Lanes && lane < 0; k++)
                 {
@@ -293,63 +329,60 @@ namespace DallasDash.Core
             track?.ParkBike(z, BikeLane);
         }
 
-        static bool SkyparkGapNear(float z)
-        {
-            for (float dz = -10f; dz <= 6f; dz += 2f) if (TrackSpawner.SkyparkVoid(z + dz)) return true;
-            return false;
-        }
-
         public void Remount()
         {
             if (!OnFoot) return;
-            OnFoot = false; warnedWall = false; warnedRoof = false;
-            FindFirstObjectByType<RiderLook>()?.Apply(PlayerProfile.Character, true);
+            OnFoot = false; warnedWall = false;
+            FindFirstObjectByType<RiderLook>()?.Apply(0, true);
             MenuUI.Instance?.Shout("BACK ON THE E-BIKE");
         }
 
-        /// The rooftop shortcut: ride the kicker ramp in the right-hand lane and the rider climbs the facade
-        /// onto the roofs; at the end of the block row they drop back into the street. Missing an alley gap
-        /// drops them to the street too, at a time cost, instead of ending the run.
-        void Rooftops(float d)
+        // ---------- The Skypark portal shortcut
+
+        /// Ace rode through a shortcut portal: teleport to the Skypark rooftops, on foot, police shaken off.
+        public void EnterSkypark()
         {
-            if (!rider || rider.Traversal.Moving) return;
-            if (Surface == RunSurface.Road)
-            {
-                if (rider.Lane == RooftopCourse.EntryLane && RooftopCourse.EntryWindow(d) && rider.JumpHeight < 1.6f)
-                {
-                    // The kicker is a bike ramp: on foot, Ace and Nova run over it and stay in the street.
-                    if (!CanTakeRooftops)
-                    {
-                        if (!warnedRoof) { warnedRoof = true; MenuUI.Instance?.Shout("ROOFTOPS: BIKE ONLY"); }
-                        return;
-                    }
-                    // A parkour line over real things: truck roof, fire-escape landing, parapet.
-                    rider.AscendToRooftops();
-                    Trick(7);
-                    Haptics.Play(Haptics.Strength.Medium);
-                }
-                return;
-            }
-            if (Surface != RunSurface.Rooftop) return;
-            if (RooftopCourse.PastDrop(d))
-            {
-                rider.DropToStreet(false);
-                RideRoute(false);
-                MenuUI.Instance?.Shout("ROOF DROP!");
-                Trick(8);
-                return;
-            }
-            if (rider.Fallen)
-            {
-                rider.DropToStreet(true);
-                RideRoute(false);
-                PenalizeTime(2f);
-                BreakTricks();
-                MenuUI.Instance?.Shout("MISSED THE ROOF / -2s");
-                return;
-            }
-            RideRoute(true);
+            var gm = GameManager.Instance;
+            if (!CanAct() || InSkypark || !rider) return;
+            float d = gm.Distance;
+            if (rider.Traversal.Surface != RunSurface.Road) rider.AttachSurface(RunSurface.Road);
+            rider.Traversal.Reset();
+            rider.ResetRider();
+            SkyFrom = d; SkyTo = d + SkyLength;
+            District = 1;
+            Shortcuts++;
+            crashedInSky = false;
+            OnFoot = true; parkPending = false;
+            track?.ClearBikeReservation(); track?.RemoveParkedBike();
+            FindFirstObjectByType<RiderLook>()?.Apply(0, false);
+            track?.SwitchWorld(d);
+            ShortcutTime = 1f;
+            gm.AddBonus(250);
+            MenuUI.Instance?.Teleport(new Color(0.35f, 0.9f, 1f));
+            MenuUI.Instance?.Caption("SKYPARK SHORTCUT", "Run the rooftops  /  jump the gaps", 2.2f);
+            Haptics.Play(Haptics.Strength.Heavy);
         }
+
+        /// The compulsory return portal at the end of the Skypark: back to Downtown, back on the bike.
+        public void ExitSkypark()
+        {
+            var gm = GameManager.Instance;
+            if (!gm || gm.State != RunState.Running || !InSkypark) return;
+            float d = gm.Distance;
+            rider?.Traversal.Reset();
+            rider?.ResetRider();
+            District = 0;
+            SkyFrom = SkyTo = -1f;
+            OnFoot = false; warnedWall = false;
+            FindFirstObjectByType<RiderLook>()?.Apply(0, true);
+            track?.SwitchWorld(d);
+            PoliceGap = MaxGap;
+            gm.AddBonus(250);
+            MenuUI.Instance?.Teleport(new Color(1f, 0.55f, 0.15f));
+            MenuUI.Instance?.Caption("BACK IN DOWNTOWN", "Cops shaken off  /  back on the e-bike", 2.2f);
+            Haptics.Play(Haptics.Strength.Heavy);
+        }
+
         public void Trick(int kind)
         {
             if (!CanAct() || lastTrick == kind && trickTime > 0f) return;
@@ -359,7 +392,6 @@ namespace DallasDash.Core
             if (TrickCombo >= 3) MenuUI.Instance?.Shout("TRICK CHAIN x" + TrickCombo);
         }
 
-        /// An airborne trick is only banked on landing; a hit or a missed landing loses it.
         public void TrickAir(int kind)
         {
             if (!CanAct() || pendingTrickKind >= 0) return;
@@ -375,68 +407,42 @@ namespace DallasDash.Core
         }
 
         public void BreakTricks() { TrickCombo = 0; trickTime = 0f; lastTrick = -1; pendingTrickKind = -1; }
+
         void Update()
         {
-            // Pit stops freeze movement, never the delivery deadline. User pauses still pause it.
-            if (GameManager.Instance && GameManager.Instance.State == RunState.Running && FuelStops.Instance && FuelStops.Instance.Pitting)
-            {
-                DeliveryTime = Mathf.Max(0f, DeliveryTime - Time.unscaledDeltaTime);
-                DrySeconds = 0f;
-                return;
-            }
             if (!CanAct()) return;
+            var gm = GameManager.Instance;
             float dt = Time.deltaTime;
             DashTime = Mathf.Max(0f, DashTime - dt); DashCooldown = Mathf.Max(0f, DashCooldown - dt);
+            ReviveGrace = Mathf.Max(0f, ReviveGrace - dt);
+            if (InSkypark) ShortcutTime = Mathf.Max(ShortcutTime, 0.3f);
             ShortcutTime = Mathf.Max(0f, ShortcutTime - dt);
-            DeliveryTime = Mathf.Max(0f, DeliveryTime - dt);
-            stumbleWindow = Mathf.Max(0f, stumbleWindow - dt);
-            // Out of charge: the rider coasts at reduced pace; reach a kiosk (Food, or the free emergency
-            // splash) inside DryLimit seconds or the run is over.
-            if (RidersEconomy.Empty)
-            {
-                float before = DrySeconds;
-                DrySeconds += dt;
-                if (before <= 0f) { MenuUI.Instance?.Shout("OUT OF CHARGE! REACH A KIOSK"); Haptics.Play(Haptics.Strength.Medium); }
-                if (DrySeconds >= DryLimit) { End("OUT OF CHARGE"); return; }
-            }
-            else DrySeconds = 0f;
             Battery = Mathf.Min(1f, Battery + dt / 28f);
             Boost = Mathf.Max(0, Boost - dt); FloatTime = Mathf.Max(0, FloatTime - dt);
             Slide = Mathf.Max(0, Slide - dt); trickTime = Mathf.Max(0, trickTime - dt);
             if (trickTime <= 0f) { TrickCombo = 0; lastTrick = -1; }
-            if (Board && (boardTime -= dt) <= 0f)
-            { Board = false; FindFirstObjectByType<RiderLook>()?.Apply(PlayerProfile.Character, true); }
-            float exitDistance = GameManager.Instance.Distance + GameManager.Instance.Speed * SurfaceTraversal.TransitionSeconds;
-            Rooftops(GameManager.Instance.Distance);
-            // Parked after the crash, and again further on if the rider runs past it.
-            if (OnFoot && (parkPending || GameManager.Instance.Distance > BikeAt + 4f)) { parkPending = false; ParkBikeAhead(GameManager.Instance.Distance); }
-            // A wall run ends on its timer, or before the facade does (a cross street, the rooftop block row, a kiosk).
+
+            // The chase: the officer gains on a runner and drops back from a rider on the bike.
+            if (PoliceActive && ReviveGrace <= 0f)
+            {
+                float before = PoliceGap;
+                if (OnFoot) PoliceGap -= GainOnFoot * dt;
+                else PoliceGap = Mathf.Min(MaxGap, PoliceGap + LoseOnBike * dt * (Boost > 0f || DashTime > 0f ? 3f : 1f));
+                if (before > 6f && PoliceGap <= 6f) { MenuUI.Instance?.Shout("COP RIGHT BEHIND YOU!"); Haptics.Play(Haptics.Strength.Medium); }
+                if (PoliceGap <= 0f) { PoliceGap = 0f; End("BUSTED!"); return; }
+            }
+
+            // The return portal is compulsory: crossing its line sends Ace back to Downtown.
+            if (InSkypark && gm.Distance >= SkyTo) { ExitSkypark(); return; }
+
+            float exitDistance = gm.Distance + gm.Speed * SurfaceTraversal.TransitionSeconds;
+            if (!InSkypark && OnFoot && (parkPending || gm.Distance > BikeAt + 4f)) { parkPending = false; ParkBikeAhead(gm.Distance); }
             if (Surface != RunSurface.Road && Surface != RunSurface.Rooftop && !rider.Traversal.Moving)
             {
                 if (!WallRunning || (wallTime -= dt) <= 0f || !WallAvailable(WallSide, exitDistance)) rider.AttachSurface(RunSurface.Road);
             }
             if (Keyboard.current?.eKey.wasPressedThisFrame == true) TryAbility();
             if (Keyboard.current?.qKey.wasPressedThisFrame == true) TryDeliveryDash();
-            if (GameManager.Instance.Distance >= (Deliveries + 1) * 450f)
-            {
-                bool onTime = DeliveryTime > 0f;
-                Deliveries++;
-                warned = false;
-                int tip = DashInventory.Delivery(onTime);
-                GameManager.Instance.TipsEarned += tip;
-                DeliveryTime = Mathf.Max(16f, 28f - Deliveries * 0.7f);
-                DashCooldown = 0f;
-                if (onTime) OnTimeDeliveries++;
-                GameManager.Instance.AddBonus(onTime ? 250 : 60);
-                MenuUI.Instance?.Shout(onTime ? $"ON TIME!  +{tip} BURGERS" : $"DELIVERED LATE  /  +{tip} BURGERS");
-            }
-            // Warning at 10 seconds remaining (quality of life)
-            else if (DeliveryTime <= 6f && DeliveryTime > 0f && !warned)
-            {
-                warned = true;
-                MenuUI.Instance?.Shout("ON-TIME BONUS ENDING!");
-                Haptics.Play(Haptics.Strength.Medium);
-            }
         }
     }
 }

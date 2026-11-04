@@ -175,7 +175,7 @@ namespace DallasDash.Gameplay
                     for (int safe = 0; safe < Tuning.Lanes; safe++)
                         if (track.GroundSupport(Tuning.LaneX[safe], gm.Distance, out float top))
                         { Lane = safe; x = Tuning.LaneX[safe]; y = groundHeight = top; break; }
-                    DallasDash.UI.MenuUI.Instance?.Shout("MISSED LANDING / -4s");
+                    DallasDash.UI.MenuUI.Instance?.Shout("MISSED LANDING!");
                     transform.position = new Vector3(x, y, gm.Distance);
                     return;
                 }

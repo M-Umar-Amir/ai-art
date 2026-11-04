@@ -7,7 +7,11 @@ namespace DallasDash.Gameplay
     {
         public GameObject skyparkTower;
         public const float CityGround = -40f;
-        public static bool SkyparkVoid(float z) => DashRun.District == 1 && z >= 100f && Mathf.Repeat(z - 100f, 80f) < 5f;
+        /// Gaps between towers, measured from the portal that brought Ace up here: the first comes 70 m in (time
+        /// to read the roof), then one every 80 m, none in the last 40 m before the return portal.
+        public const float FirstGap = 70f, GapEvery = 80f, GapLength = 5f;
+        public static bool SkyparkVoid(float z) => DashRun.District == 1 && z >= DashRun.SkyFrom + FirstGap && z < DashRun.SkyTo - 40f
+            && Mathf.Repeat(z - DashRun.SkyFrom - FirstGap, GapEvery) < GapLength;
 
         // The course is the roof of an occupied forty-metre tower. There is no street surface here.
         void SkyparkRoof(Transform parent, float z)
@@ -59,8 +63,9 @@ namespace DallasDash.Gameplay
                 at = edge;
             }
             // Explicit void volumes use the same definition as the missing visual roof.
-            for (float g=100f+Mathf.Max(0,Mathf.FloorToInt((z-100f)/80f))*80f;g<end;g+=80f)
-                if (g>=z)
+            float first = DashRun.SkyFrom + FirstGap;
+            for (float g = first + Mathf.Max(0, Mathf.FloorToInt((z - first) / GapEvery)) * GapEvery; g < end; g += GapEvery)
+                if (g >= z && SkyparkVoid(g + .01f))
                     for (int lane=0;lane<Tuning.Lanes;lane++)
                     {
                         var gap=new GameObject("High-rise roof gap / jump");gap.transform.SetParent(transform);
@@ -86,16 +91,16 @@ namespace DallasDash.Gameplay
         float SpawnSkyparkRow(float z)
         {
             SpawnWallBurgers(z);
-            float gapPhase = z < 80f ? 40f : Mathf.Repeat(z-100f,80f);
-            if (gapPhase<15f||gapPhase>65f) return 0f;
+            // Nothing in the first 30 m after the portal (Ace lands on foot) or around the return portal.
+            if (z < DashRun.SkyFrom + 30f || z > DashRun.SkyTo - 25f) return 0f;
+            float gapPhase = Mathf.Repeat(z - DashRun.SkyFrom - FirstGap, GapEvery);
+            if (z >= DashRun.SkyFrom + FirstGap - 15f && (gapPhase < 15f || gapPhase > 65f)) return 0f;
             int open=Mathf.Clamp(lastOpen+Random.Range(-1,2),0,Tuning.Lanes-1);lastOpen=open;
             bool token = z >= nextPowerUp;
             if (token) nextPowerUp = z + Random.Range(PowerUpGap*.75f,PowerUpGap*1.25f);
             for(int lane=0;lane<Tuning.Lanes;lane++)
             {
                 if (token && lane==open) { SpawnPowerUp((PowerUp)Random.Range(0,PowerUps.Count),lane,z);continue; }
-                // The rooftop shortcut's ramp and landing keep the right-hand lane clear.
-                if (lane==RooftopCourse.EntryLane && RooftopCourse.KeepLaneClear(z)) { if (!RooftopCourse.OnRamp(z)&&!RooftopCourse.OnRamp(z+5f)) SpawnPickupLine(lane,z); continue; }
                 if (lane==open||Random.value<.4f) { SpawnPickupLine(lane,z);continue; }
                 float x=Tuning.LaneX[lane];
                 var root=new GameObject("Roof ventilation unit / jump");root.transform.SetParent(transform);root.transform.position=new Vector3(x,0,z);

@@ -41,6 +41,12 @@ namespace DallasDash.EditorTools
             ["nova-run"] = new Spec { fit = Fit.Keep, outline = 0.009f },
             ["ebike"] = new Spec { fit = Fit.Keep },
             ["ebike-nova"] = new Spec { fit = Fit.Keep },
+            // 4 Nov 2026: Ace's heavy hero kit and the police officer (models/ace_gear.py, make_police.py).
+            ["ace-gear-ride"] = new Spec { fit = Fit.Keep },
+            ["ace-gear-run"] = new Spec { fit = Fit.Keep },
+            ["police-ride"] = new Spec { fit = Fit.Keep, outline = 0.009f },
+            ["police-gear-ride"] = new Spec { fit = Fit.Keep },
+            ["ebike-police"] = new Spec { fit = Fit.Keep },
             // Quaternius pedestrians, already in metres (models/make_people.py).
             ["people-male"] = new Spec { fit = Fit.Keep, outline = 0.008f },
             ["people-female"] = new Spec { fit = Fit.Keep, outline = 0.008f },
@@ -148,7 +154,7 @@ namespace DallasDash.EditorTools
                     if (!m) { m = new Material(toon); AssetDatabase.CreateAsset(m, path); }
                     m.shader = toon;
                     // A compressed copy of the embedded image (TextureBake), not glTFast's raw RGBA32 one.
-                    Texture tex = TextureBake.FromGlb(SourcePath(id), mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run" ? 2048 : spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
+                    Texture tex = TextureBake.FromGlb(SourcePath(id), mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run" or "police-ride" ? 2048 : spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
                     if (!tex) tex = BaseTexture(mats[i]);
                     // A texture baked in this same batch may still be importing: load it again by path.
                     if (tex && !AssetDatabase.Contains(tex)) tex = null;
@@ -158,7 +164,7 @@ namespace DallasDash.EditorTools
                     bool authored = TextureBake.Colors(SourcePath(id), mats[i] ? mats[i].name : null, out var glbColor, out var glbGlow);
                     m.SetColor("_BaseColor", authored ? glbColor : BaseColor(mats[i]));
                     m.SetFloat("_OutlineWidth", spec.outline);
-                    bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt" || id.StartsWith("ebike");
+                    bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt" || id.StartsWith("ebike") || id.Contains("-gear-");
                     m.SetFloat("_SurfaceStyle", 1f);
                     m.SetFloat("_Smoothness", architecture ? 0.6f : 0.3f);
                     m.SetFloat("_Metallic", architecture ? 0.22f : 0f);
@@ -167,8 +173,10 @@ namespace DallasDash.EditorTools
                     bool neonTrim = sourceName.Contains("neon cyan") || sourceName.Contains("neon pink") || sourceName.Contains("headlight");
                     m.SetColor("_EmissionColor", authored && glbGlow.maxColorComponent > 0.01f ? glbGlow * 1.7f
                         : neonTrim ? (authored ? glbColor : BaseColor(mats[i])) * 1.7f : sourceName.Contains("warm interior") ? new Color(.8f, .55f, .3f) * .75f : Color.black);
-                    m.SetFloat("_RimStrength", 0f);
-                    if (id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run") m.SetColor("_ShadeColor", new Color(0.9f, 0.9f, 0.96f));
+                    bool hero = id is "ace-ride" or "ace-run" or "police-ride" || id.Contains("-gear-");
+                    m.SetFloat("_RimStrength", hero ? 0.32f : 0f);
+                    if (hero) m.SetFloat("_RimPower", 3.2f);
+                    if (id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run" or "police-ride") m.SetColor("_ShadeColor", new Color(0.9f, 0.9f, 0.96f));
                     EditorUtility.SetDirty(m);
                     mats[i] = m;
                 }

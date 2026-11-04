@@ -405,14 +405,15 @@ namespace DallasDash.EditorTools
             look.scooter = Model(riderVisual, DashAssets.Board(true), Vector3.zero, "Glide board");
             look.scooter.SetActive(false);
             look.scooterSeat = Vector3.up * 0.2f;
-            look.seated = new GameObject[3]; look.standing = new GameObject[3];
-            for (int i = 0; i < 3; i++)
+            // One rider (client, 4 Nov 2026): Ace in his heavy hero kit on the heavy e-bike, and Ace on foot.
+            DashAssets.BrandFont = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
+            DashAssets.BrandText = mats["SignText"];
+            look.seated = new GameObject[1]; look.standing = new GameObject[1];
+            for (int i = 0; i < 1; i++)
             {
                 var crew = DashAssets.Crew(i);
-                look.seated[i] = Model(riderVisual, crew, Vector3.zero, "Crew riding " + i);
-                // Ace and Nova run on foot after a crash; Bolt's standing slot keeps his original model.
-                look.standing[i] = i < 2 ? Model(riderVisual, DashAssets.Runner(i), Vector3.zero, "Crew on foot " + i)
-                    : Model(riderVisual, CrewModels.Build(i, false), new Vector3(.75f,0f,-.35f), "Crew standing " + i);
+                look.seated[i] = Model(riderVisual, crew, Vector3.zero, "Ace riding");
+                look.standing[i] = Model(riderVisual, DashAssets.Runner(i), Vector3.zero, "Ace on foot");
                 
                 // Outfits recolour the rider only, never the e-bike under them.
                 var wearer = look.seated[i].transform.Find("Rider");
@@ -425,7 +426,10 @@ namespace DallasDash.EditorTools
             rc.visual = riderVisual;
             rc.handling = data.rides[0].handling;
 
-            // No pursuit: the game is a timed delivery course, so there is no officer and no chase rig.
+            // The police chase (client, 4 Nov 2026): one officer on a police e-bike behind Ace.
+            var chase = new GameObject("Police chase").AddComponent<ChaseController>();
+            chase.rider = rc;
+            chase.officerPrefab = DashAssets.Police();
             var spawner = new GameObject("Track").AddComponent<TrackSpawner>();
             spawner.rider = rc;
             spawner.dashBuildings = System.Array.FindAll(new[] { ModelImport.Get("neon-block-a"), ModelImport.Get("neon-block-b") }, g => g);
@@ -440,8 +444,15 @@ namespace DallasDash.EditorTools
                 AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-nova.png"),
                 AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-food.png") };
             spawner.hologramMaterial = DashAssets.HologramMaterial();
-            spawner.chase = null;
-            spawner.parkedBikes = new[] { ModelImport.Get("ebike"), ModelImport.Get("ebike-nova") };
+            spawner.chase = chase;
+            // Official Yum! Brands logo signs (models/make_brand_signs.py), in TrackSpawner.YumBrands order.
+            Texture2D[] Logos(string format) => System.Array.ConvertAll(new[] { "kfc", "tacobell", "pizzahut", "habit" },
+                b => AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/" + b + "-" + format + ".png")
+                     ?? throw new System.InvalidOperationException("Missing brand logo " + b + "-" + format));
+            spawner.brandSquare = Logos("square"); spawner.brandWide = Logos("wide"); spawner.brandBoard = Logos("board");
+            spawner.couponTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/coupon-ticket.png")
+                ?? throw new System.InvalidOperationException("Missing coupon ticket texture");
+            spawner.parkedBikes = new[] { ModelImport.Get("ebike") };
             // Dash City's residents: real rigged pedestrians walking, chatting and dancing along the course.
             PeopleModels.Build();
             new GameObject("District life").AddComponent<DistrictLife>();
@@ -550,6 +561,8 @@ namespace DallasDash.EditorTools
             menus.font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/Rajdhani-SemiBold.ttf") ?? AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
             menus.logoSprite = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "/Art/DashRiders/Visuals/dash-riders-logo.png");
             menus.crew = data.characters.ToArray();
+            menus.couponArt = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/coupon-ticket-ui.png")
+                ?? throw new System.InvalidOperationException("Missing coupon ticket artwork");
 
             // Loading Up + On the Clock play from StoryDirector before each run. No pursuit scene.
             var story = new GameObject("Story").AddComponent<StoryDirector>();
@@ -589,20 +602,33 @@ namespace DallasDash.EditorTools
             }
             var bloom = Comp<Bloom>();
             // Neon and lit windows bloom like the PDF cover; sunlit walls stay under the threshold.
-            bloom.threshold.Override(0.95f);
-            bloom.intensity.Override(0.62f);
-            bloom.scatter.Override(0.7f);
-            bloom.tint.Override(new Color(1f, 0.86f, 1f));
+            bloom.threshold.Override(0.88f);
+            bloom.intensity.Override(0.9f);
+            bloom.scatter.Override(0.72f);
+            bloom.tint.Override(new Color(0.95f, 0.95f, 1f));
+            bloom.highQualityFiltering.Override(true);
             var tone = Comp<Tonemapping>();
             tone.mode.Override(TonemappingMode.ACES);
             var grade = Comp<ColorAdjustments>();
-            grade.saturation.Override(14f);
-            grade.contrast.Override(12f);
-            grade.postExposure.Override(.35f);
-            grade.colorFilter.Override(new Color(1f, 0.96f, 1f));
+            grade.saturation.Override(18f);
+            grade.contrast.Override(16f);
+            grade.postExposure.Override(.32f);
+            grade.colorFilter.Override(Color.white);
+            // Graphics pass (4 Nov 2026): the game's cyber look. Cool teal in the shadows, warm magenta in the
+            // highlights, deeper blacks; a gentle lens vignette and chromatic fringe at the frame edges.
+            var tones = Comp<ShadowsMidtonesHighlights>();
+            tones.shadows.Override(new Vector4(0.86f, 0.98f, 1.12f, -0.04f));
+            tones.midtones.Override(new Vector4(1f, 0.98f, 1.03f, 0f));
+            tones.highlights.Override(new Vector4(1f, 1f, 1f, 0.02f));
+            var white = Comp<WhiteBalance>();
+            white.temperature.Override(-6f);
+            white.tint.Override(0f);
+            var fringe = Comp<ChromaticAberration>();
+            fringe.intensity.Override(0.12f);
             var vignette = Comp<Vignette>();
-            vignette.intensity.Override(0.2f);
-            vignette.smoothness.Override(0.5f);
+            vignette.intensity.Override(0.26f);
+            vignette.smoothness.Override(0.45f);
+            vignette.color.Override(new Color(0.06f, 0.02f, 0.12f));
             EditorUtility.SetDirty(profile);
 
             var vol = new GameObject("PostFx").AddComponent<Volume>();
@@ -796,14 +822,15 @@ namespace DallasDash.EditorTools
                 Part(root, PrimitiveType.Cylinder, new Vector3(x, 0.4f, z), new Vector3(0.8f, 0.14f, 0.8f), mats["Charcoal"], "Wheel");
                 root.GetChild(root.childCount - 1).localRotation = Quaternion.Euler(0f, 0f, 90f);
             }
-            foreach (float x in new[] { -0.99f, 0.99f })
+            // The Habit's lettering is now its official logo panels, added at spawn (HurdleBrand).
+            foreach (float x in new float[0])
             {
-                var sign = new GameObject("Slice House", typeof(TextMesh));
+                var sign = new GameObject("The Habit", typeof(TextMesh));
                 sign.transform.SetParent(root, false);
                 sign.transform.localPosition = new Vector3(x, 1.95f, 0.35f);
                 sign.transform.localRotation = Quaternion.Euler(0f, x > 0 ? -90f : 90f, 0f);
                 var tm = sign.GetComponent<TextMesh>();
-                tm.text = "SLICE HOUSE";
+                tm.text = "THE HABIT";
                 tm.anchor = TextAnchor.MiddleCenter;
                 tm.characterSize = 0.12f;
                 tm.fontSize = 48;

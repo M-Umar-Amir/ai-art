@@ -8,6 +8,8 @@ namespace DallasDash.Gameplay
     public class RunnerMotion : MonoBehaviour
     {
         public SkinnedMeshRenderer body;
+        /// Ace's heavy hero kit, posed with the same Run/Air morphs (same shape order as the body).
+        public SkinnedMeshRenderer[] gear = new SkinnedMeshRenderer[0];
 
         /// glTFast adds each morph target as a blend shape frame at weight 1.
         const float FrameWeight = 1f;
@@ -44,8 +46,13 @@ namespace DallasDash.Gameplay
                 int k = i + 1;
                 float w = k == key ? 1f - f : k == (key + 1) % 6 ? f : 0f;
                 body.SetBlendShapeWeight(keys[i], w * (1f - airborne) * FrameWeight);
+                foreach (var g in gear) if (g) g.SetBlendShapeWeight(keys[i], w * (1f - airborne) * FrameWeight);
             }
-            if (air >= 0) body.SetBlendShapeWeight(air, airborne * FrameWeight);
+            if (air >= 0)
+            {
+                body.SetBlendShapeWeight(air, airborne * FrameWeight);
+                foreach (var g in gear) if (g) g.SetBlendShapeWeight(air, airborne * FrameWeight);
+            }
         }
     }
 }

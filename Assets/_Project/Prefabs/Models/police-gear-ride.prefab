@@ -1,0 +1,169 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &941018712144558734
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3877189818570714363}
+  m_Layer: 0
+  m_Name: police-gear-ride
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3877189818570714363
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 941018712144558734}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 4241570559173733031}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &8253995091984571224
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 4241570559173733031}
+  - component: {fileID: 8608191707612131602}
+  m_Layer: 0
+  m_Name: Model
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &4241570559173733031
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8253995091984571224}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 3877189818570714363}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!137 &8608191707612131602
+SkinnedMeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8253995091984571224}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 3
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 3a4c2d034eb20a64694d38fa04b966e7, type: 2}
+  - {fileID: 2100000, guid: 9d49a54cb7cd9c649ba1296b39f4bc64, type: 2}
+  - {fileID: 2100000, guid: 7a91590fd1fba4347adb86681b2c9c78, type: 2}
+  - {fileID: 2100000, guid: 73522a08744c4dd45895a818c858ab76, type: 2}
+  - {fileID: 2100000, guid: 341746b480110114ab6508cf7de0fa9f, type: 2}
+  - {fileID: 2100000, guid: 997ce24689cdd574c909479c4098c382, type: 2}
+  - {fileID: 2100000, guid: 731e4af51e35d0c4796bcd92b0694319, type: 2}
+  - {fileID: 2100000, guid: 28b373fef29ea994a9bc1dd8e16b4426, type: 2}
+  - {fileID: 2100000, guid: 0fe3f8d6343aecb48be7efb4389d02a5, type: 2}
+  - {fileID: 2100000, guid: 53975ff8e91ac0e40af484b3de0d3097, type: 2}
+  - {fileID: 2100000, guid: b1ae2398c2b2fea45911c86822f32df7, type: 2}
+  - {fileID: 2100000, guid: b6c3fa634e7650b4cb35b1e099513415, type: 2}
+  - {fileID: 2100000, guid: c89ec9cbb14d57b428c1f2d47785e151, type: 2}
+  - {fileID: 2100000, guid: 84d171b2b159b3e4d8f8bc419aef7979, type: 2}
+  - {fileID: 2100000, guid: 182074a7f5833b4438beaf88420b34e9, type: 2}
+  - {fileID: 2100000, guid: a9528cc52ad703f4888387fb73f9a827, type: 2}
+  - {fileID: 2100000, guid: 441fa92e0c2e61e4f9a1ce82600121be, type: 2}
+  - {fileID: 2100000, guid: d42a38e7fafe8ea41b549e59d99060c7, type: 2}
+  - {fileID: 2100000, guid: d93334255eff60444880d31977f5788b, type: 2}
+  - {fileID: 2100000, guid: be5323a9dc04a9448b8d9f2016a470f3, type: 2}
+  - {fileID: 2100000, guid: da6924e5e45ebfb4585b77bb47f04430, type: 2}
+  - {fileID: 2100000, guid: a094725bddb043b44abfd03002a9bb1b, type: 2}
+  - {fileID: 2100000, guid: ee70c0034e5bfb241868a9386dfbfbf0, type: 2}
+  - {fileID: 2100000, guid: ae8006a0952a77b4ca43536250bb69dc, type: 2}
+  - {fileID: 2100000, guid: 50f81403582cafe4e8666f0e4ed60f85, type: 2}
+  - {fileID: 2100000, guid: d9ba5c8f1691e3f4697ba28a8a842c1b, type: 2}
+  - {fileID: 2100000, guid: 83dfa6952ba08a5489ea02f6959fee94, type: 2}
+  - {fileID: 2100000, guid: b24b259072e99684fbd0f7d56f830cdb, type: 2}
+  - {fileID: 2100000, guid: ba9238fb701607d41b90e945b20e2752, type: 2}
+  - {fileID: 2100000, guid: 14f039667a4a19e468bfd4022a68195f, type: 2}
+  - {fileID: 2100000, guid: 1a8522ceb11860640bc71c48bf5b7df7, type: 2}
+  - {fileID: 2100000, guid: 9692a082d2431fd4aae53d9a7610cdf5, type: 2}
+  - {fileID: 2100000, guid: 994d0d97b81b05b449cf342d462beec4, type: 2}
+  - {fileID: 2100000, guid: 88b6e7eaf3dbdc8448bdb4723130d8c3, type: 2}
+  - {fileID: 2100000, guid: 667262c54d89c1546b519600fb3f24ba, type: 2}
+  - {fileID: 2100000, guid: a291f28a021b8394eb454847c13952d1, type: 2}
+  - {fileID: 2100000, guid: a359e7d89de9e2d408e198600b217282, type: 2}
+  - {fileID: 2100000, guid: b973cbaab81c08c4dabb8e8bf60f1659, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_MaskInteraction: 0
+  serializedVersion: 2
+  m_Quality: 0
+  m_UpdateWhenOffscreen: 1
+  m_SkinnedMotionVectors: 1
+  m_Mesh: {fileID: 6841678786676347105, guid: 4a0c27df439dd794b855719ae0997329, type: 3}
+  m_Bones: []
+  m_BlendShapeWeights:
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  - 0
+  m_RootBone: {fileID: 0}
+  m_AABB:
+    m_Center: {x: 0, y: 1.3130376, z: 0.00223431}
+    m_Extent: {x: 0.40320015, y: 0.7292948, z: 0.41777062}
+  m_DirtyAABB: 0

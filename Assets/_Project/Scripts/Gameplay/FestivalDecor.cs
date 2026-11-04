@@ -167,7 +167,7 @@ namespace DallasDash.Gameplay
             foreach (float side in new[] { -1f, 1f })
             {
                 float center = z + 10f;
-                bool kiosk = side > 0 && FuelStops.KioskNear(center, 12f);
+                bool kiosk = false;
                 bool roofCourse = side > 0 && RooftopCourse.OwnsRightSide(center);
                 if (kiosk || roofCourse || TrackSpawner.NearJunction(center)) continue;
                 if (block % 2 == 0) Tree(parent, new Vector3(side * 5.2f, 0f, z + 5f), 4.6f, pine, snow, red, gold, lights);

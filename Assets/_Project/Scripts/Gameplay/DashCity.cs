@@ -218,7 +218,8 @@ namespace DallasDash.Gameplay
         public static void Signature(TrackSpawner track, Transform parent, float z)
         {
             if (DashRun.District == 2) FestivalDecor.Build(track, parent, z);
-            float checkpoint = (Mathf.Floor(z / 450f) + 1) * 450f;
+            // The delivery-drop gantries went with the delivery clock (client, 4 Nov 2026).
+            float checkpoint = -1f;
             if (checkpoint > 0f && checkpoint >= z && checkpoint < z + track.segmentLength)
             {
                 var delivery = Mat(track, "delivery", new Color(1f, 0.55f, 0.08f), 0.6f);

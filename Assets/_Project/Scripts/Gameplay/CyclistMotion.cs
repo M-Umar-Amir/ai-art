@@ -9,6 +9,8 @@ namespace DallasDash.Gameplay
     public class CyclistMotion : MonoBehaviour
     {
         public SkinnedMeshRenderer body;
+        /// Ace's heavy hero kit (and the officer's): posed with the same Pedal/Stand morphs as the body.
+        public SkinnedMeshRenderer[] gear = new SkinnedMeshRenderer[0];
         public Transform crank, frontWheel, rearWheel;
         public float wheelRadius = 0.4f;
 
@@ -72,8 +74,13 @@ namespace DallasDash.Gameplay
                 int phase = i + 1;
                 float w = phase == key ? 1f - f : phase == (key + 1) % 6 ? f : 0f;
                 body.SetBlendShapeWeight(pedal[i], w * seated * FrameWeight);
+                foreach (var g in gear) if (g) g.SetBlendShapeWeight(pedal[i], w * seated * FrameWeight);
             }
-            if (stand >= 0) body.SetBlendShapeWeight(stand, standing * FrameWeight);
+            if (stand >= 0)
+            {
+                body.SetBlendShapeWeight(stand, standing * FrameWeight);
+                foreach (var g in gear) if (g) g.SetBlendShapeWeight(stand, standing * FrameWeight);
+            }
         }
     }
 }

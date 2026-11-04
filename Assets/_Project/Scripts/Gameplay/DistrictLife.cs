@@ -779,11 +779,7 @@ namespace DallasDash.Gameplay
         /// steps aside there so it never stands inside the express deck or the pit canopy.
         static bool RightBlocked(float worldZ)
         {
-            if (RooftopCourse.OwnsRightSide(worldZ) || DashCity.FacadeZone(worldZ, 1f)) return true;
-            int index = FuelStops.IndexAt(worldZ);
-            for (int i = index - 1; i <= index + 1; i++)
-                if (i >= 0 && Mathf.Abs(worldZ - FuelStops.StationAt(i)) < 18f) return true;
-            return false;
+            return RooftopCourse.OwnsRightSide(worldZ) || DashCity.FacadeZone(worldZ, 1f);
         }
 
         static GameObject Block(Transform parent, Vector3 pos, Vector3 scale, Material material, PrimitiveType type = PrimitiveType.Cube)

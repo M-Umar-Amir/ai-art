@@ -93,7 +93,7 @@ namespace DallasDash.Gameplay
             if (bag) bag.gameObject.SetActive(false);
 
             // ---- 14 On the Clock: the rider pulls away and the camera settles in behind for the run.
-            MenuUI.Instance.Caption("ON THE CLOCK", "28 seconds to the drop. Beat the timer.", 2.6f);
+            MenuUI.Instance.Caption("RAN THE RED!", "A cop is on your tail. Don't get caught.", 2.6f);
             float z = CurbZ, speed = 4f, x = CurbX;
             for (float t = 0f; t < 2.6f; t += Time.deltaTime)
             {
@@ -113,7 +113,7 @@ namespace DallasDash.Gameplay
             }
 
             // ---- 15 The Route: the two things that buy time, called out before the run takes over.
-            MenuUI.Instance.Caption("SHORTCUTS & ROOFTOPS", "Cyan gates and rooftop runs. Both buy you time.", 2.2f);
+            MenuUI.Instance.Caption("SHORTCUT PORTALS", "Ride through one to lose the cop on the Skypark roofs.", 2.2f);
             yield return RideToStart(z, speed);
         }
 
@@ -124,7 +124,7 @@ namespace DallasDash.Gameplay
             follow.cinematic = true;
             look.Apply(PlayerProfile.Character, true);
             trafficLight.Set(TrafficLight.Phase.Green);
-            MenuUI.Instance.Caption("ON THE CLOCK", "Beat the timer.", 1.4f);
+            MenuUI.Instance.Caption("POLICE CHASE", "Don't get caught.", 1.4f);
             yield return RideToStart(-26f, 15f);
         }
 

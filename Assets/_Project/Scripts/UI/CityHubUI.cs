@@ -49,7 +49,7 @@ namespace DallasDash.UI
             status.raycastTarget = false;
             UiKit.Label(status.transform, "RIDERS CITY  /  FREE ROAM", 34, new Vector2(0, 22), new Vector2(740, 50), Color.white);
             cityWallet = UiKit.Label(status.transform, "", 24, new Vector2(0, -24), new Vector2(740, 40), UiKit.Cream);
-            UiKit.Button(p, "START DELIVERY", new Vector2(0, 585), new Vector2(620, 100), UiKit.Pink, Play, 40, "play");
+            UiKit.Button(p, "START CHASE", new Vector2(0, 585), new Vector2(620, 100), UiKit.Pink, Play, 40, "play");
             cityCaptions = UiKit.Label(p, "", 28, new Vector2(0, 470), new Vector2(940, 80), UiKit.Cream);
 
             cityFooter = UiKit.Panel(p, "Destination", new Vector2(0, -330), new Vector2(1000, 84), UiKit.Navy);
@@ -67,6 +67,7 @@ namespace DallasDash.UI
                 foreach (var button in cityHub.GetComponentsInChildren<Button>(true)) button.gameObject.SetActive(false);
             cityHub.SetActive(false);
             roamButton = UiKit.Button(title.transform, "FREE ROAM", new Vector2(210, -425), new Vector2(405, 95), UiKit.Green, EnterCity, 32);
+            roamButton.gameObject.SetActive(false); // one map only (client, 4 Nov 2026): free roam is off
         }
 
         Button roamButton;

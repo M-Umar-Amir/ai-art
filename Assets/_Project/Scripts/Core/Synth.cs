@@ -70,60 +70,8 @@ namespace DallasDash.Core
 
         static float Hz(float semisFromC, float octaveC) => octaveC * Mathf.Pow(2f, semisFromC / 12f);
 
-        public static AudioClip Music(int district = 0)
-        {
-            // Each district gets its own tempo and key so the three courses never share a soundtrack.
-            // Downtown: 126 bpm in C. Skypark: 132 bpm, a whole tone up, airier lead. Festivals: 140 bpm,
-            // a fourth up, thinner pulse lead and busier hats.
-            float bpm = district == 2 ? 140f : district == 1 ? 132f : 126f, beat = 60f / bpm;
-            int transpose = district == 2 ? 5 : district == 1 ? 2 : 0;
-            float leadDuty = district == 2 ? 0.125f : district == 1 ? 0.19f : 0.25f;
-            float hatLevel = district == 2 ? 1.35f : district == 1 ? 0.8f : 1f;
-            int notes = Tune.GetLength(0);
-            var starts = new float[notes];
-            float acc = 0f;
-            for (int i = 0; i < notes; i++) { starts[i] = acc; acc += Tune[i, 1] * beat; }
-            float length = Roots.Length * 4 * beat;
-            var rng = new System.Random(11);
-            float noiseLp = 0f;
-            int idx = 0;
-            return Make("music", length, t =>
-            {
-                while (idx < notes - 1 && t >= starts[idx + 1]) idx++;
-                if (t < starts[idx]) idx = 0;
-                float lead = 0f;
-                if (Tune[idx, 0] > -50f && t < acc)
-                {
-                    float nt = t - starts[idx], nlen = Tune[idx, 1] * beat;
-                    float f = Hz(Tune[idx, 0] + transpose, 523.25f) * (1f + 0.004f * Mathf.Sin(2f * Mathf.PI * 5.5f * nt));
-                    float ph = (f * nt) % 1f;
-                    lead = (ph < leadDuty ? 1f : -0.33f) * 0.13f * Mathf.Min(1f, nt / 0.01f) * Mathf.Lerp(1f, 0.5f, Mathf.Clamp01(nt / nlen)) * (nt > nlen - 0.03f ? 0.3f : 1f);
-                }
-
-                // Walking bass on the eighths: root, root, octave, fifth, triangle wave with a short pluck.
-                float half = beat * 0.5f;
-                int e8 = (int)(t / half);
-                int bar = Mathf.Min(e8 / 8, Roots.Length - 1);
-                float et = t - e8 * half;
-                int step = e8 % 4;
-                float bf = Hz(Roots[bar] + transpose + (step == 2 ? 12 : step == 3 ? 7 : 0), 130.81f);
-                float tri = 2f * Mathf.Abs(2f * ((bf * et) % 1f) - 1f) - 1f;
-                float bass = tri * 0.2f * Mathf.Exp(-et * 6f);
-
-                // Kick on every beat, closed hats on the off-eighths, a clap on 2 and 4.
-                int b = (int)(t / beat);
-                float bt = t - b * beat;
-                float kick = Mathf.Sin(2f * Mathf.PI * (55f + 90f * Mathf.Exp(-bt * 30f)) * bt) * Mathf.Exp(-bt * 14f) * 0.28f;
-                float n = (float)rng.NextDouble() * 2f - 1f;
-                float hp = n - noiseLp; noiseLp += (n - noiseLp) * 0.35f;
-                float hats = hp * Mathf.Exp(-et * 60f) * (e8 % 2 == 1 ? 0.09f : 0.03f) * hatLevel;
-                float clap = b % 2 == 1 ? n * Mathf.Exp(-bt * 22f) * 0.1f : 0f;
-
-                // Short fade at the loop seam.
-                float seam = Mathf.Clamp01(t / 0.02f) * Mathf.Clamp01((length - t) / 0.02f);
-                return (lead + bass + kick + hats + clap) * seam;
-            });
-        }
+        /// The soundtrack: the cyber-synthwave loop (SynthMusic, 4 Nov 2026), cached per world.
+        public static AudioClip Music(int district = 0) => SynthMusic.Get(district);
 
         /// Seamless two-tone loop for the police bicycle.
         public static AudioClip Siren() => Make("siren", 1.2f, t =>

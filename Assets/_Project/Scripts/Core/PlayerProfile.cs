@@ -15,11 +15,19 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetInt("best", value); Save(); }
         }
 
-        /// Crew member riding: 0 Finn, 1 Faye, 2 Fizz-11.
+        /// The one rider is Ace (client, 4 Nov 2026). Kept as a property so older call sites read naturally.
         public static int Character
         {
-            get => PlayerPrefs.GetInt("character", 0);
-            set { PlayerPrefs.SetInt("character", value); Save(); }
+            get => 0;
+            set { }
+        }
+
+        /// Burgers collected toward the next 10% coupon (BurgerPrices.CouponThreshold). Spending burgers does not
+        /// lower it; a coupon that appears on the track and is missed resets it to zero.
+        public static int CouponProgress
+        {
+            get => PlayerPrefs.GetInt("coupon_progress", 0);
+            set => PlayerPrefs.SetInt("coupon_progress", Mathf.Max(0, value)); // saved with the wallet
         }
 
         /// Legacy saved equipment preference; live equipment is assigned by character.
@@ -94,11 +102,10 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetInt("muted", value ? 1 : 0); Save(); }
         }
 
-        // ---- The economy is burgers only (client, 3 Nov). Burgers are earned from the burger pickups and
-        // deliveries, and spent at the charging kiosks, in the shop, and on unlocks and coupons.
+        // ---- The economy is burgers only. Burgers are earned from burger pickups, daily bonuses and missions,
+        // and spent on revives, upgrades and the outfit.
 
-        /// The burger wallet. A fresh rider starts with a small bag so the first kiosk stop can be tried.
-        /// Older saves are migrated once: their Food carries over and old energy chips convert at 20:1.
+        /// The burger wallet. Older saves are migrated once: their Food carries over and old chips convert at 20:1.
         public static int Burgers
         {
             get

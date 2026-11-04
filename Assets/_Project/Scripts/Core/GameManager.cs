@@ -20,9 +20,8 @@ namespace DallasDash.Core
         /// Burgers picked up this run (each one is already in the wallet).
         public int BurgersCollected { get; private set; }
         public bool Paused { get; private set; }
-        /// Burgers earned this run: pickups plus delivery tips.
-        public int BurgersEarned => BurgersCollected + TipsEarned;
-        public int TipsEarned { get; set; }
+        /// Burgers earned this run (pickups x BurgerPrices.PickupValue).
+        public int BurgersEarned => BurgersCollected * BurgerPrices.PickupValue;
         public bool NewBest { get; private set; }
         /// Where the run just ended placed on the Today / This week / All time boards.
         public (int today, int week, int all) LastRanks { get; private set; }
@@ -63,12 +62,12 @@ namespace DallasDash.Core
 
         public void StartRun()
         {
-            RidersEconomy.BeginRun();
+            DashRun.District = 0;
             FindFirstObjectByType<DallasDash.Gameplay.RiderLook>()?.Apply(PlayerProfile.Character, true);
             Distance = 0f;
             Speed = Tuning.SpeedBase;
             Score = 0;
-            PickupCount = BurgersCollected = TipsEarned = 0;
+            PickupCount = BurgersCollected = 0;
             Multiplier = 1;
             scoreCarry = 0f;
             bonk = 0f;
@@ -101,7 +100,7 @@ namespace DallasDash.Core
             Distance = 0f;
             Speed = Tuning.SpeedBase;
             Score = 0;
-            PickupCount = BurgersCollected = TipsEarned = 0;
+            PickupCount = BurgersCollected = 0;
             SetState(RunState.Intro);
         }
 
@@ -134,10 +133,16 @@ namespace DallasDash.Core
             Time.timeScale = paused ? 0f : 1f;
         }
 
-        /// A burger pickup: one burger into the wallet, plus its points.
+        /// Raised when the coupon progress reaches BurgerPrices.CouponThreshold (the track then puts a coupon out).
+        public event Action CouponReady;
+
+        /// A burger pickup: PickupValue burgers into the wallet and toward the next coupon, plus its points.
         public void AddPickup(int points)
         {
-            RidersEconomy.AwardBurgers(1);
+            RidersEconomy.AwardBurgers(BurgerPrices.PickupValue);
+            int before = PlayerProfile.CouponProgress;
+            PlayerProfile.CouponProgress = before + BurgerPrices.PickupValue;
+            if (before < BurgerPrices.CouponThreshold && before + BurgerPrices.PickupValue >= BurgerPrices.CouponThreshold) CouponReady?.Invoke();
             PickupCount++;
             BurgersCollected++;
             Score += points * ScoreFactor;
@@ -168,8 +173,6 @@ namespace DallasDash.Core
             else if (DashRun.Instance && DashRun.Instance.ShortcutTime > 0f) Speed *= DashRun.RouteSpeedFactor; // side-route surge
             bonk = Mathf.MoveTowards(bonk, 0f, Time.deltaTime * 0.8f);
             Speed *= 1f - 0.55f * bonk * bonk;
-            RidersEconomy.Burn(Time.deltaTime, Speed);
-            Speed *= RidersEconomy.SpeedMultiplier;
             int mult = Mathf.Min(Tuning.MaxMult, 1 + (int)(Distance / Tuning.MultEvery));
             if (mult != Multiplier) { Multiplier = mult; MultiplierUp?.Invoke(mult); }
             float move = Speed * Time.deltaTime;

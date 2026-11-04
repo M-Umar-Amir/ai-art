@@ -43,7 +43,9 @@ namespace DallasDash.Core
                 if (cam.TryGetComponent<UniversalAdditionalCameraData>(out var data))
                 {
                     data.renderPostProcessing = tier > 0;
-                    data.antialiasing = tier > 0 ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.None;
+                    // High uses SMAA (crisper edges on the bikes and signs than FXAA); Medium keeps the cheap FXAA.
+                    data.antialiasing = tier == 2 ? AntialiasingMode.SubpixelMorphologicalAntiAliasing : tier > 0 ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.None;
+                    if (tier == 2) data.antialiasingQuality = AntialiasingQuality.High;
                 }
                 cam.farClipPlane = 240f;
             }

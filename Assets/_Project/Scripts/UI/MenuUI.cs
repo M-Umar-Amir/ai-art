@@ -113,6 +113,7 @@ namespace DallasDash.UI
             BuildMissions(root);
             BuildRanks(root);
             BuildDashMenus(root);
+            BuildChaseOverlays(root);
 
             // Scene captions (Loading Up, Ran the Red, The Pursuit, street banners) and quick stunt popups.
             captionTitle = UiKit.Label(root, "", 118, new Vector2(0, 560), new Vector2(1000, 150), UiKit.Yellow);
@@ -179,13 +180,13 @@ namespace DallasDash.UI
                 UiKit.Label(logo, "Crave It. Chase It. Get It.", 32, new Vector2(0, -145), new Vector2(760, 55), Color.white, TextAnchor.MiddleCenter, true);
             }
 
-            var play = UiKit.Button(t, "START DELIVERY", new Vector2(0, -290), new Vector2(830, 130), UiKit.Pink, Play, 54, "play");
+            var play = UiKit.Button(t, "START CHASE", new Vector2(0, -290), new Vector2(830, 130), UiKit.Pink, Play, 54, "play");
             play.transform.Find("Face").gameObject.AddComponent<UiPulse>(); // the root's scale belongs to ButtonBounce
 
             // Five icon tiles along the bottom; settings is the gear between the top pills.
             // The same five tiles serve the menu and free roam (one menu screen).
             foreach (var tile in new[] {
-                Tile(t, "CREW", "rider", new Vector2(-440, TileRowY), UiKit.Yellow, ShowCrew),
+                Tile(t, "ACE", "rider", new Vector2(-440, TileRowY), UiKit.Yellow, ShowCrew),
                 Tile(t, "SHOP", "cart", new Vector2(-220, TileRowY), UiKit.Orange, ShowShop),
                 Tile(t, "MISSIONS", "list", new Vector2(0, TileRowY), UiKit.Blue, ShowMissions),
                 Tile(t, "RANKS", "trophy", new Vector2(220, TileRowY), UiKit.Purple, ShowRanks) })
@@ -430,6 +431,7 @@ namespace DallasDash.UI
         void Pause()
         {
             if (GameManager.Instance.State != RunState.Running) return;
+            if (revivePanel && revivePanel.activeSelf) return; // the revive offer already holds the run
             if (countdown != null) { StopCoroutine(countdown); countdown = null; popup.text = ""; }
             GameManager.Instance.SetPaused(true);
 
@@ -489,7 +491,7 @@ namespace DallasDash.UI
             busted = UiKit.Shade(root, "Busted").gameObject;
             busted.GetComponent<Image>().color = new Color(0.03f, 0.05f, 0.15f, 0.35f);
             var p = UiKit.FancyCard(busted.transform, new Vector2(0, -120), new Vector2(940, 950), UiKit.Red).transform;
-            courseResult = UiKit.Label(p, "TIME'S UP", 88, new Vector2(0, 350), new Vector2(900, 160), UiKit.Red, TextAnchor.MiddleCenter, true);
+            courseResult = UiKit.Label(p, "BUSTED!", 88, new Vector2(0, 350), new Vector2(900, 160), UiKit.Red, TextAnchor.MiddleCenter, true);
             bustedScore = UiKit.Label(p, "", 102, new Vector2(0, 180), new Vector2(900, 130), Color.white, TextAnchor.MiddleCenter, true);
             bustedBest = UiKit.Label(p, "", 48, new Vector2(0, 85), new Vector2(900, 65), UiKit.Cream);
             bustedRun = UiKit.Label(p, "", 40, new Vector2(0, 28), new Vector2(900, 55), UiKit.Yellow);
@@ -521,7 +523,7 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
         {
             crewPanel = UiKit.Shade(root, "Crew").gameObject;
             var p = UiKit.FancyCard(crewPanel.transform, new Vector2(0, 20), new Vector2(1040, 1720), UiKit.Purple).transform;
-            UiKit.Header(p, "THE CREW", 760, UiKit.Purple, 88);
+            UiKit.Header(p, "ACE", 760, UiKit.Purple, 88);
 
             // Pedestal: a soft spotlight pool behind, a glowing disc under the feet.
             var glow = UiKit.Centered(p, "Spotlight", new Vector2(0, 170), new Vector2(860, 950)).gameObject.AddComponent<Image>();
@@ -540,11 +542,8 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             crewPortrait.raycastTarget = false;
             crewLock = UiKit.Icon(p, "lock", new Vector2(0, 210), 230);
 
-            var left = UiKit.Button(p, "", new Vector2(-420, 190), new Vector2(140, 160), UiKit.Blue, () => FlipCrew(-1), 44, "play");
-            left.transform.Find("Face/play Icon").localRotation = Quaternion.Euler(0f, 0f, 180f);
-            UiKit.Button(p, "", new Vector2(420, 190), new Vector2(140, 160), UiKit.Blue, () => FlipCrew(1), 44, "play");
-
-            int n = crew != null ? crew.Length : 0;
+            // One rider (client, 4 Nov 2026): no carousel arrows or dots.
+            int n = 0;
             crewDots = new Image[n];
             for (int i = 0; i < n; i++)
             {
@@ -566,14 +565,9 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             crewPanel.SetActive(false);
         }
 
-        static string Blurb(CharacterDef d) => d.id switch
-        {
-            "ace" => "ACE / THE SPEEDSTER\nElectric orange. Ability: short speed boost.",
-            "nova" => "NOVA / PARKOUR QUEEN\nNeon purple. Ability: extended jump time.",
-            _ => "BOLT / MONO-WHEEL COURIER\nMagenta and silver. Ability: one-hit shield.",
-        };
+        static string Blurb(CharacterDef d) => "ACE / THE SPEEDSTER\nHero courier gear, hero e-bike. Ability: speed boost.";
 
-        static bool Unlocked(CharacterDef d) => d.id != "bolt" || DashInventory.BoltUnlocked;
+        static bool Unlocked(CharacterDef d) => true;
 
         void ToggleCrewOutfit()
         {
@@ -585,7 +579,7 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
         void ShowCrew()
         {
             if (!studio) studio = CrewStudio.Create(transform);
-            crewIndex = PlayerProfile.Character;
+            crewIndex = 0;
             crewPanel.SetActive(true);
             if (studio)
             {
@@ -609,33 +603,23 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             RefreshCrew();
         }
 
-        void PickCrew(int i)
-        {
-            if (!Unlocked(crew[i]))
-            {
-                // Bolt is bought with burgers: the SELECT button reads UNLOCK while he is locked.
-                if (!DashInventory.BuyBolt()) { Toast($"Need {BurgerPrices.Bolt - PlayerProfile.Burgers:N0} more burgers"); return; }
-                Toast($"BOLT UNLOCKED  /  -{BurgerPrices.Bolt:N0} BURGERS");
-            }
-            PlayerProfile.Character = i;
-            FindFirstObjectByType<RiderLook>()?.Apply(i, true);
-            RefreshCrew();
-        }
+        void PickCrew(int i) => CloseCrew();
 
         void RefreshCrew()
         {
             if (crew == null || crew.Length == 0) return;
-            var def = crew[crewIndex];
+            crewIndex = 0;
+            var def = crew[0];
             bool open = Unlocked(def), sel = PlayerProfile.Character == crewIndex;
             if (studio) studio.Show(crewIndex);
             crewPortrait.color = open ? Color.white : new Color(0.08f, 0.1f, 0.25f, 1f);
             crewLock.gameObject.SetActive(!open);
             crewName.text = def.displayName.ToUpper();
-            crewBlurb.text = open ? Blurb(def) : $"Unlock Bolt for {BurgerPrices.Bolt:N0} burgers.\nYou have {PlayerProfile.Burgers:N0} burgers.";
+            crewBlurb.text = Blurb(def);
             outfitButton.text = DashInventory.Outfit(crewIndex) == 1 ? "ION OUTFIT EQUIPPED / USE ORIGINAL"
                 : DashInventory.OwnsOutfit(crewIndex) ? "EQUIP ION OUTFIT" : $"ION OUTFIT  /  {BurgerPrices.Outfit} BURGERS";
-            crewButton.text = sel ? "RIDING" : open ? "SELECT" : $"UNLOCK  /  {BurgerPrices.Bolt}";
-            crewButtonFace.color = sel ? Color.Lerp(UiKit.Yellow, Color.white, 0.12f) : open || PlayerProfile.Burgers >= BurgerPrices.Bolt ? Color.Lerp(UiKit.Green, Color.white, 0.12f) : new Color(0.4f, 0.42f, 0.55f);
+            crewButton.text = "READY TO RIDE";
+            crewButtonFace.color = Color.Lerp(UiKit.Green, Color.white, 0.12f);
             for (int i = 0; i < crewDots.Length; i++)
                 crewDots[i].color = i == crewIndex ? UiKit.Yellow : new Color(1f, 1f, 1f, 0.3f);
         }
@@ -879,13 +863,14 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
 
         void OnState(RunState s)
         {
-            if (districtChip) districtChip.text = DashRun.DistrictNames[DashRun.District] + "  >";
             title.SetActive(s == RunState.Ready);
             // The Dash Riders menu is the home screen; free roam is a mode inside it, entered by choice.
             if (s != RunState.Ready && cityHub && cityHub.activeSelf) ExitCity();
             pauseButton.SetActive(s == RunState.Running);
             busted.SetActive(false);
             pause.SetActive(false);
+            if (s != RunState.Running && revivePanel) revivePanel.SetActive(false);
+            if (s != RunState.Running && couponPanel) { couponPanel.SetActive(false); couponTime = 0f; }
             skipHint.SetActive(s == RunState.Intro && ShowSkipHint);
             if (s == RunState.Ready || s == RunState.Busted) captionTimer = 0.01f;
             if (s == RunState.Running) { rewardsPanel.SetActive(false); districtPanel.SetActive(false); }
@@ -899,11 +884,11 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
                 string best = gm.NewBest ? "NEW BEST SCORE!" : $"Best {PlayerProfile.BestScore:N0}";
                 var r = gm.LastRanks;
                 bustedBest.text = r.today <= 3 ? $"{best}   |   #{r.today} today" : best;
-                bustedCoins.text = $"+{gm.BurgersEarned:N0} burgers   /   {gm.BurgersCollected} picked up, {gm.TipsEarned} in tips";
+                bustedCoins.text = $"+{gm.BurgersEarned:N0} burgers   /   coupon {Mathf.Min(PlayerProfile.CouponProgress, BurgerPrices.CouponThreshold):N0} of {BurgerPrices.CouponThreshold:N0}";
                 var dash = DashRun.Instance;
                 courseResult.text = string.IsNullOrEmpty(DashRun.EndReason) ? "RUN OVER" : DashRun.EndReason;
                 courseResult.color = UiKit.Red;
-                bustedRun.text = dash ? $"{gm.Distance:N0} m   ·   {dash.Deliveries} deliveries ({dash.OnTimeDeliveries} on time)   ·   {dash.Shortcuts} rooftops   ·   {dash.WallRuns} wall runs" : "";
+                bustedRun.text = dash ? $"{gm.Distance:N0} m   ·   {dash.Shortcuts} skypark shortcuts   ·   {gm.NearMisses} near misses   ·   {dash.Revives} revives" : "";
                 var lines = new System.Text.StringBuilder();
                 foreach (var m in Missions.Active) lines.AppendLine($"{m.Text}   {Mathf.Min(m.progress, m.target):N0}/{m.target:N0}");
                 bustedMissions.text = lines.ToString().TrimEnd();
@@ -920,6 +905,7 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             if (shopCoins) shopCoins.text = $"{PlayerProfile.Burgers:N0}";
             if (shopPanel && shopPanel.activeSelf) RefreshShop();
             if (missionsPanel && missionsPanel.activeSelf) RefreshMissions();
+            RefreshCouponMeter();
         }
 
         void Toast(string msg)
@@ -934,7 +920,8 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             float dt = Time.unscaledDeltaTime;
             if (UnityEngine.InputSystem.Keyboard.current?.escapeKey.wasPressedThisFrame == true)
             {
-                if (settings.activeSelf) CloseSettings();
+                if (revivePanel && revivePanel.activeSelf) DeclineRevive();
+                else if (settings.activeSelf) CloseSettings();
                 else if (rewardsPanel.activeSelf) { DemoRewards.Save(); rewardsPanel.SetActive(false); }
                 else if (districtPanel.activeSelf) districtPanel.SetActive(false);
                 else if (crewPanel.activeSelf) CloseCrew();
@@ -948,6 +935,7 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
                 return;
             }
             TickDashMenus(dt);
+            TickChaseOverlays(dt);
             if (captionTimer > 0f)
             {
                 captionTimer -= dt;
@@ -1002,7 +990,6 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
         /// For screenshot mode.
         public void Open(string panel)
         {
-            if (districtChip) districtChip.text = DashRun.DistrictNames[DashRun.District] + "  >";
             if (panel == "districts") ShowDistricts();
             if (panel == "rewards") ShowRewards();
             if (panel == "daily") ShowDaily();

@@ -2,56 +2,51 @@ using UnityEngine;
 
 namespace DallasDash.Core
 {
-    /// Every price and payout in the game, in burgers: the one currency (client, 3 Nov 2026).
-    /// Earning: one burger per burger pickup, plus a delivery tip every 450 m.
-    /// Spending: kiosk charging (RidersEconomy), power-up upgrades, district and crew unlocks, outfits, coupons.
+    /// Every price and payout in the game, in burgers: the one currency.
+    /// Rate (client, 4 Nov 2026): about one hour of continuous play earns 100,000 burgers, which is what a
+    /// 10% coupon costs. Every burger pickup is worth PickupValue burgers.
+    /// Spending: revives, power-up upgrades and the Ace outfit. Coupons are never bought: they appear on the
+    /// track once 100,000 burgers have been collected (CouponProgress).
     /// Debt: kept as constants in one file for now; move to a ScriptableObject when designers start tuning.
     public static class BurgerPrices
     {
-        /// District unlocks in DashRun.DistrictNames order. Neon Downtown is free.
-        public static readonly int[] District = { 0, 150, 300 };
-        public const int Bolt = 500;
-        public const int Outfit = 120;
-        /// One demo coupon (10% off a test order).
-        public const int Coupon = 100;
+        /// Burgers credited per burger pickup. Calibrated from the playtest bot (4 Nov: 10 per pickup measured
+        /// ~70,000 an hour; 14 measured 98k-138k), so 12 averages about 100,000 an hour of continuous play.
+        public const int PickupValue = 12;
+        /// Burgers collected (since the last coupon) that put a 10% coupon on the track.
+        public const int CouponThreshold = 100000;
+        /// Kept for older review code: coupons are no longer bought.
+        public const int Coupon = CouponThreshold;
+        public const int Outfit = 3000;
         /// Power-up upgrade levels 1..5.
-        public static readonly int[] Upgrade = { 40, 80, 150, 250, 400 };
+        public static readonly int[] Upgrade = { 1000, 2000, 4000, 7000, 11000 };
         /// The 7-day login calendar.
-        public static readonly int[] Daily = { 10, 15, 20, 30, 40, 60, 100 };
-        /// Delivery tip paid every 450 m: more when the drop is on time.
-        public const int OnTimeTip = 5, LateTip = 2;
-        public static int MissionReward(int level) => 20 + 10 * Mathf.Min(level, 10);
+        public static readonly int[] Daily = { 250, 400, 500, 750, 1000, 1500, 2500 };
+        public static int MissionReward(int level) => 500 + 250 * Mathf.Min(level, 10);
+        /// Revive price for the n-th revive of a run (0-based): 2,000, 4,000, 8,000... capped at 32,000.
+        public static int Revive(int n) => 2000 << Mathf.Clamp(n, 0, 4);
 
-        public static string DistrictItem(int district) => "district_" + district;
-        public const string BoltItem = "crew_bolt";
         public static string OutfitItem(int crew) => "outfit_" + crew;
 
-        public static bool DistrictOpen(int district) =>
-            district <= 0 || district < District.Length && PlayerProfile.Owns(DistrictItem(district));
+        /// Review and bot modes only (their profile is restored afterwards).
+        public static void UnlockAllForReview() => MigrateOnce();
 
-        /// Review and bot modes only (their profile is restored afterwards): every district and Bolt open.
-        public static void UnlockAllForReview()
-        {
-            MigrateOnce();
-            PlayerPrefs.SetInt("owned_" + DistrictItem(1), 1);
-            PlayerPrefs.SetInt("owned_" + DistrictItem(2), 1);
-            PlayerPrefs.SetInt("owned_" + BoltItem, 1);
-            PlayerPrefs.Save();
-        }
-
-        /// Old saves unlocked things with lifetime points or crew fragments; whatever a player had open
-        /// before the switch to burgers stays open. Runs once per install.
+        /// One-off save migrations. v2 (4 Nov): the burger scale went up (x10 per pickup), so old balances
+        /// are scaled to match; districts and other crew no longer exist.
         public static void MigrateOnce()
         {
-            if (PlayerPrefs.GetInt("burger_economy_v1", 0) == 1) return;
-            int points = PlayerPrefs.GetInt("total_points", 0);
-            if (points >= 10000) PlayerPrefs.SetInt("owned_" + DistrictItem(1), 1);
-            if (points >= 25000) PlayerPrefs.SetInt("owned_" + DistrictItem(2), 1);
-            if (points >= 25000 || PlayerPrefs.GetInt("dash_fragments", 0) >= 12) PlayerPrefs.SetInt("owned_" + BoltItem, 1);
-            for (int crew = 0; crew < 3; crew++)
-                if (PlayerPrefs.GetInt("dash_outfit_owned_" + crew, 0) == 1) PlayerPrefs.SetInt("owned_" + OutfitItem(crew), 1);
-            _ = PlayerProfile.Burgers; // folds the old Food and chip balances into the wallet
-            PlayerPrefs.SetInt("burger_economy_v1", 1);
+            if (PlayerPrefs.GetInt("burger_economy_v1", 0) != 1)
+            {
+                if (PlayerPrefs.GetInt("dash_outfit_owned_0", 0) == 1) PlayerPrefs.SetInt("owned_" + OutfitItem(0), 1);
+                _ = PlayerProfile.Burgers; // folds the old Food and chip balances into the wallet
+                PlayerPrefs.SetInt("burger_economy_v1", 1);
+            }
+            if (PlayerPrefs.GetInt("burger_economy_v2", 0) != 1)
+            {
+                PlayerProfile.Burgers = PlayerProfile.Burgers * PickupValue;
+                PlayerPrefs.SetInt("character", 0);
+                PlayerPrefs.SetInt("burger_economy_v2", 1);
+            }
             PlayerPrefs.Save();
         }
     }

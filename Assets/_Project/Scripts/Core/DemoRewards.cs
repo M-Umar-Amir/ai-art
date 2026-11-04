@@ -21,10 +21,10 @@ namespace DallasDash.Core
             PlayerPrefs.Save();
             Changed?.Invoke();
         }
-        /// Buys one coupon for BurgerPrices.Coupon burgers; null (and nothing spent) if the wallet is short.
-        public static DemoCoupon Issue()
+        /// Issues the 10% coupon the rider just grabbed on the track (earned with 100,000 collected burgers;
+        /// nothing is charged here). Production must mint it on the food app's server first.
+        public static DemoCoupon Award()
         {
-            if (!PlayerProfile.TrySpend(BurgerPrices.Coupon)) return null;
             var coupon = Ledger.Issue(DateTime.UtcNow);
             Save();
             return coupon;
