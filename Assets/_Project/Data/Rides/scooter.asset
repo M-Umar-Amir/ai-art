@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: scooter
   m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.RideDef
   id: scooter
-  displayName: Courier scooter
-  description: Compact warm yellow body, cream panels, front basket, rear insulated
-    box. The single earnable ride, never sold.
+  displayName: Built-in tires
+  description: Bolt uses his integrated tire without an additional vehicle.
   unlock: 2
   unlockPoints: 0
   isPolice: 0

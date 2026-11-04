@@ -3,17 +3,11 @@ using UnityEngine;
 
 namespace DallasDash.Core
 {
-    /// Everything the player keeps between sessions, stored in PlayerPrefs: coins, best score,
-    /// the daily login streak, and the settings menu choices.
+    /// Everything the player keeps between sessions, stored in PlayerPrefs: the burger wallet (the game's
+    /// only currency), what it has bought, best score, the daily login streak, and the settings choices.
     public static class PlayerProfile
     {
         public static event Action Changed;
-
-        public static int Coins
-        {
-            get => PlayerPrefs.GetInt("coins", 0);
-            set { PlayerPrefs.SetInt("coins", Mathf.Max(0, value)); Save(); }
-        }
 
         public static int BestScore
         {
@@ -28,17 +22,17 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetInt("character", value); Save(); }
         }
 
-        /// Ride under the crew: 0 delivery bicycle, 1 courier scooter (earned through missions).
+        /// Legacy saved equipment preference; live equipment is assigned by character.
         public static int Ride
         {
-            get => ForceRide >= 0 ? ForceRide : PlayerPrefs.GetInt("ride", 0) == 1 && Missions.ScooterEarned ? 1 : 0;
+            get => ForceRide >= 0 ? ForceRide : PlayerPrefs.GetInt("ride", 0) == 1 ? 1 : 0;
             set { PlayerPrefs.SetInt("ride", value); Save(); }
         }
 
-        /// Screenshot mode shows the scooter without touching the saved profile; -1 otherwise.
+        /// Screenshot mode overrides the travel mode without touching the saved profile; -1 otherwise.
         public static int ForceRide = -1;
 
-        /// Coin-shop upgrade level (0..PowerUps.MaxLevel) of each power-up, in PowerUp order.
+        /// Burger-shop upgrade level (0..PowerUps.MaxLevel) of each power-up, in PowerUp order.
         public static int UpgradeLevel(int powerUp) => PlayerPrefs.GetInt("upgrade" + powerUp, 0);
 
         public static void SetUpgradeLevel(int powerUp, int level)
@@ -47,7 +41,7 @@ namespace DallasDash.Core
             Save();
         }
 
-        /// Points scored across every run; Fizz-11 unlocks at 25,000.
+        /// Points scored across every run. Score only: nothing is bought or unlocked with points.
         public static int TotalPoints
         {
             get => PlayerPrefs.GetInt("total_points", 0);
@@ -100,10 +94,46 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetInt("muted", value ? 1 : 0); Save(); }
         }
 
+        // ---- The economy is burgers only (client, 3 Nov). Burgers are earned from the burger pickups and
+        // deliveries, and spent at the charging kiosks, in the shop, and on unlocks and coupons.
+
+        /// The burger wallet. A fresh rider starts with a small bag so the first kiosk stop can be tried.
+        /// Older saves are migrated once: their Food carries over and old energy chips convert at 20:1.
+        public static int Burgers
+        {
+            get
+            {
+                if (!PlayerPrefs.HasKey("burgers"))
+                    PlayerPrefs.SetInt("burgers", PlayerPrefs.GetInt("food", 25) + PlayerPrefs.GetInt("coins", 0) / 20);
+                return PlayerPrefs.GetInt("burgers");
+            }
+            set { PlayerPrefs.SetInt("burgers", Mathf.Max(0, value)); Save(); }
+        }
+
+        /// Spends burgers if the wallet holds enough; nothing changes otherwise.
+        public static bool TrySpend(int cost)
+        {
+            if (cost <= 0) return true;
+            if (Burgers < cost) return false;
+            Burgers -= cost;
+            return true;
+        }
+
+        /// One-off purchases (districts, Bolt, outfits), kept as flags in PlayerPrefs.
+        public static bool Owns(string item) => PlayerPrefs.GetInt("owned_" + item, 0) == 1;
+        public static bool Buy(string item, int cost)
+        {
+            if (Owns(item)) return true;
+            if (!TrySpend(cost)) return false;
+            PlayerPrefs.SetInt("owned_" + item, 1);
+            Save();
+            return true;
+        }
+
         // ---- Daily login bonus: a 7-day calendar. Claiming on consecutive days walks the streak;
         // missing a day starts it again from day 1. Day 7 is the big one, then it loops.
 
-        public static readonly int[] DailyRewards = { 100, 150, 200, 300, 400, 600, 1000 };
+        public static int[] DailyRewards => BurgerPrices.Daily;
 
         static int Today => (int)(DateTime.Now.Date - new DateTime(2026, 1, 1)).TotalDays;
         static int LastClaimDay => PlayerPrefs.GetInt("daily_last", int.MinValue / 2);
@@ -131,11 +161,18 @@ namespace DallasDash.Core
             int reward = DailyRewards[streak % DailyRewards.Length];
             PlayerPrefs.SetInt("daily_streak", streak % DailyRewards.Length + 1);
             PlayerPrefs.SetInt("daily_last", Today);
-            Coins += reward;
+            Burgers += reward;
             return reward;
         }
 
         static void Save()
+        {
+            PlayerPrefs.Save();
+            Changed?.Invoke();
+        }
+
+        /// Lets another system that writes profile-owned PlayerPrefs keys raise the same change event.
+        public static void NotifyChanged()
         {
             PlayerPrefs.Save();
             Changed?.Invoke();

@@ -33,6 +33,7 @@ namespace DallasDash.Gameplay
                     go.SetActive(false);
                     if (go.TryGetComponent<Topple>(out var topple)) topple.enabled = false;
                     if (go.TryGetComponent<Knockback>(out var knockback)) knockback.enabled = false;
+                    if (go.TryGetComponent<Shove>(out var shove)) shove.enabled = false;
                 }, go => UnityEngine.Object.Destroy(go), true, 32, 256);
                 pools.Add(key, owner); pool = owner;
             }

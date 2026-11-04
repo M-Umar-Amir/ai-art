@@ -1,38 +1,51 @@
-using DallasDash.Core;
 using UnityEngine;
 
 namespace DallasDash.Gameplay
 {
-    /// Which crew member is riding, and whether they're on the bike or standing at the curb (Loading Up).
-    /// Index order matches PlayerProfile.Character: 0 Finn, 1 Faye, 2 Fizz-11 (rolls on his own tire, no bike).
+    /// Ace and Nova ride their courier e-bikes (the bike is part of their seated slot); Bolt rolls on his
+    /// built-in magnetic wheel.
     public class RiderLook : MonoBehaviour
     {
+        // Serialized field names retained for existing scene compatibility; the boards are retired.
         public GameObject bicycle;
-        /// The courier scooter, earned through missions (PlayerProfile.Ride == 1).
         public GameObject scooter;
-        /// How far the saddle sits from the bicycle's, so the seated rider lands on the scooter seat.
         public Vector3 scooterSeat;
         public GameObject[] seated;
         public GameObject[] standing;
 
-        Vector3[] seatBase;
+        /// Leaves the e-bike lying on its side in the road where the crash happened, for a few seconds.
+        public void DropBike(int character, Vector3 at)
+        {
+            if (character < 0 || character >= seated.Length || !seated[character]) return;
+            var bike = seated[character].transform.Find("E-bike");
+            if (!bike) return;
+            var dropped = Instantiate(bike.gameObject, at + new Vector3(0.4f, 0.32f, 1.2f), Quaternion.Euler(0f, 24f, 78f));
+            dropped.name = "Dropped e-bike";
+            dropped.transform.localScale = bike.lossyScale;
+            Destroy(dropped, 6f);
+        }
+
+        System.Collections.IEnumerator Start()
+        {
+            // First render of a skinned, morphing mesh uploads its buffers; doing it on the crash frame
+            // stuttered. Every slot is drawn once here, too small to see, then the real selection returns.
+            var all = new System.Collections.Generic.List<GameObject>();
+            foreach (var slot in seated) if (slot) all.Add(slot);
+            foreach (var slot in standing) if (slot) all.Add(slot);
+            var scales = new Vector3[all.Count];
+            for (int i = 0; i < all.Count; i++) { scales[i] = all[i].transform.localScale; all[i].transform.localScale = Vector3.one * 0.001f; all[i].SetActive(true); }
+            yield return null; yield return null;
+            for (int i = 0; i < all.Count; i++) all[i].transform.localScale = scales[i];
+            Apply(DallasDash.Core.PlayerProfile.Character, !(DallasDash.Core.DashRun.Instance && DallasDash.Core.DashRun.Instance.OnFoot));
+        }
 
         public void Apply(int character, bool onBike)
         {
             character = Mathf.Clamp(character, 0, seated.Length - 1);
-            bool rolling = character == 2 || character == 1 && PlayerProfile.Ride == 0 && !(DashRun.Instance && DashRun.Instance.Board);
-            // The bike stays in shot at the curb too; only Fizz-11 never has one.
-            bool onScooter = scooter && (PlayerProfile.Ride == 1 || DashRun.Instance && DashRun.Instance.Board);
-            if (bicycle) bicycle.SetActive(!rolling && !onScooter);
-            if (scooter) scooter.SetActive(!rolling && onScooter);
-            if (seatBase == null)
-            {
-                seatBase = new Vector3[seated.Length];
-                for (int i = 0; i < seated.Length; i++) if (seated[i]) seatBase[i] = seated[i].transform.localPosition;
-            }
+            if (bicycle) bicycle.SetActive(false);
+            if (scooter) scooter.SetActive(false);
             for (int i = 0; i < seated.Length; i++)
             {
-                if (seated[i]) seated[i].transform.localPosition = seatBase[i] + (onScooter && i != 0 ? scooterSeat : Vector3.zero);
                 if (seated[i]) seated[i].SetActive(onBike && i == character);
                 if (i < standing.Length && standing[i]) standing[i].SetActive(!onBike && i == character);
             }

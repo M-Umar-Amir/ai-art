@@ -26,15 +26,25 @@ Material:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: e678158921ea2b54cb97d1667795f6d0, type: 3}
+        m_Scale: {x: 2, y: 2}
+        m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AmbientStrength: 0.35
+    - _BumpScale: 0
     - _CrewIndex: 0
     - _Cull: 2
     - _Cutoff: 0
+    - _EmissionUsesAlbedo: 0
     - _GaitAmount: 0
     - _GaitCenter: 0
     - _GaitHeight: 0
@@ -45,15 +55,19 @@ Material:
     - _OutlineWidth: 0
     - _Portrait: 0
     - _RimPower: 4.5
-    - _RimStrength: 0.22
+    - _RimStrength: 0
+    - _RoughnessStrength: 0
     - _ShadowSoftness: 0.18
     - _Smoothness: 0.6
-    - _SurfaceStyle: 0.85
+    - _SurfaceStyle: 1
     - _WardrobeHeight: 0
     - _WardrobeMin: 0
+    - _Wetness: 0
+    - _WindowInterior: 0
+    - _WorldTextureScale: 0
     m_Colors:
-    - _BaseColor: {r: 0.9776915, g: 0.2209163, b: 0.6799757, a: 1}
-    - _EmissionColor: {r: 1.7, g: 0.068, b: 0.68, a: 1.7}
+    - _BaseColor: {r: 0.95, g: 0.04, b: 0.42, a: 1}
+    - _EmissionColor: {r: 1.7, g: 0.07157895, b: 0.751579, a: 1.7}
     - _OutlineColor: {r: 0.12, g: 0.1, b: 0.16, a: 1}
     - _ShadeColor: {r: 0.62, g: 0.66, b: 0.86, a: 1}
   m_BuildTextureStacks: []

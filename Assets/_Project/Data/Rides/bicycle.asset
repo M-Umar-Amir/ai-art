@@ -13,9 +13,8 @@ MonoBehaviour:
   m_Name: bicycle
   m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.RideDef
   id: bicycle
-  displayName: Delivery bicycle
-  description: Starter ride. Warm yellow and cream frame, chunky tyres, front basket,
-    insulated delivery backpack on the rear rack.
+  displayName: Courier e-bike
+  description: Fat-tyre electric courier bikes for Ace and Nova.
   unlock: 0
   unlockPoints: 0
   isPolice: 0

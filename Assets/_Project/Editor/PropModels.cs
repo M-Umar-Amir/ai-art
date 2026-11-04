@@ -31,15 +31,15 @@ namespace DallasDash.EditorTools
             m.SetColor("_BaseColor", color);
             m.SetColor("_EmissionColor", glow > 0f ? color * glow : Color.black);
             m.SetColor("_ShadeColor", new Color(0.74f, 0.78f, 0.94f));
-            m.SetFloat("_OutlineWidth", 0.006f);
-            m.SetFloat("_SurfaceStyle", 0f);
+            m.SetFloat("_OutlineWidth", 0f);
+            m.SetFloat("_SurfaceStyle", 1f);
             m.SetFloat("_Smoothness", smoothness);
             m.SetFloat("_Metallic", metallic);
-            m.SetFloat("_RimStrength", 0.4f);
+            m.SetFloat("_RimStrength", 0f);
             m.SetFloat("_RimPower", 3.2f);
             m.SetFloat("_AmbientStrength", 0.4f);
             m.SetFloat("_ShadowSoftness", 0.2f);
-            m.SetShaderPassEnabled("Outline", true);
+            m.SetShaderPassEnabled("Outline", false);
             EditorUtility.SetDirty(m);
             cache[id] = m;
             return m;
@@ -76,16 +76,25 @@ namespace DallasDash.EditorTools
         {
             System.IO.Directory.CreateDirectory(MeshDir);
             string path = MeshDir + "/" + key + ".asset";
-            // A fresh asset every run: CopySerialized does not carry a Mesh's native vertex data over,
-            // which left zero-bounds meshes behind. The GUID churn is harmless because every prop is
-            // built before any prefab that embeds it is saved (see BuildStreetHurdles).
-            AssetDatabase.DeleteAsset(path);
             mesh.name = key;
+            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (existing)
+            {
+                // Preserve references shared by mirrored parts; copy native mesh data explicitly.
+                existing.Clear(); existing.indexFormat = mesh.indexFormat;
+                existing.vertices = mesh.vertices; existing.normals = mesh.normals;
+                existing.uv = mesh.uv; existing.tangents = mesh.tangents; existing.colors = mesh.colors;
+                existing.subMeshCount = mesh.subMeshCount;
+                for (int sub = 0; sub < mesh.subMeshCount; sub++)
+                    existing.SetIndices(mesh.GetIndices(sub), mesh.GetTopology(sub), sub, false);
+                existing.bounds = mesh.bounds;
+                EditorUtility.SetDirty(existing);
+                UnityEngine.Object.DestroyImmediate(mesh);
+                return existing;
+            }
             AssetDatabase.CreateAsset(mesh, path);
-            // Import straight away: a prefab saved in the same session keeps a null mesh reference
-            // until the freshly created mesh asset has been imported once.
-            AssetDatabase.ImportAsset(path, ImportAssetOptions.ForceUpdate);
-            return AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            return mesh;
+
         }
 
         static Mesh Loft(string key, Ring[] rings, int segments = 20, bool caps = true)
@@ -216,12 +225,30 @@ namespace DallasDash.EditorTools
                 if (child != root.transform) UnityEngine.Object.DestroyImmediate(child.gameObject);
 
             int index = 0;
+            var total = new Bounds();
+            bool any = false;
             foreach (var pair in groups)
             {
                 var mesh = new Mesh { name = id + "-" + index, indexFormat = UnityEngine.Rendering.IndexFormat.UInt32 };
                 mesh.CombineMeshes(pair.Value.ToArray(), true, true);
                 mesh.RecalculateBounds();
                 mesh = SaveMesh(id + "-" + index++, mesh);
+                // Track the prop's own extents while the parts are still known: the hit box is taken
+                // from here instead of a freshly saved prefab, whose mesh references are not resolved
+                // until the assets have been re-imported.
+                foreach (var part in pair.Value)
+                {
+                    var mb = part.mesh.bounds;
+                    for (int corner = 0; corner < 8; corner++)
+                    {
+                        var p = new Vector3(
+                            (corner & 1) == 0 ? mb.min.x : mb.max.x,
+                            (corner & 2) == 0 ? mb.min.y : mb.max.y,
+                            (corner & 4) == 0 ? mb.min.z : mb.max.z);
+                        p = part.transform.MultiplyPoint3x4(p);
+                        if (!any) { total = new Bounds(p, Vector3.zero); any = true; } else total.Encapsulate(p);
+                    }
+                }
                 var go = new GameObject(pair.Key.name);
                 go.transform.SetParent(root.transform, false);
                 go.AddComponent<MeshFilter>().sharedMesh = mesh;
@@ -229,7 +256,12 @@ namespace DallasDash.EditorTools
                 renderer.sharedMaterial = pair.Key;
                 renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.On;
             }
+            if (any) bounds[id] = total;
         }
+
+        /// Extents of a prop built this run, keyed by its prefab name.
+        static readonly Dictionary<string, Bounds> bounds = new();
+        public static bool TryBounds(string id, out Bounds b) => bounds.TryGetValue(id, out b);
 
         static GameObject Save(GameObject root, string id)
         {
@@ -301,49 +333,61 @@ namespace DallasDash.EditorTools
             return Save(root, variant);
         }
 
-        /// The overhead cargo gate: two striped posts carrying a beam and a suspended container
-        /// whose underside sits at 1.98 m, exactly the slide clearance the spawner uses.
+        /// The overhead hurdle is construction scaffolding over one lane, the everyday "slide under it"
+        /// object of any city street: galvanised tube standards on base plates, ledgers and braces, a boarded
+        /// deck whose underside sits at 1.98 m (the spawner's slide clearance), toe boards, a guard rail and
+        /// green debris netting, with a contractor's hoarding board and a hazard lamp.
         public static GameObject CargoGate()
         {
             variant = "cargoGate";
             var root = new GameObject(variant);
             var t = root.transform;
-            const float clearance = 1.98f;
-
-            foreach (float side in new[] { -1f, 1f })
+            const float clearance = 1.98f, deck = 0.07f;
+            var timber = M("propTimber", new Color(0.55f, 0.38f, 0.2f), 0f, 0.2f, 0f);
+            var galvanised = M("propGalvanised", new Color(0.66f, 0.68f, 0.7f), 0f, 0.5f, 0.7f);
+            var netting = M("propNetting", new Color(0.12f, 0.36f, 0.2f), 0f, 0.1f, 0f);
+            var tube = Tube("scaffoldTube", 0.024f, 0.024f, 1f, 1f, 10);
+            foreach (float x in new[] { -0.95f, 0.95f })
+                foreach (float z in new[] { -0.6f, 0.6f })
+                {
+                    Part(t, "Base plate", Box("scaffoldPlate", new Vector3(0.2f, 0.02f, 0.2f), 0.005f), SteelDark, new Vector3(x, 0.01f, z));
+                    var standard = Part(t, "Standard", tube, galvanised, new Vector3(x, 1.28f, z));
+                    standard.transform.localScale = new Vector3(1f, 2.55f, 1f);
+                }
+            // Ledgers along the lane at knee height and under the deck, transoms across it, one brace a side.
+            foreach (float x in new[] { -0.95f, 0.95f })
+                foreach (float y in new[] { 0.45f, clearance - 0.03f, 2.52f })
+                {
+                    var ledger = Part(t, "Ledger", tube, galvanised, new Vector3(x, y, 0f), new Vector3(90f, 0f, 0f));
+                    ledger.transform.localScale = new Vector3(1f, 1.3f, 1f);
+                }
+            foreach (float z in new[] { -0.6f, 0.6f })
             {
-                Part(t, "Base plate", Box("base", new Vector3(0.34f, 0.08f, 0.6f), 0.02f), Ink,
-                    new Vector3(side * 0.9f, 0.04f, 0f));
-                Part(t, "Post", Box("post", new Vector3(0.13f, 2.36f, 0.17f), 0.02f), SteelDark,
-                    new Vector3(side * 0.9f, 1.18f, 0f));
-                for (int i = 0; i < 4; i++)
-                    Part(t, "Hazard band", Box("band", new Vector3(0.145f, 0.16f, 0.185f), 0.012f),
-                        i % 2 == 0 ? Orange : White, new Vector3(side * 0.9f, 0.32f + i * 0.22f, 0f));
-                Part(t, "Post light", Box("postLight", new Vector3(0.04f, 1.5f, 0.04f), 0.008f), Cyan,
-                    new Vector3(side * 0.96f, 1.3f, 0f));
+                var transom = Part(t, "Transom", tube, galvanised, new Vector3(0f, clearance - 0.03f, z), new Vector3(0f, 0f, 90f));
+                transom.transform.localScale = new Vector3(1f, 2f, 1f);
+                var rail = Part(t, "Guard rail", tube, galvanised, new Vector3(0f, 2.52f, z), new Vector3(0f, 0f, 90f));
+                rail.transform.localScale = new Vector3(1f, 2f, 1f);
             }
-
-            Part(t, "Beam", Box("beam", new Vector3(2f, 0.18f, 0.26f), 0.025f), SteelDark, new Vector3(0f, 2.31f, 0f));
-            Part(t, "Beam light", Box("beamLight", new Vector3(1.9f, 0.035f, 0.28f), 0.008f), Cyan,
-                new Vector3(0f, 2.2f, 0f));
-            foreach (float x in new[] { -0.62f, 0.62f })
-                Part(t, "Beacon", Box("beacon", new Vector3(0.16f, 0.08f, 0.18f), 0.015f), Amber,
-                    new Vector3(x, 2.44f, 0f));
-
-            // The suspended container: corrugated sides, lit underside, magenta cargo badge.
-            float crateMid = (clearance + 2.16f) * 0.5f;
-            Part(t, "Container", Box("container", new Vector3(1.5f, 2.16f - clearance, 0.72f), 0.03f), Steel,
-                new Vector3(0f, crateMid, 0f));
+            foreach (float x in new[] { -0.95f, 0.95f })
+            {
+                var brace = Part(t, "Brace", tube, galvanised, new Vector3(x, 1.0f, 0f), new Vector3(-58f, 0f, 0f));
+                brace.transform.localScale = new Vector3(1f, 1.85f, 1f);
+            }
+            // Boarded deck: separate scaffold boards with gaps, and toe boards on the open sides.
+            for (int i = 0; i < 8; i++)
+                Part(t, "Scaffold board", Box("scaffoldBoard", new Vector3(0.22f, deck, 1.34f), 0.01f), timber,
+                    new Vector3(-0.84f + i * 0.24f, clearance + deck * 0.5f, 0f));
+            foreach (float z in new[] { -0.64f, 0.64f })
+                Part(t, "Toe board", Box("toeBoard", new Vector3(1.94f, 0.15f, 0.03f), 0.006f), timber, new Vector3(0f, clearance + 0.14f, z));
+            // Debris netting between deck and guard rail, and a hoarding board facing the oncoming rider.
+            foreach (float z in new[] { -0.62f, 0.62f })
+                Part(t, "Debris netting", Box("netting", new Vector3(1.86f, 0.36f, 0.012f), 0.004f), netting, new Vector3(0f, clearance + 0.38f, z));
+            Part(t, "Hoarding board", Box("hoarding", new Vector3(1.5f, 0.3f, 0.025f), 0.006f), White, new Vector3(0f, clearance + 0.36f, -0.66f));
             for (int i = -2; i <= 2; i++)
-                Part(t, "Rib", Box("rib", new Vector3(0.06f, 0.16f, 0.74f), 0.01f), SteelDark,
-                    new Vector3(i * 0.3f, crateMid, 0f));
-            Part(t, "Cargo badge", Box("badge", new Vector3(0.5f, 0.14f, 0.02f), 0.01f), Magenta,
-                new Vector3(0f, crateMid, 0.37f));
-            Part(t, "Underside light", Box("underLight", new Vector3(1.4f, 0.025f, 0.6f), 0.006f), Cyan,
-                new Vector3(0f, clearance + 0.012f, 0f));
-            foreach (float x in new[] { -0.55f, 0.55f })
-                Part(t, "Cable", Box("cable", new Vector3(0.035f, 0.14f, 0.035f), 0.005f), Ink,
-                    new Vector3(x, 2.23f, 0f));
+                Part(t, "Hoarding stripe", Box("hoardingStripe", new Vector3(0.12f, 0.32f, 0.006f), 0.002f), Orange,
+                    new Vector3(i * 0.3f, clearance + 0.36f, -0.68f), new Vector3(0f, 0f, 30f));
+            Shape(t, "Hazard lamp", PrimitiveType.Sphere, new Vector3(0.95f, 2.57f, -0.6f), Vector3.one * 0.1f, Amber);
+            Shape(t, "Hazard lamp", PrimitiveType.Sphere, new Vector3(-0.95f, 2.57f, -0.6f), Vector3.one * 0.1f, Amber);
             return Save(root, variant);
         }
 

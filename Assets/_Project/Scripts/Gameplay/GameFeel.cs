@@ -32,7 +32,8 @@ namespace DallasDash.Gameplay
             siren.Play();
             // Background music under the menus and the run (an original synthesised loop).
             music = gameObject.AddComponent<AudioSource>();
-            music.clip = Synth.Music();
+            music.clip = Synth.Music(DashRun.District);
+            musicDistrict = DashRun.District;
             music.loop = true;
             music.volume = 0.32f;
             music.Play();
@@ -78,6 +79,7 @@ namespace DallasDash.Gameplay
 
         AudioClip powerUp;
         AudioSource music;
+        int musicDistrict = -1;
 
         void OnPowerUp(PowerUp p)
         {
@@ -106,7 +108,7 @@ namespace DallasDash.Gameplay
             sfx.PlayOneShot(whoosh, 1f);
             Haptics.Play(Haptics.Strength.Light);
             cam.Kick(1.2f); // Slightly stronger camera kick for better feedback
-            StartCoroutine(SlowMo());
+
         }
 
         System.Collections.IEnumerator HitStop()
@@ -144,7 +146,7 @@ namespace DallasDash.Gameplay
             dust.Emit(Params(o.transform.position + Vector3.up * 0.5f), 22); // More dust for better impact feedback
             cam.Shake(0.55f); // Stronger shake for better feedback
             Haptics.Play(Haptics.Strength.Medium);
-            if (GameManager.Instance.State == RunState.Running) StartCoroutine(HitStop());
+
         }
 
         void Update()
@@ -170,13 +172,19 @@ namespace DallasDash.Gameplay
             {
                 float mv = (gm.State == RunState.Busted ? 0.12f : running && chase && chase.Close ? 0.2f : 0.32f) * PlayerProfile.MusicVolume;
                 music.volume = Mathf.MoveTowards(music.volume, mv, Time.unscaledDeltaTime * 0.6f);
-                float districtPitch = DashRun.District == 1 ? 0.88f : DashRun.District == 2 ? 1.13f : 1f;
-                music.pitch = Mathf.MoveTowards(music.pitch, (running && PowerUps.Active(PowerUp.Rush) ? 1.08f : 1f) * districtPitch, Time.unscaledDeltaTime * 0.5f);
+                if (musicDistrict != DashRun.District)
+                {
+                    musicDistrict = DashRun.District;
+                    music.clip = Synth.Music(musicDistrict);
+                    music.Play();
+                }
+                music.pitch = Mathf.MoveTowards(music.pitch, running && PowerUps.Active(PowerUp.Rush) ? 1.08f : 1f, Time.unscaledDeltaTime * 0.5f);
             }
         }
 
         ChaseController chaseCache;
-        ChaseController FindChase() => chaseCache ? chaseCache : chaseCache = FindFirstObjectByType<ChaseController>();
+        bool chaseSearched;
+        ChaseController FindChase() { if (!chaseSearched) { chaseCache = FindFirstObjectByType<ChaseController>(); chaseSearched = true; } return chaseCache; }
 
         static ParticleSystem.EmitParams Params(Vector3 pos) => new() { position = pos, applyShapeToPosition = true };
 

@@ -17,6 +17,11 @@ namespace DallasDash.UI
         static readonly Color Ink = new(0.1f, 0.12f, 0.3f);
         static readonly Color Gold = new(1f, 0.78f, 0.16f), GoldDark = new(0.86f, 0.52f, 0.06f), GoldLight = new(1f, 0.93f, 0.55f);
         static readonly Color White = new(1f, 0.98f, 0.94f);
+        static readonly Color NeonBlue = new(0.2f, 0.7f, 1f);
+        static readonly Color NeonPink = new(1f, 0.3f, 0.6f);
+        static readonly Color NeonGreen = new(0.3f, 0.95f, 0.5f);
+        static readonly Color Red = new(0.94f, 0.22f, 0.15f);
+        static readonly Color Cyan = new(0.45f, 0.82f, 0.94f);
 
         public static Sprite Get(string kind)
         {
@@ -140,6 +145,156 @@ namespace DallasDash.UI
                                          Box(p - new Vector2(0.12f, -0.32f), new Vector2(0.3f, 0.06f), 0.06f)), new Color(0.3f, 0.5f, 1f)),
                 new Layer(p => Mathf.Min(Mathf.Min(Circle(p - new Vector2(-0.38f, 0.36f), 0.09f), Circle(p - new Vector2(-0.38f, 0.02f), 0.09f)),
                                          Circle(p - new Vector2(-0.38f, -0.32f), 0.09f)), new Color(0.15f, 0.62f, 0.3f)),
+            },
+            "diamond" => new[]
+            {
+                // Premium/rare item marker
+                new Layer(p => Mathf.Abs(p.x) + Mathf.Abs(p.y) - 0.68f, NeonBlue),
+                new Layer(p => Mathf.Abs(p.x) + Mathf.Abs(p.y) - 0.5f, White),
+                new Layer(p => Mathf.Abs(p.x) + Mathf.Abs(p.y) - 0.3f, NeonBlue),
+            },
+            "crown" => new[]
+            {
+                // Achievement/reward icon
+                // Three peaks, cut off flat at the band so the crown sits on a base.
+                new Layer(p => Mathf.Min(
+                    Mathf.Max(
+                        Mathf.Max(
+                            Box(p - new Vector2(0f, 0.6f), new Vector2(0.3f, 0.3f), 0.08f),
+                            Box(p - new Vector2(-0.4f, 0.35f), new Vector2(0.22f, 0.35f), 0.08f)),
+                        Box(p - new Vector2(0.4f, 0.35f), new Vector2(0.22f, 0.35f), 0.08f)),
+                    -p.y - 0.1f), Gold),
+                new Layer(p => Box(p - new Vector2(0f, -0.2f), new Vector2(0.7f, 0.15f), 0.06f), GoldDark),
+                new Layer(p => Box(p - new Vector2(0f, -0.38f), new Vector2(0.86f, 0.12f), 0.06f), Gold),
+                new Layer(p => Circle(p - new Vector2(0f, 0.52f), 0.12f), GoldLight),
+            },
+            "rocket" => new[]
+            {
+                // Speed/boost icon
+                new Layer(p => Triangle(p - new Vector2(0f, 0.3f), 0.5f) - 0.06f, NeonPink),
+                new Layer(p => Box(p - new Vector2(0f, -0.28f), new Vector2(0.18f, 0.32f), 0.06f), White),
+                new Layer(p => Triangle(p - new Vector2(-0.24f, -0.16f), 0.22f) - 0.04f, NeonPink),
+                new Layer(p => Triangle(p - new Vector2(0.24f, -0.16f), 0.22f) - 0.04f, NeonPink),
+                new Layer(p => Circle(p - new Vector2(0f, 0.15f), 0.12f), new Color(0.9f, 0.95f, 1f)),
+            },
+            "map" => new[]
+            {
+                // District/location icon
+                new Layer(p => Box(p - new Vector2(0f, 0f), new Vector2(0.72f, 0.86f), 0.1f), White),
+                new Layer(p => Box(p - new Vector2(-0.24f, 0.22f), new Vector2(0.4f, 0.06f), 0.04f), new Color(0.4f, 0.5f, 0.7f)),
+                new Layer(p => Box(p - new Vector2(0.2f, -0.1f), new Vector2(0.32f, 0.06f), 0.04f), new Color(0.4f, 0.5f, 0.7f)),
+                new Layer(p => Box(p - new Vector2(-0.18f, -0.35f), new Vector2(0.28f, 0.06f), 0.04f), new Color(0.4f, 0.5f, 0.7f)),
+                new Layer(p => Star(p - new Vector2(0.1f, 0.22f), 0.14f, 0.06f) - 0.02f, NeonPink),
+            },
+            "fuel" => new[]
+            {
+                // Gas pump / fuel icon
+                new Layer(p => Box(p - new Vector2(-0.25f, -0.1f), new Vector2(0.32f, 0.62f), 0.1f), new Color(0.6f, 0.65f, 0.75f)),
+                new Layer(p => Box(p - new Vector2(-0.25f, 0.28f), new Vector2(0.28f, 0.18f), 0.08f), new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Box(p - new Vector2(0.25f, -0.05f), new Vector2(0.12f, 0.24f), 0.06f), new Color(0.5f, 0.55f, 0.65f)),
+                new Layer(p => Mathf.Max(Ring(p - new Vector2(0.32f, 0.22f), 0.16f, 0.06f), 0.22f - p.x), new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Box(p - new Vector2(-0.25f, -0.45f), new Vector2(0.36f, 0.1f), 0.05f), Ink),
+            },
+            "clock" => new[]
+            {
+                new Layer(p => Circle(p, 0.78f), White),
+                new Layer(p => Mathf.Min(Segment(p, Vector2.zero, new Vector2(0f, 0.52f)) - 0.08f, Segment(p, Vector2.zero, new Vector2(0.32f, 0.18f)) - 0.07f), new Color(0.15f, 0.2f, 0.35f)),
+                new Layer(p => Circle(p, 0.1f), new Color(0.15f, 0.2f, 0.35f)),
+            },
+            "package" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(0f, -0.08f), new Vector2(0.78f, 0.66f), 0.1f), new Color(0.95f, 0.62f, 0.28f)),
+                new Layer(p => Box(p - new Vector2(0f, 0.28f), new Vector2(0.78f, 0.14f), 0.08f), new Color(0.98f, 0.75f, 0.42f)),
+                new Layer(p => Box(p - new Vector2(0f, 0.12f), new Vector2(0.12f, 0.56f), 0.06f), GoldLight),
+                new Layer(p => Box(p - new Vector2(0f, -0.08f), new Vector2(0.6f, 0.08f), 0.05f), GoldLight),
+            },
+            "flag" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(-0.52f, -0.2f), new Vector2(0.08f, 0.7f), 0.04f), new Color(0.6f, 0.65f, 0.75f)),
+                new Layer(p => Triangle(new Vector2(p.x - (-0.28f), p.y - 0.26f), 0.44f) - 0.08f, Red),
+            },
+            "arrow" => new[]
+            {
+                new Layer(p => Triangle(p - new Vector2(0.18f, 0f), 0.56f) - 0.1f, White),
+                new Layer(p => Box(p - new Vector2(-0.24f, 0f), new Vector2(0.42f, 0.16f), 0.08f), White),
+            },
+            "arrows" => new[]
+            {
+                new Layer(p => Triangle(p - new Vector2(0.28f, 0.22f), 0.4f) - 0.08f, Cyan),
+                new Layer(p => Box(p - new Vector2(-0.12f, 0.22f), new Vector2(0.4f, 0.12f), 0.06f), Cyan),
+                new Layer(p => Triangle(p - new Vector2(-0.28f, -0.22f), 0.4f) - 0.08f, Cyan),
+                new Layer(p => Box(p - new Vector2(0.12f, -0.22f), new Vector2(0.4f, 0.12f), 0.06f), Cyan),
+            },
+            "battery" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(-0.08f, 0f), new Vector2(0.62f, 0.38f), 0.1f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Box(p - new Vector2(0.36f, 0f), new Vector2(0.08f, 0.16f), 0.05f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Box(p - new Vector2(-0.08f, 0f), new Vector2(0.52f, 0.28f), 0.07f), Ink),
+                new Layer(p => Box(p - new Vector2(-0.24f, 0f), new Vector2(0.16f, 0.22f), 0.05f), NeonGreen),
+            },
+            "bike" => new[]
+            {
+                new Layer(p => Circle(p - new Vector2(-0.32f, -0.28f), 0.26f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Circle(p - new Vector2(0.32f, -0.28f), 0.26f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Circle(p - new Vector2(-0.32f, -0.28f), 0.14f), White),
+                new Layer(p => Circle(p - new Vector2(0.32f, -0.28f), 0.14f), White),
+                new Layer(p => Box(p - new Vector2(0f, 0.02f), new Vector2(0.5f, 0.08f), 0.05f), new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Box(p - new Vector2(-0.12f, 0.22f), new Vector2(0.16f, 0.32f), 0.06f), new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Circle(p - new Vector2(0.24f, 0.38f), 0.09f), White),
+            },
+            "wheel" => new[]
+            {
+                new Layer(p => Circle(p, 0.72f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Circle(p, 0.38f), new Color(0.7f, 0.74f, 0.85f)),
+                new Layer(p => Circle(p, 0.16f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Box(p, new Vector2(0.06f, 0.64f), 0.04f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Box(p, new Vector2(0.64f, 0.06f), 0.04f), new Color(0.25f, 0.28f, 0.4f)),
+            },
+            "home" => new[]
+            {
+                new Layer(p => Triangle(new Vector2(p.x, p.y + 0.12f), 0.72f) - 0.1f, new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Box(p - new Vector2(0f, -0.26f), new Vector2(0.6f, 0.5f), 0.08f), new Color(0.96f, 0.72f, 0.38f)),
+                new Layer(p => Box(p - new Vector2(0f, -0.34f), new Vector2(0.22f, 0.34f), 0.06f), new Color(0.25f, 0.28f, 0.4f)),
+                new Layer(p => Box(p - new Vector2(0f, -0.1f), new Vector2(0.18f, 0.18f), 0.05f), White),
+            },
+            "exit" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(0.1f, 0f), new Vector2(0.48f, 0.66f), 0.1f), new Color(0.6f, 0.65f, 0.75f)),
+                new Layer(p => Box(p - new Vector2(-0.28f, 0f), new Vector2(0.24f, 0.16f), 0.08f), new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Triangle(p - new Vector2(-0.52f, 0f), 0.28f) - 0.06f, new Color(0.9f, 0.55f, 0.15f)),
+            },
+            "sound" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(-0.32f, 0f), new Vector2(0.18f, 0.26f), 0.08f), White),
+                new Layer(p => Triangle(new Vector2(p.x - (-0.12f), p.y), 0.42f) - 0.08f, White),
+                new Layer(p => Mathf.Max(Ring(p - new Vector2(0.22f, 0f), 0.32f, 0.07f), -p.x), White),
+                new Layer(p => Mathf.Max(Ring(p - new Vector2(0.26f, 0f), 0.48f, 0.07f), -p.x), White),
+            },
+            "mute" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(-0.32f, 0f), new Vector2(0.18f, 0.26f), 0.08f), White),
+                new Layer(p => Triangle(new Vector2(p.x - (-0.12f), p.y), 0.42f) - 0.08f, White),
+                new Layer(p => Mathf.Min(Segment(p, new Vector2(-0.1f, -0.38f), new Vector2(0.52f, 0.38f)) - 0.1f, Segment(p, new Vector2(-0.1f, 0.38f), new Vector2(0.52f, -0.38f)) - 0.1f), Red),
+            },
+            "vibrate" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(0f, 0f), new Vector2(0.36f, 0.72f), 0.1f), White),
+                new Layer(p => Box(p - new Vector2(0f, 0.52f), new Vector2(0.18f, 0.08f), 0.05f), new Color(0.6f, 0.65f, 0.75f)),
+                new Layer(p => Box(p - new Vector2(0f, -0.52f), new Vector2(0.18f, 0.08f), 0.05f), new Color(0.6f, 0.65f, 0.75f)),
+                new Layer(p => Mathf.Min(Segment(p, new Vector2(-0.52f, 0.22f), new Vector2(-0.38f, -0.22f)) - 0.08f, Segment(p, new Vector2(0.52f, 0.22f), new Vector2(0.38f, -0.22f)) - 0.08f), Cyan),
+            },
+            "kiosk" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(0f, -0.08f), new Vector2(0.72f, 0.6f), 0.1f), new Color(0.9f, 0.55f, 0.15f)),
+                new Layer(p => Box(p - new Vector2(0f, 0.38f), new Vector2(0.72f, 0.16f), 0.08f), new Color(1f, 0.72f, 0.32f)),
+                new Layer(p => Box(p - new Vector2(0f, -0.08f), new Vector2(0.18f, 0.28f), 0.08f), White),
+                new Layer(p => Box(p - new Vector2(0f, -0.38f), new Vector2(0.52f, 0.1f), 0.06f), new Color(0.25f, 0.28f, 0.4f)),
+            },
+            "copy" => new[]
+            {
+                new Layer(p => Box(p - new Vector2(0.12f, -0.12f), new Vector2(0.5f, 0.58f), 0.08f), new Color(0.6f, 0.65f, 0.75f)),
+                new Layer(p => Box(p - new Vector2(-0.12f, 0.12f), new Vector2(0.5f, 0.58f), 0.08f), White),
+                new Layer(p => Box(p - new Vector2(-0.12f, 0.28f), new Vector2(0.32f, 0.08f), 0.05f), new Color(0.6f, 0.65f, 0.75f)),
             },
             _ => new[] { new Layer(p => Circle(p, 0.8f), Color.magenta) },
         };

@@ -9,10 +9,26 @@ namespace DallasDash.EditorTools
     /// Output goes to Builds/Android/dash-riders.apk next to the project (outside Assets).
     public static class BuildTools
     {
+        static void PrepareCityMaterial()
+        {
+            const string folder = "Assets/_Project/Resources";
+            Directory.CreateDirectory(folder);
+            const string path = folder + "/RidersCityMaterial.mat";
+            if (!AssetDatabase.LoadAssetAtPath<Material>(path))
+            {
+                var shader = Shader.Find("Universal Render Pipeline/Lit");
+                if (!shader) throw new System.Exception("City shader unavailable");
+                AssetDatabase.CreateAsset(new Material(shader), path);
+                AssetDatabase.SaveAssets();
+            }
+        }
         /// Quick Windows review build (Mono, no IL2CPP) for screenshots: -executeMethod DallasDash.EditorTools.BuildTools.Windows
         [MenuItem("Dallas Dash/Build Windows (review)")]
         public static void Windows()
         {
+            PrepareCityMaterial();
+            WorldArtPass.Prepare();
+            RidersCityAssetBuilder.Prepare();
             PlayerSettings.SetScriptingBackend(UnityEditor.Build.NamedBuildTarget.Standalone, ScriptingImplementation.Mono2x);
             PlayerSettings.fullScreenMode = FullScreenMode.Windowed;
             PlayerSettings.resizableWindow = true;
@@ -31,6 +47,9 @@ namespace DallasDash.EditorTools
         [MenuItem("Dallas Dash/Build Android APK")]
         public static void Android()
         {
+            PrepareCityMaterial();
+            WorldArtPass.Prepare();
+            RidersCityAssetBuilder.Prepare();
             EditorUserBuildSettings.SwitchActiveBuildTarget(BuildTargetGroup.Android, BuildTarget.Android);
             EditorUserBuildSettings.buildAppBundle = false;
             var android = UnityEditor.Build.NamedBuildTarget.Android;

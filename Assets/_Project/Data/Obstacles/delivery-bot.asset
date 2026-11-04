@@ -15,9 +15,9 @@ MonoBehaviour:
   id: delivery-bot
   displayName: Dash City robot courier
   kind: 2
-  size: {x: 0.714, y: 1.7087705, z: 0.8260001}
+  size: {x: 1.282402, y: 2.15, z: 2.4029744}
   weight: 3
   placeholderColor: {r: 1, g: 0.8, b: 0.15, a: 1}
-  prefab: {fileID: 8938151950067089960, guid: dee0a23744bfc7741895ece66c4327b8, type: 3}
+  prefab: {fileID: 9107750719414825599, guid: b1a90bbd5a5622b4baba3179657fc745, type: 3}
   drift: 0.3
   heavy: 1

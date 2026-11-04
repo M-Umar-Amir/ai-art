@@ -6,7 +6,15 @@ Shader "FoodInc/ToonCurved"
     Properties
     {
         _BaseMap ("Base Map", 2D) = "white" {}
+        [Normal] _BumpMap ("Surface normal", 2D) = "bump" {}
+        _BumpScale ("Normal strength", Range(0,2)) = 0
+        _RoughnessMap ("Measured roughness", 2D) = "white" {}
+        _RoughnessStrength ("Measured roughness blend", Range(0,1)) = 0
+        _Wetness ("Patchy surface wetness", Range(0,1)) = 0
+        _EmissionUsesAlbedo ("Texture-modulated emission", Range(0,1)) = 0
+        _WindowInterior ("Window interior detail", Range(0,1)) = 0
         _BaseColor ("Base Color", Color) = (1,1,1,1)
+        _WorldTextureScale ("World texture scale", Float) = 0
         _ShadeColor ("Shade Tint", Color) = (0.62,0.66,0.86,1)
         [HDR] _EmissionColor ("Emission", Color) = (0,0,0,0)
         _RimStrength ("Rim", Range(0,1)) = 0.42
@@ -50,6 +58,9 @@ Shader "FoodInc/ToonCurved"
             #pragma fragment frag
             #pragma multi_compile _ _MAIN_LIGHT_SHADOWS _MAIN_LIGHT_SHADOWS_CASCADE _MAIN_LIGHT_SHADOWS_SCREEN
             #pragma multi_compile_fragment _ _SHADOWS_SOFT
+            #pragma multi_compile _ _ADDITIONAL_LIGHTS_VERTEX _ADDITIONAL_LIGHTS
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BLENDING
+            #pragma multi_compile_fragment _ _REFLECTION_PROBE_BOX_PROJECTION
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
             #pragma shader_feature_local _ALPHATEST_ON
@@ -84,7 +95,11 @@ Shader "FoodInc/ToonCurved"
             half4 frag(Varyings i) : SV_Target
             {
                 UNITY_SETUP_INSTANCE_ID(i);
-                half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, i.uv) * _BaseColor;
+                half3 projectionNormal = abs(i.normalWS);
+                float2 worldUV = projectionNormal.y > max(projectionNormal.x, projectionNormal.z) ? i.positionWS.xz :
+                    projectionNormal.x > projectionNormal.z ? i.positionWS.zy : i.positionWS.xy;
+                float2 surfaceUV = _WorldTextureScale > 0 ? worldUV * _WorldTextureScale : i.uv;
+                half4 albedo = SAMPLE_TEXTURE2D(_BaseMap, sampler_BaseMap, surfaceUV) * _BaseColor;
                 if (_Outfit > 0.5)
                 {
                     float h = (i.localY - _WardrobeMin) / max(_WardrobeHeight, 0.001);
@@ -103,6 +118,18 @@ Shader "FoodInc/ToonCurved"
                 clip(albedo.a - _Cutoff);
                 #endif
                 half3 n = normalize(i.normalWS);
+                // Derivative tangent frame works for imported meshes and world-projected paving.
+                if (_BumpScale > 0.001)
+                {
+                    float3 dp1 = ddx(i.positionWS), dp2 = ddy(i.positionWS);
+                    float2 duv1 = ddx(surfaceUV), duv2 = ddy(surfaceUV);
+                    float3 p2 = cross(dp2, n), p1 = cross(n, dp1);
+                    float3 t = p2 * duv1.x + p1 * duv2.x;
+                    float3 b = p2 * duv1.y + p1 * duv2.y;
+                    float invLength = rsqrt(max(max(dot(t,t), dot(b,b)), 0.000001));
+                    half3 detail = UnpackNormalScale(SAMPLE_TEXTURE2D(_BumpMap, sampler_BumpMap, surfaceUV), _BumpScale);
+                    n = normalize(t * invLength * detail.x + b * invLength * detail.y + n * detail.z);
+                }
                 Light main = GetMainLight(TransformWorldToShadowCoord(i.positionWS));
                 // Enhanced cel lighting with softer shadow transition
                 half ndl = dot(n, main.direction);
@@ -139,9 +166,26 @@ Shader "FoodInc/ToonCurved"
                     surface.alpha = albedo.a;
                     surface.metallic = _Metallic;
                     surface.smoothness = _Smoothness;
+                    half measuredRoughness = SAMPLE_TEXTURE2D(_RoughnessMap, sampler_RoughnessMap, surfaceUV).r;
+                    surface.smoothness = lerp(surface.smoothness, 1-measuredRoughness, _RoughnessStrength);
+                    float2 wetUV = i.positionWS.xz;
+                    half patch = smoothstep(.12,.78,sin(wetUV.x*.73+sin(wetUV.y*.27))*sin(wetUV.y*.43)*.5+.5) * _Wetness;
+                    surface.smoothness = lerp(surface.smoothness,.94,patch);
+                    surface.albedo *= lerp(1,.66,patch);
                     surface.normalTS = half3(0,0,1);
                     surface.occlusion = 1;
-                    surface.emission = _EmissionColor.rgb;
+                    surface.emission = _EmissionColor.rgb * lerp(half3(1,1,1),albedo.rgb,_EmissionUsesAlbedo);
+                    if (_WindowInterior > .5)
+                    {
+                        // Recess shading, partially closed blinds and a lit ceiling break up flat panes.
+                        float2 roomUV = i.uv;
+                        half edgeShade = smoothstep(0,.15,min(min(roomUV.x,1-roomUV.x),min(roomUV.y,1-roomUV.y)));
+                        half blind = lerp(.48,1,smoothstep(.2,.35,frac(roomUV.y*11)));
+                        half depthShade = lerp(.32,1,roomUV.y)*lerp(.4,1,edgeShade);
+                        half ceiling = step(.86,roomUV.y)*step(.2,roomUV.x)*step(roomUV.x,.8);
+                        surface.emission *= depthShade*blind+ceiling*.3;
+                        surface.albedo *= lerp(.25,.8,depthShade);
+                    }
                     c = lerp(c, UniversalFragmentPBR(data, surface).rgb * lerp(1, contact * canyon, vertical), _SurfaceStyle);
                 }
                 c = MixFog(c, i.fog);

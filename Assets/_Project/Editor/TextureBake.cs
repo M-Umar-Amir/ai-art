@@ -20,8 +20,8 @@ namespace DallasDash.EditorTools
         [Serializable] class Image { public int bufferView = -1; public string mimeType; public string name; }
         [Serializable] class View { public int byteOffset; public int byteLength; }
         [Serializable] class Tex { public int source = -1; }
-        [Serializable] class Mat { public string name; public Pbr pbrMetallicRoughness; }
-        [Serializable] class Pbr { public TexRef baseColorTexture; }
+        [Serializable] class Mat { public string name; public Pbr pbrMetallicRoughness; public float[] emissiveFactor; }
+        [Serializable] class Pbr { public TexRef baseColorTexture; public float[] baseColorFactor; }
         [Serializable] class TexRef { public int index = -1; }
 
         static readonly Dictionary<string, (Glb json, byte[] bytes, int bin)> cache = new();
@@ -35,6 +35,25 @@ namespace DallasDash.EditorTools
             var r = (json, bytes, 20 + len + 8);
             cache[glbPath] = r;
             return r;
+        }
+
+        /// Base colour and emission of a material straight from the .glb JSON: reading them back off glTFast's
+        /// imported materials is unreliable in a batch import (they came back white for authored props).
+        public static bool Colors(string glbPath, string material, out Color baseColor, out Color emissive)
+        {
+            baseColor = Color.white; emissive = Color.black;
+            if (!File.Exists(glbPath) || string.IsNullOrEmpty(material)) return false;
+            var g = Load(glbPath).json;
+            if (g.materials == null) return false;
+            foreach (var m in g.materials)
+            {
+                if (m.name != material) continue;
+                var f = m.pbrMetallicRoughness?.baseColorFactor;
+                if (f != null && f.Length >= 3) baseColor = new Color(f[0], f[1], f[2], f.Length > 3 ? f[3] : 1f);
+                if (m.emissiveFactor != null && m.emissiveFactor.Length >= 3) emissive = new Color(m.emissiveFactor[0], m.emissiveFactor[1], m.emissiveFactor[2]);
+                return true;
+            }
+            return false;
         }
 
         /// The embedded image used as the base colour of the glTF material called `material` (or the first image

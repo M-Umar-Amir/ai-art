@@ -13,11 +13,10 @@ namespace DallasDash.Core
     }
 
     // Deliberately independent of Unity: the dummy food app and the game share one local ledger.
-    // Production must move this transaction to FOOD INC's server.
+    // Production must move this transaction to FOOD INC's server. The price (burgers) is charged by the
+    // caller (DemoRewards) before Issue runs, so this class only mints, tracks and redeems codes.
     [Serializable] public class CouponLedger
     {
-        public const int BadgeCost = 3;
-        public int badges;
         public long latestUtcTicks;
         public string issuerNamespace;
         public string lastSerial = "0";
@@ -32,7 +31,6 @@ namespace DallasDash.Core
         public DemoCoupon Issue(DateTime utc)
         {
             long now = Observe(utc);
-            if (badges < BadgeCost) return null;
             // Namespace + an expanding base-36 serial is the durable identity. No integer overflow
             // and no wrap-around: Z -> 10, ZZ -> 100, and so on. Deleting old history never resets it.
             // In production the server must allocate the namespace and advance the serial atomically.
@@ -45,7 +43,6 @@ namespace DallasDash.Core
             string code = payload + "-" + Checksum(payload);
             var coupon = new DemoCoupon { code = code, issuedUtcTicks = now,
                 expiresUtcTicks = now + TimeSpan.TicksPerDay, issuanceId = identity };
-            badges -= BadgeCost;
             coupons.Insert(0, coupon);
             return coupon;
         }

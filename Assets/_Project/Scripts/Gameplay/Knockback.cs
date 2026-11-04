@@ -12,7 +12,9 @@ namespace DallasDash.Gameplay
         {
             life = 1.2f;
             float side = transform.position.x >= 0f ? 1f : -1f;
-            velocity = new Vector3(side * Random.Range(5f, 8f), Random.Range(6f, 9f), Random.Range(8f, 14f));
+            // Thrown ahead faster than the rider is going, so the rider never drives through what they hit.
+            float pace = DallasDash.Core.GameManager.Instance ? DallasDash.Core.GameManager.Instance.Speed : 20f;
+            velocity = new Vector3(side * Random.Range(5f, 8f), Random.Range(6f, 9f), pace + Random.Range(5f, 9f));
             spin = Random.insideUnitSphere * 720f;
         }
 

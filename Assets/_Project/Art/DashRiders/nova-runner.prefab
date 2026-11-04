@@ -1,0 +1,115 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &7046878377000471356
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3249833151007018277}
+  - component: {fileID: 7831111464738550688}
+  m_Layer: 0
+  m_Name: nova-runner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3249833151007018277
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7046878377000471356}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 7533348062419335691}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &7831111464738550688
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7046878377000471356}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9ed129e02edbfa4dbbeaa25f172da6c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Gameplay.RunnerMotion
+  body: {fileID: 6666315955017240996}
+--- !u!1001 &2824272115786381618
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3249833151007018277}
+    m_Modifications:
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8980600481042722313, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+      propertyPath: m_Name
+      value: Rider
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+--- !u!137 &6666315955017240996 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 8913282871480723606, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+  m_PrefabInstance: {fileID: 2824272115786381618}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7533348062419335691 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5744904964805575481, guid: e712b40cd7f28fc4da5507785771e149, type: 3}
+  m_PrefabInstance: {fileID: 2824272115786381618}
+  m_PrefabAsset: {fileID: 0}

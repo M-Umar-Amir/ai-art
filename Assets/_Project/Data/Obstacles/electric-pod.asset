@@ -15,7 +15,7 @@ MonoBehaviour:
   id: electric-pod
   displayName: Autonomous delivery pod
   kind: 2
-  size: {x: 0, y: 0, z: 0.3}
+  size: {x: 2.0600002, y: 2.26, z: 3.74}
   weight: 4
   placeholderColor: {r: 0.11, g: 0.27, b: 0.85, a: 1}
   prefab: {fileID: 614145908307681857, guid: e1812c42a76c30c458d4fa1165eac5f6, type: 3}

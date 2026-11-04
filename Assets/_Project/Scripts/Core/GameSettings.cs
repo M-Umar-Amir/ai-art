@@ -24,9 +24,11 @@ namespace DallasDash.Core
             int tier = PlayerProfile.Graphics;
             if (GraphicsSettings.currentRenderPipeline is UniversalRenderPipelineAsset urp)
             {
-                urp.renderScale = tier switch { 0 => 0.7f, 1 => 0.85f, _ => 1f };
+                bool sharedGpu = SystemInfo.graphicsDeviceName.Contains("Intel(R) HD") || SystemInfo.graphicsDeviceName.Contains("UHD");
+                urp.renderScale = tier switch { 0 => 0.7f, 1 => 0.85f, _ => sharedGpu ? 0.85f : 1f };
                 urp.msaaSampleCount = tier == 2 ? 2 : 1;
-                urp.shadowDistance = tier switch { 0 => 0f, 1 => 25f, _ => 40f };
+                urp.shadowCascadeCount = tier == 2 ? 2 : 1;
+                urp.shadowDistance = tier switch { 0 => 0f, 1 => 32f, _ => 65f };
             }
 
             var sun = RenderSettings.sun;
@@ -35,13 +37,19 @@ namespace DallasDash.Core
                     if (l.type == LightType.Directional) { sun = l; break; }
             if (sun) sun.shadows = tier switch { 0 => LightShadows.None, 1 => LightShadows.Hard, _ => LightShadows.Soft };
 
-            var cam = Camera.main;
-            if (cam && cam.TryGetComponent<UniversalAdditionalCameraData>(out var data))
+            foreach (var cam in Object.FindObjectsByType<Camera>(FindObjectsInactive.Include, FindObjectsSortMode.None))
             {
-                data.renderPostProcessing = tier > 0;
-                data.antialiasing = tier == 1 ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.None;
+                if (cam.targetTexture) continue;
+                if (cam.TryGetComponent<UniversalAdditionalCameraData>(out var data))
+                {
+                    data.renderPostProcessing = tier > 0;
+                    data.antialiasing = tier > 0 ? AntialiasingMode.FastApproximateAntialiasing : AntialiasingMode.None;
+                }
+                cam.farClipPlane = 240f;
             }
-
+            RenderSettings.fogStartDistance = 95f;
+            RenderSettings.fogEndDistance = 230f;
+            QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 60;
         }
     }

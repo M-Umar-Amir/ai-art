@@ -36,13 +36,26 @@ namespace DallasDash.Gameplay
             if (!captured) Capture();
             var gm = GameManager.Instance;
             bool moving = gm && gm.State == RunState.Running && !gm.Paused;
+            var rider = GetComponentInParent<RiderController>();
+            if (rider) riding = VehicleDynamics.Current.kind != CourierVehicle.Running;
+            if (rider && rider.Airborne) { Rest(); return; }
             if (!moving) { Rest(); return; }
 
-            phase += Time.deltaTime * gm.Speed * (riding || robot ? 0.26f : 0.42f);
+            phase += Time.deltaTime * gm.Speed * (riding ? 0.26f : 0.42f);
             float s = Mathf.Sin(phase);
 
-            if (riding || robot)
+            if (riding)
             {
+                Rest();
+                if (leftLeg) leftLeg.localRotation = legL;
+                if (rightLeg) rightLeg.localRotation = legR;
+                if (!robot)
+                {
+                    if (leftLeg) { var at = leftLeg.localPosition; at.x = -.16f; leftLeg.localPosition = at; }
+                    if (rightLeg) { var at = rightLeg.localPosition; at.x = .16f; rightLeg.localPosition = at; }
+                }
+                if (leftKnee) leftKnee.localRotation = kneeL;
+                if (rightKnee) rightKnee.localRotation = kneeR;
                 // Balance sway: arms breathe with the run, legs stay planted on the deck or pegs.
                 if (leftArm) leftArm.localRotation = armL * Quaternion.Euler(s * 2.2f, 0f, s * 1.4f);
                 if (rightArm) rightArm.localRotation = armR * Quaternion.Euler(-s * 2.2f, 0f, -s * 1.4f);

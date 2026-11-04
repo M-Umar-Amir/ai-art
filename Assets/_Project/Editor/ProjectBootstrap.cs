@@ -47,6 +47,10 @@ namespace DallasDash.EditorTools
             BuildScene(mats, data);
             TrimOutlinePasses();
             AssetDatabase.SaveAssets();
+            // Every material created above starts flat; give each one a base map so a rebuild never
+            // ships untextured geometry. Existing/hand-authored maps are left alone.
+            TextureKit.Apply();
+            AssetDatabase.SaveAssets();
             Debug.Log("[DallasDash] Bootstrap complete: " + ScenePath);
         }
 
@@ -83,6 +87,8 @@ namespace DallasDash.EditorTools
             var so = new SerializedObject(urp);
             so.FindProperty("m_SoftShadowsSupported").boolValue = true;
             so.FindProperty("m_MainLightShadowmapResolution").intValue = 2048;
+            so.FindProperty("m_AdditionalLightsRenderingMode").intValue = (int)LightRenderingMode.PerPixel;
+            so.FindProperty("m_AdditionalLightsPerObjectLimit").intValue = 8;
             so.ApplyModifiedPropertiesWithoutUndo();
             urp.msaaSampleCount = 2;
             urp.shadowDistance = 40f;
@@ -296,16 +302,16 @@ namespace DallasDash.EditorTools
         {
             var d = new PackData();
 
-            d.characters.Add(Character("ace", "Ace", "Ace, the Speedster. Electric orange bomber jacket, black cargo trousers, futuristic sneakers. Electric board. Short speed boost.",
+            d.characters.Add(Character("ace", "Ace", "Ace, the Speedster. Electric orange bomber jacket, black cargo trousers, futuristic sneakers. Courier e-bike. Short speed boost.",
                 Unlock.Free, 0, false, "Characters/02-finn.jpeg"));
             d.characters.Add(Character("nova", "Nova", "Nova, the parkour queen. Neon purple cropped jacket, athletic cargo trousers, high-tech sneakers. Extended jump duration.",
                 Unlock.Free, 0, false, "Characters/03-faye.jpeg"));
-            d.characters.Add(Character("bolt", "Bolt", "Bolt, the experimental robot courier. Silver and yellow chassis, expressive LED eyes, magnetic wheels, delivery compartment. Temporary collision protection.",
+            d.characters.Add(Character("bolt", "Bolt", "Bolt, the experimental robot courier. Silver and magenta chassis, expressive LED eyes, articulated legs, delivery compartment. Temporary collision protection.",
                 Unlock.Points, 25000, true, "Characters/04-fizz-11.jpeg"));
 
-            d.rides.Add(Ride("bicycle", "Delivery bicycle", "Starter ride. Warm yellow and cream frame, chunky tyres, front basket, insulated delivery backpack on the rear rack.",
+            d.rides.Add(Ride("bicycle", "Courier e-bike", "Fat-tyre electric courier bikes for Ace and Nova.",
                 Unlock.Free, false, 1.1f, "Rides/05-delivery-bicycle.jpeg"));
-            d.rides.Add(Ride("scooter", "Courier scooter", "Compact warm yellow body, cream panels, front basket, rear insulated box. The single earnable ride, never sold.",
+            d.rides.Add(Ride("scooter", "Built-in tires", "Bolt uses his integrated tire without an additional vehicle.",
                 Unlock.Objective, false, 1f, "Rides/06-courier-scooter.jpeg"));
 
             d.landmarks.Add(Landmark("reunion-tower", "Reunion Tower", 300f, 1f, "Landmarks/08-reunion-tower.jpeg", "Reunion Blvd"));
@@ -315,9 +321,10 @@ namespace DallasDash.EditorTools
             d.landmarks.Add(Landmark("omni-dallas", "Omni Dallas hotel", 2700f, 1f, "Landmarks/12-omni-dallas-hotel.jpeg", "Lamar Street"));
 
             // One pickup only: Bellagreen's Wagyu Bacon Burger (menu read off bellagreen.com).
-            foreach (var id in new[] { "energy-chip", "burger", "pizza", "soft-drink", "taco" })
+            // Burgers only (client, 3 Nov): the burger is the one collectible and the one currency.
+            foreach (var id in new[] { "burger" })
             {
-                var pickup = Pickup(id, id.Replace('-', ' '), id == "energy-chip" ? 5 : 15, id == "energy-chip" ? 4 : 1, WarmYellow);
+                var pickup = Pickup(id, id, 15, 1, WarmYellow);
                 pickup.prefab = DashAssets.Pickup(id); EditorUtility.SetDirty(pickup); d.pickups.Add(pickup);
             }
 
@@ -338,10 +345,11 @@ namespace DallasDash.EditorTools
             // The Slice House food truck from scene 13 (Loading Up).
             d.obstacles.Add(Obstacle("food-truck", "Parked food truck", TrackKind.Block, new Vector3(1.9f, 2.4f, 4.5f), 1, Cream, heavy: true));
             // Dash City's traffic replaces the old western rider cast and conventional cars.
-            d.obstacles.RemoveAll(o => o.id is "courier-a" or "courier-b" or "scooter-courier" or "slow-car" or "taxi" or "garbage-truck");
+            // Real-life hurdles only (client): stopped taxis, garbage trucks and slow cars stay; the other
+            // couriers used the retired Food Inc meshes.
+            d.obstacles.RemoveAll(o => o.id is "courier-a" or "courier-b" or "scooter-courier");
             d.obstacles.Add(Obstacle("electric-pod", "Autonomous delivery pod", TrackKind.Block, new Vector3(1.9f, 2.2f, 3.6f), 4, RoyalBlue, heavy: true, drift: 0.28f));
-            d.obstacles.Add(Obstacle("delivery-bot", "Dash City robot courier", TrackKind.Block, new Vector3(1f, 1.8f, 0.7f), 3, WarmYellow, heavy: true, drift: 0.3f));
-            d.obstacles.Add(Obstacle("cargo-slide-gate", "Cargo transfer gate / slide", TrackKind.Overhead, new Vector3(1.95f, 2.32f, 0.8f), 2, RoyalBlue));
+            d.obstacles.Add(Obstacle("cargo-slide-gate", "Scaffolding over the lane / slide", TrackKind.Overhead, new Vector3(1.95f, 2.32f, 0.8f), 2, RoyalBlue));
             return d;
         }
 
@@ -401,11 +409,16 @@ namespace DallasDash.EditorTools
             for (int i = 0; i < 3; i++)
             {
                 var crew = DashAssets.Crew(i);
-                look.seated[i] = Model(riderVisual, crew, i==0 ? Vector3.up*.2f : Vector3.zero, "Crew riding " + i);
-                look.standing[i] = Model(riderVisual, crew, new Vector3(.75f,0f,-.35f), "Crew standing " + i);
-                if (i==1) look.seated[i].AddComponent<DashMeshMotion>();
-                look.seated[i].AddComponent<DashWardrobe>().character=i;
-                look.standing[i].AddComponent<DashWardrobe>().character=i;
+                look.seated[i] = Model(riderVisual, crew, Vector3.zero, "Crew riding " + i);
+                // Ace and Nova run on foot after a crash; Bolt's standing slot keeps his original model.
+                look.standing[i] = i < 2 ? Model(riderVisual, DashAssets.Runner(i), Vector3.zero, "Crew on foot " + i)
+                    : Model(riderVisual, CrewModels.Build(i, false), new Vector3(.75f,0f,-.35f), "Crew standing " + i);
+                
+                // Outfits recolour the rider only, never the e-bike under them.
+                var wearer = look.seated[i].transform.Find("Rider");
+                (wearer ? wearer.gameObject : look.seated[i]).AddComponent<DashWardrobe>().character=i;
+                var runnerBody = look.standing[i].transform.Find("Rider");
+                (runnerBody ? runnerBody.gameObject : look.standing[i]).AddComponent<DashWardrobe>().character=i;
             }
             look.Apply(0, true);
             var rc = rider.AddComponent<RiderController>();
@@ -428,7 +441,29 @@ namespace DallasDash.EditorTools
                 AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-food.png") };
             spawner.hologramMaterial = DashAssets.HologramMaterial();
             spawner.chase = null;
+            spawner.parkedBikes = new[] { ModelImport.Get("ebike"), ModelImport.Get("ebike-nova") };
+            // Dash City's residents: real rigged pedestrians walking, chatting and dancing along the course.
+            PeopleModels.Build();
+            new GameObject("District life").AddComponent<DistrictLife>();
             spawner.pickups = data.pickups.ToArray();
+            spawner.powerUpModels = System.Array.ConvertAll(new[] { "magnet-pack", "speed-core", "double-core", "gravity-boots", "shield-drone", "dash-battery" }, name => ModelImport.Get("free-" + name));
+            spawner.routeHurdleModel = PropModels.Barrier(false);
+            spawner.movingDeliveryPlatform = ModelImport.Get("free-delivery-platform");
+            spawner.roofVentModel = ModelImport.Get("free-roof-vent");
+            spawner.roofTankModel = ModelImport.Get("free-roof-tank");
+            spawner.roofChimneyModel = ModelImport.Get("free-roof-chimney");
+            spawner.festivalStageModel = ModelImport.Get("free-festival-stage");
+            spawner.asphaltTexture = CitySurfaceImport.Texture("asphalt_02");
+            spawner.pavingTexture = CitySurfaceImport.Texture("concrete_pavers_02");
+            spawner.asphaltNormal = CitySurfaceImport.Texture("asphalt_02", true);
+            spawner.pavingNormal = CitySurfaceImport.Texture("concrete_pavers_02", true);
+            spawner.masonryTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/Textures/Materials/brick.png");
+            spawner.masonryTexture = CitySurfaceImport.Texture("brick_wall_02");
+            spawner.masonryNormal = CitySurfaceImport.Texture("brick_wall_02",true);
+            spawner.masonryRoughness = CitySurfaceImport.Roughness("brick_wall_02");
+            spawner.asphaltRoughness = CitySurfaceImport.Roughness("asphalt_02");
+            spawner.pavingRoughness = CitySurfaceImport.Roughness("concrete_pavers_02");
+            CitySurfaceImport.NightEnvironment();
             spawner.obstacles = data.obstacles.ToArray();
             spawner.landmarks = System.Array.Empty<LandmarkDef>();
             spawner.roadMaterial = mats["Road"];
@@ -553,18 +588,20 @@ namespace DallasDash.EditorTools
                 return c;
             }
             var bloom = Comp<Bloom>();
-            bloom.threshold.Override(1.15f); // emissive bulbs and windows only, not sunlit walls
-            bloom.intensity.Override(0.65f);
-            bloom.scatter.Override(0.65f);
+            // Neon and lit windows bloom like the PDF cover; sunlit walls stay under the threshold.
+            bloom.threshold.Override(0.95f);
+            bloom.intensity.Override(0.62f);
+            bloom.scatter.Override(0.7f);
+            bloom.tint.Override(new Color(1f, 0.86f, 1f));
             var tone = Comp<Tonemapping>();
             tone.mode.Override(TonemappingMode.ACES);
             var grade = Comp<ColorAdjustments>();
-            grade.saturation.Override(12f);
+            grade.saturation.Override(14f);
             grade.contrast.Override(12f);
-            grade.postExposure.Override(0f);
-            grade.colorFilter.Override(Color.white);
+            grade.postExposure.Override(.35f);
+            grade.colorFilter.Override(new Color(1f, 0.96f, 1f));
             var vignette = Comp<Vignette>();
-            vignette.intensity.Override(0.15f);
+            vignette.intensity.Override(0.2f);
             vignette.smoothness.Override(0.5f);
             EditorUtility.SetDirty(profile);
 
@@ -853,9 +890,8 @@ namespace DallasDash.EditorTools
             SetPrefab(data, "courier-b", BuildCourier(mats, "courier-b", "faye-ride", SafetyOrange, "QUIKBITE", false));
             SetPrefab(data, "scooter-courier", BuildCourier(mats, "scooter-courier", "finn-ride", new Color(0.45f, 0.25f, 0.85f), "SNAPCHOW", true));
             SetPrefab(data, "electric-pod", pod);
-            SetPrefab(data, "roadworks-barrier", neonBarrier);
+            SetPrefab(data, "roadworks-barrier", barricade);
             SetPrefab(data, "cargo-slide-gate", gate);
-            SetPrefab(data, "delivery-bot", CrewModels.Build(2, true));
             MeasureHurdles(data);
         }
 
@@ -869,6 +905,15 @@ namespace DallasDash.EditorTools
             foreach (var def in data.obstacles)
             {
                 if (!def.prefab) continue;
+                // Authored props report their extents directly; their freshly written mesh assets are
+                // not readable through an instanced prefab in the same session.
+                if (PropModels.TryBounds(def.prefab.name, out var known))
+                {
+                    def.size = new Vector3(known.size.x, known.max.y, Mathf.Max(0.3f, known.size.z));
+                    EditorUtility.SetDirty(def);
+                    Debug.Log($"[DallasDash] Hurdle {def.id}: {def.kind}, {def.size.x:F2} x {def.size.y:F2} x {def.size.z:F2} m");
+                    continue;
+                }
                 // Re-load from disk: the in-session prefab object still holds null mesh references.
                 string path = AssetDatabase.GetAssetPath(def.prefab);
                 var source = string.IsNullOrEmpty(path) ? def.prefab : AssetDatabase.LoadAssetAtPath<GameObject>(path);

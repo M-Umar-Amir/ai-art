@@ -18,8 +18,10 @@ namespace DallasDash.Gameplay
             foreach (var renderer in renderers)
             {
                 if (!renderer) continue;
-                var mesh = renderer.GetComponent<MeshFilter>(); if (!mesh || !mesh.sharedMesh) continue;
-                var b = mesh.sharedMesh.bounds;
+                var filter = renderer.GetComponent<MeshFilter>();
+                var mesh = filter ? filter.sharedMesh : renderer is SkinnedMeshRenderer skin ? skin.sharedMesh : null;
+                if (!mesh) continue;
+                var b = mesh.bounds;
                 renderer.GetPropertyBlock(properties);
                 properties.SetFloat("_Outfit", last); properties.SetFloat("_CrewIndex", character);
                 properties.SetFloat("_WardrobeMin", b.min.y); properties.SetFloat("_WardrobeHeight", b.size.y);

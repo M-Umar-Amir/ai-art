@@ -29,56 +29,65 @@ namespace DallasDash.Gameplay
             score.gameObject.SetActive(false);
             pickups.gameObject.SetActive(false);
             banner.gameObject.SetActive(false);
-            pickups = UiKit.Pill(safe, "coin", Vector2.zero, 300, Color.white, out pickupPill);
-            score = UiKit.Pill(safe, "star", Vector2.zero, 420, Color.white, out scorePill);
-            score.alignment = TextAnchor.MiddleRight;
-            score.rectTransform.anchoredPosition = new Vector2(10f, 2f);
-            Pin(pickupPill, new Vector2(0f, 1f), new Vector2(30f, -50f));
-            Pin(scorePill, new Vector2(1f, 1f), new Vector2(-30f, -50f));
 
-            var b = UiKit.Panel(safe, "Multiplier", Vector2.zero, new Vector2(150f, 84f), UiKit.Red);
+            // === TOP SECTION ===
+            // Left column: score and multiplier. The burger wallet (the only currency) is DashHud's right-hand
+            // pill; this pill stays built for older call sites but is never shown, so there is one burger count.
+            pickups = UiKit.Pill(safe, "burger", Vector2.zero, 230, Color.white, out pickupPill);
+            pickups.alignment = TextAnchor.MiddleRight;
+            Pin(pickupPill, new Vector2(0f, 1f), new Vector2(30f, -116f));
+
+            // Score pill - top of the left column.
+            score = UiKit.Pill(safe, "star", Vector2.zero, 230, Color.white, out scorePill);
+            score.alignment = TextAnchor.MiddleRight;
+            Pin(scorePill, new Vector2(0f, 1f), new Vector2(30f, -36f));
+
+            // Multiplier badge - under the score, with a star marker so it reads without a sentence.
+            var b = UiKit.Panel(safe, "Multiplier", Vector2.zero, new Vector2(120f, 72f), UiKit.Red);
             b.sprite = UiKit.Gradient;
             b.raycastTarget = false;
             badge = b.rectTransform;
-            Pin(badge, new Vector2(1f, 1f), new Vector2(-36f, -166f));
-            badgeText = UiKit.Label(b.transform, "", 56, new Vector2(0f, 2f), new Vector2(150f, 84f), Color.white);
+            Pin(badge, new Vector2(0f, 1f), new Vector2(30f, -116f));
+            UiKit.Icon(b.transform, "star", new Vector2(-32f, 0f), 34f);
+            badgeText = UiKit.Label(b.transform, "", 40, new Vector2(18f, 2f), new Vector2(80f, 64f), Color.white);
 
-            // Active power-ups: one pill each down the left side, its coloured bar draining as time runs out.
+            // Combo pill - same left stack, with a bar that fills as the chain grows.
+            var cb = UiKit.Panel(safe, "Combo", Vector2.zero, new Vector2(230f, 82f), new Color(0.05f, 0.08f, 0.25f, 0.84f));
+            cb.raycastTarget = false;
+            comboPill = cb.rectTransform;
+            Pin(comboPill, new Vector2(0f, 1f), new Vector2(30f, -282f));
+            comboText = UiKit.Label(cb.transform, "", 36, new Vector2(0f, 14f), new Vector2(210f, 46f), UiKit.Yellow);
+            var ctrack = UiKit.Panel(cb.transform, "Track", new Vector2(0f, -26f), new Vector2(180f, 11f), new Color(1f, 1f, 1f, 0.18f));
+            ctrack.raycastTarget = false;
+            var cfill = UiKit.Panel(ctrack.transform, "Fill", Vector2.zero, new Vector2(180f, 11f), UiKit.Yellow);
+            cfill.raycastTarget = false;
+            comboBar = cfill.rectTransform;
+            comboBar.pivot = new Vector2(0f, 0.5f);
+            comboBar.anchoredPosition = new Vector2(-90f, 0f);
+            cb.gameObject.SetActive(false);
+            GameManager.Instance.ComboMilestone += OnComboMilestone;
+
+            // === LEFT SIDE - POWER-UPS ===
+            // Active power-ups stack under the combo pill; equipment owns the bottom-left corner.
             boostPills = new RectTransform[PowerUps.Count];
             boostBars = new RectTransform[PowerUps.Count];
             boostPop = new float[PowerUps.Count];
             for (int i = 0; i < PowerUps.Count; i++)
             {
-                var bg = UiKit.Panel(safe, PowerUps.Names[i], Vector2.zero, new Vector2(250f, 88f), new Color(0.05f, 0.08f, 0.25f, 0.72f));
+                var bg = UiKit.Panel(safe, PowerUps.Names[i], Vector2.zero, new Vector2(230f, 80f), new Color(0.05f, 0.08f, 0.25f, 0.8f));
                 bg.raycastTarget = false;
                 boostPills[i] = bg.rectTransform;
-                UiKit.Icon(bg.transform, PowerUps.IconKeys[i], new Vector2(-82f, 2f), 92f);
-                var track = UiKit.Panel(bg.transform, "Track", new Vector2(40f, 0f), new Vector2(150f, 26f), new Color(1f, 1f, 1f, 0.18f));
+                UiKit.Icon(bg.transform, PowerUps.IconKeys[i], new Vector2(-72f, 2f), 78f);
+                var track = UiKit.Panel(bg.transform, "Track", new Vector2(38f, 0f), new Vector2(130f, 22f), new Color(1f, 1f, 1f, 0.18f));
                 track.raycastTarget = false;
-                var fill = UiKit.Panel(track.transform, "Fill", Vector2.zero, new Vector2(150f, 26f), PowerUps.Colors[i]);
+                var fill = UiKit.Panel(track.transform, "Fill", Vector2.zero, new Vector2(130f, 22f), PowerUps.Colors[i]);
                 fill.raycastTarget = false;
                 boostBars[i] = fill.rectTransform;
                 boostBars[i].pivot = new Vector2(0f, 0.5f);
-                boostBars[i].anchoredPosition = new Vector2(-75f, 0f);
+                boostBars[i].anchoredPosition = new Vector2(-65f, 0f);
                 bg.gameObject.SetActive(false);
             }
             PowerUps.Activated += OnPowerUp;
-
-            // Burger combo: a pill under the pause button with the streak and a bar that drains until the
-            // next pickup. Hidden below 3 in a row.
-            var cb = UiKit.Panel(safe, "Combo", Vector2.zero, new Vector2(300f, 96f), new Color(0.05f, 0.08f, 0.25f, 0.78f));
-            cb.raycastTarget = false;
-            comboPill = cb.rectTransform;
-            Pin(comboPill, new Vector2(0.5f, 1f), new Vector2(0f, -232f));
-            comboText = UiKit.Label(cb.transform, "", 46, new Vector2(0f, 10f), new Vector2(300f, 60f), UiKit.Yellow);
-            var ctrack = UiKit.Panel(cb.transform, "Track", new Vector2(0f, -30f), new Vector2(240f, 12f), new Color(1f, 1f, 1f, 0.18f));
-            ctrack.raycastTarget = false;
-            var cfill = UiKit.Panel(ctrack.transform, "Fill", new Vector2(-120f, 0f), new Vector2(240f, 12f), UiKit.Yellow);
-            cfill.raycastTarget = false;
-            comboBar = cfill.rectTransform;
-            comboBar.pivot = new Vector2(0f, 0.5f);
-            cb.gameObject.SetActive(false);
-            GameManager.Instance.ComboMilestone += OnComboMilestone;
 
             flash = UiKit.Rect(canvas, "Hit flash", Vector2.zero, Vector2.one).gameObject.AddComponent<Image>();
             flash.sprite = EdgeVignette();
@@ -142,9 +151,9 @@ namespace DallasDash.Gameplay
             var gm = GameManager.Instance;
             if (gm == null || !scorePill) return;
             score.text = gm.Score.ToString("N0");
-            pickups.text = gm.EnergyCollected.ToString();
+            pickups.text = gm.BurgersCollected.ToString();
             // The burger pill pulses on each pickup; the badge pops whenever the multiplier steps up.
-            if (gm.EnergyCollected != lastPickups) { pulse = 1f; lastPickups = gm.EnergyCollected; }
+            if (gm.BurgersCollected != lastPickups) { pulse = 1f; lastPickups = gm.BurgersCollected; }
             pulse = Mathf.MoveTowards(pulse, 0f, Time.deltaTime * 5f);
             pickupPill.localScale = Vector3.one * (1f + pulse * 0.12f);
             if (gm.Multiplier != lastMult) { badgePop = 1f; lastMult = gm.Multiplier; }
@@ -153,7 +162,7 @@ namespace DallasDash.Gameplay
 
             // Title, pause and busted screens live in MenuUI; the HUD only shows mid-run.
             bool running = gm.State == RunState.Running;
-            pickupPill.gameObject.SetActive(running);
+            pickupPill.gameObject.SetActive(false);
             scorePill.gameObject.SetActive(running);
             badge.gameObject.SetActive(running && gm.Multiplier > 1);
             badgeText.text = gm.ScoreFactor > gm.Multiplier ? $"x{gm.ScoreFactor}" : $"x{gm.Multiplier}";
@@ -174,18 +183,18 @@ namespace DallasDash.Gameplay
             flashT = Mathf.MoveTowards(flashT, 0f, Time.unscaledDeltaTime * 3f);
             flash.color = new Color(1f, 0.12f, 0.1f, flashT * (PlayerProfile.ReduceMotion ? 0.25f : 0.7f));
 
-            float y = -166f;
+            // Power-ups stack down the right column, under the route chip and clear of the left status stack.
+            float y = -280f;
             for (int i = 0; i < PowerUps.Count; i++)
             {
                 bool on = running && PowerUps.Active((PowerUp)i);
                 boostPills[i].gameObject.SetActive(on);
                 if (!on) continue;
-                Pin(boostPills[i], new Vector2(0f, 1f), new Vector2(30f, y));
-                y -= 100f;
+                Pin(boostPills[i], new Vector2(1f, 1f), new Vector2(-30f, y));
+                y -= 92f;
                 float frac = PowerUps.Fraction((PowerUp)i);
                 boostBars[i].localScale = new Vector3(frac, 1f, 1f);
                 boostPop[i] = Mathf.MoveTowards(boostPop[i], 0f, Time.deltaTime * 3f);
-                // Pops in on pickup, and blinks for the last two seconds.
                 bool ending = PowerUps.Remaining((PowerUp)i) < 2f && Mathf.Repeat(Time.time * 6f, 1f) < 0.5f;
                 boostPills[i].localScale = Vector3.one * (1f + boostPop[i] * boostPop[i] * 0.35f) * (ending ? 0.94f : 1f);
             }

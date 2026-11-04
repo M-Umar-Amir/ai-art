@@ -21,9 +21,10 @@ namespace DallasDash.Core
             PlayerPrefs.Save();
             Changed?.Invoke();
         }
-        public static void EarnBadge() { Ledger.badges++; Save(); }
+        /// Buys one coupon for BurgerPrices.Coupon burgers; null (and nothing spent) if the wallet is short.
         public static DemoCoupon Issue()
         {
+            if (!PlayerProfile.TrySpend(BurgerPrices.Coupon)) return null;
             var coupon = Ledger.Issue(DateTime.UtcNow);
             Save();
             return coupon;

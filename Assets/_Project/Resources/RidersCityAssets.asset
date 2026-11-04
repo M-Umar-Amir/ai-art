@@ -1,0 +1,71 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 715194d506b4ef5459fc7cb1c4b02e6e, type: 3}
+  m_Name: RidersCityAssets
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Gameplay.RidersCityAssets
+  riderPrefabs:
+  - {fileID: 4672182122939273557, guid: 6cdb06b206436294cb4ddb81a03443cf, type: 3}
+  - {fileID: 7341387092427875164, guid: f3ca50887779f4c408802e5ddc963413, type: 3}
+  - {fileID: 6884544919436830687, guid: 13da6a1e77f752945a2260859eb730b5, type: 3}
+  buildings:
+  - {fileID: 536447698841707955, guid: da207adbf43c2d145a7dc5f8cbddab8e, type: 3}
+  - {fileID: 2688683545917769788, guid: e0aaacb1db4eb3640a12087ef520600b, type: 3}
+  - {fileID: 536447698841707955, guid: da207adbf43c2d145a7dc5f8cbddab8e, type: 3}
+  - {fileID: 2688683545917769788, guid: e0aaacb1db4eb3640a12087ef520600b, type: 3}
+  - {fileID: 536447698841707955, guid: da207adbf43c2d145a7dc5f8cbddab8e, type: 3}
+  - {fileID: 6240513621805133060, guid: cb4f61ddb0c117f4fa8bcce69467ebd1, type: 3}
+  - {fileID: 4221340641976291397, guid: 314421b0ddbe5ed408ab4144cf20a818, type: 3}
+  trees:
+  - {fileID: 3184855525954473347, guid: b53ea97f486ae82488313cde818126e7, type: 3}
+  - {fileID: 4659489307669098130, guid: 0c9ec57693b438b49bb74a86b18c78b9, type: 3}
+  - {fileID: 8243618325694914444, guid: eae375c80b417a64985cb9b19ae2f32b, type: 3}
+  props:
+  - {fileID: 6408296822228591117, guid: 2abcc7d8a7739f141b136a12972f4830, type: 3}
+  - {fileID: 8638995482599659326, guid: 1062e21bd0de8f441a70f40f230e0982, type: 3}
+  - {fileID: 1674568521928628224, guid: 368f92b02fc91ae40b5d1bafdfeb5eda, type: 3}
+  - {fileID: 8678566818802172375, guid: a5df36ce0deac6440aabad3e284520d8, type: 3}
+  - {fileID: 3107038540289060377, guid: a47ce75d6f68e974f9cd8426458bc88a, type: 3}
+  - {fileID: 4963366539269405285, guid: 45e5777a28a401549b1bf29712566a05, type: 3}
+  - {fileID: 6327152342941162869, guid: 7dc78777240c7a44a9304b7d3262b9b2, type: 3}
+  - {fileID: 8373360400615553384, guid: 277e4670683a9984c9bb4ba866d253ec, type: 3}
+  - {fileID: 865713786944831965, guid: eea7b319cea741b4cb4ab9a4f1a3b0aa, type: 3}
+  - {fileID: 4180786100507405189, guid: 7acd972c5138a584b88ca08f0461634d, type: 3}
+  obstacles:
+  - {fileID: 2855130420635399231, guid: 0edb87bd11f169f46ba58945df4df994, type: 3}
+  - {fileID: 489555904579196711, guid: 9336bb9a650c8f84fb6f388cfa7f0baa, type: 3}
+  - {fileID: 5999982332108457585, guid: 36b1ebacc8e296949a8ddea76e6e61af, type: 3}
+  materials:
+  - {fileID: 2100000, guid: 5e8c5fb0997757f48b0f81703c6c2a9f, type: 2}
+  - {fileID: 2100000, guid: 0dbcdf662d6e331498de40d2364f78f8, type: 2}
+  services:
+  - {fileID: 5553427903999386864, guid: 8309d918c0b07f54388bf70b83d9ae14, type: 3}
+  - {fileID: 3998949150078007568, guid: 26c0585ffd253d74bbd293f5b626a497, type: 3}
+  - {fileID: 8678566818802172375, guid: a5df36ce0deac6440aabad3e284520d8, type: 3}
+  - {fileID: 660302277048243840, guid: bb9c9a4225ccb1b4c9b0928614c25364, type: 3}
+  - {fileID: 3998949150078007568, guid: 26c0585ffd253d74bbd293f5b626a497, type: 3}
+  - {fileID: 2848939609894239488, guid: 9c5cf84e53e049f44a8d4da1694a4cb9, type: 3}
+  servicePlatform: {fileID: 3528411309562439729, guid: 5b7fc1c21f8253643bca37fbd023fd9f, type: 3}
+  chargingStation: {fileID: 660302277048243840, guid: bb9c9a4225ccb1b4c9b0928614c25364, type: 3}
+  raceGate: {fileID: 7753896086247528641, guid: 1d677bb96c5ff024e96e4b6cf20c7ef4, type: 3}
+  pedestrianBridge: {fileID: 6365279729286798277, guid: 8ab5f987b8a0715438959dbea9f9ee1f, type: 3}
+  marketStall: {fileID: 8678566818802172375, guid: a5df36ce0deac6440aabad3e284520d8, type: 3}
+  districtRiders:
+  - {fileID: 4307143401248453839, guid: bd48c4e7fcd4cb54892b01d1d7431d97, type: 3}
+  - {fileID: 4876154447703805796, guid: f47e92bf12f206b4283f2126584679dc, type: 3}
+  - {fileID: 8620290299645266265, guid: 7553d2d19f6f58b449cd2ebb99e2758a, type: 3}
+  districtObstacles:
+  - {fileID: 7896459859540104937, guid: 7458e89bf4b5d9549ae4c76ecea92cf4, type: 3}
+  - {fileID: 346204691901603561, guid: c4b33316eec39f1469fd461f938dc721, type: 3}
+  - {fileID: 284749844927082691, guid: 7af17c24d647e094eaad385c6ef6a658, type: 3}
+  districtCharger: {fileID: 6526514561519419179, guid: 537b3190df6a7ab43b8cb6ef027f2e0c, type: 3}
+  districtFood: {fileID: 7882495964370774411, guid: db9168ee52d0820428d2f433fe7ef50d, type: 3}
+  districtFinish: {fileID: 2715131074293402899, guid: 819e3a9bb4286b440a75e9f87b1c16e1, type: 3}

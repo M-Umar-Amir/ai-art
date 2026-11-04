@@ -14,6 +14,8 @@ namespace DallasDash.UI
 
         Rect last;
         Vector2Int lastSize;
+        RectTransform content;
+        float lastScale;
 
         /// The usable rectangle in screen pixels.
         public static Rect Current
@@ -48,13 +50,20 @@ namespace DallasDash.UI
             rt.anchorMin = Vector2.zero;
             rt.anchorMax = Vector2.one;
             rt.offsetMin = rt.offsetMax = Vector2.zero;
+            var fitted = new GameObject("Content", typeof(RectTransform)).GetComponent<RectTransform>();
+            fitted.SetParent(rt, false);
+            fitted.anchorMin = fitted.anchorMax = new Vector2(.5f, .5f);
+            fitted.sizeDelta = new Vector2(1080, 1920);
+            go.GetComponent<SafeArea>().content = fitted;
             go.GetComponent<SafeArea>().Fit();
-            return rt;
+            return fitted;
         }
 
         void Update()
         {
-            if (Current != last || Screen.width != lastSize.x || Screen.height != lastSize.y) Fit();
+            var canvas = GetComponentInParent<Canvas>();
+            float scale = canvas ? canvas.scaleFactor : 1f;
+            if (Current != last || Screen.width != lastSize.x || Screen.height != lastSize.y || !Mathf.Approximately(scale, lastScale)) Fit();
         }
 
         void Fit()
@@ -71,6 +80,13 @@ namespace DallasDash.UI
             rt.anchorMin = new Vector2(r.xMin / Screen.width, r.yMin / Screen.height);
             rt.anchorMax = new Vector2(r.xMax / Screen.width, r.yMax / Screen.height);
             rt.offsetMin = rt.offsetMax = Vector2.zero;
+            var canvas = GetComponentInParent<Canvas>();
+            lastScale = canvas ? canvas.scaleFactor : 1f;
+            if (content)
+            {
+                float fit = Mathf.Min(rt.rect.width / 1080f, rt.rect.height / 1920f);
+                content.localScale = Vector3.one * Mathf.Max(.01f, fit);
+            }
         }
     }
 }

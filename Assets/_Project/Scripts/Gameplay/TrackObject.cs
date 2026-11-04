@@ -31,7 +31,6 @@ namespace DallasDash.Gameplay
         /// measured from here, so route objects resolve against a rider on the route, not on the road.
         public float baseHeight;
         public int points;
-        public bool energy;
         /// Oncoming traffic moves toward the rider at this speed (world units/s).
         public float oncoming;
         /// Traffic riding the same way (other couriers): the fraction of the rider's pace it moves at. It sits
@@ -40,6 +39,10 @@ namespace DallasDash.Gameplay
         public float meetZ;
         /// Vans, cars and roadworks: the rider bounces off instead of shoving them over.
         public bool heavy;
+        /// Cross traffic: the hit box follows the object's real x across the lanes, not its lane centre.
+        public bool lateral;
+        /// The rider's own e-bike, parked in a lane after a crash: riding into it puts them back on it.
+        public bool bike;
         /// A power-up token (PowerUp index) rather than a burger; -1 for everything else.
         public int powerUp = -1;
 

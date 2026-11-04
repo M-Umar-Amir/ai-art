@@ -20,13 +20,14 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
+  - Outline
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
     - _BaseMap:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
+        m_Texture: {fileID: 2800000, guid: 5d97e254fd61ae84dafee07991345ee7, type: 3}
+        m_Scale: {x: 1.5, y: 1.5}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
         m_Texture: {fileID: 0}
@@ -64,6 +65,10 @@ Material:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _SpecGlossMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -98,6 +103,7 @@ Material:
     - _DetailNormalMapScale: 1
     - _DstBlend: 0
     - _DstBlendAlpha: 0
+    - _EmissionUsesAlbedo: 0
     - _EnvironmentReflections: 1
     - _GaitAmount: 0
     - _GaitCenter: 0
@@ -110,13 +116,14 @@ Material:
     - _Metallic: 0
     - _OcclusionStrength: 1
     - _Outfit: 0
-    - _OutlineWidth: 0.012
+    - _OutlineWidth: 0
     - _Parallax: 0.005
     - _Portrait: 0
     - _QueueOffset: 0
     - _ReceiveShadows: 1
     - _RimPower: 4.5
-    - _RimStrength: 0.35
+    - _RimStrength: 0
+    - _RoughnessStrength: 0
     - _ShadowSoftness: 0.18
     - _Smoothness: 0.15
     - _SmoothnessTextureChannel: 0
@@ -124,10 +131,13 @@ Material:
     - _SrcBlend: 1
     - _SrcBlendAlpha: 1
     - _Surface: 0
-    - _SurfaceStyle: 0
+    - _SurfaceStyle: 1
     - _WardrobeHeight: 0
     - _WardrobeMin: 0
+    - _Wetness: 0
+    - _WindowInterior: 0
     - _WorkflowMode: 1
+    - _WorldTextureScale: 0
     - _XRMotionVectorsPass: 1
     - _ZWrite: 1
     m_Colors:

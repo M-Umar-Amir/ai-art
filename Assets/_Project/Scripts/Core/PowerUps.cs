@@ -7,7 +7,7 @@ namespace DallasDash.Core
 
     /// Timed run boosts picked up from tokens on the street. Magnet pulls burgers in from every lane,
     /// Sugar Rush speeds the rider up and shrugs off obstacles, Double Score doubles every point.
-    /// Each lasts longer for every coin-shop upgrade (PlayerProfile.UpgradeLevel).
+    /// Each lasts longer for every burger-shop upgrade (PlayerProfile.UpgradeLevel).
     public static class PowerUps
     {
         public const int Count = 6;
@@ -15,7 +15,7 @@ namespace DallasDash.Core
         public static readonly string[] Names = { "MAGNET PACK", "SPEED CORE", "DOUBLE SCORE", "GRAVITY BOOTS", "SHIELD DRONE", "DASH BATTERY" };
         public static readonly string[] Blurbs =
         {
-            "Food and chips fly to you.",
+            "Burgers fly to you.",
             "Faster; hits bounce off.",
             "Every point x2.",
             "Longer jumps; ride gravity rails.",
@@ -26,7 +26,7 @@ namespace DallasDash.Core
         public static readonly string[] IconKeys = { "magnet", "bolt", "x2", "boot", "shield", "bolt" };
         public static readonly Color[] Colors = { new(0.92f, 0.2f, 0.22f), new(0.2f, 0.55f, 1f), new(0.2f, 0.75f, 0.35f), new(0.65f, 0.2f, 1f), new(0.1f, 0.9f, 0.9f), new(1f, 0.65f, 0.1f) };
         /// Coin price of upgrade level 1..MaxLevel.
-        public static readonly int[] UpgradeCost = { 500, 1000, 2000, 4000, 7500 };
+        public static int[] UpgradeCost => BurgerPrices.Upgrade;
         public const float RushSpeedFactor = 1.3f;
 
         static readonly float[] remaining = new float[Count];

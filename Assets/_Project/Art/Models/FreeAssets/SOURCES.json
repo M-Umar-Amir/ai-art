@@ -1,0 +1,280 @@
+[
+  {
+    "file": "free-food-burger.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/food-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/food-kit",
+    "original": "burger-cheese-double.glb",
+    "sha256": "d2ad3076d2dd1550bd99ebe7a19e09a6c3fd5f09a44430e63c2b14279e03e783"
+  },
+  {
+    "file": "free-food-pizza.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/food-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/food-kit",
+    "original": "pizza.glb",
+    "sha256": "bde451f93a14a7198515a27deb7794362fa828f3db8356271d766146870ac9d6"
+  },
+  {
+    "file": "free-food-drink.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/food-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/food-kit",
+    "original": "soda.glb",
+    "sha256": "dab8a7323d5f273bf840e9d3b6767fed6d8279632ab6dd9625f6a1e1dffba8b5"
+  },
+  {
+    "file": "free-food-taco.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/food-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/food-kit",
+    "original": "taco.glb",
+    "sha256": "2aca873cda80115b36f7135f0620c3978f6f8140ec06b31a1014c37ed3ae3f9a"
+  },
+  {
+    "file": "free-food-parcel.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/food-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/food-kit",
+    "original": "bag.glb",
+    "sha256": "9e6dbed700ba195f7b55b4b19c13dd2ffe78a10c3f0092b0081c5fe72a6d6199"
+  },
+  {
+    "file": "free-city-a.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "building-c.glb",
+    "sha256": "834acf7c9a5fa99899d66645e35aa79a1bfca8930c6ed50fb135cf272bc2289f"
+  },
+  {
+    "file": "free-city-b.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "building-f.glb",
+    "sha256": "81a2b59a680b75b1e08d2bb7ba9aea42ffb5588822fe1a89a5095fa3fc51b3bc"
+  },
+  {
+    "file": "free-city-c.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "building-i.glb",
+    "sha256": "83f86305491eeae7979062fe919bab84e89c640f7c9fa5677879b6fda0c5e112"
+  },
+  {
+    "file": "free-city-tower-a.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "building-skyscraper-b.glb",
+    "sha256": "783151cd937cbd9ebacf3af5dc30f4ef090c9a7ceb9741366c65bc1171dbd4d1"
+  },
+  {
+    "file": "free-city-tower-b.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "building-skyscraper-d.glb",
+    "sha256": "158729f4bf10d5076532eb00c279bcbf72769dc4a86a77a1b07d3a181b562b2a"
+  },
+  {
+    "file": "free-city-awning.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "detail-awning-wide.glb",
+    "sha256": "2983552b43e56e86516af95f481b4f736eefbec271b8b5d55a2153ec1e10bab7"
+  },
+  {
+    "file": "free-city-parasol.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/city-kit-commercial",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/city-kit-commercial",
+    "original": "detail-parasol-a.glb",
+    "sha256": "67e1d464f379fca5327e0f3de0d3085cd69ed02449f86500f6bac030655adceb"
+  },
+  {
+    "file": "free-service-console.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "desk-computer.glb",
+    "sha256": "a2a6c536db930352553d56833870956ec2790e8c6a71d4a2f93358cce36d12e3"
+  },
+  {
+    "file": "free-service-charger.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "machine-wirelesscable.glb",
+    "sha256": "b38770b6d1a40e2afd8a5f535e6a962f07cf18a8345e9b940bf3843bcf938a6b"
+  },
+  {
+    "file": "free-delivery-platform.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "platform-large.glb",
+    "sha256": "aa1fba20818bc1d623953794146d9f9ff0e0f025463b013e325b373deb9be6c4"
+  },
+  {
+    "file": "free-service-gate.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "gate-simple.glb",
+    "sha256": "9ed530a12b9bfc2da091dc1725010c9c54debf99ec261320119e2db2dc8d5cff"
+  },
+  {
+    "file": "free-power-core.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "machine-generator.glb",
+    "sha256": "98e8ac6aceada3b2483ed1eceb59bff7190ee774edac799350ccc11ad140f7f3"
+  },
+  {
+    "file": "free-power-battery.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "machine-barrel.glb",
+    "sha256": "ecd46823928292bbb01718966bd4602a71e37a09320f3ba232d9044e909ce4ed"
+  },
+  {
+    "file": "free-power-drone.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "craft-miner.glb",
+    "sha256": "de32320578886d2e73b1cd24b6161c9bd855e3a172bc2abcc8cb7bdd46352348"
+  },
+  {
+    "file": "free-power-magnet.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "machine-wireless.glb",
+    "sha256": "9d49e70d51515bc38628fb0d6e43f4eda7f9cd5326882fd02e8815e61f2259d7"
+  },
+  {
+    "file": "free-energy-chip.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/platformer-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/platformer-kit",
+    "original": "coin-gold.glb",
+    "sha256": "0770dba9b512f438634589ec6c8a10bde5569cce4502566f9201c412cb5fd651"
+  },
+  {
+    "file": "free-roof-chimney.glb",
+    "creator": "Kenney",
+    "license": "CC0-1.0",
+    "source": "https://kenney.nl/assets/space-kit",
+    "download": "https://github.com/Hidencod/tge-assets/tree/d92c6e923bbef8649d4e5be3ab375a40f88672b0/packs/space-kit",
+    "original": "chimney-detailed.glb",
+    "sha256": "2b7b4950f5a1430ccf7d3469c21b837dc52ec61538dcdbcf875529767d68d752"
+  },
+  {
+    "file": "free-courier-chip.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "c05c83ccbf9eedfb933576cdd8e4691cb0b78d4f951b9add065d5dbb8d6a4c0e"
+  },
+  {
+    "file": "free-dash-battery.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "a7027622927eb62c09752e66d27cac9c431fad2dfff3aad4ef5498f37306c16e"
+  },
+  {
+    "file": "free-double-core.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "fac4f9ffe5e339c6a3c0d9926f3f7dbb5bd931eb41defede3154fbffe0bd6745"
+  },
+  {
+    "file": "free-festival-stage.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "d6b81ab8bc6445a99074f1685e2661c49ca6e9146b2d4a1712f372c6975cfa9b"
+  },
+  {
+    "file": "free-gravity-boots.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "b53e59cddc0d3becc939384860bd8941d29dd73a9dd4b34bd75c52957b91624b"
+  },
+  {
+    "file": "free-magnet-pack.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "9d807892f7aee1309c6c2e591709a604a6e5d1093360f27ab731a9951203faab"
+  },
+  {
+    "file": "free-roof-tank.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "ddb83ebf94759cb09157dfe51b9c1759e7a74a0ff2d2d51a207203acab5c27a1"
+  },
+  {
+    "file": "free-roof-vent.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "7eee77c101ea0b74e471a3524ab7e01877d0f867111f8da636556e86aba82ade"
+  },
+  {
+    "file": "free-shield-drone.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "037a7eac5031ab48a7280125c6d19d555986c1bc8a180026b89774cab95377e0"
+  },
+  {
+    "file": "free-speed-core.glb",
+    "creator": "Local project generation",
+    "source": "generate_courier_collectibles.py",
+    "method": "Free Blender procedural mesh generation; no AI inference",
+    "license": "Project-generated; no third-party mesh inputs",
+    "sha256": "475743a55d177e3377d2b7689f8995b75aac4a4b58368daddafb7841ea58a965"
+  }
+]

@@ -1,0 +1,197 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &5936901065410520453
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3835921581566786496}
+  - component: {fileID: 2737337263923212810}
+  m_Layer: 0
+  m_Name: nova-cyclist
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3835921581566786496
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5936901065410520453}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 6194456966090118991}
+  - {fileID: 4041782244432521675}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2737337263923212810
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5936901065410520453}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 78787de362b26974bbf3b878f5fca456, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Gameplay.CyclistMotion
+  body: {fileID: 7353608864276888962}
+  crank: {fileID: 8222708497490869549}
+  frontWheel: {fileID: 8157299979607593540}
+  rearWheel: {fileID: 7160464466569586188}
+  wheelRadius: 0.4
+--- !u!1001 &370361666187522827
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3835921581566786496}
+    m_Modifications:
+    - target: {fileID: 1448865492957996335, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_Name
+      value: Rider
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+--- !u!4 &4041782244432521675 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 4410293354351745728, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+  m_PrefabInstance: {fileID: 370361666187522827}
+  m_PrefabAsset: {fileID: 0}
+--- !u!137 &7353608864276888962 stripped
+SkinnedMeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7146805463250914953, guid: c79693b7a64214a4caab11b2f7b34d4e, type: 3}
+  m_PrefabInstance: {fileID: 370361666187522827}
+  m_PrefabAsset: {fileID: 0}
+--- !u!1001 &1832177057082460874
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3835921581566786496}
+    m_Modifications:
+    - target: {fileID: 836299785547708265, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_Name
+      value: E-bike
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+--- !u!4 &6194456966090118991 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5519744745883803013, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+  m_PrefabInstance: {fileID: 1832177057082460874}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &7160464466569586188 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 8805143299475811526, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+  m_PrefabInstance: {fileID: 1832177057082460874}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8157299979607593540 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7519250302735390862, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+  m_PrefabInstance: {fileID: 1832177057082460874}
+  m_PrefabAsset: {fileID: 0}
+--- !u!4 &8222708497490869549 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7742213890553034727, guid: 17b5e17807ee8c749954bf8104e124ae, type: 3}
+  m_PrefabInstance: {fileID: 1832177057082460874}
+  m_PrefabAsset: {fileID: 0}

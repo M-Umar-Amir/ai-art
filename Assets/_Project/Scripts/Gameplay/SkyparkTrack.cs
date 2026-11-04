@@ -14,7 +14,7 @@ namespace DallasDash.Gameplay
         {
             float end = z + segmentLength, at = z;
             var metal = DashCity.Mat(this, "roofMetal", new Color(.11f,.18f,.24f), .02f);
-            var cyan = DashCity.Mat(this, "roofCoping", new Color(.08f,.85f,.85f), .6f);
+            var cyan = DashCity.Mat(this, "roofCoping", new Color(.48f,.46f,.38f), 0f);
             var garden = DashCity.Mat(this, "roofGarden", new Color(.14f,.34f,.22f));
             var stone = DashCity.Mat(this, "roofStone", new Color(.24f,.32f,.38f));
             while (at < end)
@@ -25,16 +25,14 @@ namespace DallasDash.Gameplay
                 edge = Mathf.Min(edge, end);
                 if (!voidNow)
                 {
-                    if (skyparkTower)
-                    {
-                        var tower = Instantiate(skyparkTower, new Vector3(0f, CityGround, (at + edge) * .5f), Quaternion.identity, parent);
-                        tower.transform.localScale = new Vector3(1f, 1f, (edge - at) / 20f);
-                        tower.name = "Playable high-rise roof / 40m above city";
-                    }
-                    else DashCity.Part(parent, new Vector3(0f, CityGround * .5f, (at + edge) * .5f), new Vector3(8f, -CityGround, edge-at), stone);
+                    // Own the roof geometry here: the imported tower's raised pale inset panels
+                    // protruded through the paving. Keep the mass below the actual support plane.
+                    DashCity.Part(parent, new Vector3(0f, (CityGround-.04f)*.5f, (at + edge) * .5f), new Vector3(8f, -CityGround-.04f, edge-at), stone);
+                    // Rough, normal-mapped terrace paving replaces the glossy pale tower cap.
+                    DashCity.Part(parent,new Vector3(0f,.018f,(at+edge)*.5f),new Vector3(7.96f,.018f,edge-at),sidewalkMaterial);
                     foreach (float side in new[] { -1f, 1f })
                     {
-                        bool opening = side > 0f && (DashRun.RouteOpen(at) || DashRun.RouteOpen(edge));
+                        bool opening = DashCity.OpenEdge(side, at, edge - at);
                         if (!opening)
                         {
                             DashCity.Part(parent, new Vector3(side*4.05f,.43f,(at+edge)*.5f), new Vector3(.12f,.85f,edge-at), metal);
@@ -54,7 +52,7 @@ namespace DallasDash.Gameplay
                     }
                     // Roof joints, skylights and edge beacons replace road markings and traffic signs.
                     for (float seam=at+4f; seam<edge; seam+=4f)
-                        DashCity.Part(parent,new Vector3(0f,.009f,seam),new Vector3(7.7f,.012f,.025f),metal);
+                        DashCity.Part(parent,new Vector3(0f,.034f,seam),new Vector3(7.7f,.012f,.025f),metal);
                     if (SkyparkVoid(edge+.05f))
                         DashCity.Part(parent,new Vector3(0f,.025f,edge-.12f),new Vector3(7.8f,.05f,.2f),cyan);
                 }
@@ -75,20 +73,19 @@ namespace DallasDash.Gameplay
         {
             var city = DashCity.Mat(this,"cityBelow",new Color(.035f,.055f,.09f));
             DashCity.Part(parent,new Vector3(0f,CityGround-.2f,z+10f),new Vector3(160f,.2f,segmentLength),city);
-            if (dashBuildings == null || dashBuildings.Length == 0) return;
+            var skyline = new GameObject("Masonry roof district").transform;
+            skyline.SetParent(parent,false);
             foreach (float side in new[] {-1f,1f})
             {
-                int block=Mathf.Abs(Mathf.FloorToInt(z/20f));
-                if (block%2!=0) continue;
-                var tower=Instantiate(dashBuildings[block%dashBuildings.Length],new Vector3(side*(22f+block%3*5f),CityGround,z+10f),Quaternion.Euler(0f,side>0f?-90f:90f,0f),parent);
-                tower.transform.localScale=new Vector3(.8f+(block%3)*.12f,1.7f+(block%4)*.32f,.8f+(block%3)*.12f);
-                tower.name="City skyline below rooftop course";
+                if (side > 0f && (RooftopCourse.OwnsRightSide(z) || RooftopCourse.OwnsRightSide(z + segmentLength))) continue;
+                NaturalArchitecture.Build(this,skyline,side,z,false);
             }
+            Combine(skyline.gameObject);
         }
 
         float SpawnSkyparkRow(float z)
         {
-            if (DashRun.WallZone(z)||DashRun.GravityZone(z)) { SpawnTraversalRow(z); return 0f; }
+            SpawnWallBurgers(z);
             float gapPhase = z < 80f ? 40f : Mathf.Repeat(z-100f,80f);
             if (gapPhase<15f||gapPhase>65f) return 0f;
             int open=Mathf.Clamp(lastOpen+Random.Range(-1,2),0,Tuning.Lanes-1);lastOpen=open;
@@ -97,13 +94,12 @@ namespace DallasDash.Gameplay
             for(int lane=0;lane<Tuning.Lanes;lane++)
             {
                 if (token && lane==open) { SpawnPowerUp((PowerUp)Random.Range(0,PowerUps.Count),lane,z);continue; }
+                // The rooftop shortcut's ramp and landing keep the right-hand lane clear.
+                if (lane==RooftopCourse.EntryLane && RooftopCourse.KeepLaneClear(z)) { if (!RooftopCourse.OnRamp(z)&&!RooftopCourse.OnRamp(z+5f)) SpawnPickupLine(lane,z); continue; }
                 if (lane==open||Random.value<.4f) { SpawnPickupLine(lane,z);continue; }
                 float x=Tuning.LaneX[lane];
                 var root=new GameObject("Roof ventilation unit / jump");root.transform.SetParent(transform);root.transform.position=new Vector3(x,0,z);
-                var shell=DashCity.Mat(this,"roofVentShell",new Color(.2f,.28f,.34f));
-                var slat=DashCity.Mat(this,"roofVentSlat",new Color(.055f,.09f,.13f));
-                DashCity.Part(root.transform,new Vector3(x,.36f,z),new Vector3(1.35f,.72f,1.5f),shell);
-                for(int k=0;k<7;k++) DashCity.Part(root.transform,new Vector3(x,.725f,z-.6f+k*.2f),new Vector3(1.1f,.025f,.075f),slat);
+                PlaceAsset(roofVentModel, root.transform, new Vector3(x, 0, z), 1.5f);
                 Register(root,TrackKind.Low,lane,.75f,0,0f);var o=live[live.Count-1];o.height=.74f;o.halfWidth=.675f;
             }
             return 0f;

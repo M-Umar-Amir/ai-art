@@ -14,6 +14,20 @@ namespace DallasDash.Gameplay
         public RiderController rider;
         public ChaseController chase;
         public PickupDef[] pickups;
+        public GameObject[] powerUpModels;
+        public GameObject routeHurdleModel;
+        public GameObject movingDeliveryPlatform;
+        public GameObject roofVentModel, roofTankModel, roofChimneyModel, festivalStageModel;
+        public Texture2D asphaltTexture, pavingTexture, asphaltNormal, pavingNormal, masonryTexture;
+        public Texture2D asphaltRoughness, pavingRoughness, masonryNormal, masonryRoughness;
+
+        public GameObject PlaceAsset(GameObject prefab, Transform parent, Vector3 at, float size, float yaw = 0f)
+        {
+            if (!prefab) throw new InvalidOperationException("Required environment model is missing");
+            var model = Instantiate(prefab, at, Quaternion.Euler(0, yaw, 0), parent);
+            model.transform.localScale = Vector3.one * size;
+            return model;
+        }
         public ObstacleDef[] obstacles;
         public LandmarkDef[] landmarks;
 
@@ -130,11 +144,9 @@ namespace DallasDash.Gameplay
                 if (gapPlatform && gapPlatform.Support(x, z, out float gapTop)) { best = Mathf.Max(best, gapTop); continue; }
                 return false;
             }
-            if (best == float.NegativeInfinity && x > 4.5f && DashRun.RouteZone(z))
-            {
-                float local = z - DashRun.RouteZoneStart(z);
-                if (local > DashRun.RouteLeadIn && local < DashRun.RouteZoneLength(z) - DashRun.RouteLeadIn) return false;
-            }
+            // The rooftop kicker ramp in the right-hand lane is a real slope the bike rolls up.
+            if (RooftopCourse.OnRamp(z) && Mathf.Abs(x - Tuning.LaneX[RooftopCourse.EntryLane]) < 1.05f)
+                best = Mathf.Max(best, RampHeightAt(z));
             if (best > float.NegativeInfinity) height = best;
             return true;
         }
@@ -144,6 +156,9 @@ namespace DallasDash.Gameplay
 
         void Start()
         {
+            // Older authored scenes predate district services. Ensure kiosks are
+            // live in every district, including existing builds/scenes.
+            if (!FindFirstObjectByType<FuelStops>()) gameObject.AddComponent<FuelStops>();
             // The font atlas is dynamic: keep the curved text material pointed at it as glyphs get added.
             if (signTextMaterial && signFont)
             {
@@ -165,6 +180,7 @@ namespace DallasDash.Gameplay
 
         void ResetTrack()
         {
+            staticCohorts.Clear();
             DashCity.ApplyLighting(this);
             pending.Clear();
             building = null;
@@ -179,7 +195,7 @@ namespace DallasDash.Gameplay
             nextPowerUp = FirstPowerUpAt;
             brandIndex = 0;
             lastOpen = 1;
-            builtRoutes.Clear();
+            builtRooftops.Clear();
             landmarkIndex = 0;
             segmentIndex = 0;
             Build(0f);
@@ -220,6 +236,7 @@ namespace DallasDash.Gameplay
                 if (rider.Lane != lastLane) { laneFrom = lastLane; laneChangedAt = Time.time; lastLane = rider.Lane; }
                 MoveTraffic(d);
                 Resolve(d);
+                PedestrianContacts();
                 previousRiderPosition = rider.transform.position;
                 previousDistance = d;
                 Announce(d);
@@ -234,7 +251,7 @@ namespace DallasDash.Gameplay
             {
                 SpawnLandmark(landmarks[landmarkIndex++]);
             }
-            BuildRoutes(d);
+            BuildRooftops(d);
             while (builtTo < d + Tuning.FarEdge + segmentLength * 2f)
             {
                 var root = new GameObject("Segment");
@@ -250,7 +267,8 @@ namespace DallasDash.Gameplay
                 // Rows with a long hurdle (a 6 m van or roadworks) get its length added to the gap after them,
                 // so the clear road between rows is the same whatever was spawned.
                 float extra = SpawnRow(nextRow);
-                nextRow += rowSpacing * Mathf.Lerp(1f, 1.6f, Mathf.InverseLerp(Tuning.SpeedBase, Tuning.SpeedMax, GameManager.Instance.Speed)) + extra;
+                float densitySpeed = GameManager.Instance.Speed;
+                nextRow += rowSpacing * Mathf.Lerp(1f, 1.6f, Mathf.InverseLerp(Tuning.SpeedBase, Tuning.SpeedMax, densitySpeed)) + extra;
             }
         }
 
@@ -266,6 +284,7 @@ namespace DallasDash.Gameplay
                 yield return null;
                 if (!root) yield break;
                 SkyparkBackdrop(t, z);
+                BatchCohort(root, z);
                 yield break;
             }
             int gapLane = DashRun.RoofGapLane(z);
@@ -285,7 +304,9 @@ namespace DallasDash.Gameplay
                     }
                 }
             }
-            foreach (float side in new[] { -1f, 1f })
+            bool junction = Junction(z);
+            if (junction) BuildJunction(t, z);
+            foreach (float side in junction ? new float[0] : new[] { -1f, 1f })
             {
                 var walk = GameObject.CreatePrimitive(PrimitiveType.Cube);
                 walk.transform.SetParent(t);
@@ -297,26 +318,57 @@ namespace DallasDash.Gameplay
             // Dashed lane lines between the three lanes.
             foreach (float lx in new[] { -1.15f, 1.15f })
                 for (float dz = 1f; dz < segmentLength; dz += 5f)
-                    if (gapLane < 0 || dz < 5f || dz > 13f)
+                    if ((gapLane < 0 || dz < 5f || dz > 13f) && !junction)
                         Block(t, new Vector3(lx, 0.005f, z + dz + 1.25f), new Vector3(0.12f, 0.02f, 2.5f), laneLineMaterial);
             DashCity.Signature(this, t, z);
             segmentIndex++;
             Combine(root);
             yield return null;
 
-            foreach (float side in new[] { -1f, 1f })
+            foreach (float side in junction ? new float[0] : new[] { -1f, 1f })
             {
                 if (!root) yield break;
                 // Each side gets its own batching root, so the merge cost is split across frames too.
                 var sideRoot = new GameObject(side < 0f ? "Left" : "Right").transform;
                 sideRoot.SetParent(t, false);
                 DashCity.Side(this, sideRoot, side, z);
-                if (DashRun.District != 1) StreetTree(sideRoot, side, z + 10f);
+                if (DashRun.District == 0 && !DashCity.OpenEdge(side, z, segmentLength)) StreetTree(sideRoot, side, z + 10f);
                 yield return null;
                 if (!root) yield break;
                 Combine(sideRoot.gameObject);
                 yield return null;
             }
+            if (junction)
+            {
+                // People and cross traffic come a frame or two after the junction's geometry.
+                yield return null;
+                if (!root) yield break;
+                JunctionPeople(t, z);
+                yield return null;
+                if (!root) yield break;
+                SpawnCrossTraffic(z);
+            }
+            BatchCohort(root, z);
+        }
+
+        readonly Dictionary<int,List<GameObject>> staticCohorts = new();
+        void BatchCohort(GameObject root, float z)
+        {
+            int key = Mathf.FloorToInt(z / (segmentLength * 3f));
+            if (!staticCohorts.TryGetValue(key, out var members)) staticCohorts[key] = members = new List<GameObject>(3);
+            members.Add(root);
+            if (members.Count < 3) return;
+            var objects = new List<GameObject>();
+            foreach (var member in members) if (member)
+                foreach (var renderer in member.GetComponentsInChildren<MeshRenderer>())
+                {
+                    var filter = renderer.GetComponent<MeshFilter>();
+                    if (!renderer.enabled || renderer.isPartOfStaticBatch || renderer.HasPropertyBlock() || !filter || !filter.sharedMesh || !filter.sharedMesh.isReadable) continue;
+                    if (renderer.GetComponent<TextMesh>() || renderer.GetComponentInParent<LODGroup>() || renderer.GetComponentInParent<Billboard>() || renderer.GetComponentInParent<Bobber>() || renderer.GetComponentInParent<Blinker>() || renderer.GetComponentInParent<TrafficLight>()) continue;
+                    objects.Add(renderer.gameObject);
+                }
+            if (objects.Count > 1) StaticBatchingUtility.Combine(objects.ToArray(), gameObject);
+            staticCohorts.Remove(key);
         }
 
         Material patchMaterial;
@@ -391,11 +443,7 @@ namespace DallasDash.Gameplay
         float SpawnRow(float z)
         {
             if (DashRun.District == 1) return SpawnSkyparkRow(z);
-            if (DashRun.GravityZone(z) || DashRun.WallZone(z))
-            {
-                SpawnTraversalRow(z);
-                return 0f;
-            }
+            SpawnWallBurgers(z);
             // One lane is always left open so every row is passable, and it is never more than one lane over
             // from the last row's, so the way through is always one swipe away.
             int open = Mathf.Clamp(lastOpen + Random.Range(-1, 2), 0, Tuning.Lanes - 1);
@@ -410,10 +458,17 @@ namespace DallasDash.Gameplay
             bool token = z >= nextPowerUp;
             if (token) nextPowerUp = z + Random.Range(PowerUpGap * 0.75f, PowerUpGap * 1.25f);
 
-            // The fourth lane is the side route, built separately by RouteSegment. The three traffic
-            // lanes keep every hazard, so the route is a real bypass rather than a cleared lane.
+            // The rooftop shortcut runs above the right-hand pavement; the three traffic lanes keep their
+            // hazards, so the roofs are a real bypass rather than a cleared lane.
+            // At a junction the cross traffic is the hazard; the street rows there only carry food.
+            if (NearJunction(z)) { for (int lane = 0; lane < Tuning.Lanes; lane++) SpawnPickupLine(lane, z); return 0f; }
+            bool rampLane = RooftopCourse.KeepLaneClear(z);
+            int bikeLane = z > BikeReservedFrom && z < BikeReservedTo ? BikeReservedLane : -1;
+            if (rampLane) { open = RooftopCourse.EntryLane; lastOpen = open; }
             for (int lane = 0; lane < Tuning.Lanes; lane++)
             {
+                if (lane == bikeLane) continue;
+                if (rampLane && lane == RooftopCourse.EntryLane) { if (!RooftopCourse.OnRamp(z) && !RooftopCourse.OnRamp(z + 5f)) SpawnPickupLine(lane, z); continue; }
                 if (token && lane == open) { SpawnPowerUp((PowerUp)Random.Range(0, PowerUps.Count), lane, z); continue; }
                 if (lane == open || Random.value < 0.45f || obstacles == null || obstacles.Length == 0)
                 {
@@ -426,41 +481,29 @@ namespace DallasDash.Gameplay
                     longest = Mathf.Max(longest, DashRun.District == 1 ? 7f : 2f);
                     continue;
                 }
-                var def = SpawnObstacle(WeightedObstacle(), lane, z);
+                var def = SpawnObstacle(DistrictObstacle(), lane, z);
                 if (def && def.drift <= 0f) longest = Mathf.Max(longest, def.size.z);
             }
             return Mathf.Max(0f, longest - 1f);
         }
 
-        void SpawnTraversalRow(float z)
+        /// Wall runs can start anywhere (client, 3 Nov), so some street rows put a line of burgers along one
+        /// facade at the wall-run height: a reward for running the wall, out of reach from the road.
+        void SpawnWallBurgers(float z)
         {
-            bool gravity = DashRun.GravityZone(z);
-            // Rewards are physically attached to a surface, so the alternate route has a purpose.
-            // Road remains a viable teaching route; advanced riders can follow the wall/ceiling chains.
-            // ALTERNATE ROUTES NOW MARKED AS SHORTCUTS WITH BONUS REWARDS
-            foreach (RunSurface surface in Enum.GetValues(typeof(RunSurface)))
+            int row = Mathf.Abs(Mathf.FloorToInt(z / rowSpacing));
+            if (row % 5 != 2) return;
+            int side = (row / 5) % 2 == 0 ? -1 : 1;
+            if (!DashRun.WallAvailable(side, z) || !DashRun.WallAvailable(side, z + 10f)) return;
+            var surface = side < 0 ? RunSurface.LeftWall : RunSurface.RightWall;
+            for (int j = 0; j < 4; j++)
             {
-                if (!gravity && surface == RunSurface.Ceiling) continue;
-                for (int j = 0; j < 4; j++)
-                {
-                    if (!(gravity ? DashRun.GravityZone(z + j * 2.5f) : DashRun.WallZone(z + j * 2.5f))) continue;
-                    var at = SurfaceTraversal.Point(surface, 0, 0.85f) + Vector3.forward * (z + j * 2.5f);
-                    var token = Pool.Rent("route-chip", () => DashCity.Part(transform, Vector3.zero, new Vector3(0.32f, 0.12f, 0.32f),
-                        DashCity.Mat(this, "routeChip", new Color(1f, 0.7f, 0.12f), 0.5f), PrimitiveType.Cylinder), at, SurfaceTraversal.Orientation(surface));
-                    token.name = "Shortcut chip / " + surface;
-                    token.transform.rotation = SurfaceTraversal.Orientation(surface);
-                    Register(token, TrackKind.Pickup, 1, 0.3f, 25, 0); // Increased points for shortcut routes
-                    live[live.Count - 1].surface = surface;
-                    live[live.Count - 1].energy = true;
-                }
-                int blockedLane = Mathf.Abs(Mathf.FloorToInt(z / rowSpacing)) % 2 == 0 ? 0 : 2;
-                var position = SurfaceTraversal.Point(surface, Tuning.LaneX[blockedLane], 0.65f) + Vector3.forward * z;
-                var hurdle = Pool.Rent("route-barrier", () => DashCity.Part(transform, Vector3.zero, new Vector3(1.8f, 1.3f, 0.5f),
-                    DashCity.Mat(this, "routeBarrier", new Color(0.95f, 0.34f, 0.08f), 0.1f)), position, SurfaceTraversal.Orientation(surface));
-                hurdle.name = "Shortcut barrier / " + surface;
-                hurdle.transform.rotation = SurfaceTraversal.Orientation(surface);
-                Register(hurdle, TrackKind.Low, blockedLane, 0.25f, 0, 0);
-                var obstacle = live[live.Count - 1]; obstacle.surface = surface; obstacle.height = 1.3f;
+                var at = SurfaceTraversal.Point(surface, 0f, 0.5f) + Vector3.forward * (z + j * 2.5f);
+                var token = RentBurger("wall-burger", at, SurfaceTraversal.Orientation(surface), false);
+                token.name = "Wall-run burger / " + surface;
+                token.transform.rotation = SurfaceTraversal.Orientation(surface);
+                Register(token, TrackKind.Pickup, 1, 0.4f, 25, 0);
+                live[live.Count - 1].surface = surface;
             }
         }
 
@@ -475,34 +518,65 @@ namespace DallasDash.Gameplay
             // Every second gap includes a delivery platform moving vertically through the opening.
             if (Mathf.FloorToInt(z / 80f) % 2 == 0)
             {
-                var platform = DashCity.Part(go.transform, go.transform.position + Vector3.down * 0.5f, new Vector3(2.05f, 0.22f, 6f), roadMaterial);
-                platform.name = "Moving delivery platform";
+                if (!movingDeliveryPlatform) throw new InvalidOperationException("Missing moving platform mesh");
+                var platform = new GameObject("Moving delivery platform");
+                platform.transform.SetParent(go.transform, false);
+                platform.transform.localPosition = Vector3.down * .5f;
+                var visual = Instantiate(movingDeliveryPlatform, platform.transform);
+                var renderers = visual.GetComponentsInChildren<Renderer>();
+                var bounds = renderers[0].bounds;
+                foreach (var renderer in renderers) bounds.Encapsulate(renderer.bounds);
+                visual.transform.localScale = new Vector3(2.05f / bounds.size.x, .22f / bounds.size.y, 6f / bounds.size.z);
+                visual.transform.localPosition = Vector3.down * .11f;
                 go.AddComponent<DashPlatform>().platform = platform.transform;
             }
         }
 
+        /// Signature street hurdles, all real objects: construction scaffolding over a lane to slide under,
+        /// or in Festivals a stage lighting truss whose light bar drops and lifts on the music's beat.
         void SpawnSignatureObstacle(int lane, float z)
         {
-            var root = new GameObject("Dash route challenge");
-            root.transform.SetParent(transform);
             float x = Tuning.LaneX[lane];
+            if (DashRun.District != 2)
+            {
+                ObstacleDef scaffold = null;
+                foreach (var def in obstacles) if (def && def.id == "cargo-slide-gate") scaffold = def;
+                if (scaffold) { SpawnObstacle(scaffold, lane, z); return; }
+            }
+            var root = new GameObject("Festival lighting truss / beat gate");
+            root.transform.SetParent(transform);
             root.transform.position = new Vector3(x, 0, z);
-            var mat = DashCity.Mat(this, "hazard", new Color(1f, 0.25f, 0.4f), 0.35f);
-            bool gap = DashRun.District == 1;
-            if (gap)
+            var truss = DashCity.Mat(this, "trussAluminium", new Color(0.72f, 0.74f, 0.78f));
+            var housing = DashCity.Mat(this, "trussLampHousing", new Color(0.05f, 0.05f, 0.06f));
+            var warm = DashCity.Mat(this, "trussLampWarm", new Color(1f, 0.72f, 0.35f), 2.4f);
+            var pink = DashCity.Mat(this, "roofNeonPink", new Color(1f, 0.1f, 0.55f), 2.2f);
+            // Square box-truss towers with cross bracing, and a header truss across the lane.
+            foreach (float side in new[] { -1f, 1f })
             {
-                DashCity.Part(root.transform, new Vector3(x, 0.015f, z), new Vector3(2.1f, 0.02f, 7f), DashCity.Mat(this, "void", new Color(0.01f, 0.015f, 0.045f)));
-                foreach (float edge in new[] { -3.6f, 3.6f })
-                    DashCity.Part(root.transform, new Vector3(x, 0.05f, z + edge), new Vector3(2.15f, 0.08f, 0.12f), mat);
+                foreach (float dx in new[] { -0.15f, 0.15f })
+                    foreach (float dz in new[] { -0.15f, 0.15f })
+                        DashCity.Part(root.transform, new Vector3(x + side * 1.12f + dx, 2f, z + dz), new Vector3(0.05f, 4f, 0.05f), truss);
+                for (float y = 0.4f; y < 4f; y += 0.5f)
+                    DashCity.Part(root.transform, new Vector3(x + side * 1.12f, y, z - 0.15f), new Vector3(0.32f, 0.03f, 0.03f), truss);
+                DashCity.Part(root.transform, new Vector3(x + side * 1.12f, 0.03f, z), new Vector3(0.6f, 0.06f, 0.6f), housing);
             }
-            else
+            foreach (float dy in new[] { 3.85f, 4.15f })
+                DashCity.Part(root.transform, new Vector3(x, dy, z), new Vector3(2.6f, 0.05f, 0.05f), truss);
+            // The moving light bar: a row of stage spots on a pipe, dropped to riding height on the beat.
+            var bar = new GameObject("Light bar").transform;
+            bar.SetParent(root.transform, false);
+            bar.position = new Vector3(x, 1.75f, z);
+            DashCity.Part(bar, new Vector3(x, 1.75f, z), new Vector3(2.1f, 0.12f, 0.12f), truss);
+            for (int i = -2; i <= 2; i++)
             {
-                foreach (float side in new[] { -1f, 1f })
-                    DashCity.Part(root.transform, new Vector3(x + side, 1.4f, z), new Vector3(0.12f, 2.8f, 0.3f), mat);
-                var beam = DashCity.Part(root.transform, new Vector3(x, 2.1f, z), new Vector3(2.1f, 1.3f, 0.8f), mat);
-                if (DashRun.District == 2) root.AddComponent<DashRhythmGate>().beam = beam.transform;
+                DashCity.Part(bar, new Vector3(x + i * 0.42f, 1.55f, z), new Vector3(0.24f, 0.3f, 0.24f), housing);
+                DashCity.Part(bar, new Vector3(x + i * 0.42f, 1.39f, z - 0.02f), new Vector3(0.17f, 0.03f, 0.17f), warm);
             }
-            Register(root, gap ? TrackKind.Gap : TrackKind.Overhead, lane, gap ? 3.5f : 0.45f, 0, 0);
+            DashCity.Part(bar, new Vector3(x, 1.86f, z - 0.07f), new Vector3(2f, 0.04f, 0.02f), pink);
+            root.AddComponent<DashRhythmGate>().beam = bar;
+            Register(root, TrackKind.Overhead, lane, 0.45f, 0, 0);
+            // Closed, the bar's spots hang at 1.3 m: slide under them, or ride through on the lift.
+            var gate = live[live.Count - 1]; gate.clearance = 1.3f; gate.height = 1.95f;
         }
 
         void SpawnPickupLine(int lane, float z)
@@ -513,7 +587,8 @@ namespace DallasDash.Gameplay
             {
                 var go = Pool.Rent("food-" + def.GetInstanceID(), () =>
                 {
-                    var item = def.prefab ? Instantiate(def.prefab) : GameObject.CreatePrimitive(PrimitiveType.Sphere);
+                    if (!def.prefab) throw new InvalidOperationException("Missing food pickup model: " + def.id);
+                    var item = Instantiate(def.prefab);
                     if (!def.prefab) { item.transform.localScale = Vector3.one * 0.7f; Tint(item, def.placeholderColor); }
                     item.AddComponent<PickupSpin>();
                     if (haloMaterial) Halo(item.transform);
@@ -524,319 +599,11 @@ namespace DallasDash.Gameplay
                 go.transform.position = new Vector3(Tuning.LaneX[lane], def.prefab ? 0.45f : 0.8f, z + i * 2.5f);
                 if (!def.prefab) { go.transform.localScale = Vector3.one * 0.7f; Tint(go, def.placeholderColor); }
                 Register(go, TrackKind.Pickup, lane, 0.4f, def.points, 0f);
-                live[live.Count - 1].energy = def.id == "energy-chip";
             }
         }
 
         /// First power-up token comes early so new players meet one; then roughly every PowerUpGap metres.
         const float FirstPowerUpAt = 140f, PowerUpGap = 360f;
-
-        // ---- The side route: a real fourth lane ------------------------------------------------------
-        // Both features share one system. In a shortcut zone the fourth lane is a raised express deck
-        // that runs the length of the zone at a higher speed; in Skypark it is the rooftop of a row of
-        // low-rise shop units, stepped up from the kerb, with hurdles to hop. Either way the three
-        // traffic lanes keep every hazard, so the route is a genuine bypass, and either way the rider
-        // can only get onto it through the flat lead-in at the start of the zone.
-
-        readonly HashSet<int> builtRoutes = new();
-        static int RouteKey(float start, int kind) => Mathf.RoundToInt(start) * 4 + kind;
-        static readonly string[] RouteShopNames = { "NOODLE BAR", "TEA HOUSE", "PRINT SHOP", "DASH MART", "BIKE DOCTOR", "PHONE FIX" };
-
-        /// Whole-zone route builders, queued like the street blocks so a 90 m zone never costs a frame.
-        void BuildRoutes(float d)
-        {
-            float ahead = d + Tuning.FarEdge + segmentLength * 2f;
-            float firstShortcut = DashRun.ShortcutStart + Mathf.Max(0, Mathf.FloorToInt((d - 40f - DashRun.ShortcutStart) / DashRun.ShortcutEvery)) * DashRun.ShortcutEvery;
-            for (float s = firstShortcut; s < ahead; s += DashRun.ShortcutEvery)
-                if (s + DashRun.ShortcutLength > d - 40f && builtRoutes.Add(RouteKey(s, 1)))
-                    pending.Enqueue(BuildRoute(s, 1));
-            if (DashRun.District != 1) return;
-            float firstParkour = DashRun.ParkourStart + Mathf.Max(0, Mathf.FloorToInt((d - 40f - DashRun.ParkourStart) / DashRun.ParkourEvery)) * DashRun.ParkourEvery;
-            for (float s = firstParkour; s < ahead; s += DashRun.ParkourEvery)
-                if (s + DashRun.ParkourLength > d - 40f && builtRoutes.Add(RouteKey(s, 2)))
-                    pending.Enqueue(BuildRoute(s, 2));
-        }
-
-        System.Collections.IEnumerator BuildRoute(float start, int kind)
-        {
-            bool parkour = kind == 2;
-            float length = parkour ? DashRun.ParkourLength : DashRun.ShortcutLength;
-            float x = Tuning.LaneX[Tuning.RouteLane];
-            var root = new GameObject(parkour ? "Rooftop route" : "Express route");
-            root.transform.SetParent(transform);
-            // Root at the far end: Cull() only destroys segment roots behind d - 60, and the whole zone has
-            // to outlive the approach that leads onto it.
-            root.transform.position = new Vector3(0f, 0f, start + length);
-            segments.Add(root);
-            var t = root.transform;
-            var deck = DashCity.Mat(this, parkour ? "routeRoof" : "routeDeck", parkour ? new Color(0.36f, 0.42f, 0.47f) : new Color(0.16f, 0.2f, 0.28f));
-            var shell = DashCity.Mat(this, parkour ? "routeShop" : "routeArcade", parkour ? new Color(0.19f, 0.25f, 0.34f) : new Color(0.12f, 0.16f, 0.24f));
-            var edge = DashCity.Mat(this, "routeEdge" + kind, parkour ? new Color(0.1f, 0.95f, 0.72f) : new Color(0.1f, 0.9f, 1f), 1.3f);
-            var glass = DashCity.Mat(this, "routeGlass" + kind, new Color(0.08f, 0.3f, 0.42f), 0.2f);
-            var warm = DashCity.Mat(this, "routeWarm" + kind, new Color(1f, 0.6f, 0.22f), 0.55f);
-            var ink = DashCity.Mat(this, "routeInk" + kind, new Color(0.04f, 0.055f, 0.11f));
-            var trim = DashCity.Mat(this, "routeTrim" + kind, new Color(0.5f, 0.58f, 0.64f));
-
-            // The ride surface. Lead-in and lead-out stay at kerb height, so the swipe onto the route
-            // always lands on flat deck; every rise after that is a step of at most 0.4 m.
-            float lead = DashRun.RouteLeadIn;
-            RouteRun(t, x, start, start + lead, DashRun.RouteLeadHeight, deck, edge);
-            yield return null;
-            if (!root) yield break;
-
-            if (!parkour)
-            {
-                float top = DashRun.ExpressHeight, rise = 3.6f;
-                float runStart = start + lead + rise, runEnd = start + length - lead - rise;
-                RouteStairs(t, x, start + lead, runStart, DashRun.RouteLeadHeight, top, deck, edge);
-                yield return null;
-                if (!root) yield break;
-                RouteRun(t, x, runStart, runEnd, top, deck, edge);
-                RouteChips(t, x, runStart + 2f, runEnd - 2f, top, edge);
-                RouteChevrons(t, x, runStart + 3f, runEnd - 3f, top, edge);
-                RouteGantry(t, x, start + 1.5f, "EXPRESS LANE", edge, ink);
-                yield return null;
-                if (!root) yield break;
-                RouteStairs(t, x, runEnd, start + length - lead, top, DashRun.RouteLeadHeight, deck, edge);
-                RouteRun(t, x, start + length - lead, start + length, DashRun.RouteLeadHeight, deck, edge);
-                // A lit shop arcade behind the deck keeps the right-hand side of the street built.
-                for (float z = start - 8f; z < start + length + 8f; z += 11f)
-                    ArcadeShop(t, z, Mathf.Min(z + 11f, start + length + 8f), shell, glass, warm, ink, trim, edge, Mathf.RoundToInt(z / 11f));
-                yield return null;
-                if (!root) yield break;
-            }
-            else
-            {
-                float roof = DashRun.ParkourRoofHeight, stairs = 12f;
-                RouteStairs(t, x, start + lead, start + lead + stairs, DashRun.RouteLeadHeight, roof, deck, edge);
-                yield return null;
-                if (!root) yield break;
-                float runStart = start + lead + stairs, runEnd = start + length - lead - stairs;
-                int blocks = Mathf.Max(1, Mathf.RoundToInt((runEnd - runStart) / 14f));
-                float blockLen = (runEnd - runStart) / blocks;
-                for (int i = 0; i < blocks; i++)
-                {
-                    float z0 = runStart + blockLen * i, z1 = z0 + blockLen;
-                    // Separate occupied buildings with physical voids between their roofs.
-                    float r = roof + (i % 2 == 0 ? 0f : 0.3f);
-                    if (i > 0)
-                    {
-                        var gap = new GameObject("Rooftop jump gap"); gap.transform.SetParent(t, false);
-                        gap.transform.position = new Vector3(x, r, z0 + 1.7f);
-                        Register(gap, TrackKind.Gap, Tuning.RouteLane, 1.7f, 0, 0f);
-                        live[live.Count - 1].baseHeight = r;
-                        z0 += 3.4f;
-                    }
-                    ParkourBlock(t, z0, z1, r, shell, deck, glass, warm, ink, trim, edge, i);
-                    if (i % 2 == 1) RouteHurdle(t, x, (z0 + z1) * 0.5f, r, edge, ink);
-                    else RouteChips(t, x, z0 + 1.8f, z1 - 1.4f, r, edge);
-                    if (i % 2 == 1) { yield return null; if (!root) yield break; }
-                }
-                RouteGantry(t, x, start + 1.5f, "ROOFTOPS", edge, ink);
-                yield return null;
-                if (!root) yield break;
-                RouteStairs(t, x, runEnd, start + length - lead, roof, DashRun.RouteLeadHeight, deck, edge);
-                RouteRun(t, x, start + length - lead, start + length, DashRun.RouteLeadHeight, deck, edge);
-            }
-
-            // Towers behind the route fill the skyline the street's own right-hand side would have given us.
-            if (dashBuildings != null && dashBuildings.Length > 0)
-                for (float z = start - 12f; z < start + length + 12f; z += 24f)
-                {
-                    var prefab = dashBuildings[Mathf.Abs(Mathf.RoundToInt(z / 24f)) % dashBuildings.Length];
-                    var tower = Instantiate(prefab, new Vector3(15.5f, 0f, z), Quaternion.Euler(0f, -90f, 0f), t);
-                    tower.name = "Route-side tower";
-                }
-            Combine(root);
-        }
-
-        /// A flat run of the ride surface: a solid plinth from the street up to `top`, so the deck reads
-        /// as a raised expressway instead of a floating ribbon, with a lit edge down each side.
-        void RouteRun(Transform root, float x, float z0, float z1, float top, Material body, Material edge)
-        {
-            if (z1 - z0 < 0.05f) return;
-            float zc = (z0 + z1) * 0.5f, len = z1 - z0;
-            const float half = 1.05f;
-            DashCity.Part(root, new Vector3(x, top * 0.5f, zc), new Vector3(half * 2f, top, len), body);
-            foreach (float side in new[] { -1f, 1f })
-                DashCity.Part(root, new Vector3(x + side * (half - 0.04f), top + 0.025f, zc), new Vector3(0.08f, 0.05f, len), edge);
-            RouteSupport(root, x, 1.3f, z0, z1, top);
-        }
-
-        /// Steps of at most 0.4 m, so the rider walks up without a jump and without clipping the deck.
-        void RouteStairs(Transform root, float x, float z0, float z1, float h0, float h1, Material body, Material edge)
-        {
-            int steps = Mathf.Max(1, Mathf.CeilToInt(Mathf.Abs(h1 - h0) / 0.4f));
-            float dz = (z1 - z0) / steps;
-            for (int i = 0; i < steps; i++)
-            {
-                float a = z0 + dz * i;
-                RouteRun(root, x, a, a + dz, Mathf.Lerp(h0, h1, (i + 1f) / steps), body, edge);
-            }
-        }
-
-        /// The walkable box for one run of the route. The merged mesh has no per-piece renderer left,
-        /// so the support is an explicit world-space box on an empty holder.
-        void RouteSupport(Transform root, float x, float half, float z0, float z1, float top)
-        {
-            var go = new GameObject("Route deck support");
-            go.transform.SetParent(root, false);
-            go.transform.position = new Vector3(x, 0f, z1); // culled 15 m after the far end
-            var platform = go.AddComponent<DashPlatform>();
-            platform.moving = false;
-            platform.useBounds = true;
-            platform.bounds = new Bounds(new Vector3(x, top * 0.5f, (z0 + z1) * 0.5f),
-                new Vector3(half * 2f, Mathf.Max(top, 0.08f), z1 - z0));
-            Register(go, TrackKind.Platform, Tuning.RouteLane, (z1 - z0) * 0.5f, 0, 0f);
-        }
-
-        /// Energy chips strung along the route: the reward for taking the longer, cleaner line.
-        void RouteChips(Transform root, float x, float z0, float z1, float top, Material edge)
-        {
-            for (float z = z0; z < z1; z += 6f)
-            {
-                var chip = new GameObject("Route energy chip");
-                chip.transform.SetParent(root, false);
-                chip.transform.position = new Vector3(x, top, z);
-                var disc = DashCity.Part(chip.transform, new Vector3(x, top + 0.78f, z), new Vector3(0.46f, 0.07f, 0.46f), edge, PrimitiveType.Cylinder);
-                disc.transform.rotation = Quaternion.Euler(0f, 0f, 0f);
-                disc.AddComponent<PickupSpin>().degreesPerSecond = 220f;
-                Register(chip, TrackKind.Pickup, Tuning.RouteLane, 0.4f, 25, 0f);
-                var o = live[live.Count - 1];
-                o.energy = true;
-                o.baseHeight = top;
-            }
-        }
-
-        /// Painted chevrons on the express deck, pointing the way the rider is going.
-        void RouteChevrons(Transform root, float x, float z0, float z1, float top, Material edge)
-        {
-            for (float z = z0; z < z1; z += 8f)
-            {
-                foreach (float side in new[] { -1f, 1f })
-                {
-                    var v = DashCity.Part(root, new Vector3(x + side * 0.24f, top + 0.035f, z + 0.3f), new Vector3(0.52f, 0.02f, 0.1f), edge);
-                    v.transform.rotation = Quaternion.Euler(0f, side * 38f, 0f);
-                }
-            }
-        }
-
-        /// A gantry over the mouth of the route: two posts, a beam and the route's name facing the rider.
-        void RouteGantry(Transform root, float x, float z, string label, Material edge, Material ink)
-        {
-            foreach (float side in new[] { -1f, 1f })
-            {
-                DashCity.Part(root, new Vector3(x + side * 1.18f, 1.72f, z), new Vector3(0.14f, 3.44f, 0.14f), edge);
-                DashCity.Part(root, new Vector3(x + side * 1.18f, 0.12f, z), new Vector3(0.4f, 0.24f, 0.4f), ink);
-            }
-            DashCity.Part(root, new Vector3(x, 3.5f, z), new Vector3(2.62f, 0.26f, 0.3f), ink);
-            DashCity.Part(root, new Vector3(x, 3.5f, z - 0.14f), new Vector3(2.3f, 0.06f, 0.06f), edge);
-            DashCity.Text(this, root, label, new Vector3(x, 3.52f, z - 0.22f), 0.05f, Color.white);
-        }
-
-        /// One low-rise shop unit in the Skypark rooftop run: a solid shell whose roof is the ride
-        /// surface, a glazed shopfront, awning and blade sign at street level, and real rooftop clutter.
-        void ParkourBlock(Transform root, float z0, float z1, float roof, Material shell, Material deck,
-            Material glass, Material warm, Material ink, Material trim, Material edge, int index)
-        {
-            if (rooftopBuilding)
-            {
-                if (skyparkTower)
-                {
-                    var tower = Instantiate(skyparkTower, new Vector3(6.2f, CityGround + roof - DashRun.ParkourRoofHeight, (z0 + z1) * .5f), Quaternion.identity, root);
-                    tower.transform.localScale = new Vector3(.4125f, 1f, (z1 - z0) / 20f);
-                    tower.name = "Parkour penthouse / forty metre tower below";
-                }
-                var apartment = Instantiate(rooftopBuilding, new Vector3(6.2f, roof - DashRun.ParkourRoofHeight, (z0 + z1) * 0.5f), Quaternion.identity, root);
-                apartment.transform.localScale = new Vector3(0.825f, 1f, (z1 - z0) / 14f);
-                apartment.name = "Parkour / occupied garden apartment";
-                RouteSupport(root, Tuning.LaneX[Tuning.RouteLane], 1.3f, z0, z1, roof);
-                return;
-            }
-            float zc = (z0 + z1) * 0.5f, len = z1 - z0;
-            const float front = 4.55f, back = 7.85f;
-            float cx = (front + back) * 0.5f, width = back - front;
-            DashCity.Part(root, new Vector3(cx, (roof - 0.12f) * 0.5f, zc), new Vector3(width, roof - 0.12f, len - 0.06f), shell);
-            // Pilasters and a cornice give the shell a built edge instead of a plain box.
-            foreach (float pz in new[] { z0 + 0.18f, z1 - 0.18f })
-                DashCity.Part(root, new Vector3(front + 0.1f, (roof - 0.12f) * 0.5f, pz), new Vector3(0.24f, roof - 0.12f, 0.34f), trim);
-            DashCity.Part(root, new Vector3(front + 0.04f, 2.66f, zc), new Vector3(0.14f, 0.24f, len), trim);
-            // Street level: recessed glazing over a lit interior, a door, an awning and a blade sign.
-            float windowLen = len - 1.7f;
-            DashCity.Part(root, new Vector3(front - 0.03f, 1.32f, zc - len * 0.06f), new Vector3(0.06f, 2.05f, windowLen), glass);
-            DashCity.Part(root, new Vector3(front - 0.07f, 1.26f, zc - len * 0.06f), new Vector3(0.03f, 1.6f, windowLen - 0.5f), warm);
-            foreach (float mullion in new[] { -0.32f, 0.32f })
-                DashCity.Part(root, new Vector3(front - 0.06f, 1.32f, zc - len * 0.06f + mullion * windowLen), new Vector3(0.05f, 2.05f, 0.09f), ink);
-            float doorZ = zc + len * 0.36f;
-            DashCity.Part(root, new Vector3(front - 0.02f, 1.06f, doorZ), new Vector3(0.09f, 2f, 0.94f), ink);
-            DashCity.Part(root, new Vector3(front - 0.07f, 1.94f, doorZ), new Vector3(0.04f, 0.28f, 0.7f), warm);
-            var awning = DashCity.Part(root, new Vector3(front - 0.36f, 2.42f, zc - len * 0.06f), new Vector3(0.82f, 0.09f, windowLen + 0.3f), trim);
-            awning.transform.rotation = Quaternion.Euler(0f, 0f, 13f);
-            DashCity.Part(root, new Vector3(front - 0.72f, 2.32f, zc - len * 0.06f), new Vector3(0.06f, 0.16f, windowLen + 0.3f), edge);
-            DashCity.Part(root, new Vector3(front - 0.52f, 3.28f, z0 + 1.05f), new Vector3(0.9f, 0.62f, 0.09f), ink);
-            DashCity.Text(this, root, RouteShopNames[Mathf.Abs(index) % RouteShopNames.Length], new Vector3(front - 0.52f, 3.28f, z0 + 0.98f), 0.032f, new Color(1f, 0.8f, 0.42f));
-            // Roof: the ride surface, with parapets on both edges and a lit cap.
-            DashCity.Part(root, new Vector3(cx, roof - 0.06f, zc), new Vector3(width + 0.06f, 0.12f, len), deck);
-            foreach (float px in new[] { front + 0.12f, back - 0.12f })
-            {
-                DashCity.Part(root, new Vector3(px, roof + 0.17f, zc), new Vector3(0.17f, 0.34f, len), trim);
-                DashCity.Part(root, new Vector3(px, roof + 0.36f, zc), new Vector3(0.2f, 0.04f, len), edge);
-            }
-            // Roof clutter: AC plant and a vent stack, or a water tank on legs.
-            if (index % 2 == 0)
-            {
-                DashCity.Part(root, new Vector3(7.05f, roof + 0.36f, zc - len * 0.24f), new Vector3(1.1f, 0.72f, 1.4f), trim);
-                DashCity.Part(root, new Vector3(7.05f, roof + 0.74f, zc - len * 0.24f), new Vector3(0.86f, 0.06f, 1.1f), ink);
-                var fan = DashCity.Part(root, new Vector3(7.05f, roof + 0.79f, zc - len * 0.24f), new Vector3(0.7f, 0.04f, 0.7f), edge, PrimitiveType.Cylinder);
-                fan.transform.rotation = Quaternion.identity;
-            }
-            else
-            {
-                DashCity.Part(root, new Vector3(7.1f, roof + 0.55f, zc + len * 0.2f), new Vector3(0.95f, 1.1f, 0.95f), shell, PrimitiveType.Cylinder);
-                DashCity.Part(root, new Vector3(7.1f, roof + 1.12f, zc + len * 0.2f), new Vector3(1.02f, 0.08f, 1.02f), trim, PrimitiveType.Cylinder);
-                foreach (float side in new[] { -1f, 1f })
-                    DashCity.Part(root, new Vector3(7.1f + side * 0.36f, roof + 0.2f, zc + len * 0.2f), new Vector3(0.08f, 0.4f, 0.08f), ink);
-            }
-            DashCity.Part(root, new Vector3(4.9f, roof + 0.5f, z1 - 0.7f), new Vector3(0.09f, 1f, 0.09f), ink);
-            RouteSupport(root, (front + back) * 0.5f, 1.6f, z0, z1, roof);
-        }
-
-        /// A rooftop hurdle: two posts and a lit crossbar the rider has to hop. It stands on the roof,
-        /// so its hit height is measured from the roof rather than from the street.
-        void RouteHurdle(Transform root, float x, float z, float top, Material edge, Material ink)
-        {
-            var hurdle = new GameObject("Rooftop hurdle");
-            hurdle.transform.SetParent(root, false);
-            hurdle.transform.position = new Vector3(x, 0f, z);
-            foreach (float side in new[] { -1f, 1f })
-                DashCity.Part(hurdle.transform, new Vector3(x + side * 0.62f, top + 0.22f, z), new Vector3(0.12f, 0.44f, 0.12f), ink);
-            DashCity.Part(hurdle.transform, new Vector3(x, top + 0.4f, z), new Vector3(1.34f, 0.1f, 0.15f), edge);
-            DashCity.Part(hurdle.transform, new Vector3(x, top + 0.24f, z), new Vector3(1.2f, 0.18f, 0.06f), ink);
-            Register(hurdle, TrackKind.Low, Tuning.RouteLane, 0.2f, 0, 0f);
-            var o = live[live.Count - 1];
-            o.height = 0.45f;
-            o.baseHeight = top;
-        }
-
-        /// A shopfront in the arcade behind the express deck: glazed ground floor, sign band, lit upper
-        /// windows and a cornice, so the deck runs along a real street rather than a bare plinth.
-        void ArcadeShop(Transform root, float z0, float z1, Material shell, Material glass, Material warm,
-            Material ink, Material trim, Material edge, int index)
-        {
-            float zc = (z0 + z1) * 0.5f, len = z1 - z0;
-            const float front = 6.88f, back = 7.98f;
-            float cx = (front + back) * 0.5f, width = back - front;
-            float h = 5.6f + Mathf.Abs(index % 3) * 1.7f;
-            DashCity.Part(root, new Vector3(cx, h * 0.5f, zc), new Vector3(width, h, len - 0.08f), shell);
-            DashCity.Part(root, new Vector3(front - 0.03f, 1.35f, zc), new Vector3(0.06f, 2.2f, len - 1.4f), glass);
-            DashCity.Part(root, new Vector3(front - 0.07f, 1.3f, zc), new Vector3(0.03f, 1.8f, len - 2.1f), warm);
-            DashCity.Part(root, new Vector3(front - 0.04f, 3.02f, zc), new Vector3(0.1f, 0.66f, len - 0.9f), ink);
-            DashCity.Part(root, new Vector3(front - 0.1f, 3.02f, zc), new Vector3(0.03f, 0.46f, len - 1.3f), edge);
-            for (int w = 0; w < 3; w++)
-                DashCity.Part(root, new Vector3(front - 0.04f, 4.2f, z0 + len * (0.2f + w * 0.3f)), new Vector3(0.05f, 1.05f, 1.4f), w == 1 ? warm : glass);
-            DashCity.Part(root, new Vector3(front + 0.06f, h - 0.16f, zc), new Vector3(0.32f, 0.22f, len), trim);
-            DashCity.Part(root, new Vector3(front + 0.1f, h - 0.05f, zc), new Vector3(0.36f, 0.04f, len), edge);
-        }
 
         /// A glowing token in the power-up's colour with its emblem on the front: a horseshoe magnet,
         /// a lightning bolt, or "2X". It floats and bobs (no spin, so the emblem keeps facing the rider).
@@ -849,49 +616,13 @@ namespace DallasDash.Gameplay
 
         GameObject CreatePowerUp(PowerUp kind)
         {
-            var root = new GameObject(PowerUps.Names[(int)kind]);
-            root.transform.SetParent(transform);
-            root.transform.position = Vector3.zero;
-            var c = PowerUps.Colors[(int)kind];
-            var rim = Shape(root.transform, PrimitiveType.Cylinder, Vector3.zero, new Vector3(1.1f, 0.06f, 1.1f), new Color(1f, 0.85f, 0.3f), 0.6f);
-            rim.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            var disc = Shape(root.transform, PrimitiveType.Cylinder, new Vector3(0f, 0f, -0.035f), new Vector3(0.92f, 0.06f, 0.92f), c, 0.8f);
-            disc.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
-            var white = new Color(1f, 0.97f, 0.9f);
-            var steel = new Color(0.75f, 0.8f, 0.9f);
-            var gold = new Color(1f, 0.88f, 0.25f);
-            const float f = -0.1f; // the emblem stands proud of the disc, toward the rider
-            switch (kind)
-            {
-                case PowerUp.Magnet:
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(-0.17f, 0.04f, f), new Vector3(0.12f, 0.36f, 0.08f), white, 0.4f);
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(0.17f, 0.04f, f), new Vector3(0.12f, 0.36f, 0.08f), white, 0.4f);
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(0f, -0.17f, f), new Vector3(0.46f, 0.12f, 0.08f), white, 0.4f);
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(-0.17f, 0.25f, f), new Vector3(0.12f, 0.1f, 0.09f), steel, 0.2f);
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(0.17f, 0.25f, f), new Vector3(0.12f, 0.1f, 0.09f), steel, 0.2f);
-                    break;
-                case PowerUp.Rush:
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(0.05f, 0.14f, f), new Vector3(0.1f, 0.34f, 0.08f), gold, 0.6f).transform.localRotation = Quaternion.Euler(0f, 0f, -25f);
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(0f, 0f, f), new Vector3(0.3f, 0.09f, 0.08f), gold, 0.6f).transform.localRotation = Quaternion.Euler(0f, 0f, 20f);
-                    Shape(root.transform, PrimitiveType.Cube, new Vector3(-0.05f, -0.15f, f), new Vector3(0.1f, 0.34f, 0.08f), gold, 0.6f).transform.localRotation = Quaternion.Euler(0f, 0f, -25f);
-                    break;
-                default:
-                    var label = new GameObject("2X", typeof(TextMesh));
-                    label.transform.SetParent(root.transform, false);
-                    label.transform.localPosition = new Vector3(0f, 0.02f, f);
-                    var tm = label.GetComponent<TextMesh>();
-                    tm.text = kind == PowerUp.Double ? "2X" : kind == PowerUp.Boots ? "G" : kind == PowerUp.Shield ? "S" : "B";
-                    tm.anchor = TextAnchor.MiddleCenter;
-                    tm.characterSize = 0.075f;
-                    tm.fontSize = 64;
-                    tm.color = white;
-                    if (signFont)
-                    {
-                        tm.font = signFont;
-                        label.GetComponent<MeshRenderer>().sharedMaterial = signTextMaterial ? signTextMaterial : signFont.material;
-                    }
-                    break;
-            }
+            int index = (int)kind;
+            if (powerUpModels == null || index >= powerUpModels.Length || !powerUpModels[index])
+                throw new InvalidOperationException("Missing power-up model: " + kind);
+            var root = Instantiate(powerUpModels[index], transform);
+            root.name = PowerUps.Names[index];
+            root.transform.localPosition = Vector3.zero;
+            root.transform.localScale *= .8f;
             var spin = root.AddComponent<PickupSpin>();
             spin.degreesPerSecond = 0f;
             spin.bob = 0.12f;
@@ -902,6 +633,7 @@ namespace DallasDash.Gameplay
         /// A tinted, slightly glowing primitive part (power-up tokens).
         GameObject Shape(Transform parent, PrimitiveType type, Vector3 pos, Vector3 scale, Color c, float glow)
         {
+            if (WorldPalette.IsCoolNeon(c)) { c = WorldPalette.Surface(c); glow = 0; }
             var go = GameObject.CreatePrimitive(type);
             Destroy(go.GetComponent<Collider>());
             go.transform.SetParent(parent, false);
@@ -934,7 +666,8 @@ namespace DallasDash.Gameplay
             var chosen = def;
             var go = Pool.Rent("obstacle-" + def.GetInstanceID(), () =>
             {
-                var item = chosen.prefab ? Instantiate(chosen.prefab) : GameObject.CreatePrimitive(PrimitiveType.Cube);
+                if (!chosen.prefab) throw new InvalidOperationException("Missing obstacle model: " + chosen.id);
+                var item = Instantiate(chosen.prefab);
                 if (!chosen.prefab) { item.transform.localScale = chosen.size; Tint(item, chosen.placeholderColor); }
                 return item;
             }, new Vector3(Tuning.LaneX[lane], def.prefab ? 0f : def.size.y / 2f, z), Quaternion.identity);
@@ -1208,41 +941,16 @@ namespace DallasDash.Gameplay
         /// Rooftop clutter: AC units, sometimes a wooden water tower on legs or a chimney.
         void RoofClutter(Transform parent, float side, float mid, float len, float h, Material chimney = null)
         {
-            if (!chimney) chimney = Pick(facadeMaterials);
             float roofX = side * 9.4f;
             int units = Random.Range(1, 3);
             for (int i = 0; i < units; i++)
-            {
-                float uz = mid + Random.Range(-len * 0.35f, len * 0.35f);
-                Block(parent, new Vector3(roofX + Random.Range(-1f, 1f), h + 0.5f, uz), new Vector3(1.3f, 0.9f, 1.1f), trimMaterial);
-                Block(parent, new Vector3(roofX, h + 0.98f, uz), new Vector3(0.9f, 0.08f, 0.9f), lampPostMaterial);
-            }
-            float r = Random.value;
-            if (r < 0.25f && doorMaterial)
-            {
-                // Wooden water tower on legs, the downtown-roof classic.
-                float tz = mid + Random.Range(-3f, 3f);
-                foreach (float lx in new[] { -0.6f, 0.6f })
-                foreach (float lz in new[] { -0.6f, 0.6f })
-                    Block(parent, new Vector3(roofX + lx, h + 0.9f, tz + lz), new Vector3(0.12f, 1.8f, 0.12f), lampPostMaterial);
-                var tank = GameObject.CreatePrimitive(PrimitiveType.Cylinder);
-                Destroy(tank.GetComponent<Collider>());
-                tank.transform.SetParent(parent);
-                tank.transform.position = new Vector3(roofX, h + 2.7f, tz);
-                tank.transform.localScale = new Vector3(1.9f, 1f, 1.9f);
-                Paint(tank, doorMaterial);
-                var cap = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-                Destroy(cap.GetComponent<Collider>());
-                cap.transform.SetParent(parent);
-                cap.transform.position = new Vector3(roofX, h + 3.7f, tz);
-                cap.transform.localScale = new Vector3(2f, 0.9f, 2f);
-                Paint(cap, lampPostMaterial);
-            }
-            else if (r < 0.55f)
-                Block(parent, new Vector3(side * 8.2f, h + 1f, mid + Random.Range(-len * 0.4f, len * 0.4f)), new Vector3(0.8f, 2f, 0.8f), chimney);
-
+                PlaceAsset(roofVentModel, parent, new Vector3(roofX + Random.Range(-1f, 1f), h, mid + Random.Range(-len * .35f, len * .35f)), 1.4f);
+            float choice = Random.value;
+            if (choice < .25f)
+                PlaceAsset(roofTankModel, parent, new Vector3(roofX, h, mid + Random.Range(-3f, 3f)), 3.1f);
+            else if (choice < .55f)
+                PlaceAsset(roofChimneyModel, parent, new Vector3(side * 8.2f, h, mid + Random.Range(-len * .4f, len * .4f)), 2f);
         }
-
         /// Black iron fire escape on the far half of the facade: a landing per floor, rails, and stairs between.
         void FireEscape(Transform parent, float side, float mid, float h, float face)
         {
@@ -1348,6 +1056,33 @@ namespace DallasDash.Gameplay
 
         static Material Pick(Material[] set) => set != null && set.Length > 0 ? set[Random.Range(0, set.Length)] : null;
 
+        /// Riding into someone on the e-bike knocks them over (and costs the rider a wobble and some speed);
+        /// on foot they shrug it off. People are scenery, never a crash.
+        void PedestrianContacts()
+        {
+            if (!rider || rider.Traversal.Moving || rider.JumpHeight > 1.2f) return;
+            var at = rider.transform.position;
+            bool onFoot = DashRun.Instance && DashRun.Instance.OnFoot;
+            bool bike = !onFoot; // the e-bike, or Bolt's magnetic wheel
+            var list = Pedestrian.Active;
+            for (int i = list.Count - 1; i >= 0; i--)
+            {
+                var person = list[i];
+                if (!person || person.Reacting) continue;
+                var p = person.transform.position;
+                if (Mathf.Abs(p.z - at.z) > 0.9f || Mathf.Abs(p.x - at.x) > 0.6f || Mathf.Abs(p.y - at.y) > 1.2f) continue;
+                if (bike) { person.KnockDown(at); rider.Wobble(); GameManager.Instance.Bonk(); }
+                else person.ShrugOff(at);
+            }
+        }
+
+        /// Residents for junctions and roofs come from the district's pool and go back to it when culled.
+        Pedestrian RentPerson(Pedestrian template, Transform parent)
+        {
+            if (DistrictLife.Instance) return DistrictLife.Instance.Take(template, parent);
+            var made = Instantiate(template, parent); made.template = template; return made;
+        }
+
         static GameObject Block(Transform parent, Vector3 pos, Vector3 scale, Material m)
         {
             var go = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -1397,9 +1132,10 @@ namespace DallasDash.Gameplay
             combineBuffer.Clear();
             foreach (var mf in root.GetComponentsInChildren<MeshFilter>())
             {
-                if (!mf.sharedMesh || !mf.sharedMesh.isReadable || mf.transform.parent != root.transform || mf.sharedMesh.subMeshCount != 1) continue;
+                if (!mf.sharedMesh || !mf.sharedMesh.isReadable || mf.sharedMesh.subMeshCount != 1) continue;
                 var renderer = mf.GetComponent<MeshRenderer>();
-                if (!renderer || !renderer.sharedMaterial || mf.GetComponent<TextMesh>()) continue;
+                if (!renderer || !renderer.enabled || !renderer.sharedMaterial || renderer.HasPropertyBlock() || mf.GetComponent<TextMesh>()) continue;
+                if (mf.GetComponentInParent<LODGroup>() || mf.GetComponentInParent<Billboard>() || mf.GetComponentInParent<Bobber>() || mf.GetComponentInParent<Blinker>() || mf.GetComponentInParent<TrafficLight>()) continue;
                 if (!combineGroups.TryGetValue(renderer.sharedMaterial, out var pieces))
                     combineGroups[renderer.sharedMaterial] = pieces = new List<CombineInstance>();
                 pieces.Add(new CombineInstance { mesh = mf.sharedMesh, transform = root.transform.worldToLocalMatrix * mf.transform.localToWorldMatrix });
@@ -1417,7 +1153,13 @@ namespace DallasDash.Gameplay
                 batch.AddComponent<MeshRenderer>().sharedMaterial = group.Key;
                 lifetime.meshes.Add(mesh);
             }
-            foreach (var original in combineBuffer) Destroy(original);
+            foreach (var original in combineBuffer)
+            {
+                // Keep nested transforms and any children (signs, lights, animation anchors).
+                var renderer = original.GetComponent<MeshRenderer>();
+                if (renderer) { renderer.enabled = false; Destroy(renderer); }
+                Destroy(original.GetComponent<MeshFilter>());
+            }
         }
 
         bool InPlaza(float side, float z)
@@ -1466,7 +1208,7 @@ namespace DallasDash.Gameplay
             t.surface = RunSurface.Road; t.powerUp = -1; t.drift = t.meetZ = 0f; t.height = 0.8f;
             t.baseHeight = 0f;
             t.halfWidth = 0.85f; t.clearance = 1.4f;
-            t.energy = false;
+            t.lateral = false; t.bike = false;
             t.kind = k;
             t.lane = lane;
             t.halfLength = half;
@@ -1482,12 +1224,12 @@ namespace DallasDash.Gameplay
             if (GameManager.Instance.Paused) return;
             foreach (var o in live)
             {
-                if (magnet && o && !o.consumed && o.kind == TrackKind.Pickup && o.powerUp < 0 && Pull(o, d)) continue;
+                if (magnet && o && !o.consumed && !o.bike && o.kind == TrackKind.Pickup && o.powerUp < 0 && Pull(o, d)) continue;
                 if (!o || o.consumed || o.struck) continue;
                 var contact = SurfaceTraversal.Point(o.surface, Tuning.LaneX[o.lane], 0f);
                 // Route objects stand on a deck or a roof: measure the rider against that surface.
                 if (o.surface == RunSurface.Road) contact.y = o.baseHeight;
-                if (o.lane == Tuning.RouteLane && o.kind == TrackKind.Pickup) contact.y = o.transform.position.y - 0.8f;
+                if (o.lateral) contact.x = o.transform.position.x;
                 var localRider = Quaternion.Inverse(SurfaceTraversal.Orientation(o.surface)) * (rider.transform.position - contact);
                 // Resolve in the object's contact frame. A ceiling chip cannot be collected from the road;
                 // floor barriers do not mysteriously hit a rider on the opposite wall.
@@ -1551,10 +1293,11 @@ namespace DallasDash.Gameplay
         void Collect(TrackObject o)
         {
             o.consumed = true;
+            if (o.bike) { DashRun.Instance?.Remount(); ClearBikeReservation(); o.gameObject.SetActive(false); return; }
             if (o.powerUp >= 0) PowerUps.Activate((PowerUp)o.powerUp);
             else
             {
-                GameManager.Instance.AddPickup(o.points, o.energy);
+                GameManager.Instance.AddPickup(o.points);
                 Collected?.Invoke(o);
             }
             o.gameObject.SetActive(false);
@@ -1612,6 +1355,9 @@ namespace DallasDash.Gameplay
             if (o.struck) return;
             o.struck = true;
             o.consumed = true;
+            // Endless rules count only head-on impacts: the rider centred on the thing it hit. Clipping a
+            // vehicle's side mid lane change is a bounce and a speed loss, never a wipe-out.
+            bool headOn = Mathf.Abs(rider.transform.position.x - o.transform.position.x) < 0.85f;
             if (DashRun.Instance && DashRun.Instance.AbsorbHit())
             {
                 if (o.heavy)
@@ -1646,8 +1392,12 @@ namespace DallasDash.Gameplay
                 // A van or a roadworks fence doesn't fall over: the rider clips it and swerves into the
                 // clearest lane beside it, losing speed.
                 int to = SwerveLane(o);
-                o.consumed = to < 0;
+                // Never leave the rider inside a van: with both sides blocked, knock them out to the side anyway.
+                if (to < 0) to = o.lane == 1 ? (rider.transform.position.x < 0f ? 0 : 2) : 1;
+                o.consumed = false;
                 if (to >= 0) { rider.BounceBack(to); lastLane = to; laneFrom = o.lane; }
+                var shove = o.GetComponent<Shove>();
+                if (shove) { shove.enabled = false; shove.enabled = true; } else o.gameObject.AddComponent<Shove>();
                 GameManager.Instance.Bonk();
             }
             else
@@ -1659,8 +1409,11 @@ namespace DallasDash.Gameplay
             GameManager.Instance.BreakCombo();
             Struck?.Invoke(o);
             rider.Wobble();
-            // No chase: an obstacle costs speed, combo and a wobble, never the run. The only ways a
-            // run ends are the delivery timer running out or falling off the course.
+            // Endless run: the first crash knocks the rider off (or staggers Bolt); a second one before
+            // recovering ends the run (DashRun.Crash). Side swipes only bounce.
+            DashRun.LastStruck = $"{o.name} {o.kind} lane{o.lane} heavy={o.heavy} z={o.transform.position.z:0.0} headOn={headOn}";
+            if (!headOn) Debug.Log("[DashCrash] side contact only: " + DashRun.LastStruck);
+            if (!sideSwipe && headOn) DashRun.Instance?.Crash();
             if (chase) chase.Stumble();
         }
 
@@ -1698,7 +1451,7 @@ namespace DallasDash.Gameplay
             for (int i = segments.Count - 1; i >= 0; i--)
             {
                 if (segments[i] && segments[i].transform.position.z > d - 60f) continue;
-                if (segments[i]) Destroy(segments[i]);
+                if (segments[i]) { DistrictLife.Instance?.Return(segments[i]); Destroy(segments[i]); }
                 segments.RemoveAt(i);
             }
         }

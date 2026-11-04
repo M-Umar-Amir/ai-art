@@ -20,7 +20,7 @@ namespace DallasDash.Gameplay
         readonly Dictionary<string, (bool exists, string value)> strings = new();
         
         static readonly string[] CharacterNames = { "Ace", "Nova", "Bolt" };
-        static readonly string[] VehicleNames = { "None", "Board" };
+        string EquipmentName => character == 2 ? "BuiltInTires" : "EBike";
         
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         static void Boot()
@@ -98,7 +98,7 @@ namespace DallasDash.Gameplay
             var previous = RenderTexture.active; RenderTexture.active = rt;
             var texture = new Texture2D(width, height, TextureFormat.RGB24, false);
             texture.ReadPixels(new Rect(0, 0, width, height), 0, 0); texture.Apply();
-            string filename = $"{CharacterNames[character]}_{VehicleNames[vehicle]}_District{district}_{label}.png";
+            string filename = $"{CharacterNames[character]}_{EquipmentName}_District{district}_{label}.png";
             File.WriteAllBytes(Path.Combine(output, filename), texture.EncodeToPNG());
             RenderTexture.active = previous; Destroy(texture); RenderTexture.ReleaseTemporary(rt);
             for (int i = 0; i < canvases.Length; i++) { canvases[i].renderMode = modes[i]; canvases[i].worldCamera = cameras[i]; }
@@ -112,8 +112,8 @@ namespace DallasDash.Gameplay
             // Unlock all content
             PlayerPrefs.SetInt("coached_runs", 6); // Unlock scooter
             PlayerPrefs.SetInt("dash_missions_done", 6);
-            PlayerProfile.TotalPoints = Mathf.Max(30000, PlayerProfile.TotalPoints);
-            PlayerProfile.Coins = 1000; // Enough for board
+            BurgerPrices.UnlockAllForReview();
+            PlayerProfile.Burgers = 1000; // Enough for board
             
             // Set test parameters
             PlayerProfile.Character = Mathf.Clamp(character, 0, 2);
@@ -151,6 +151,10 @@ namespace DallasDash.Gameplay
             RiderInput.Override = () => RiderInput.Action.None;
             gm.StartRun();
             
+            Check(VehicleDynamics.Current.kind == (character == 2 ? CourierVehicle.MonoWheel : CourierVehicle.Bicycle), "Crew uses its assigned travel equipment");
+            var activeLook = FindFirstObjectByType<RiderLook>();
+            Check(activeLook.seated[character].activeSelf && !activeLook.scooter.activeSelf, "Crew visibility matches selection; boards retired");
+            Check(character == 2 ? activeLook.seated[character].GetComponentInChildren<DashPose>() : activeLook.seated[character].GetComponentInChildren<CyclistMotion>(), "Crew has animated locomotion");
             // Test ability based on character
             if (character == 0) // Ace - Speed boost
             {
@@ -174,42 +178,43 @@ namespace DallasDash.Gameplay
                 yield return CaptureScreenshot("bolt-ability");
             }
             
-            // Test vehicle
-            if (vehicle == 1) // Board
-            {
-                run.ToggleBoard();
-                Check(run.Board, "Board activated");
-                yield return new WaitForSeconds(0.5f);
-                yield return CaptureScreenshot("board-active");
-            }
-            
+            Check(!activeLook.bicycle.activeSelf, "Legacy vehicle hidden");
+            if (character == 2) Check(activeLook.seated[character].GetComponentInChildren<WheelSpin>(), "Robot uses its animated built-in tire");
+            yield return CaptureScreenshot("equipment");
+
             // Test delivery dash
             gm.StartRun();
             Check(run.TryDeliveryDash(), "all crew can activate delivery dash");
             yield return new WaitForSeconds(0.5f);
             yield return CaptureScreenshot("delivery-dash");
             
-            // Test a bit of gameplay
+            // Test controls on the clear starting stretch, before traffic can force an evasive lane change.
+            gm.ToMenu(); gm.StartRun();
+            yield return null;
+            float inputStart = gm.RunTime;
+            int inputStep = 0;
             RiderInput.Override = () =>
             {
-                float d = gm.Distance;
-                if (d < 50f) return RiderInput.Action.Jump;
-                if (d < 100f) return RiderInput.Action.Right;
-                if (d < 150f) return RiderInput.Action.Left;
-                if (d < 200f) return RiderInput.Action.Jump;
+                float elapsed = gm.RunTime - inputStart;
+                if (inputStep == 0 && elapsed > .1f) { inputStep++; return RiderInput.Action.Right; }
+                if (inputStep == 1 && elapsed > .18f) { inputStep++; return RiderInput.Action.Left; }
+                if (inputStep == 2 && elapsed > .7f) { inputStep++; return RiderInput.Action.Jump; }
+                if (inputStep == 3 && elapsed > .95f) { inputStep++; return RiderInput.Action.Down; }
                 return RiderInput.Action.None;
             };
-            
-            yield return new WaitForSeconds(3f);
+            yield return new WaitForSeconds(1.5f);
+            Check(inputStep == 4, "Lane reversal, jump and drop inputs executed");
+            Check(rider.Lane == 1 && Mathf.Abs(rider.transform.position.x - Tuning.LaneX[1]) < .08f, "Lane reversal settles at target without drift");
+            Check(!rider.Airborne, "Jump and fast drop return to ground");
             yield return CaptureScreenshot("gameplay");
-            
+
             // Finish
             gm.ToMenu();
             Restore();
             
             File.WriteAllText(Path.Combine(output, "comprehensive-pass.txt"), 
-                $"PASS: {CharacterNames[character]} with {VehicleNames[vehicle]} in District {district}\n");
-            Debug.Log($"[DashComprehensive] COMPLETE: {CharacterNames[character]} {VehicleNames[vehicle]} District {district}");
+                $"PASS: {CharacterNames[character]} with {EquipmentName} in District {district}\n");
+            Debug.Log($"[DashComprehensive] COMPLETE: {CharacterNames[character]} {EquipmentName} District {district}");
             
             yield return new WaitForSecondsRealtime(0.2f); Application.Quit(0);
         }

@@ -8,6 +8,8 @@
 float4 _CurveParams; // x: downward bend, y: sideways bend
 
 TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
+TEXTURE2D(_BumpMap); SAMPLER(sampler_BumpMap);
+TEXTURE2D(_RoughnessMap); SAMPLER(sampler_RoughnessMap);
 
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseMap_ST;
@@ -21,9 +23,15 @@ CBUFFER_START(UnityPerMaterial)
     half _SurfaceStyle;
     half _Smoothness;
     half _Metallic;
+    half _BumpScale;
+    half _RoughnessStrength;
+    half _Wetness;
+    half _EmissionUsesAlbedo;
+    half _WindowInterior;
     half _AmbientStrength;
     half _RimPower;
     half _ShadowSoftness;
+    float _WorldTextureScale;
     float _GaitPhase;
     float _GaitAmount;
     float _GaitMin;

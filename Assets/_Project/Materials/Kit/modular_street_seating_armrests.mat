@@ -20,6 +20,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - SRPDEFAULTUNLIT
+  - Outline
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -28,12 +29,22 @@ Material:
         m_Texture: {fileID: 6108559451021826873, guid: 054a2de9d0c96524fa1fd47570b50d02, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RoughnessMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _AmbientStrength: 0.35
+    - _BumpScale: 0
     - _CrewIndex: 0
     - _Cull: 2
     - _Cutoff: 0
+    - _EmissionUsesAlbedo: 0
     - _GaitAmount: 0
     - _GaitCenter: 0
     - _GaitHeight: 0
@@ -44,12 +55,16 @@ Material:
     - _OutlineWidth: 0
     - _Portrait: 0
     - _RimPower: 4.5
-    - _RimStrength: 0.12
+    - _RimStrength: 0
+    - _RoughnessStrength: 0
     - _ShadowSoftness: 0.18
     - _Smoothness: 0.45
-    - _SurfaceStyle: 0
+    - _SurfaceStyle: 1
     - _WardrobeHeight: 0
     - _WardrobeMin: 0
+    - _Wetness: 0
+    - _WindowInterior: 0
+    - _WorldTextureScale: 0
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}

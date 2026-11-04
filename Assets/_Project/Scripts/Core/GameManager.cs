@@ -17,10 +17,12 @@ namespace DallasDash.Core
         public int Score { get; private set; }
         public int Multiplier { get; private set; } = 1;
         public int PickupCount { get; private set; }
-        public int EnergyCollected { get; private set; }
+        /// Burgers picked up this run (each one is already in the wallet).
+        public int BurgersCollected { get; private set; }
         public bool Paused { get; private set; }
-        /// Set when a run ends: coins paid out (one per burger) and whether the score beat the saved best.
-        public int CoinsEarned { get; private set; }
+        /// Burgers earned this run: pickups plus delivery tips.
+        public int BurgersEarned => BurgersCollected + TipsEarned;
+        public int TipsEarned { get; set; }
         public bool NewBest { get; private set; }
         /// Where the run just ended placed on the Today / This week / All time boards.
         public (int today, int week, int all) LastRanks { get; private set; }
@@ -57,15 +59,16 @@ namespace DallasDash.Core
         /// Ran into something head on: the rider loses most of their speed and builds it back up.
         public void Bonk() => bonk = 1f;
 
-        void Awake() => Instance = this;
+        void Awake() { Instance = this; BurgerPrices.MigrateOnce(); }
 
         public void StartRun()
         {
+            RidersEconomy.BeginRun();
             FindFirstObjectByType<DallasDash.Gameplay.RiderLook>()?.Apply(PlayerProfile.Character, true);
             Distance = 0f;
             Speed = Tuning.SpeedBase;
             Score = 0;
-            PickupCount = EnergyCollected = 0;
+            PickupCount = BurgersCollected = TipsEarned = 0;
             Multiplier = 1;
             scoreCarry = 0f;
             bonk = 0f;
@@ -83,11 +86,9 @@ namespace DallasDash.Core
             if (State != RunState.Running) return;
             PowerUps.Clear();
             Missions.Save();
-            CoinsEarned = EnergyCollected;
             PlayerProfile.TotalPoints += Score;
             NewBest = Score > PlayerProfile.BestScore;
             if (NewBest) PlayerProfile.BestScore = Score;
-            PlayerProfile.Coins += CoinsEarned;
             LastRanks = Leaderboard.Record(this);
             Haptics.Play(Haptics.Strength.Heavy);
             SetState(RunState.Busted);
@@ -100,7 +101,7 @@ namespace DallasDash.Core
             Distance = 0f;
             Speed = Tuning.SpeedBase;
             Score = 0;
-            PickupCount = EnergyCollected = 0;
+            PickupCount = BurgersCollected = TipsEarned = 0;
             SetState(RunState.Intro);
         }
 
@@ -133,12 +134,14 @@ namespace DallasDash.Core
             Time.timeScale = paused ? 0f : 1f;
         }
 
-        public void AddPickup(int points, bool energy = false)
+        /// A burger pickup: one burger into the wallet, plus its points.
+        public void AddPickup(int points)
         {
+            RidersEconomy.AwardBurgers(1);
             PickupCount++;
-            if (energy) EnergyCollected++;
+            BurgersCollected++;
             Score += points * ScoreFactor;
-            if (!energy) Missions.Add(MissionStat.Burgers, 1);
+            Missions.Add(MissionStat.Burgers, 1);
             Combo = comboTimer > 0f ? Combo + 1 : 1;
             comboTimer = ComboWindow;
             BestCombo = Mathf.Max(BestCombo, Combo);
@@ -165,6 +168,8 @@ namespace DallasDash.Core
             else if (DashRun.Instance && DashRun.Instance.ShortcutTime > 0f) Speed *= DashRun.RouteSpeedFactor; // side-route surge
             bonk = Mathf.MoveTowards(bonk, 0f, Time.deltaTime * 0.8f);
             Speed *= 1f - 0.55f * bonk * bonk;
+            RidersEconomy.Burn(Time.deltaTime, Speed);
+            Speed *= RidersEconomy.SpeedMultiplier;
             int mult = Mathf.Min(Tuning.MaxMult, 1 + (int)(Distance / Tuning.MultEvery));
             if (mult != Multiplier) { Multiplier = mult; MultiplierUp?.Invoke(mult); }
             float move = Speed * Time.deltaTime;

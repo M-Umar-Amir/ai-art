@@ -17,7 +17,7 @@ namespace DallasDash.Gameplay
 
         void Update()
         {
-            float d = Application.isPlaying && GameManager.Instance ? GameManager.Instance.Distance : 0f;
+            float d = Application.isPlaying ? (GameManager.Instance ? GameManager.Instance.Distance : 0f) : 0f;
             float side = Mathf.Sin(d / swayPeriod * Mathf.PI * 2f) * sway;
             Shader.SetGlobalVector(CurveParams, new Vector4(down, side, 0f, 0f));
         }

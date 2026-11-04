@@ -14,8 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Data.CharacterDef
   id: bolt
   displayName: Bolt
-  description: Bolt, the experimental robot courier. Silver and yellow chassis, expressive
-    LED eyes, magnetic wheels, delivery compartment. Temporary collision protection.
+  description: Bolt, the experimental robot courier. Silver and magenta chassis,
+    expressive LED eyes, articulated legs, delivery compartment. Temporary collision
+    protection.
   unlock: 1
   unlockPoints: 25000
   rollingBase: 1

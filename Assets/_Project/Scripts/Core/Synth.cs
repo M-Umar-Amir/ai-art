@@ -70,9 +70,15 @@ namespace DallasDash.Core
 
         static float Hz(float semisFromC, float octaveC) => octaveC * Mathf.Pow(2f, semisFromC / 12f);
 
-        public static AudioClip Music()
+        public static AudioClip Music(int district = 0)
         {
-            const float bpm = 126f, beat = 60f / bpm;
+            // Each district gets its own tempo and key so the three courses never share a soundtrack.
+            // Downtown: 126 bpm in C. Skypark: 132 bpm, a whole tone up, airier lead. Festivals: 140 bpm,
+            // a fourth up, thinner pulse lead and busier hats.
+            float bpm = district == 2 ? 140f : district == 1 ? 132f : 126f, beat = 60f / bpm;
+            int transpose = district == 2 ? 5 : district == 1 ? 2 : 0;
+            float leadDuty = district == 2 ? 0.125f : district == 1 ? 0.19f : 0.25f;
+            float hatLevel = district == 2 ? 1.35f : district == 1 ? 0.8f : 1f;
             int notes = Tune.GetLength(0);
             var starts = new float[notes];
             float acc = 0f;
@@ -89,9 +95,9 @@ namespace DallasDash.Core
                 if (Tune[idx, 0] > -50f && t < acc)
                 {
                     float nt = t - starts[idx], nlen = Tune[idx, 1] * beat;
-                    float f = Hz(Tune[idx, 0], 523.25f) * (1f + 0.004f * Mathf.Sin(2f * Mathf.PI * 5.5f * nt));
+                    float f = Hz(Tune[idx, 0] + transpose, 523.25f) * (1f + 0.004f * Mathf.Sin(2f * Mathf.PI * 5.5f * nt));
                     float ph = (f * nt) % 1f;
-                    lead = (ph < 0.25f ? 1f : -0.33f) * 0.13f * Mathf.Min(1f, nt / 0.01f) * Mathf.Lerp(1f, 0.5f, Mathf.Clamp01(nt / nlen)) * (nt > nlen - 0.03f ? 0.3f : 1f);
+                    lead = (ph < leadDuty ? 1f : -0.33f) * 0.13f * Mathf.Min(1f, nt / 0.01f) * Mathf.Lerp(1f, 0.5f, Mathf.Clamp01(nt / nlen)) * (nt > nlen - 0.03f ? 0.3f : 1f);
                 }
 
                 // Walking bass on the eighths: root, root, octave, fifth, triangle wave with a short pluck.
@@ -100,7 +106,7 @@ namespace DallasDash.Core
                 int bar = Mathf.Min(e8 / 8, Roots.Length - 1);
                 float et = t - e8 * half;
                 int step = e8 % 4;
-                float bf = Hz(Roots[bar] + (step == 2 ? 12 : step == 3 ? 7 : 0), 130.81f);
+                float bf = Hz(Roots[bar] + transpose + (step == 2 ? 12 : step == 3 ? 7 : 0), 130.81f);
                 float tri = 2f * Mathf.Abs(2f * ((bf * et) % 1f) - 1f) - 1f;
                 float bass = tri * 0.2f * Mathf.Exp(-et * 6f);
 
@@ -110,7 +116,7 @@ namespace DallasDash.Core
                 float kick = Mathf.Sin(2f * Mathf.PI * (55f + 90f * Mathf.Exp(-bt * 30f)) * bt) * Mathf.Exp(-bt * 14f) * 0.28f;
                 float n = (float)rng.NextDouble() * 2f - 1f;
                 float hp = n - noiseLp; noiseLp += (n - noiseLp) * 0.35f;
-                float hats = hp * Mathf.Exp(-et * 60f) * (e8 % 2 == 1 ? 0.09f : 0.03f);
+                float hats = hp * Mathf.Exp(-et * 60f) * (e8 % 2 == 1 ? 0.09f : 0.03f) * hatLevel;
                 float clap = b % 2 == 1 ? n * Mathf.Exp(-bt * 22f) * 0.1f : 0f;
 
                 // Short fade at the loop seam.
@@ -126,5 +132,27 @@ namespace DallasDash.Core
             float phase = 2f * Mathf.PI * f * t;
             return (Mathf.Sin(phase) * 0.6f + Mathf.Sin(phase * 2f) * 0.15f) * 0.5f;
         });
+
+        /// A short spoken-vowel blip for the Riders City voice-preset picker. Six base pitches and
+        /// formant weights stand in for the different voices until the real voice service exists.
+        public static AudioClip Voice(int preset)
+        {
+            float[] pitch = { 196f, 233f, 147f, 262f, 220f, 131f };
+            float[] f1 = { 700f, 850f, 520f, 760f, 620f, 480f };
+            float[] f2 = { 1200f, 1500f, 900f, 1350f, 1100f, 780f };
+            int i = Mathf.Clamp(preset, 0, pitch.Length - 1);
+            float baseHz = pitch[i], formant1 = f1[i], formant2 = f2[i];
+            return Make("voice", 0.42f, t =>
+            {
+                float env = Env(t, 0.42f, 0.02f);
+                float vibrato = 1f + 0.012f * Mathf.Sin(2f * Mathf.PI * 5.2f * t);
+                float phase = 2f * Mathf.PI * baseHz * vibrato * t;
+                float glottal = Mathf.Sin(phase) + 0.45f * Mathf.Sin(phase * 2f) + 0.22f * Mathf.Sin(phase * 3f);
+                float vowel = 0.55f * glottal
+                    + 0.25f * Mathf.Sin(2f * Mathf.PI * formant1 * t) * 0.4f
+                    + 0.14f * Mathf.Sin(2f * Mathf.PI * formant2 * t) * 0.25f;
+                return vowel * 0.34f * env;
+            });
+        }
     }
 }

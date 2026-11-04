@@ -1,0 +1,62 @@
+[
+  {
+    "file": "shanghai_bund_1k.hdr",
+    "source": "https://polyhaven.com/a/shanghai_bund",
+    "license": "CC0-1.0",
+    "sha256": "77276a6b67cbf09611efc46e55871eead34e1fc6fa107db412207b91cf74697e"
+  },
+  {
+    "file": "brick_wall_02_diff_1k.jpg",
+    "source": "https://polyhaven.com/a/brick_wall_02",
+    "license": "CC0-1.0",
+    "sha256": "e80aad85ff49b70af5e554d28adf1009adca409fe5d89c2647595254f972df9c"
+  },
+  {
+    "file": "brick_wall_02_nor_gl_1k.jpg",
+    "source": "https://polyhaven.com/a/brick_wall_02",
+    "license": "CC0-1.0",
+    "sha256": "ee1d7b11786a6c26245c02d6041aef0cda03431fc06a7509111575ce12bf422c"
+  },
+  {
+    "file": "brick_wall_02_rough_1k.jpg",
+    "source": "https://polyhaven.com/a/brick_wall_02",
+    "license": "CC0-1.0",
+    "sha256": "0567ea80ad98578f7160ed7880352b3b84d877afe8abbb538c1bb02586aa6e64"
+  },
+  {
+    "file": "asphalt_02_diff_1k.jpg",
+    "source": "https://polyhaven.com/a/asphalt_02",
+    "license": "CC0-1.0",
+    "sha256": "1aa5ce99f58a625c71d48cfc3e68b65ca85ccb00f39e045c0a928608a0ea25ed"
+  },
+  {
+    "file": "asphalt_02_nor_gl_1k.jpg",
+    "source": "https://polyhaven.com/a/asphalt_02",
+    "license": "CC0-1.0",
+    "sha256": "42a1c381b53204e83a982db2864479a30bc127bbdeebb1006f8ee51bff099df3"
+  },
+  {
+    "file": "asphalt_02_rough_1k.jpg",
+    "source": "https://polyhaven.com/a/asphalt_02",
+    "license": "CC0-1.0",
+    "sha256": "70ba3edc65525eb4dc366cf010ca7ae0bd34e0251ff0225c2dad627a873d0712"
+  },
+  {
+    "file": "concrete_pavers_02_diff_1k.jpg",
+    "source": "https://polyhaven.com/a/concrete_pavers_02",
+    "license": "CC0-1.0",
+    "sha256": "483c284c13153b8a8d010dbc58b4e52e65ad2525ddc69b3daf8722c70731730f"
+  },
+  {
+    "file": "concrete_pavers_02_nor_gl_1k.jpg",
+    "source": "https://polyhaven.com/a/concrete_pavers_02",
+    "license": "CC0-1.0",
+    "sha256": "54eeb307a2f028134382b5e02d4d66b3272d10b8531e6f2b0d59fc466f560d67"
+  },
+  {
+    "file": "concrete_pavers_02_rough_1k.jpg",
+    "source": "https://polyhaven.com/a/concrete_pavers_02",
+    "license": "CC0-1.0",
+    "sha256": "8faca37df4653cb093ffb14e8420e0052713f7295bcdc1c7eb91b72a71070378"
+  }
+]

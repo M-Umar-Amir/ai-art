@@ -19,7 +19,7 @@ namespace DallasDash.Core
             public int target, progress;
             public bool PerRun => stat is MissionStat.Burgers or MissionStat.Distance or MissionStat.Score;
             public bool Done => progress >= target;
-            public int Reward => 200 + 100 * Mathf.Min(Level, 10);
+            public int Reward => BurgerPrices.MissionReward(Level);
             public string Text => stat switch
             {
                 MissionStat.Burgers => $"Collect {target} food items and chips in one run",
@@ -124,7 +124,7 @@ namespace DallasDash.Core
                 if (!m.Done) continue;
                 m.progress = m.target;
                 PlayerPrefs.SetInt("missions_done", Level + 1);
-                PlayerProfile.Coins += m.Reward;
+                PlayerProfile.Burgers += m.Reward;
                 Completed?.Invoke(m);
                 list[i] = Deal(i);
                 Save();

@@ -13,6 +13,7 @@ namespace DallasDash.Gameplay
         /// so a renderer's bounds can no longer be trusted to describe a single platform.
         public bool useBounds;
         public Bounds bounds;
+        Renderer[] platformRenderers;
         public bool Safe => platform && platform.position.y >= -0.18f;
         public bool Support(float x, float z, out float height)
         {
@@ -23,8 +24,11 @@ namespace DallasDash.Gameplay
                 height = bounds.max.y;
                 return true;
             }
-            if (!platform || !platform.TryGetComponent<Renderer>(out var renderer)) return false;
-            var b = renderer.bounds;
+            if (!platform) return false;
+            if (platformRenderers == null) platformRenderers = platform.GetComponentsInChildren<Renderer>();
+            if (platformRenderers.Length == 0) return false;
+            var b = platformRenderers[0].bounds;
+            foreach (var renderer in platformRenderers) b.Encapsulate(renderer.bounds);
             if (x < b.min.x || x > b.max.x || z < b.min.z || z > b.max.z) return false;
             height = b.max.y;
             return true;

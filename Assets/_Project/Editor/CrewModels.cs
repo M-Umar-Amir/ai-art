@@ -5,10 +5,7 @@ using UnityEngine;
 
 namespace DallasDash.EditorTools
 {
-    /// Authored crew models: clean, toon-shaded, articulated characters built from lofted meshes
-    /// instead of AI photogrammetry blobs. Each character has a standing variant for the crew screen
-    /// and a riding variant posed on the board (Bolt on his own monowheel). Limbs are real joints, so
-    /// DashPose animates them in game.
+    /// Loads the original client crew meshes. Procedural authoring helpers remain for reference only.
     public static class CrewModels
     {
         const string PrefabDir = "Assets/_Project/Prefabs/Crew";
@@ -20,17 +17,48 @@ namespace DallasDash.EditorTools
         public static GameObject Build(int character, bool riding)
         {
             character = Mathf.Clamp(character, 0, 2);
-            string name = character == 0 ? "Ace" : character == 1 ? "Nova" : "Bolt";
-            string id = name + (riding && character != 2 ? "-Ride" : "");
-            variant = id;
-            var root = new GameObject(id);
-            if (character == 2) Bolt(root.transform);
-            else Human(root.transform, character, riding);
-            System.IO.Directory.CreateDirectory(PrefabDir);
-            var prefab = PrefabUtility.SaveAsPrefabAsset(root, PrefabDir + "/" + id + ".prefab");
-            Object.DestroyImmediate(root);
-            Debug.Log("[DallasDash] Crew model " + id);
+            string id = character == 0 ? "ace" : character == 1 ? "nova" : "bolt";
+            var prefab = ModelImport.Get(id);
+            if (!prefab) throw new System.InvalidOperationException("Required original crew model missing: " + id);
             return prefab;
+        }
+        // One skinned renderer preserves the authored joint animation while batching rigid parts by material.
+        static void BatchSkin(GameObject root)
+        {
+            var filters = root.GetComponentsInChildren<MeshFilter>();
+            var vertices = new List<Vector3>(); var normals = new List<Vector3>(); var uvs = new List<Vector2>();
+            var weights = new List<BoneWeight>(); var bones = new List<Transform>(); var bind = new List<Matrix4x4>();
+            var materials = new List<Material>(); var indices = new List<List<int>>();
+            foreach (var filter in filters)
+            {
+                var renderer = filter.GetComponent<MeshRenderer>(); var source = filter.sharedMesh;
+                if (!renderer || !source || !source.isReadable) continue;
+                int material = materials.IndexOf(renderer.sharedMaterial);
+                if (material < 0) { material = materials.Count; materials.Add(renderer.sharedMaterial); indices.Add(new List<int>()); }
+                int bone = bones.Count, first = vertices.Count;
+                bones.Add(filter.transform); bind.Add(filter.transform.worldToLocalMatrix * root.transform.localToWorldMatrix);
+                var matrix = root.transform.worldToLocalMatrix * filter.transform.localToWorldMatrix;
+                var sourceVertices = source.vertices; var sourceNormals = source.normals; var sourceUv = source.uv;
+                for (int v = 0; v < sourceVertices.Length; v++)
+                {
+                    vertices.Add(matrix.MultiplyPoint3x4(sourceVertices[v]));
+                    normals.Add(matrix.MultiplyVector(sourceNormals[v]).normalized);
+                    uvs.Add(sourceUv.Length > v ? sourceUv[v] : Vector2.zero);
+                    weights.Add(new BoneWeight { boneIndex0 = bone, weight0 = 1f });
+                }
+                foreach (int index in source.triangles) indices[material].Add(first + index);
+                Object.DestroyImmediate(renderer); Object.DestroyImmediate(filter);
+            }
+            var mesh = new Mesh { name = variant + " skinned", indexFormat = vertices.Count > 65535 ? UnityEngine.Rendering.IndexFormat.UInt32 : UnityEngine.Rendering.IndexFormat.UInt16 };
+            mesh.SetVertices(vertices); mesh.SetNormals(normals); mesh.SetUVs(0, uvs);
+            mesh.boneWeights = weights.ToArray(); mesh.bindposes = bind.ToArray(); mesh.subMeshCount = materials.Count;
+            for (int m = 0; m < materials.Count; m++) mesh.SetTriangles(indices[m], m);
+            mesh.RecalculateBounds();
+            var skin = root.AddComponent<SkinnedMeshRenderer>();
+            skin.sharedMesh = SaveMesh(variant + "_batched", mesh); skin.sharedMaterials = materials.ToArray();
+            skin.bones = bones.ToArray(); skin.rootBone = root.transform;
+            var bounds = skin.sharedMesh.bounds; bounds.Expand(.2f); skin.localBounds = bounds;
+            skin.quality = SkinQuality.Bone1;
         }
 
         // ================= materials =================
@@ -77,10 +105,26 @@ namespace DallasDash.EditorTools
         {
             System.IO.Directory.CreateDirectory(MeshDir);
             string path = MeshDir + "/" + key + ".asset";
-            AssetDatabase.DeleteAsset(path);
             mesh.name = key;
+            var existing = AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            if (existing)
+            {
+                // Preserve references shared by mirrored parts; copy native mesh data explicitly.
+                existing.Clear(); existing.indexFormat = mesh.indexFormat;
+                existing.vertices = mesh.vertices; existing.normals = mesh.normals;
+                existing.uv = mesh.uv; existing.tangents = mesh.tangents; existing.colors = mesh.colors;
+                existing.subMeshCount = mesh.subMeshCount;
+                for (int sub = 0; sub < mesh.subMeshCount; sub++)
+                    existing.SetIndices(mesh.GetIndices(sub), mesh.GetTopology(sub), sub, false);
+                existing.boneWeights = mesh.boneWeights; existing.bindposes = mesh.bindposes;
+                existing.bounds = mesh.bounds;
+                EditorUtility.SetDirty(existing);
+                UnityEngine.Object.DestroyImmediate(mesh);
+                return existing;
+            }
             AssetDatabase.CreateAsset(mesh, path);
-            return AssetDatabase.LoadAssetAtPath<Mesh>(path);
+            return mesh;
+
         }
 
         /// A lofted solid: rings of superellipse sections stacked up Y with smooth normals, so limbs
@@ -499,6 +543,12 @@ namespace DallasDash.EditorTools
             Disc(wheel, "Hub", Vector3.zero, 0.16f, 0.3f, magenta, new Vector3(0f, 0f, 90f));
             Disc(wheel, "Hub light", new Vector3(0f, 0f, 0.153f), 0.09f, 0.02f, cyan, new Vector3(0f, 0f, 90f));
             Disc(wheel, "Hub light", new Vector3(0f, 0f, -0.153f), 0.09f, 0.02f, cyan, new Vector3(0f, 0f, 90f));
+            for (int tread = 0; tread < 16; tread++)
+            {
+                float angle = tread * Mathf.PI * 2f / 16f;
+                Part(wheel, "Tire tread", Box("tread" + tread, new Vector3(.23f,.016f,.045f), .004f), silverDark,
+                    new Vector3(0f, Mathf.Cos(angle)*.329f, Mathf.Sin(angle)*.329f), new Vector3(tread * 22.5f,0f,0f));
+            }
             wheel.gameObject.AddComponent<WheelSpin>();
 
             // Fairings either side of the wheel, then the chassis that carries the rider.

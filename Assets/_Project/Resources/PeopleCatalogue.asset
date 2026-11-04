@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d30d2a715a570c2409b06c48bb072b68, type: 3}
+  m_Name: PeopleCatalogue
+  m_EditorClassIdentifier: DallasDash.Runtime::DallasDash.Gameplay.PeopleCatalogue
+  bodies:
+  - {fileID: 7707473739356494184, guid: 20bbd97fab1c0c04797d325653d1c9b6, type: 3}
+  - {fileID: 8857090219462618546, guid: 57ec1bbdacbcede4184c8ece90a1063a, type: 3}
+  maleOutfits:
+  - {fileID: 2100000, guid: d278641399430c14e9a4739a019717bd, type: 2}
+  - {fileID: 2100000, guid: c35921b56b4116849af279f18e31ce50, type: 2}
+  - {fileID: 2100000, guid: 67bb1d8619f32c1438eb04f282b5cba5, type: 2}
+  - {fileID: 2100000, guid: 87e138a0498f0c5438a17347305eb8c1, type: 2}
+  - {fileID: 2100000, guid: c676ec146866c38448ab16b1b540e6c5, type: 2}
+  - {fileID: 2100000, guid: 5854e587f2a8fda4b9e1b7995680fea4, type: 2}
+  femaleOutfits:
+  - {fileID: 2100000, guid: 39e07ae1f451d604cbf7b75de64641eb, type: 2}
+  - {fileID: 2100000, guid: abb52fb267cd6d640b26e50aa922261c, type: 2}
+  - {fileID: 2100000, guid: 48fc4d5064088194085bea3711a7dd93, type: 2}
+  - {fileID: 2100000, guid: a574bf90a1dfe8a4fabc729b450ead64, type: 2}
+  - {fileID: 2100000, guid: 2bd13224afd7fd849a0aabea6020fc5e, type: 2}
+  - {fileID: 2100000, guid: 0dab913bd78430746bffbb3128ec3eb1, type: 2}
+  hairTints:
+  - {r: 0.12, g: 0.08, b: 0.05, a: 1}
+  - {r: 0.25, g: 0.15, b: 0.08, a: 1}
+  - {r: 0.05, g: 0.05, b: 0.06, a: 1}
+  - {r: 0.55, g: 0.4, b: 0.2, a: 1}
+  - {r: 0.45, g: 0.1, b: 0.08, a: 1}

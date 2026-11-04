@@ -5,6 +5,7 @@ namespace DallasDash.Gameplay
     /// Bot rider for screenshot and showcase modes: looks a short way down its lane and dodges whatever is there.
     public static class Autopilot
     {
+        static float lastWallRun = -1000f;
         public static RiderInput.Action Steer(TrackSpawner track, RiderController rider)
         {
             if (!track || !rider) return RiderInput.Action.None;
@@ -12,31 +13,44 @@ namespace DallasDash.Gameplay
             float d = gm.Distance;
             float speed = UnityEngine.Mathf.Max(gm.Speed, 1f);
             // Looks about two thirds of a second ahead (vans and roadworks are 5-6 m long; 9 m was too late at speed).
-            float look = UnityEngine.Mathf.Max(10f, speed * 0.7f);
-            // The fourth lane is the faster, hazard-free line: be on the right-hand lane before the entry
-            // window opens and swipe onto the route as soon as it does.
-            if (rider.Lane != Tuning.RouteLane)
+            // A lane change needs about half a second to clear a van; look a full second ahead.
+            float look = UnityEngine.Mathf.Max(12f, speed * 1.05f);
+            var surface = rider.Traversal.Surface;
+            var dash = DashRun.Instance;
+            if (dash && dash.OnFoot && surface == RunSurface.Road && dash.BikeAt > d && dash.BikeAt - d < 60f && rider.Lane != dash.BikeLane)
+                return rider.Lane < dash.BikeLane ? RiderInput.Action.Right : RiderInput.Action.Left;
+            if (rider.Traversal.Moving) return RiderInput.Action.None;
+            // Wall runs (client, 3 Nov: anywhere there is a facade; on foot for Ace and Nova, always for Bolt):
+            // from an outer lane with a long clear facade ahead, steer into the building. Spaced out so the bot
+            // still rides the street between runs.
+            if (dash && surface == RunSurface.Road && DashRun.CanRideWalls && !rider.Airborne && d - lastWallRun > (dash.OnFoot ? 45f : 140f)
+                && (rider.Lane == 0 || rider.Lane == Tuning.Lanes - 1) && !(dash.OnFoot && dash.BikeAt > d && dash.BikeAt - d < 70f))
             {
-                if (DashRun.RouteEntry(d)) return RiderInput.Action.Right;
-                if (DashRun.RouteOpen(d + 45f) && rider.Lane < Tuning.Lanes - 1) return RiderInput.Action.Right;
+                int side = rider.Lane == 0 ? -1 : 1;
+                float reach = speed * (dash.WallRunSeconds + 0.6f);
+                if (DashRun.WallAvailable(side, d) && DashRun.WallAvailable(side, d + reach * 0.5f) && DashRun.WallAvailable(side, d + reach))
+                { lastWallRun = d; return side < 0 ? RiderInput.Action.Left : RiderInput.Action.Right; }
             }
-            else
+            if (d < lastWallRun) lastWallRun = -1000f; // a new run
+            if (surface == RunSurface.Road && DashRun.CanTakeRooftops)
             {
-                // On the route there is no lane to dodge into, so a rooftop hurdle has to be hopped.
-                foreach (var o in track.Live)
-                {
-                    if (!o || o.consumed || o.lane != Tuning.RouteLane || o.kind != TrackKind.Low && o.kind != TrackKind.Gap) continue;
-                    float ahead = o.transform.position.z - o.halfLength - d;
-                    if (ahead < -0.6f || ahead > look) continue;
-                    return rider.Airborne || ahead / speed > 0.28f ? RiderInput.Action.None : RiderInput.Action.Jump;
-                }
-                return RiderInput.Action.None;
+                // Take the rooftop shortcut: be in the ramp lane well before the kicker.
+                float s = RooftopCourse.ZoneStartAt(d);
+                if (d > s - 48f && d < s && d > RooftopCourse.Start - 48f && rider.Lane != RooftopCourse.EntryLane)
+                    return rider.Lane < RooftopCourse.EntryLane ? RiderInput.Action.Right : RiderInput.Action.Left;
+                if (d > s - 48f && d < s + 1f && d > RooftopCourse.Start - 48f) return RiderInput.Action.None;
+            }
+            else if (surface == RunSurface.Rooftop)
+            {
+                // Alley gaps are jumped on time; a skybridge lane needs no jump.
+                float edge = RooftopCourse.NextEdge(d, Tuning.LaneX[rider.Lane]);
+                if (!rider.Airborne && edge / speed < 0.12f && edge > -0.5f) return RiderInput.Action.Jump;
             }
             TrackObject next = null;
             float nextAhead = float.MaxValue;
             foreach (var o in track.Live)
             {
-                if (!o || o.consumed || o.kind == TrackKind.Pickup || o.lane != rider.Lane) continue;
+                if (!o || o.consumed || o.kind == TrackKind.Pickup || o.lane != rider.Lane || o.surface != surface) continue;
                 float ahead = o.transform.position.z - o.halfLength - d;
                 if (ahead > -o.halfLength * 2f && ahead < look && ahead < nextAhead) { next = o; nextAhead = ahead; }
             }
@@ -45,39 +59,44 @@ namespace DallasDash.Gameplay
             // 0.1 s to 0.5 s after take-off, so going too early lands on it.
             float eta = nextAhead / speed;
             if (next.kind == TrackKind.Overhead && eta < 0.25f) return RiderInput.Action.Down;
-            if (next.kind == TrackKind.Low || next.kind == TrackKind.Gap)
+            // A tall barrier (taller than a clean hop clears) is steered round like a block.
+            if ((next.kind == TrackKind.Low && next.height <= 1.0f) || next.kind == TrackKind.Gap)
             {
                 // Steer round it if a neighbouring lane is open for longer; otherwise hop it on time.
-                int alt = BestLane(track, rider.Lane, d, look);
-                if (alt != rider.Lane && Room(track, alt, d, look) > nextAhead + 6f) return alt < rider.Lane ? RiderInput.Action.Left : RiderInput.Action.Right;
-                return rider.Airborne || eta > 0.25f ? RiderInput.Action.None : RiderInput.Action.Jump;
+                int alt = BestLane(track, rider, rider.Lane, d, look);
+                if (alt != rider.Lane && Room(track, rider, alt, d, look) > nextAhead + 6f) return alt < rider.Lane ? RiderInput.Action.Left : RiderInput.Action.Right;
+                // Still airborne (just landed off a gap, say): ask anyway, the controller buffers it to landing.
+                return eta > 0.3f ? RiderInput.Action.None : RiderInput.Action.Jump;
             }
-            int lane = BestLane(track, rider.Lane, d, look);
+            int lane = BestLane(track, rider, rider.Lane, d, look);
             if (lane == rider.Lane) return RiderInput.Action.None;
+            if (surface != RunSurface.Road && surface != RunSurface.Rooftop) return RiderInput.Action.None;
             return lane < rider.Lane ? RiderInput.Action.Left : RiderInput.Action.Right;
         }
 
         /// The neighbouring lane (or this one) with the most open road ahead; low hurdles count as passable.
-        static int BestLane(TrackSpawner track, int from, float d, float look)
+        static int BestLane(TrackSpawner track, RiderController rider, int from, float d, float look)
         {
             int best = from;
-            float bestRoom = Room(track, from, d, look);
+            float bestRoom = Room(track, rider, from, d, look);
             foreach (int lane in new[] { from - 1, from + 1 })
             {
                 if (lane < 0 || lane >= Tuning.Lanes) continue;
-                float room = Room(track, lane, d, look);
+                float room = Room(track, rider, lane, d, look);
                 if (room > bestRoom + 0.5f) { best = lane; bestRoom = room; }
             }
             return best;
         }
 
         /// Distance to the first lane-filling obstacle in a lane (0 if one is alongside right now).
-        static float Room(TrackSpawner track, int lane, float d, float look)
+        static float Room(TrackSpawner track, RiderController rider, int lane, float d, float look)
         {
             float room = look * 3f;
             foreach (var o in track.Live)
             {
-                if (!o || o.consumed || (o.kind != TrackKind.Block && o.kind != TrackKind.Gap && o.kind != TrackKind.Overhead) || o.lane != lane) continue;
+                if (!o) continue;
+                bool tall = o.kind == TrackKind.Low && o.height > 1.0f;
+                if (o.consumed || (o.kind != TrackKind.Block && o.kind != TrackKind.Gap && o.kind != TrackKind.Overhead && !tall) || o.lane != lane || o.surface != rider.Traversal.Surface) continue;
                 float near = o.transform.position.z - o.halfLength - d;
                 float far = o.transform.position.z + o.halfLength - d;
                 if (far < -Tuning.PlayerHalf - 0.3f) continue;

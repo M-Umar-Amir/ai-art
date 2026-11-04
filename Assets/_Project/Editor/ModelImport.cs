@@ -34,6 +34,16 @@ namespace DallasDash.EditorTools
             ["ace"] = new Spec { size = 2.0f, outline = 0.009f },
             ["nova"] = new Spec { size = 1.95f, outline = 0.009f },
             ["bolt"] = new Spec { size = 2.15f, outline = 0.009f },
+            // Seated on the e-bike by models/pose_cyclist.py: already in metres in bike space.
+            ["ace-ride"] = new Spec { fit = Fit.Keep, outline = 0.009f },
+            ["nova-ride"] = new Spec { fit = Fit.Keep, outline = 0.009f },
+            ["ace-run"] = new Spec { fit = Fit.Keep, outline = 0.009f },
+            ["nova-run"] = new Spec { fit = Fit.Keep, outline = 0.009f },
+            ["ebike"] = new Spec { fit = Fit.Keep },
+            ["ebike-nova"] = new Spec { fit = Fit.Keep },
+            // Quaternius pedestrians, already in metres (models/make_people.py).
+            ["people-male"] = new Spec { fit = Fit.Keep, outline = 0.008f },
+            ["people-female"] = new Spec { fit = Fit.Keep, outline = 0.008f },
             ["neon-block-a"] = new Spec { fit = Fit.Keep },
             ["neon-block-b"] = new Spec { fit = Fit.Keep },
             ["skybridge"] = new Spec { fit = Fit.Keep },
@@ -81,11 +91,13 @@ namespace DallasDash.EditorTools
             var self = File.GetLastWriteTimeUtc("Assets/_Project/Editor/ModelImport.cs");
             if (self > newest) newest = self;
             if (existing && File.GetLastWriteTimeUtc(prefabPath) > newest) return existing;
-            return Build(id, src, Specs.TryGetValue(id, out var s) ? s : new Spec { size = 1f });
+            return Build(id, src, Specs.TryGetValue(id, out var s) ? s : new Spec { size = 1f, fit = id.StartsWith("free-") ? Fit.Longest : Fit.Height });
         }
 
         static string SourcePath(string id)
         {
+            string free = $"Assets/_Project/Art/Models/FreeAssets/{id}.glb";
+            if (id.StartsWith("free-") && File.Exists(free)) return free;
             string dash = $"Assets/_Project/Art/Models/DashRiders/{id}.glb";
             return File.Exists(dash) ? dash : $"{ModelDir}/{id}.glb";
         }
@@ -136,22 +148,27 @@ namespace DallasDash.EditorTools
                     if (!m) { m = new Material(toon); AssetDatabase.CreateAsset(m, path); }
                     m.shader = toon;
                     // A compressed copy of the embedded image (TextureBake), not glTFast's raw RGBA32 one.
-                    Texture tex = TextureBake.FromGlb(SourcePath(id), mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", id is "ace" or "nova" ? 2048 : spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
+                    Texture tex = TextureBake.FromGlb(SourcePath(id), mats[i] ? mats[i].name : null, $"{id}-{mi - 1}", id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run" ? 2048 : spec.size > 20f || spec.fit == Fit.Keep || spec.size >= 1.5f ? 1024 : 512);
                     if (!tex) tex = BaseTexture(mats[i]);
+                    // A texture baked in this same batch may still be importing: load it again by path.
+                    if (tex && !AssetDatabase.Contains(tex)) tex = null;
+                    if (!tex) tex = AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/_Project/Art/Textures/Baked/{id}-{mi - 1}.png");
                     m.SetTexture("_BaseMap", tex);
-                    m.SetColor("_BaseColor", BaseColor(mats[i]));
+                    if (tex) { m.SetTextureScale("_BaseMap", Vector2.one); m.SetTextureOffset("_BaseMap", Vector2.zero); }
+                    bool authored = TextureBake.Colors(SourcePath(id), mats[i] ? mats[i].name : null, out var glbColor, out var glbGlow);
+                    m.SetColor("_BaseColor", authored ? glbColor : BaseColor(mats[i]));
                     m.SetFloat("_OutlineWidth", spec.outline);
-                    bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt";
-                    m.SetFloat("_SurfaceStyle", architecture ? 0.85f : id is "ace" or "nova" ? 0.3f : 0.5f);
+                    bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt" || id.StartsWith("ebike");
+                    m.SetFloat("_SurfaceStyle", 1f);
                     m.SetFloat("_Smoothness", architecture ? 0.6f : 0.3f);
                     m.SetFloat("_Metallic", architecture ? 0.22f : 0f);
                     m.SetShaderPassEnabled("Outline", false);
                     string sourceName = mats[i] ? mats[i].name.ToLowerInvariant() : "";
-                    m.SetColor("_EmissionColor", sourceName.Contains("neon cyan") ? new Color(0.05f, 0.8f, 1f) * 1.7f
-                        : sourceName.Contains("neon pink") ? new Color(1f, 0.04f, 0.4f) * 1.7f
-                        : sourceName.Contains("warm interior") ? new Color(0.8f, 0.42f, 0.18f) * 0.5f : Color.black);
-                    m.SetFloat("_RimStrength", id is "ace" or "nova" ? 0.18f : 0.22f);
-                    if (id is "ace" or "nova") m.SetColor("_ShadeColor", new Color(0.9f, 0.9f, 0.96f));
+                    bool neonTrim = sourceName.Contains("neon cyan") || sourceName.Contains("neon pink") || sourceName.Contains("headlight");
+                    m.SetColor("_EmissionColor", authored && glbGlow.maxColorComponent > 0.01f ? glbGlow * 1.7f
+                        : neonTrim ? (authored ? glbColor : BaseColor(mats[i])) * 1.7f : sourceName.Contains("warm interior") ? new Color(.8f, .55f, .3f) * .75f : Color.black);
+                    m.SetFloat("_RimStrength", 0f);
+                    if (id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run") m.SetColor("_ShadeColor", new Color(0.9f, 0.9f, 0.96f));
                     EditorUtility.SetDirty(m);
                     mats[i] = m;
                 }
