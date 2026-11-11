@@ -23,7 +23,7 @@ namespace DallasDash.Gameplay
         /// The n-th sign in the street's brand rotation (works for blocks behind the start too).
         public static int BrandAt(int n) => ((n % YumBrands.Length) + YumBrands.Length) % YumBrands.Length;
         /// The official logo sign textures (models/make_brand_signs.py), in YumBrands order; set by the bootstrap.
-        public Texture2D[] brandSquare, brandWide, brandBoard;
+        public Texture2D[] brandSquare, brandWide, brandBoard, brandLivery;
         void Awake()
         {
             BrandVisibility.Square = brandSquare; BrandVisibility.Wide = brandWide; BrandVisibility.Board = brandBoard;
@@ -50,7 +50,70 @@ namespace DallasDash.Gameplay
         {
             if (!built) { built = true; Build(track, id, brand); }
             foreach (var f in faces) f.renderer.sharedMaterial = BrandVisibility.Logo(track, brand, f.format);
+            if (livery.Count > 0) ApplyLivery(track, id, brand);
         }
+
+        // ---- Seamless fleet livery (client, 11 Nov 2026: "branding on vehicles should be seamless"). Vans, pods and
+        // trucks wear the brand in their own paint: FoodInc/ToonCurved projects the official logo onto the side and
+        // rear panels in body space, with a brand-colour stripe on the light paint. One material per vehicle type,
+        // renderer and brand, shared by every pooled copy; no logo quads, no z-fighting, logos bend with the body.
+        readonly List<(Renderer renderer, Material[] original, Matrix4x4 toBody)> livery = new();
+        Vector4 sideRect, rearRect, stripe;
+        static readonly Dictionary<string, Material> liveryMats = new();
+
+        static bool LiveryVehicle(string id) => id is "delivery-van" or "electric-pod" or "food-truck" or "garbage-truck";
+
+        void BuildLivery(Vector3 c, Vector3 size, float bottom, float back)
+        {
+            foreach (var r in GetComponentsInChildren<MeshRenderer>())
+            {
+                if (r.GetComponent<Blinker>() || r.GetComponentInParent<WheelSpin>()) continue;
+                var toBody = transform.worldToLocalMatrix * r.transform.localToWorldMatrix;
+                livery.Add((r, r.sharedMaterials, toBody));
+            }
+            const float aspect = 1024f / 384f;
+            // Side logo over the cargo area (rear 60% of the body, where there are no windows), under the roof line.
+            float w = Mathf.Min(size.z * 0.5f, size.y * 0.34f * aspect), h = w / aspect;
+            sideRect = new Vector4(c.z - size.z * 0.12f, bottom + size.y * 0.56f, w, h);
+            float rw = Mathf.Min(size.x * 0.72f, size.y * 0.3f * aspect);
+            rearRect = new Vector4(c.x, bottom + size.y * 0.6f, rw, rw / aspect);
+            stripe = new Vector4(bottom + size.y * 0.2f, bottom + size.y * 0.29f, 0f, 0f);
+        }
+
+        void ApplyLivery(TrackSpawner track, string id, int brand)
+        {
+            var logo = track.brandLivery != null && brand < track.brandLivery.Length ? track.brandLivery[brand] : null;
+            if (!logo) return;
+            for (int k = 0; k < livery.Count; k++)
+            {
+                var (r, original, toBody) = livery[k];
+                if (!r) continue;
+                var mats = new Material[original.Length];
+                for (int m = 0; m < original.Length; m++)
+                {
+                    var src = original[m];
+                    if (!src || !src.HasProperty("_LiveryOn")) { mats[m] = src; continue; }
+                    string key = id + "/" + k + "/" + m + "/" + brand;
+                    if (!liveryMats.TryGetValue(key, out var mat) || !mat)
+                    {
+                        mat = new Material(src) { name = src.name + " / livery " + TrackSpawner.YumBrands[brand].name };
+                        mat.SetFloat("_LiveryOn", 1f);
+                        mat.SetTexture("_LiveryMap", logo);
+                        mat.SetMatrix("_LiveryObjectToBody", toBody);
+                        mat.SetVector("_LiveryRect", sideRect);
+                        mat.SetVector("_LiveryRear", rearRect);
+                        mat.SetVector("_LiveryStripe", stripe);
+                        mat.SetColor("_LiveryColor", TrackSpawner.YumBrands[brand].board);
+                        liveryMats[key] = mat;
+                    }
+                    mats[m] = mat;
+                }
+                r.sharedMaterials = mats;
+            }
+            // The livery counts as a visible brand mark (client rule: a brand in view every frame).
+            if (!registered) { registered = true; foreach (var (r, _, _) in livery) if (r) BrandVisibility.Live(r, false); }
+        }
+        bool registered;
 
         void Add(TrackSpawner track, int brand, string format, Vector3 local, float yaw, float width)
         {
@@ -91,9 +154,9 @@ namespace DallasDash.Gameplay
                     var box = DashCity.Part(transform, Vector3.zero, new Vector3(s, s, s * 0.9f), shell);
                     box.name = "Courier delivery box";
                     box.transform.localPosition = new Vector3(c.x, bottom + size.y * 0.55f, back + s * 0.35f);
-                    Add(track, brand, "square", box.transform.localPosition + new Vector3(0f, 0f, -s * 0.45f - 0.012f), 0f, s * 0.92f);
+                    Add(track, brand, "square", box.transform.localPosition + new Vector3(0f, 0f, -s * 0.45f - 0.003f), 0f, s * 0.92f);
                     foreach (float side in new[] { -1f, 1f })
-                        Add(track, brand, "square", box.transform.localPosition + new Vector3(side * (s * 0.5f + 0.012f), 0f, 0f), side > 0 ? -90f : 90f, s * 0.82f);
+                        Add(track, brand, "square", box.transform.localPosition + new Vector3(side * (s * 0.5f + 0.003f), 0f, 0f), side > 0 ? -90f : 90f, s * 0.82f);
                     break;
                 }
                 case "roadworks-barrier": case "roadworks":
@@ -101,7 +164,7 @@ namespace DallasDash.Gameplay
                     // A sponsor banner wrapped on the barrier face the rider meets.
                     float w = Mathf.Min(size.x * 0.82f, 1.7f);
                     float y = id == "roadworks" ? bottom + Mathf.Min(1.0f, size.y * 0.62f) : bottom + size.y * 0.55f;
-                    Add(track, brand, "wide", new Vector3(c.x, y, back - 0.03f), 0f, w);
+                    Add(track, brand, "wide", new Vector3(c.x, y, back - 0.006f), 0f, w);
                     break;
                 }
                 case "cargo-slide-gate":
@@ -113,12 +176,13 @@ namespace DallasDash.Gameplay
                 }
                 default:
                 {
-                    // Vans, pods, trucks and the food truck: a logo panel down each side and on the back.
+                    if (LiveryVehicle(id)) { BuildLivery(c, size, bottom, back); break; }
+                    // Anything else branded: logo panels flush on each side and the back.
                     float h = Mathf.Min(0.95f, size.y * 0.36f), w = Mathf.Min(size.z * 0.62f, h * wide), y = bottom + size.y * 0.56f;
                     foreach (float side in new[] { -1f, 1f })
-                        Add(track, brand, "wide", new Vector3(c.x + side * (size.x * 0.5f + 0.015f), y, c.z), side > 0 ? -90f : 90f, w);
+                        Add(track, brand, "wide", new Vector3(c.x + side * (size.x * 0.5f + 0.004f), y, c.z), side > 0 ? -90f : 90f, w);
                     float bw = Mathf.Min(size.x * 0.8f, h * wide);
-                    Add(track, brand, "wide", new Vector3(c.x, y, back - 0.015f), 0f, bw);
+                    Add(track, brand, "wide", new Vector3(c.x, y, back - 0.004f), 0f, bw);
                     break;
                 }
             }

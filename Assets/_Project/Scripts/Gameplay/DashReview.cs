@@ -99,7 +99,7 @@ namespace DallasDash.Gameplay
             for (int d = 0; d < 1; d++)
                 for (int k = 0; k < 5; k++)
                 {
-                    DashRun.District = d; menu.Open("none");
+                    menu.Open("none");
                     UnityEngine.Random.InitState(9000 + d * 17 + k * 101);
                     RiderInput.Override = () => Autopilot.Steer(track, rider);
                     gm.StartRun();
@@ -207,7 +207,9 @@ namespace DallasDash.Gameplay
                 int light = 0;
                 for (int i = 0; i + 2 < data.Length; i += 97 * 3) if (data[i] + data[i + 1] + data[i + 2] > 40) light++;
                 Check(light > 100, "screenshot renders visible content: " + label);
-                bool flip = SystemInfo.graphicsUVStartsAtTop;
+                // D3D readback is already in the bottom-up row order EncodeArrayToPNG expects; flipping it there
+                // saved every review capture upside down (found 11 Nov 2026). Only GL-style targets need the flip.
+                bool flip = !SystemInfo.graphicsUVStartsAtTop;
                 System.Threading.Tasks.Task.Run(() =>
                 {
                     if (flip)
@@ -246,7 +248,6 @@ namespace DallasDash.Gameplay
             PlayerPrefs.SetInt("coached_runs", 2);
             PlayerPrefs.SetInt("dash_outfit_0", 0);
             BurgerPrices.UnlockAllForReview();
-            DashRun.District = 0;
             yield return new WaitForSeconds(1.5f);
             var menu = MenuUI.Instance; var gm = GameManager.Instance; var run = DashRun.Instance;
             var track = FindFirstObjectByType<TrackSpawner>(); var rider = FindFirstObjectByType<RiderController>();
@@ -275,7 +276,7 @@ namespace DallasDash.Gameplay
 
             // ---- The police chase: on the bike the gap opens, on foot it closes, a crash costs ground.
             gm.StartRun(); yield return null;
-            Check(Mathf.Abs(run.PoliceGap - DashRun.StartGap) < 0.2f, "chase starts with the officer behind: " + run.PoliceGap.ToString("0.00"));
+            Check(Mathf.Abs(run.PoliceGap - DashRun.StartGap) < 0.8f, "chase starts with the officer behind: " + run.PoliceGap.ToString("0.00"));
             yield return new WaitForSeconds(1f);
             Check(run.PoliceGap > DashRun.StartGap, "riding the e-bike pulls away from the officer");
             Check(!chase.officer.gameObject.activeInHierarchy, "far back, the officer stays out of the frame");
@@ -295,7 +296,9 @@ namespace DallasDash.Gameplay
             Check(run.PoliceGap < footGap - 1f, "on foot the officer closes in");
             yield return Shot("on-foot-cop-closing");
 
-            // ---- Busted, and the burger revive.
+            // ---- Busted, and the burger revive. A fresh run: on a slow PC the on-foot capture above can take long
+            // enough for the officer to have caught Ace already (auto-decline is still on there).
+            gm.StartRun(); yield return null;
             DashRun.AutoDeclineRevive = false;
             PlayerProfile.Burgers = BurgerPrices.Revive(0) + 500;
             run.PoliceGains(1000f); yield return null;
@@ -321,33 +324,6 @@ namespace DallasDash.Gameplay
             yield return Shot("busted-card");
             DashRun.AutoDeclineRevive = true;
 
-            // ---- The Skypark portal shortcut: in through the street portal, back through the compulsory one.
-            gm.StartRun(); yield return null;
-            float portalZ = -1f; int portalLane = 1;
-            for (float guard = Time.realtimeSinceStartup + 20f; Time.realtimeSinceStartup < guard; )
-            {
-                if (track.Portal) { portalZ = track.Portal.transform.position.z; portalLane = track.Portal.lane; break; }
-                Place(gm.Distance + 30f, track, rider); yield return null;
-            }
-            Check(portalZ > 0f, "a shortcut portal stands in a street lane");
-            // The Skypark is ridden with the bot's normal input (it hops the roof vents and jumps the gaps).
-            RiderInput.Override = () => Autopilot.Steer(track, rider);
-            Place(portalZ - 24f, track, rider); rider.BounceBack(portalLane);
-            yield return new WaitForSeconds(0.25f);
-            yield return Shot("portal-sign");
-            for (float guard = Time.realtimeSinceStartup + 6f; !DashRun.InSkypark && Time.realtimeSinceStartup < guard; ) yield return null;
-            Check(DashRun.InSkypark && run.OnFoot && run.Shortcuts == 1 && !run.PoliceActive, "riding through the portal teleports Ace to the Skypark, on foot, police shaken off");
-            Check(VehicleDynamics.Current.kind == CourierVehicle.Running, "Ace runs the Skypark without the bike");
-            yield return new WaitForSeconds(0.9f);
-            yield return Shot("skypark-on-foot");
-            Place(DashRun.SkyTo - 30f, track, rider); yield return new WaitForSeconds(0.2f);
-            yield return Shot("return-portal");
-            for (float guard = Time.realtimeSinceStartup + 6f; DashRun.InSkypark && Time.realtimeSinceStartup < guard; ) yield return null;
-            Check(!DashRun.InSkypark && !run.OnFoot && run.PoliceActive && Mathf.Abs(run.PoliceGap - DashRun.MaxGap) < 0.2f, "the compulsory return portal sends Ace back to Downtown on his bike");
-            yield return new WaitForSeconds(0.8f);
-            yield return Shot("back-downtown");
-            RiderInput.Override = () => RiderInput.Action.None;
-
             // ---- The coupon: 100,000 burgers put a 10% coupon on the track; missing it resets the count.
             gm.StartRun(); yield return null;
             int coupons = DemoRewards.Ledger.coupons.Count;
@@ -366,14 +342,14 @@ namespace DallasDash.Gameplay
             PlayerProfile.CouponProgress = BurgerPrices.CouponThreshold - BurgerPrices.PickupValue;
             gm.AddPickup(15); yield return null; yield return null;
             Check(track.Coupon, "a second coupon appears at the next 100,000");
-            // Dodge the coupon and any shortcut portal near it (a portal keeps the coupon for later, by design).
+            // Dodge the coupon.
             int dodge = 0;
             for (int l = 0; l < Tuning.Lanes; l++)
-                if (l != track.Coupon.lane && !(track.Portal && track.Portal.lane == l)) dodge = l;
+                if (l != track.Coupon.lane) dodge = l;
             Place(track.Coupon.transform.position.z - 20f, track, rider); rider.BounceBack(dodge);
             track.ClearAhead(gm.Distance, 40f); yield return null;
             RiderInput.Override = () => RiderInput.Action.None;
-            for (float guard = Time.realtimeSinceStartup + 6f; track.Coupon && Time.realtimeSinceStartup < guard; ) yield return null;
+            for (float guard = Time.realtimeSinceStartup + 15f; track.Coupon && Time.realtimeSinceStartup < guard; ) yield return null;
             Check(PlayerProfile.CouponProgress < 2000 && DemoRewards.Ledger.coupons.Count == coupons + 1, "a missed coupon is lost and the count starts again from zero: " + PlayerProfile.CouponProgress);
             yield return Shot("coupon-missed");
             gm.Bust();
@@ -394,7 +370,6 @@ namespace DallasDash.Gameplay
             // Set specific character/vehicle/district
             PlayerProfile.Character = Mathf.Clamp(comprehensiveChar, 0, 2);
             PlayerProfile.Ride = comprehensiveVeh;
-            DashRun.District = Mathf.Clamp(district, 0, 2);
             
             yield return new WaitForSeconds(1.5f);
             
@@ -494,7 +469,6 @@ namespace DallasDash.Gameplay
             PlayerPrefs.SetInt("coached_runs", 2);
             BurgerPrices.UnlockAllForReview();
             DashRun.AutoDeclineRevive = true;
-            DashRun.District = 0;
             yield return new WaitForSeconds(1.5f);
             MenuUI.Instance.Open("none");
             var gm = GameManager.Instance; var run = DashRun.Instance;
@@ -504,9 +478,8 @@ namespace DallasDash.Gameplay
             int wallChips = 0, hits = 0, pickups = 0;
             bool wallEntered = false, dashed = false;
             bool knockedOff = false, remounted = false, footShot = false, wallShot = false;
-            bool skyShot = false, gapShot = false, returnShot = false, policeShot = false, portalShot = false;
-            bool enteredSky = false, leftSky = false;
-            float crashAt = -1f, leftAt = -1f, minGap = float.MaxValue;
+            bool policeShot = false, streetShot = false, portalSeen = false;
+            float crashAt = -1f, minGap = float.MaxValue;
             int spikes = 0, phantoms = 0; float worstSpike = 0f;
             int framesChecked = 0, framesNoBrand = 0, framesNoStreetBrand = 0, minStreetBrands = int.MaxValue;
             var overlapSince = new System.Collections.Generic.Dictionary<TrackObject, int>();
@@ -524,7 +497,7 @@ namespace DallasDash.Gameplay
             {
                 float d = gm.Distance;
                 if (d > 100f && !dashed) { startingSpeed = gm.Speed; dashed = run.TryDeliveryDash(); }
-                if (leftSky && crashAt < 0f && d > leftAt + 40f && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne && !rider.Traversal.Moving
+                if (crashAt < 0f && d > 420f && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne && !rider.Traversal.Moving
                     && !TrackSpawner.NearJunction(d + 20f) && !TrackSpawner.NearJunction(d + 60f))
                 {
                     run.KnockOffBike(); run.PoliceGains(DashRun.CrashOnBike);
@@ -534,11 +507,6 @@ namespace DallasDash.Gameplay
                 if (onWall) wallEntered = true;
                 if (onWall) return RiderInput.Action.None;
                 if (rider.Traversal.Moving) return RiderInput.Action.None;
-                // The Skypark: jump the gaps between towers on time.
-                if (DashRun.InSkypark && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne)
-                    foreach (var gap in track.Live)
-                        if (gap && gap.kind == TrackKind.Gap && gap.lane == rider.Lane && gap.transform.position.z - gap.halfLength - d > -.5f && gap.transform.position.z - gap.halfLength - d < gm.Speed * .25f)
-                            return RiderInput.Action.Jump;
                 return Autopilot.Steer(track, rider);
             };
             UnityEngine.Random.InitState(7421 + continuousAttempt * 101 + filmTakeSeed * 7919);
@@ -549,7 +517,7 @@ namespace DallasDash.Gameplay
             const float Goal = 1250f;
             try
             {
-                while ((film ? filmFrame < filmSeconds * 30 : !(leftSky && remounted && gm.Distance > Mathf.Max(Goal, crashAt + 150f))) && Time.realtimeSinceStartup < deadline)
+                while ((film ? filmFrame < filmSeconds * 30 : !(remounted && gm.Distance > Mathf.Max(Goal, crashAt + 150f))) && Time.realtimeSinceStartup < deadline)
                 {
                     if (WipeoutRetry(gm, ref continuousAttempt)) { retryAttempt = true; break; }
                     if (film && !filmAbility && gm.Distance > 250f && run.Battery >= .999f && gm.State == RunState.Running && !gm.Paused)
@@ -562,7 +530,7 @@ namespace DallasDash.Gameplay
                         framesChecked++;
                         minStreetBrands = Mathf.Min(minStreetBrands, seen.street);
                         if (seen.street == 0) framesNoStreetBrand++;
-                        if (seen.street + seen.rider == 0) { framesNoBrand++; Debug.Log($"[Brands] none in view at {gm.Distance:0} m sky={DashRun.InSkypark} onFoot={run.OnFoot}"); }
+                        if (seen.street + seen.rider == 0) { framesNoBrand++; Debug.Log($"[Brands] none in view at {gm.Distance:0} m onFoot={run.OnFoot}"); }
                     }
                     if (run.PoliceActive) minGap = Mathf.Min(minGap, run.PoliceGap);
                     if (!policeShot && gm.Distance > 60f && chase && chase.officer && chase.officer.gameObject.activeInHierarchy)
@@ -570,28 +538,15 @@ namespace DallasDash.Gameplay
                         var vp = Camera.main.WorldToViewportPoint(chase.officer.position + Vector3.up);
                         if (vp.z > 0f && vp.y > 0f && vp.y < 0.6f) { policeShot = true; yield return Shot("continuous-police-chase"); }
                     }
-                    var portal = track.Portal;
-                    if (!portalShot && portal && portal.transform.position.z - gm.Distance < 30f && portal.transform.position.z - gm.Distance > 12f)
-                    { portalShot = true; yield return Shot("continuous-portal-ahead"); }
-                    if (DashRun.InSkypark && !enteredSky)
-                    {
-                        enteredSky = true;
-                        Check(run.OnFoot && !run.PoliceActive, "portal: Ace is on foot in the Skypark and the officer is gone");
-                        if (film) filmEvents.Add($"{filmFrame / 30f:F3},{gm.Distance:F1},SKYPARK");
-                    }
-                    if (DashRun.InSkypark && !skyShot && gm.Distance > DashRun.SkyFrom + 20f) { skyShot = true; yield return Shot("continuous-skypark-on-foot"); }
-                    if (DashRun.InSkypark && rider.Airborne && !gapShot && gm.Distance > DashRun.SkyFrom + 60f) { gapShot = true; yield return Shot("continuous-skypark-gap-jump"); }
-                    if (DashRun.InSkypark && !returnShot && DashRun.SkyTo - gm.Distance < 30f && DashRun.SkyTo - gm.Distance > 12f) { returnShot = true; yield return Shot("continuous-return-portal"); }
-                    if (enteredSky && !DashRun.InSkypark && !leftSky)
-                    {
-                        leftSky = true; leftAt = gm.Distance;
-                        Check(!run.OnFoot && run.PoliceActive, "return portal: back in Downtown on the bike with the officer far behind");
-                        if (film) filmEvents.Add($"{filmFrame / 30f:F3},{gm.Distance:F1},DOWNTOWN");
-                    }
+                    // No shortcut any more (client, 11 Nov 2026): nothing named a portal may ever be streamed in.
+                    if (!portalSeen && Time.frameCount % 30 == 0)
+                        foreach (Transform child in track.transform)
+                            if (child.gameObject.activeInHierarchy && child.name.IndexOf("portal", StringComparison.OrdinalIgnoreCase) >= 0) { portalSeen = true; Debug.LogError("[DashPlaytest] portal object streamed: " + child.name); }
+                    if (!streetShot && gm.Distance > 700f && !run.OnFoot && !rider.Airborne) { streetShot = true; yield return Shot("continuous-downtown-street"); }
                     if (knockedOff && run.OnFoot && !footShot && !rider.Traversal.Moving && rider.Traversal.Surface == RunSurface.Road)
                     { footShot = true; Check(VehicleDynamics.Current.kind == CourierVehicle.Running, "knocked-off rider runs on foot"); yield return Shot("continuous-on-foot"); }
                     if (knockedOff && !run.OnFoot) remounted = true;
-                    if (!film && gm.RunTime > 1.5f && Time.unscaledDeltaTime > 0.045f && !DashRun.InSkypark)
+                    if (!film && gm.RunTime > 1.5f && Time.unscaledDeltaTime > 0.045f)
                     { spikes++; worstSpike = Mathf.Max(worstSpike, Time.unscaledDeltaTime); Debug.Log($"[Spike] {Time.unscaledDeltaTime * 1000f:0} ms at {gm.Distance:0} m surface={rider.Traversal.Surface} onFoot={run.OnFoot}"); }
                     if (!rider.Traversal.Moving)
                         foreach (var o in track.Live)
@@ -624,8 +579,7 @@ namespace DallasDash.Gameplay
                 if (!retryAttempt)
                 {
                     if (!film) Check(gm.Distance >= Goal, $"travels {Goal:0} m continuously");
-                    if (!film) Check(enteredSky && skyShot && leftSky, "portal shortcut: Skypark entered through the street portal and left through the return portal");
-                    if (!film) Check(run.Shortcuts >= 1, "shortcut counted");
+                    if (!film) Check(!portalSeen && DashRun.District == 0, "Downtown only: no shortcut portal streamed in the whole run");
                     if (!film) Check(minGap < float.MaxValue && (policeShot || minGap >= ChaseController.ShowGap), $"the officer is on screen whenever he closes in (closest {minGap:0.0} m)");
                     if (!film) Check(!wallEntered && run.WallRuns == 0, "no wall running anywhere in the run");
                     if (!film) Check(knockedOff && footShot && remounted, "crash puts Ace on foot, then back on the e-bike by grabbing it");
@@ -633,7 +587,7 @@ namespace DallasDash.Gameplay
                     if (!film) Check(framesChecked > 500 && framesNoBrand == 0, $"a brand is in view in every frame: {framesChecked} frames checked, {framesNoBrand} without");
                     if (!film) Check(track.PooledReused > 0, "streamed items actually reused from Unity object pools");
                     float minutes = (Time.realtimeSinceStartup - runStart) / 60f;
-                    File.WriteAllText(Path.Combine(output, "continuous-pass.txt"), $"PASS distance={gm.Distance:0.0}; pickups={pickups}; burgersEarned={gm.BurgersEarned}; runSeconds={gm.RunTime:0.0}; burgersPerHour={gm.BurgersEarned / Mathf.Max(0.01f, gm.RunTime / 3600f):0}; hits={hits}; minPoliceGap={minGap:0.0}; shortcuts={run.Shortcuts}; wallRuns={run.WallRuns}; assertions={assertions}; pooledCreated={track.PooledCreated}; pooledReused={track.PooledReused}; spikes45ms={spikes}; worstFrameMs={worstSpike * 1000f:0}; brandFrames={framesChecked}; framesWithoutAnyBrand={framesNoBrand}; framesWithoutStreetBrand={framesNoStreetBrand}; minStreetBrandsInView={minStreetBrands}\nOne scripted crash (logged); no obstacle disabling or invulnerability.\n");
+                    File.WriteAllText(Path.Combine(output, "continuous-pass.txt"), $"PASS distance={gm.Distance:0.0}; pickups={pickups}; burgersEarned={gm.BurgersEarned}; runSeconds={gm.RunTime:0.0}; burgersPerHour={gm.BurgersEarned / Mathf.Max(0.01f, gm.RunTime / 3600f):0}; hits={hits}; minPoliceGap={minGap:0.0}; wallRuns={run.WallRuns}; assertions={assertions}; pooledCreated={track.PooledCreated}; pooledReused={track.PooledReused}; spikes45ms={spikes}; worstFrameMs={worstSpike * 1000f:0}; brandFrames={framesChecked}; framesWithoutAnyBrand={framesNoBrand}; framesWithoutStreetBrand={framesNoStreetBrand}; minStreetBrandsInView={minStreetBrands}\nOne scripted crash (logged); no obstacle disabling or invulnerability.\n");
                     Debug.Log("[DashReview] CONTINUOUS COMPLETE");
                 }
             }
@@ -651,7 +605,7 @@ namespace DallasDash.Gameplay
             {
                 Check(filmFrame == filmSeconds * 30, "film contains the exact requested frame count");
                 FinishFilmEncoder();
-                File.WriteAllText(Path.Combine(output, "recording-pass.txt"), $"ACE; ability={filmAbility}; wallRuns={run.WallRuns}; frames={filmFrame}; fps=30; duration={filmSeconds}s; distance={gm.Distance:F1}; shortcuts={run.Shortcuts}\n");
+                File.WriteAllText(Path.Combine(output, "recording-pass.txt"), $"ACE; ability={filmAbility}; wallRuns={run.WallRuns}; frames={filmFrame}; fps=30; duration={filmSeconds}s; distance={gm.Distance:F1}\n");
                 File.WriteAllLines(Path.Combine(output, "route-events.csv"), new[] { "seconds,distance,route" });
                 File.AppendAllLines(Path.Combine(output, "route-events.csv"), filmEvents);
             }

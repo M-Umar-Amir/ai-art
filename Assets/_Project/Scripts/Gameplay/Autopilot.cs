@@ -37,8 +37,8 @@ namespace DallasDash.Gameplay
                 { lastWallRun = d; return side < 0 ? RiderInput.Action.Left : RiderInput.Action.Right; }
             }
             if (d < lastWallRun) lastWallRun = -1000f; // a new run
-            // The shortcut portal and the 10% coupon are ridden into: be in their lane well before them.
-            foreach (var target in new[] { track.Coupon, track.Portal })
+            // The 10% coupon is ridden into: be in its lane well before it.
+            foreach (var target in new[] { track.Coupon })
             {
                 if (!target || surface != RunSurface.Road) continue;
                 float ahead = target.transform.position.z - d;

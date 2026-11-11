@@ -489,7 +489,7 @@ namespace DallasDash.EditorTools
                     new Vector3(side * 0.5f, 0.78f, 1.8f));
             Part(t, "Front bumper", Box("frontBumper", new Vector3(1.5f, 0.16f, 0.14f), 0.02f), SteelDark,
                 new Vector3(0f, 0.44f, 1.8f));
-            Part(t, "Rear hatch", Box("hatch", new Vector3(1.2f, 0.8f, 0.06f), 0.02f), Magenta,
+            Part(t, "Rear hatch", Box("hatch", new Vector3(1.2f, 0.8f, 0.06f), 0.02f), White, // white paint so the fleet livery logo reads (11 Nov 2026)
                 new Vector3(0f, 1.18f, -1.8f));
             Part(t, "Hatch handle", Box("handle", new Vector3(0.4f, 0.06f, 0.04f), 0.008f), White,
                 new Vector3(0f, 1.5f, -1.84f));

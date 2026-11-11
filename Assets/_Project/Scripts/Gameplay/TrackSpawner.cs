@@ -33,7 +33,7 @@ namespace DallasDash.Gameplay
 
         public float segmentLength = 20f;
         public float rowSpacing = 14f;
-        public float firstRowAt = 40f;
+        public float firstRowAt = 60f; // 11 Nov 2026 QoL: a clear 60 m to settle in before the first hurdle row
         public Material roadMaterial, sidewalkMaterial, landmarkMaterial;
         /// Storefront dressing: brick and painted facades; bulbMaterial lights the fallback lamp heads.
         public Material[] facadeMaterials;
@@ -235,7 +235,6 @@ namespace DallasDash.Gameplay
                 if (rider.Lane != lastLane) { laneFrom = lastLane; laneChangedAt = Time.time; lastLane = rider.Lane; }
                 MoveTraffic(d);
                 Resolve(d);
-                if (portalPending) { portalPending = false; DashRun.Instance?.EnterSkypark(); return; }
                 PedestrianContacts();
                 previousRiderPosition = rider.transform.position;
                 previousDistance = d;
@@ -279,18 +278,6 @@ namespace DallasDash.Gameplay
         {
             if (!root) yield break;
             var t = root.transform;
-            if (DashRun.District == 1)
-            {
-                SkyparkRoof(t, z);
-                if (DashRun.SkyTo >= z && DashRun.SkyTo < z + segmentLength) SkyparkReturnPortal(t, DashRun.SkyTo);
-                DashCity.Signature(this, t, z);
-                Combine(root);
-                yield return null;
-                if (!root) yield break;
-                SkyparkBackdrop(t, z);
-                BatchCohort(root, z);
-                yield break;
-            }
             int gapLane = DashRun.RoofGapLane(z);
             if (gapLane < 0)
                 Block(t, new Vector3(0, -0.1f, z + segmentLength / 2f), new Vector3(8f, 0.2f, segmentLength), roadMaterial);
@@ -368,7 +355,7 @@ namespace DallasDash.Gameplay
                 {
                     var filter = renderer.GetComponent<MeshFilter>();
                     if (!renderer.enabled || renderer.isPartOfStaticBatch || renderer.HasPropertyBlock() || !filter || !filter.sharedMesh || !filter.sharedMesh.isReadable) continue;
-                    if (renderer.GetComponent<TextMesh>() || renderer.GetComponentInParent<LODGroup>() || renderer.GetComponentInParent<Billboard>() || renderer.GetComponentInParent<Bobber>() || renderer.GetComponentInParent<Blinker>() || renderer.GetComponentInParent<TrafficLight>()) continue;
+                    if (renderer.GetComponent<TextMesh>() || renderer.GetComponentInParent<Pedestrian>() || renderer.GetComponentInParent<LODGroup>() || renderer.GetComponentInParent<Billboard>() || renderer.GetComponentInParent<Bobber>() || renderer.GetComponentInParent<Blinker>() || renderer.GetComponentInParent<TrafficLight>()) continue;
                     objects.Add(renderer.gameObject);
                 }
             if (objects.Count > 1) StaticBatchingUtility.Combine(objects.ToArray(), gameObject);
@@ -446,7 +433,6 @@ namespace DallasDash.Gameplay
         /// Returns how much longer than a short hurdle the row's longest one is.
         float SpawnRow(float z)
         {
-            if (DashRun.District == 1) return SpawnSkyparkRow(z);
             SpawnWallBurgers(z);
             // One lane is always left open so every row is passable, and it is never more than one lane over
             // from the last row's, so the way through is always one swipe away.
@@ -468,7 +454,7 @@ namespace DallasDash.Gameplay
             if (NearJunction(z)) { for (int lane = 0; lane < Tuning.Lanes; lane++) SpawnPickupLine(lane, z); return 0f; }
             bool rampLane = RooftopCourse.KeepLaneClear(z);
             int bikeLane = z > BikeReservedFrom && z < BikeReservedTo ? BikeReservedLane : -1;
-            for (int l = 0; l < Tuning.Lanes; l++) if (LaneReserved(l, z)) { open = l; lastOpen = l; } // the portal/coupon lane is the way through
+            for (int l = 0; l < Tuning.Lanes; l++) if (LaneReserved(l, z)) { open = l; lastOpen = l; } // the coupon lane is the way through
             if (rampLane) { open = RooftopCourse.EntryLane; lastOpen = open; }
             for (int lane = 0; lane < Tuning.Lanes; lane++)
             {
@@ -481,13 +467,7 @@ namespace DallasDash.Gameplay
                     SpawnPickupLine(lane, z);
                     continue;
                 }
-                if (z > 160f && DashRun.District != 1 && Random.value < 0.2f)
-                {
-                    SpawnSignatureObstacle(lane, z);
-                    longest = Mathf.Max(longest, DashRun.District == 1 ? 7f : 2f);
-                    continue;
-                }
-                var def = SpawnObstacle(DistrictObstacle(), lane, z);
+                var def = SpawnObstacle(WeightedObstacle(), lane, z);
                 if (def && def.drift <= 0f) longest = Mathf.Max(longest, def.size.z);
             }
             return Mathf.Max(0f, longest - 1f);
@@ -1146,7 +1126,7 @@ namespace DallasDash.Gameplay
                 if (!mf.sharedMesh || !mf.sharedMesh.isReadable || mf.sharedMesh.subMeshCount != 1) continue;
                 var renderer = mf.GetComponent<MeshRenderer>();
                 if (!renderer || !renderer.enabled || !renderer.sharedMaterial || renderer.HasPropertyBlock() || mf.GetComponent<TextMesh>()) continue;
-                if (mf.GetComponentInParent<LODGroup>() || mf.GetComponentInParent<Billboard>() || mf.GetComponentInParent<Bobber>() || mf.GetComponentInParent<Blinker>() || mf.GetComponentInParent<TrafficLight>()) continue;
+                if (mf.GetComponentInParent<Pedestrian>() || mf.GetComponentInParent<LODGroup>() || mf.GetComponentInParent<Billboard>() || mf.GetComponentInParent<Bobber>() || mf.GetComponentInParent<Blinker>() || mf.GetComponentInParent<TrafficLight>()) continue;
                 if (!combineGroups.TryGetValue(renderer.sharedMaterial, out var pieces))
                     combineGroups[renderer.sharedMaterial] = pieces = new List<CombineInstance>();
                 pieces.Add(new CombineInstance { mesh = mf.sharedMesh, transform = root.transform.worldToLocalMatrix * mf.transform.localToWorldMatrix });
@@ -1219,7 +1199,7 @@ namespace DallasDash.Gameplay
             t.surface = RunSurface.Road; t.powerUp = -1; t.drift = t.meetZ = 0f; t.height = 0.8f;
             t.baseHeight = 0f;
             t.halfWidth = 0.85f; t.clearance = 1.4f;
-            t.lateral = false; t.bike = false; t.portal = t.coupon = false;
+            t.lateral = false; t.bike = false; t.coupon = false;
             t.kind = k;
             t.lane = lane;
             t.halfLength = half;
@@ -1235,7 +1215,7 @@ namespace DallasDash.Gameplay
             if (GameManager.Instance.Paused) return;
             foreach (var o in live)
             {
-                if (magnet && o && !o.consumed && !o.bike && !o.portal && !o.coupon && o.kind == TrackKind.Pickup && o.powerUp < 0 && Pull(o, d)) continue;
+                if (magnet && o && !o.consumed && !o.bike && !o.coupon && o.kind == TrackKind.Pickup && o.powerUp < 0 && Pull(o, d)) continue;
                 if (!o || o.consumed || o.struck) continue;
                 var contact = SurfaceTraversal.Point(o.surface, Tuning.LaneX[o.lane], 0f);
                 // Route objects stand on a deck or a roof: measure the rider against that surface.
@@ -1305,8 +1285,6 @@ namespace DallasDash.Gameplay
         {
             o.consumed = true;
             if (o.bike) { DashRun.Instance?.Remount(); ClearBikeReservation(); o.gameObject.SetActive(false); return; }
-            // The teleport rebuilds the world (and this list): run it after the hit-test loop, not inside it.
-            if (o.portal) { o.gameObject.SetActive(false); portal = null; portalPending = true; return; }
             if (o.coupon) { TakeCoupon(o); return; }
             if (o.powerUp >= 0) PowerUps.Activate((PowerUp)o.powerUp);
             else
@@ -1473,11 +1451,13 @@ namespace DallasDash.Gameplay
         ObstacleDef WeightedObstacle()
         {
             int total = 0;
-            foreach (var o in obstacles) total += Mathf.Max(1, o.weight);
+            // Weight 0 retires a hurdle from the street mix (the slide-under scaffold, 11 Nov 2026: no ducking).
+            foreach (var o in obstacles) total += Mathf.Max(0, o.weight);
+            if (total <= 0) return obstacles[0];
             int r = Random.Range(0, total);
             foreach (var o in obstacles)
             {
-                r -= Mathf.Max(1, o.weight);
+                r -= Mathf.Max(0, o.weight);
                 if (r < 0) return o;
             }
             return obstacles[0];

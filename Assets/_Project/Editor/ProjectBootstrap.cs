@@ -349,7 +349,8 @@ namespace DallasDash.EditorTools
             // couriers used the retired Food Inc meshes.
             d.obstacles.RemoveAll(o => o.id is "courier-a" or "courier-b" or "scooter-courier");
             d.obstacles.Add(Obstacle("electric-pod", "Autonomous delivery pod", TrackKind.Block, new Vector3(1.9f, 2.2f, 3.6f), 4, RoyalBlue, heavy: true, drift: 0.28f));
-            d.obstacles.Add(Obstacle("cargo-slide-gate", "Scaffolding over the lane / slide", TrackKind.Overhead, new Vector3(1.95f, 2.32f, 0.8f), 2, RoyalBlue));
+            // Retired from the mix (weight 0, client: no ducking); still built and measured for the old review shots.
+            d.obstacles.Add(Obstacle("cargo-slide-gate", "Scaffolding over the lane / slide", TrackKind.Overhead, new Vector3(1.95f, 2.32f, 0.8f), 0, RoyalBlue));
             return d;
         }
 
@@ -438,7 +439,7 @@ namespace DallasDash.EditorTools
             // Authored street dressing: a lit contemporary lamp and a planted terrace box.
             spawner.dashLamp = PropModels.Lamp();
             spawner.dashPlanter = PropModels.Planter();
-            spawner.skyparkTower = ModelImport.Get("skypark-tower");
+
             spawner.hologramTextures = new[] {
                 AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-ace.png"),
                 AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-nova.png"),
@@ -450,6 +451,15 @@ namespace DallasDash.EditorTools
                 b => AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/" + b + "-" + format + ".png")
                      ?? throw new System.InvalidOperationException("Missing brand logo " + b + "-" + format));
             spawner.brandSquare = Logos("square"); spawner.brandWide = Logos("wide"); spawner.brandBoard = Logos("board");
+            // Vehicle liveries (11 Nov 2026): transparent official logos projected into the vehicle paint (HurdleBrand).
+            foreach (var b in new[] { "kfc", "tacobell", "pizzahut", "habit" })
+                if (AssetImporter.GetAtPath(Root + "/Art/DashRiders/Brands/" + b + "-livery.png") is TextureImporter liveryImporter
+                    && (liveryImporter.wrapMode != TextureWrapMode.Clamp || !liveryImporter.alphaIsTransparency))
+                {
+                    liveryImporter.wrapMode = TextureWrapMode.Clamp; liveryImporter.alphaIsTransparency = true;
+                    liveryImporter.mipmapEnabled = true; liveryImporter.anisoLevel = 4; liveryImporter.SaveAndReimport();
+                }
+            spawner.brandLivery = Logos("livery");
             spawner.couponTexture = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/coupon-ticket.png")
                 ?? throw new System.InvalidOperationException("Missing coupon ticket texture");
             spawner.parkedBikes = new[] { ModelImport.Get("ebike") };

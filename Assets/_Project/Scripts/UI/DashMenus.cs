@@ -18,11 +18,10 @@ namespace DallasDash.UI
         float rewardsRefresh;
         void BuildDashMenus(Transform root)
         {
-            UiKit.Label(title.transform, "FOOD INC  /  POWERED BY PAGE STUDIO INC.", 26, new Vector2(0, -920), new Vector2(1040, 48), UiKit.Cream);
+            UiKit.Label(title.transform, "FOOD INC  /  POWERED BY PAGE STUDIO INC.", 24, new Vector2(0, -912), new Vector2(1040, 40), UiKit.Muted);
             // One map (client, 4 Nov 2026): no district picker. The coupon meter and the rewards wallet sit
             // above the tile row.
             BuildCouponMeter(title.transform);
-            UiKit.Button(title.transform, "FOOD INC REWARDS", new Vector2(0, -550), new Vector2(830, 100), UiKit.Red, ShowRewards, 36, "star");
 
             districtPanel = UiKit.Shade(root, "Districts").gameObject;
             var p = UiKit.FancyCard(districtPanel.transform, Vector2.zero, new Vector2(1040, 1660), UiKit.Teal).transform;
@@ -71,7 +70,6 @@ namespace DallasDash.UI
         }
         void PickDistrict(int i)
         {
-            DashRun.District = 0;
             FindFirstObjectByType<TrackSpawner>()?.RefreshDistrict();
             districtPanel.SetActive(false);
         }
@@ -81,17 +79,18 @@ namespace DallasDash.UI
         Text couponMeterText;
         void BuildCouponMeter(Transform t)
         {
-            var bar = UiKit.Panel(t, "Coupon meter", new Vector2(0, -425), new Vector2(830, 95), UiKit.Surface);
-            bar.sprite = UiKit.Rounded;
-            bar.raycastTarget = false;
-            UiKit.Icon(bar.transform, "star", new Vector2(-370, 0), 52);
-            couponMeterText = UiKit.Label(bar.transform, "", 30, new Vector2(30, 16), new Vector2(700, 44), Color.white, TextAnchor.MiddleLeft);
-            var track = UiKit.Panel(bar.transform, "Track", new Vector2(30, -22), new Vector2(700, 12), new Color(1, 1, 1, .14f));
+            // One card: progress to the 10% coupon, and a tap opens the rewards wallet (11 Nov 2026 UI pass).
+            var button = UiKit.Button(t, "", new Vector2(0, -300), new Vector2(900, 112), new Color(.07f, .09f, .18f), ShowRewards, 30);
+            var bar = button.transform.Find("Face");
+            UiKit.Icon(bar, "star", new Vector2(-392, 0), 52);
+            couponMeterText = UiKit.Label(bar, "", 30, new Vector2(-20, 18), new Vector2(680, 44), Color.white, TextAnchor.MiddleLeft);
+            UiKit.Label(bar, "REWARDS  >", 26, new Vector2(345, 18), new Vector2(180, 40), UiKit.Gold, TextAnchor.MiddleRight);
+            var track = UiKit.Panel(bar, "Track", new Vector2(30, -24), new Vector2(760, 12), new Color(1, 1, 1, .14f));
             track.raycastTarget = false;
-            couponMeterFill = UiKit.Panel(track.transform, "Fill", Vector2.zero, new Vector2(700, 12), UiKit.Gold);
+            couponMeterFill = UiKit.Panel(track.transform, "Fill", Vector2.zero, new Vector2(760, 12), UiKit.Gold);
             couponMeterFill.raycastTarget = false;
             couponMeterFill.rectTransform.pivot = new Vector2(0, .5f);
-            couponMeterFill.rectTransform.anchoredPosition = new Vector2(-350, 0);
+            couponMeterFill.rectTransform.anchoredPosition = new Vector2(-380, 0);
             RefreshCouponMeter();
         }
         void RefreshCouponMeter()
@@ -99,7 +98,7 @@ namespace DallasDash.UI
             if (!couponMeterText) return;
             int have = Mathf.Min(PlayerProfile.CouponProgress, BurgerPrices.CouponThreshold);
             couponMeterText.text = have >= BurgerPrices.CouponThreshold ? "10% COUPON READY  /  it appears on your next run"
-                : $"10% COUPON   {have:N0} / {BurgerPrices.CouponThreshold:N0} burgers";
+                : $"10% COUPON   {have:N0} / {BurgerPrices.CouponThreshold:N0}";
             couponMeterFill.rectTransform.localScale = new Vector3(have / (float)BurgerPrices.CouponThreshold, 1f, 1f);
         }
         DemoCoupon CouponAt(int row)

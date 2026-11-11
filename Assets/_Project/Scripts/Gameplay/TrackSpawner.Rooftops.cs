@@ -61,7 +61,7 @@ namespace DallasDash.Gameplay
             root.transform.position = new Vector3(0f, 0f, s + RooftopCourse.Length + 30f);
             segments.Add(root);
             int d = DashRun.District;
-            float baseY = d == 1 ? CityGround : 0f;
+            float baseY = 0f;
             float top = SurfaceTraversal.RoofHeight;
 
             var cyan = DashCity.Mat(this, "roofNeonCyan", new Color(0.1f, 0.85f, 1f), 2.2f);
@@ -76,7 +76,7 @@ namespace DallasDash.Gameplay
             glass.SetFloat("_Smoothness", 0.95f);
 
             BuildRamp(root.transform, s, cyan, pink, steel);
-            BuildParkourLine(root.transform, s, d == 1 ? CityGround : 0f, steel, cyan);
+            BuildParkourLine(root.transform, s, 0f, steel, cyan);
             yield return null;
             if (!root) yield break;
 

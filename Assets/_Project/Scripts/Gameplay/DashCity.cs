@@ -22,7 +22,7 @@ namespace DallasDash.Gameplay
             ApplyNaturalLight(d);
             NightLighting.Ensure();
             SkyTraffic.Ensure(track);
-            ChristmasSnow.Ensure(d == 2, ChristmasSnow.FlakeMaterial(track));
+
             if (track.kitTrees != null) foreach (var tree in track.kitTrees) {
                 if (!tree) continue;
                 foreach (var renderer in tree.GetComponentsInChildren<Renderer>(true))
@@ -39,8 +39,9 @@ namespace DallasDash.Gameplay
         public static void ApplyNaturalLight(int district)
         {
             RenderSettings.ambientMode = UnityEngine.Rendering.AmbientMode.Trilight;
-            RenderSettings.fogColor = district == 2 ? new Color(.3f,.13f,.3f) : new Color(.26f,.13f,.33f);
-            RenderSettings.fogStartDistance = 85f; RenderSettings.fogEndDistance = 240f;
+            // Pink-violet haze (PDF cover): distant towers fade into it rather than into a dark murk.
+            RenderSettings.fogColor = new Color(.42f,.24f,.46f);
+            RenderSettings.fogStartDistance = 70f; RenderSettings.fogEndDistance = 250f;
             RenderSettings.ambientSkyColor = new Color(.34f,.27f,.58f);
             RenderSettings.ambientEquatorColor = new Color(.36f,.2f,.38f);
             RenderSettings.ambientGroundColor = new Color(.07f,.05f,.1f);
@@ -217,7 +218,7 @@ namespace DallasDash.Gameplay
         }
         public static void Signature(TrackSpawner track, Transform parent, float z)
         {
-            if (DashRun.District == 2) FestivalDecor.Build(track, parent, z);
+
             // The delivery-drop gantries went with the delivery clock (client, 4 Nov 2026).
             float checkpoint = -1f;
             if (checkpoint > 0f && checkpoint >= z && checkpoint < z + track.segmentLength)
@@ -271,7 +272,7 @@ namespace DallasDash.Gameplay
         public static void FacadeWall(TrackSpawner track, Transform parent, float side, float z)
         {
             int d = DashRun.District, block = Mathf.FloorToInt(z / 20f);
-            float baseY = d == 1 ? TrackSpawner.CityGround : 0f;
+            float baseY = 0f;
             float top = 15f + Mathf.Abs(block * 5 % 3) * 3.2f;
             float face = side * SurfaceTraversal.FacadeX, mid = z + 10f;
             int variant = Mathf.Abs(block * 3 + (side > 0 ? 1 : 0)) % 4;
@@ -351,7 +352,9 @@ namespace DallasDash.Gameplay
             if (side > 0f && (RooftopCourse.OwnsRightSide(z) || RooftopCourse.OwnsRightSide(z + track.segmentLength))) return;
             if (FacadeZone(z, track.segmentLength)) { FacadeWall(track, parent, side, z); return; }
             const bool route = false;
-            NaturalArchitecture.Build(track, parent, side, z, route);
+            // 11 Nov 2026: PDF-cover towers and brand shops with real interiors (DowntownArchitecture).
+            if (d == 0) DowntownArchitecture.Build(track, parent, side, z);
+            else NaturalArchitecture.Build(track, parent, side, z, route);
 
             var frame = Mat(track, "billboardFrame", new Color(0.11f, 0.16f, 0.23f));
             var edge = Mat(track, "billboardEdge" + d, Accent(d), 0f);
@@ -375,11 +378,7 @@ namespace DallasDash.Gameplay
                         Part(parent, new Vector3(side * 5.3f,.2f,z+12f+dz), new Vector3(.5f,.4f,.12f), frame);
                 }
                 // Warm service windows and shaded awnings break up the repeated cool facades.
-                if (d != 1)
-                {
-                    Part(parent, new Vector3(side * 8.4f,1.65f,z+8f), new Vector3(.12f,2.1f,4.2f), warmLight);
-                    Part(parent, new Vector3(side * 7.7f,2.85f,z+8f), new Vector3(1.6f,.16f,4.6f), frame);
-                }
+                // (The old warm service window here stood in front of the new open shopfronts; removed 11 Nov 2026.)
                 if (d == 1)
                 {
                     Part(parent, new Vector3(side * 7.8f,.7f,z+10f), new Vector3(.12f,1.4f,20f), frame);

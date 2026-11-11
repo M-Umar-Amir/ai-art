@@ -166,7 +166,9 @@ namespace DallasDash.EditorTools
                     m.SetFloat("_OutlineWidth", spec.outline);
                     bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt" || id.StartsWith("ebike") || id.Contains("-gear-");
                     m.SetFloat("_SurfaceStyle", 1f);
-                    m.SetFloat("_Smoothness", architecture ? 0.6f : 0.3f);
+                    // Rider bodies are matte (hair, skin): at 0.3 the sky reflection turned Ace's hair silver on the title (11 Nov 2026).
+                    bool riderBody = id is "ace" or "nova" or "ace-ride" or "nova-ride" or "ace-run" or "nova-run" or "police-ride";
+                    m.SetFloat("_Smoothness", architecture ? 0.6f : riderBody ? 0.08f : 0.3f);
                     m.SetFloat("_Metallic", architecture ? 0.22f : 0f);
                     m.SetShaderPassEnabled("Outline", false);
                     string sourceName = mats[i] ? mats[i].name.ToLowerInvariant() : "";

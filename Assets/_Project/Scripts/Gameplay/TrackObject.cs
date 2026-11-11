@@ -43,8 +43,8 @@ namespace DallasDash.Gameplay
         public bool lateral;
         /// The rider's own e-bike, parked in a lane after a crash: riding into it puts them back on it.
         public bool bike;
-        /// The Skypark shortcut portal (riding into it teleports) and the 10% coupon.
-        public bool portal, coupon;
+        /// The 10% coupon (riding into it issues the reward).
+        public bool coupon;
         /// A power-up token (PowerUp index) rather than a burger; -1 for everything else.
         public int powerUp = -1;
 

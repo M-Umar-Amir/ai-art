@@ -62,7 +62,6 @@ namespace DallasDash.Core
 
         public void StartRun()
         {
-            DashRun.District = 0;
             FindFirstObjectByType<DallasDash.Gameplay.RiderLook>()?.Apply(PlayerProfile.Character, true);
             Distance = 0f;
             Speed = Tuning.SpeedBase;
@@ -170,7 +169,6 @@ namespace DallasDash.Core
             Speed *= DallasDash.Gameplay.VehicleDynamics.Current.speed;
             if (PowerUps.Active(PowerUp.Rush) || DashRun.Instance && DashRun.Instance.Boost > 0f) Speed *= PowerUps.RushSpeedFactor;
             else if (DashRun.Instance && DashRun.Instance.DashTime > 0f) Speed *= 1.55f;
-            else if (DashRun.Instance && DashRun.Instance.ShortcutTime > 0f) Speed *= DashRun.RouteSpeedFactor; // side-route surge
             bonk = Mathf.MoveTowards(bonk, 0f, Time.deltaTime * 0.8f);
             Speed *= 1f - 0.55f * bonk * bonk;
             int mult = Mathf.Min(Tuning.MaxMult, 1 + (int)(Distance / Tuning.MultEvery));

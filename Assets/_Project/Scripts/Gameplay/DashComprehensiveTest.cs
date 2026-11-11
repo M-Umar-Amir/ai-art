@@ -117,7 +117,6 @@ namespace DallasDash.Gameplay
             
             // Set test parameters
             PlayerProfile.Character = Mathf.Clamp(character, 0, 2);
-            DashRun.District = Mathf.Clamp(district, 0, 2);
             
             // Set vehicle
             PlayerProfile.Ride = vehicle == 1 ? 1 : 0;

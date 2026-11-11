@@ -192,14 +192,7 @@ namespace DallasDash.UI
             var face = Panel(img.transform, "Face", Vector2.zero, size - new Vector2(4f, 4f), new Color(.04f, .06f, .11f, 1));
             face.sprite = Gradient2D;
             face.raycastTarget = false;
-            // Corner accents
-            float cornerSize = 24f;
-            var corners = new[] { new Vector2(-1, 1), new Vector2(1, 1), new Vector2(-1, -1), new Vector2(1, -1) };
-            foreach (var corner in corners)
-            {
-                var cornerEl = Panel(img.transform, "Corner", corner * (size * 0.5f - new Vector2(cornerSize, cornerSize)), new Vector2(cornerSize * 2, cornerSize * 2), accentColor);
-                cornerEl.raycastTarget = false;
-            }
+            // (The coloured corner dots were removed on 11 Nov 2026: they read as warning lights.)
             var sheen = Panel(img.transform, "Sheen", new Vector2(0f, size.y * .5f - 24f), new Vector2(88, 4), accentColor);
             sheen.raycastTarget = false;
             // Add shimmer effect to sheen

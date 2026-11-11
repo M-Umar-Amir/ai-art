@@ -49,8 +49,8 @@ namespace DallasDash.Core
                 }
                 cam.farClipPlane = 240f;
             }
-            RenderSettings.fogStartDistance = 95f;
-            RenderSettings.fogEndDistance = 230f;
+            RenderSettings.fogStartDistance = 70f;
+            RenderSettings.fogEndDistance = 250f;
             QualitySettings.vSyncCount = 0;
             Application.targetFrameRate = 60;
         }

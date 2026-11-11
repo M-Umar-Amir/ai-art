@@ -14,7 +14,7 @@ namespace DallasDash.Gameplay
             int district = DashRun.District;
             // Skypark neighbours rise at least 15 m above the course roof, so there is always a wall to run.
             int floors = district == 1 ? 17 + variant : 4 + variant;
-            float baseY = district == 1 ? TrackSpawner.CityGround : 0f;
+            float baseY = 0f;
             float height = floors * 3.2f + 3.6f;
             // One street line for every block: the wall-run plane (SurfaceTraversal.WallRunX) relies on it.
             float front = side * (route ? 10.8f : 8.5f);

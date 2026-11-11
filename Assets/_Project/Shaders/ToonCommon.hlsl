@@ -10,6 +10,11 @@ float4 _CurveParams; // x: downward bend, y: sideways bend
 TEXTURE2D(_BaseMap); SAMPLER(sampler_BaseMap);
 TEXTURE2D(_BumpMap); SAMPLER(sampler_BumpMap);
 TEXTURE2D(_RoughnessMap); SAMPLER(sampler_RoughnessMap);
+// Lit-window atlas (DowntownArchitecture): emission comes from this map when _EmissionMapOn > 0.5, so stone
+// and frames stay unlit while only the windows glow.
+TEXTURE2D(_EmissionMap); SAMPLER(sampler_EmissionMap);
+// Vehicle livery (HurdleBrand, 11 Nov 2026): the official logo projected into the vehicle's own paint.
+TEXTURE2D(_LiveryMap); SAMPLER(sampler_LiveryMap);
 
 CBUFFER_START(UnityPerMaterial)
     float4 _BaseMap_ST;
@@ -28,6 +33,13 @@ CBUFFER_START(UnityPerMaterial)
     half _Wetness;
     half _EmissionUsesAlbedo;
     half _WindowInterior;
+    half _EmissionMapOn;
+    float4x4 _LiveryObjectToBody; // mesh object space -> vehicle body space (x across, y up from the road, z nose)
+    float4 _LiveryRect;           // side logo: centre z, centre y, width (along z), height
+    float4 _LiveryRear;           // rear logo: centre x, centre y, width, height (width 0 = none)
+    float4 _LiveryStripe;         // brand stripe: y from, y to
+    half4 _LiveryColor;
+    half _LiveryOn;
     half _AmbientStrength;
     half _RimPower;
     half _ShadowSoftness;

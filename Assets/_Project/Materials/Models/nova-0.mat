@@ -20,7 +20,6 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - Outline
-  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -30,6 +29,14 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _BumpMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _LiveryMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
@@ -44,12 +51,14 @@ Material:
     - _CrewIndex: 0
     - _Cull: 2
     - _Cutoff: 0
+    - _EmissionMapOn: 0
     - _EmissionUsesAlbedo: 0
     - _GaitAmount: 0
     - _GaitCenter: 0
     - _GaitHeight: 0
     - _GaitMin: 0
     - _GaitPhase: 0
+    - _LiveryOn: 0
     - _Metallic: 0
     - _Outfit: 0
     - _OutlineWidth: 0
@@ -58,7 +67,7 @@ Material:
     - _RimStrength: 0
     - _RoughnessStrength: 0
     - _ShadowSoftness: 0.18
-    - _Smoothness: 0.3
+    - _Smoothness: 0.08
     - _SurfaceStyle: 1
     - _WardrobeHeight: 0
     - _WardrobeMin: 0
@@ -68,6 +77,10 @@ Material:
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
+    - _LiveryColor: {r: 1, g: 1, b: 1, a: 1}
+    - _LiveryRear: {r: 0, g: 0, b: 0, a: 0}
+    - _LiveryRect: {r: 0, g: 0, b: 0, a: 0}
+    - _LiveryStripe: {r: 0, g: 0, b: 0, a: 0}
     - _OutlineColor: {r: 0.12, g: 0.1, b: 0.16, a: 1}
     - _ShadeColor: {r: 0.9, g: 0.9, b: 0.96, a: 1}
   m_BuildTextureStacks: []

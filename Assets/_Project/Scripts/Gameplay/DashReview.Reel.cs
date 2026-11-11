@@ -29,7 +29,7 @@ namespace DallasDash.Gameplay
             PlayerPrefs.SetInt("coached_runs", 2);
             BurgerPrices.UnlockAllForReview();
             for (int i = 0; i < 3; i++) PlayerPrefs.SetInt("dash_outfit_" + i, 0);
-            PlayerProfile.Character = 0; DashRun.District = 0;
+            PlayerProfile.Character = 0;
             yield return new WaitForSeconds(2f);
             var menu = MenuUI.Instance; var track = FindFirstObjectByType<TrackSpawner>(); var rider = FindFirstObjectByType<RiderController>();
             var look = FindFirstObjectByType<RiderLook>();

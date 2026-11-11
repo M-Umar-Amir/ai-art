@@ -56,7 +56,8 @@ namespace DallasDash.EditorTools
             Check(DashRun.StartGap > 0f && DashRun.MaxGap > DashRun.StartGap && DashRun.GainOnFoot > DashRun.LoseOnBike, "the officer gains on a runner and drops back from the e-bike");
             Check(DashRun.CrashOnFoot > DashRun.CrashOnBike && DashRun.StartGap / DashRun.GainOnFoot > 5f, "a crash costs ground; on foot there is time to reach the bike");
             Check(DashRun.CrewNames.Length == 1 && DashRun.DistrictNames[0] == "NEON DOWNTOWN", "one rider (Ace) and one map (Downtown)");
-            Check(DashRun.SkyLength > 200f && TrackSpawner.FirstPortalAt > 100f && TrackSpawner.PortalEvery > DashRun.SkyLength, "the Skypark shortcut has room between portals");
+            Check(DashRun.DistrictNames.Length == 1 && DashRun.District == 0, "no shortcut: Downtown is the only world (client, 11 Nov 2026)");
+            Check(typeof(TrackSpawner).GetProperty("Portal") == null && typeof(DashRun).GetMethod("EnterSkypark") == null, "the Skypark portal shortcut is removed");
             var codes = new HashSet<string>();
             for (int i = 0; i < 1000; i++)
             {
@@ -126,6 +127,23 @@ namespace DallasDash.EditorTools
             {
                 var prefab = ModelImport.Get(id);
                 Check(prefab && (prefab.GetComponentInChildren<MeshFilter>() || prefab.GetComponentInChildren<SkinnedMeshRenderer>()), "real model imported: " + id);
+            }
+            // Client, 11 Nov 2026: Ace rides without a helmet (the officer keeps his). Geometry check: a helmet puts
+            // the top of the gear mesh at the top of the rider's head; without it the gear stops at the shoulders.
+            foreach (var (gearId, bodyId, wantHelmet) in new[] { ("ace-gear-ride", "ace-ride", false), ("ace-gear-run", "ace-run", false), ("police-gear-ride", "police-ride", true) })
+            {
+                float Top(string id)
+                {
+                    float top = float.NegativeInfinity;
+                    foreach (var r in ModelImport.Get(id).GetComponentsInChildren<SkinnedMeshRenderer>())
+                        if (r.sharedMesh) top = Mathf.Max(top, r.sharedMesh.bounds.max.y);
+                    foreach (var f in ModelImport.Get(id).GetComponentsInChildren<MeshFilter>())
+                        if (f.sharedMesh) top = Mathf.Max(top, f.sharedMesh.bounds.max.y);
+                    return top;
+                }
+                float gearTop = Top(gearId), bodyTop = Top(bodyId);
+                bool helmet = gearTop > bodyTop - 0.12f;
+                Check(helmet == wantHelmet, (wantHelmet ? "the officer wears his helmet: " : "Ace has no helmet: ") + $"{gearId} top {gearTop:0.00} vs {bodyId} {bodyTop:0.00}");
             }
             var city = ModelImport.Get("neon-block-a"); bool hasDarkMaterial = false;
             foreach (var renderer in city.GetComponentsInChildren<Renderer>()) foreach (var material in renderer.sharedMaterials)

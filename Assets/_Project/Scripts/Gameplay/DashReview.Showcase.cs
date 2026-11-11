@@ -15,7 +15,7 @@ namespace DallasDash.Gameplay
     ///   3. Story intro, "ran the red" [authored intro rig] handing off to the run's follow camera.
     ///   4. The chase on the branded street [gameplay follow]: police meter, shops, billboards, branded hurdles.
     ///   5. A crash: knocked off, the officer rides into frame, Ace grabs his bike back [follow].
-    ///   6. The shortcut portal, teleport, Skypark on foot with gap jumps, compulsory return portal [follow].
+    ///   6. (Retired 11 Nov 2026: the Skypark portal shortcut.) Long clean riding down Downtown [follow].
     ///   7. The 10% coupon on the road and the coupon-won card [follow].
     ///   8. Caught: revive offer, revive for burgers, ride on; caught again, decline, BUSTED card [follow, then card].
     /// The run is ridden through the normal input path by the bot; the only scripted events are the crash and the
@@ -38,7 +38,6 @@ namespace DallasDash.Gameplay
         {
             PlayerPrefs.SetInt("coached_runs", 2);
             BurgerPrices.UnlockAllForReview();
-            DashRun.District = 0;
             DashRun.AutoDeclineRevive = false;
             PlayerProfile.Burgers = 30000;
             // The coupon is 60 pickups away, so it comes up on the road during the take.
@@ -85,9 +84,9 @@ namespace DallasDash.Gameplay
             Check(gm.State == RunState.Running, "showcase run starts");
             Event("RUN");
 
-            // 4-7. Ride: the crash, the portal and Skypark, the coupon. Unscheduled catches are revived (that is
+            // 4-7. Ride: the crash, the remount, Downtown, the coupon. Unscheduled catches are revived (that is
             // shown properly in beat 8); the take ends early only if the run ends.
-            bool crashed = false, sky = false, back = false, coupon = false, couponWon = false;
+            bool crashed = false, back = false, coupon = false, couponWon = false;
             int coupons = DemoRewards.Ledger.coupons.Count;
             float backAt = -1f;
             int frameLimit = 150 * 30;
@@ -95,13 +94,12 @@ namespace DallasDash.Gameplay
             {
                 float d = gm.Distance;
                 if (run.AwaitingRevive) { yield return Frames(30); Revive(menu); Event("REVIVED (unscheduled)"); continue; }
-                if (!crashed && d > 230f && !DashRun.InSkypark && !run.OnFoot && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne
-                    && !TrackSpawner.NearJunction(d + 15f) && !TrackSpawner.NearJunction(d + 60f) && !(track.Portal && track.Portal.transform.position.z - d < 120f))
+                if (!crashed && d > 230f && !run.OnFoot && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne
+                    && !TrackSpawner.NearJunction(d + 15f) && !TrackSpawner.NearJunction(d + 60f))
                 {
                     crashed = true; run.KnockOffBike(); run.PoliceGains(DashRun.CrashOnBike + 3f); Event("CRASH, ON FOOT");
                 }
-                if (DashRun.InSkypark && !sky) { sky = true; Event("SKYPARK"); }
-                if (sky && !DashRun.InSkypark && !back) { back = true; backAt = d; Event("BACK IN DOWNTOWN"); }
+                if (crashed && !run.OnFoot && !back) { back = true; backAt = d; Event("BACK ON THE E-BIKE"); }
                 if (track.Coupon && !coupon) { coupon = true; Event("COUPON ON THE ROAD"); }
                 if (!couponWon && DemoRewards.Ledger.coupons.Count > coupons) { couponWon = true; Event("COUPON WON"); }
                 if (crashed && back && (couponWon || d > backAt + 500f) && d > backAt + 120f && !run.OnFoot) break;
@@ -130,22 +128,14 @@ namespace DallasDash.Gameplay
             FinishFilmEncoder();
             File.WriteAllText(Path.Combine(output, "showcase-events.csv"), "seconds,distance,event\n" + showcaseLog);
             File.WriteAllText(Path.Combine(output, "recording-pass.txt"),
-                $"frames={filmFrame}; seconds={filmFrame / 30f:F1}; crash={crashed}; skypark={sky}; back={back}; coupon={coupon}; couponWon={couponWon}; distance={gm.Distance:F0}\n");
+                $"frames={filmFrame}; seconds={filmFrame / 30f:F1}; crash={crashed}; remounted={back}; coupon={coupon}; couponWon={couponWon}; distance={gm.Distance:F0}\n");
             gm.ToMenu(); Restore();
             yield return new WaitForSecondsRealtime(0.3f); Application.Quit(0);
         }
 
         void Revive(MenuUI menu) => typeof(MenuUI).GetMethod("AcceptRevive", BindingFlags.Instance | BindingFlags.NonPublic).Invoke(menu, null);
 
-        /// The bot's normal input, plus gap jumps in the Skypark (the same rules as the playtest).
-        static RiderInput.Action ShowcaseInput(TrackSpawner track, RiderController rider, DashRun run, GameManager gm)
-        {
-            float d = gm.Distance;
-            if (DashRun.InSkypark && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne)
-                foreach (var gap in track.Live)
-                    if (gap && gap.kind == TrackKind.Gap && gap.lane == rider.Lane && gap.transform.position.z - gap.halfLength - d > -.5f && gap.transform.position.z - gap.halfLength - d < gm.Speed * .25f)
-                        return RiderInput.Action.Jump;
-            return Autopilot.Steer(track, rider);
-        }
+        /// The bot's normal input (the same rules as the playtest).
+        static RiderInput.Action ShowcaseInput(TrackSpawner track, RiderController rider, DashRun run, GameManager gm) => Autopilot.Steer(track, rider);
     }
 }

@@ -13,6 +13,14 @@ Shader "FoodInc/ToonCurved"
         _Wetness ("Patchy surface wetness", Range(0,1)) = 0
         _EmissionUsesAlbedo ("Texture-modulated emission", Range(0,1)) = 0
         _WindowInterior ("Window interior detail", Range(0,1)) = 0
+        _EmissionMap ("Emission map (lit windows)", 2D) = "black" {}
+        _EmissionMapOn ("Use emission map", Range(0,1)) = 0
+        _LiveryMap ("Livery logo", 2D) = "clear" {}
+        [HideInInspector] _LiveryOn ("Livery", Float) = 0
+        [HideInInspector] _LiveryRect ("Livery side rect", Vector) = (0,0,0,0)
+        [HideInInspector] _LiveryRear ("Livery rear rect", Vector) = (0,0,0,0)
+        [HideInInspector] _LiveryStripe ("Livery stripe", Vector) = (0,0,0,0)
+        [HideInInspector] _LiveryColor ("Livery colour", Color) = (1,1,1,1)
         _BaseColor ("Base Color", Color) = (1,1,1,1)
         _WorldTextureScale ("World texture scale", Float) = 0
         _ShadeColor ("Shade Tint", Color) = (0.62,0.66,0.86,1)
@@ -74,6 +82,8 @@ Shader "FoodInc/ToonCurved"
                 half3 normalWS : TEXCOORD2;
                 half fog : TEXCOORD3;
                 float localY : TEXCOORD4;
+                float3 positionOS : TEXCOORD5;
+                half3 normalOS : TEXCOORD6;
                 UNITY_VERTEX_INPUT_INSTANCE_ID
             };
 
@@ -85,6 +95,7 @@ Shader "FoodInc/ToonCurved"
                 float3 ws = TransformObjectToWorld(DashPoseOS(v.positionOS.xyz));
                 o.positionWS = ws; // unbent position for lighting and shadow lookups
                 o.localY = v.positionOS.y;
+                o.positionOS = v.positionOS.xyz; o.normalOS = v.normalOS;
                 o.positionCS = TransformWorldToHClip(CurveWorld(ws));
                 o.normalWS = TransformObjectToWorldNormal(v.normalOS);
                 o.uv = TRANSFORM_TEX(v.uv, _BaseMap);
@@ -117,6 +128,33 @@ Shader "FoodInc/ToonCurved"
                 #ifdef _ALPHATEST_ON
                 clip(albedo.a - _Cutoff);
                 #endif
+                if (_LiveryOn > 0.5)
+                {
+                    // Fleet wrap in the body's own paint: a brand-colour stripe on the light paint panels of the sides
+                    // and rear (never glass, tyres or lamps), and the official logo projected across the side and rear
+                    // panels, reading left to right from both sides. Same surface, same lighting: no decal quad.
+                    float3 bp = mul(_LiveryObjectToBody, float4(i.positionOS, 1)).xyz;
+                    float3 bn = normalize(mul((float3x3)_LiveryObjectToBody, (float3)i.normalOS));
+                    half lum = dot(albedo.rgb, half3(0.3, 0.59, 0.11));
+                    half sat = max(albedo.r, max(albedo.g, albedo.b)) - min(albedo.r, min(albedo.g, albedo.b));
+                    half paint = step(0.42, lum) * step(sat, 0.22);
+                    half side = step(0.55, abs(bn.x)), rear = step(0.55, -bn.z);
+                    half band = step(_LiveryStripe.x, bp.y) * step(bp.y, _LiveryStripe.y);
+                    albedo.rgb = lerp(albedo.rgb, _LiveryColor.rgb, paint * band * saturate(side + rear));
+                    float2 uv = float2(-1, -1);
+                    if (side > 0.5)
+                    {
+                        uv = float2((bp.z - _LiveryRect.x) / _LiveryRect.z + 0.5, (bp.y - _LiveryRect.y) / _LiveryRect.w + 0.5);
+                        if (bn.x < 0) uv.x = 1 - uv.x;
+                    }
+                    else if (rear > 0.5 && _LiveryRear.z > 0)
+                        uv = float2((bp.x - _LiveryRear.x) / _LiveryRear.z + 0.5, (bp.y - _LiveryRear.y) / _LiveryRear.w + 0.5);
+                    if (all(uv >= 0) && all(uv <= 1))
+                    {
+                        half4 logo = SAMPLE_TEXTURE2D(_LiveryMap, sampler_LiveryMap, uv);
+                        albedo.rgb = lerp(albedo.rgb, logo.rgb, logo.a * step(0.25, lum));
+                    }
+                }
                 half3 n = normalize(i.normalWS);
                 // Derivative tangent frame works for imported meshes and world-projected paving.
                 if (_BumpScale > 0.001)
@@ -175,6 +213,7 @@ Shader "FoodInc/ToonCurved"
                     surface.normalTS = half3(0,0,1);
                     surface.occlusion = 1;
                     surface.emission = _EmissionColor.rgb * lerp(half3(1,1,1),albedo.rgb,_EmissionUsesAlbedo);
+                    if (_EmissionMapOn > .5) surface.emission = _EmissionColor.rgb * SAMPLE_TEXTURE2D(_EmissionMap, sampler_EmissionMap, surfaceUV).rgb;
                     if (_WindowInterior > .5)
                     {
                         // Recess shading, partially closed blinds and a lit ceiling break up flat panes.

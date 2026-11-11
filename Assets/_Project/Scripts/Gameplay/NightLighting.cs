@@ -22,7 +22,7 @@ namespace DallasDash.Gameplay
                 var lamp = go.AddComponent<Light>(); lights[i] = lamp;
                 lamp.type = i<6 ? LightType.Spot : LightType.Point;
                 lamp.range = i<6 ? 19f : i<8 ? 16f : 10f;
-                lamp.intensity = i<6 ? 28f : i<8 ? 12f : 3.5f;
+                lamp.intensity = i<6 ? 28f : i<8 ? 12f : 1.4f;
                 lamp.color = i<6 ? new Color(1f,.75f,.49f) : i==6 ? new Color(.12f,.65f,1f) : i==7 ? new Color(1f,.12f,.45f) : new Color(.65f,.76f,1f);
                 lamp.spotAngle = 112f; lamp.innerSpotAngle = 68f;
                 lamp.shadows = LightShadows.None;
@@ -53,7 +53,8 @@ namespace DallasDash.Gameplay
                 if (DashRun.District==2) lights[i].color = i==6 ? new Color(1f,.42f,.12f) : new Color(.3f,.6f,1f);
                 else lights[i].color = i==6 ? new Color(.12f,.65f,1f) : new Color(1f,.12f,.45f);
             }
-            lights[8].transform.position = at+view.transform.forward*6f+Vector3.up;
+            // Close to the camera and above it: 6 m out it sat in Ace's face on the title and washed his hair blue-white.
+            lights[8].transform.position = at+view.transform.forward*2f+Vector3.up*2.5f;
         }
     }
 }

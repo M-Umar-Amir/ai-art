@@ -9,7 +9,7 @@ namespace DallasDash.UI
     /// Graphical in-run HUD: every value is an icon plus a gauge or a short number.
     /// Top-left: score, multiplier, combo and power-up timers.
     /// Top-right: coupon progress and the burger wallet. Top-centre: the police chase meter.
-    /// Bottom: equipment, dash and Ace's ability. A chip announces the shortcut portal and the coupon.
+    /// Bottom: dash and Ace's ability (and the bike distance while on foot). A chip announces the coupon.
     public class DashHud : MonoBehaviour
     {
         GameObject root;
@@ -18,6 +18,7 @@ namespace DallasDash.UI
         Image fuelFill, deliveryBar, batteryFill;
         Button ability, dash;
         GameObject movePill;
+        Image equipmentPanel;
         int lastZone = -1;
         RiderController rider;
         TrackSpawner track;
@@ -94,7 +95,7 @@ namespace DallasDash.UI
             routeChip.raycastTarget = false;
             Pin(routeChip.rectTransform, new Vector2(1, 1), new Vector2(-30, -196));
             UiKit.Icon(routeChip.transform, "rocket", new Vector2(-188, 0), 34);
-            routeText = UiKit.Label(routeChip.transform, "", 25, new Vector2(18, 0), new Vector2(380, 46), Color.white);
+            routeText = UiKit.Label(routeChip.transform, "", 28, new Vector2(18, 0), new Vector2(380, 46), Color.white);
             routeChip.gameObject.SetActive(false);
 
             // ---------- Movement hint: icon + two or three words
@@ -102,27 +103,32 @@ namespace DallasDash.UI
             hint.raycastTarget = false;
             movePill = hint.gameObject;
             moveIcon = UiKit.Icon(hint.transform, "arrow", new Vector2(-128, 0), 30);
-            move = UiKit.Label(hint.transform, "", 24, new Vector2(6, 0), new Vector2(250, 40), UiKit.Cream);
+            move = UiKit.Label(hint.transform, "", 28, new Vector2(6, 0), new Vector2(250, 40), UiKit.Cream);
             movePill.SetActive(false);
 
             // ---------- Bottom left: ride / equipment
-            var equipmentPanel = UiKit.Panel(root.transform, "Equipment", new Vector2(-380, -882), new Vector2(250, 96), new Color(.06f, .12f, .2f, .92f));
+            equipmentPanel = UiKit.Panel(root.transform, "Equipment", new Vector2(-380, -882), new Vector2(250, 96), new Color(.06f, .12f, .2f, .92f));
             equipmentPanel.raycastTarget = false;
             equipmentIcon = UiKit.Icon(equipmentPanel.transform, "bike", new Vector2(-80, 0), 52);
-            equipment = UiKit.Label(equipmentPanel.transform, "E-BIKE", 24, new Vector2(30, 0), new Vector2(148, 72), UiKit.Cream);
+            equipment = UiKit.Label(equipmentPanel.transform, "E-BIKE", 28, new Vector2(30, 0), new Vector2(160, 72), UiKit.Cream);
 
             // ---------- Bottom right: crew ability with a charge gauge
-            ability = UiKit.Button(root.transform, "", new Vector2(380, -882), new Vector2(250, 96), UiKit.Blue, () => DashRun.Instance?.TryAbility(), 24);
+            // A round boost button at the right thumb (target look, 11 Nov 2026), with a cyan rim and a charge bar.
+            ability = UiKit.Button(root.transform, "", new Vector2(400, -850), new Vector2(200, 200), new Color(.04f, .12f, .2f), () => DashRun.Instance?.TryAbility(), 24);
             var abilityFace = ability.transform.Find("Face");
-            UiKit.Icon(abilityFace, "bolt", new Vector2(-78, 8), 44);
-            abilityLabel = UiKit.Label(abilityFace, "", 23, new Vector2(30, 22), new Vector2(140, 34), Color.white);
-            var batteryTrack = UiKit.Panel(abilityFace, "Track", new Vector2(30, -18), new Vector2(140, 11), new Color(1, 1, 1, .16f));
+            foreach (var part in ability.GetComponentsInChildren<Image>()) if (part.name is "Face" or "Rim") part.sprite = UiKit.Disc;
+            var gloss = abilityFace.Find("Gloss"); if (gloss) gloss.gameObject.SetActive(false);
+            var ring = UiKit.Panel(ability.transform, "Boost ring", Vector2.zero, new Vector2(212, 212), UiKit.Cyan);
+            ring.sprite = UiKit.Disc; ring.raycastTarget = false; ring.transform.SetSiblingIndex(1);
+            UiKit.Icon(abilityFace, "bolt", new Vector2(0, 42), 58);
+            abilityLabel = UiKit.Label(abilityFace, "", 24, new Vector2(0, -6), new Vector2(170, 34), Color.white);
+            var batteryTrack = UiKit.Panel(abilityFace, "Track", new Vector2(0, -42), new Vector2(110, 10), new Color(1, 1, 1, .16f));
             batteryTrack.raycastTarget = false;
-            batteryFill = UiKit.Panel(batteryTrack.transform, "Fill", Vector2.zero, new Vector2(140, 11), UiKit.Green);
+            batteryFill = UiKit.Panel(batteryTrack.transform, "Fill", Vector2.zero, new Vector2(110, 10), UiKit.Green);
             batteryFill.raycastTarget = false;
             batteryFill.rectTransform.pivot = new Vector2(0, .5f);
-            batteryFill.rectTransform.anchoredPosition = new Vector2(-70, 0);
-            battery = UiKit.Label(abilityFace, "", 17, new Vector2(30, -42), new Vector2(140, 24), UiKit.Green);
+            batteryFill.rectTransform.anchoredPosition = new Vector2(-55, 0);
+            battery = UiKit.Label(abilityFace, "", 22, new Vector2(0, -70), new Vector2(160, 28), UiKit.Green);
 
             // ---------- Bottom centre: dash
             dash = UiKit.Button(root.transform, "DASH", new Vector2(0, -882), new Vector2(300, 96), UiKit.Pink, () => DashRun.Instance?.TryDeliveryDash(), 34, "rocket");
@@ -157,19 +163,12 @@ namespace DallasDash.UI
             dash.interactable = run.DashCooldown <= 0f && !gm.Paused;
             dash.GetComponentInChildren<Text>().text = run.DashTime > 0f ? "DASHING" : run.DashCooldown > 0f ? $"{run.DashCooldown:0.0}s" : "DASH";
 
+            // On the bike there is nothing to tell the player; the pill comes up only while running on foot.
+            equipmentPanel.gameObject.SetActive(run.OnFoot);
             equipmentIcon.sprite = Icons.Get(run.OnFoot ? "rider" : "bike");
-            equipment.text = run.OnFoot ? (!DashRun.InSkypark && run.BikeAt > gm.Distance ? $"BIKE {run.BikeAt - gm.Distance:0} m" : "ON FOOT") : "E-BIKE";
+            equipment.text = run.OnFoot ? (run.BikeAt > gm.Distance ? $"BIKE {run.BikeAt - gm.Distance:0} m" : "ON FOOT") : "E-BIKE";
 
-            // The chase meter: the officer's distance and how hot the pursuit is. In the Skypark he is shaken off.
-            if (!run.PoliceActive)
-            {
-                deliveryNo.text = "SKYPARK";
-                deliveryNo.color = UiKit.Cyan;
-                deliveryDistance.text = $"{Mathf.Max(0f, DashRun.SkyTo - gm.Distance):0} m";
-                deliveryBar.rectTransform.localScale = new Vector3(Mathf.Clamp01((gm.Distance - DashRun.SkyFrom) / DashRun.SkyLength), 1, 1);
-                deliveryBar.color = UiKit.Cyan;
-            }
-            else
+            // The chase meter: the officer's distance and how hot the pursuit is.
             {
                 float heat = run.Heat;
                 deliveryNo.text = heat > 0.75f ? "COP CLOSE!" : "POLICE";
@@ -184,7 +183,6 @@ namespace DallasDash.UI
             if (!rider) rider = FindFirstObjectByType<RiderController>();
             if (!track) track = FindFirstObjectByType<TrackSpawner>();
             bool onRoute = false;
-            var portalAhead = track ? track.Portal : null;
             var couponAhead = track ? track.Coupon : null;
             bool routeAhead = false;
             if (couponAhead && couponAhead.transform.position.z - gm.Distance < 160f)
@@ -193,13 +191,6 @@ namespace DallasDash.UI
                 routeChip.color = UiKit.Gold;
                 routeText.color = UiKit.Ink;
                 routeText.text = "10% COUPON  " + LaneArrow(couponAhead.lane) + "  " + Mathf.Max(0f, couponAhead.transform.position.z - gm.Distance).ToString("0") + " m";
-            }
-            else if (portalAhead && portalAhead.transform.position.z - gm.Distance < 140f)
-            {
-                routeAhead = true;
-                routeChip.color = UiKit.Cyan;
-                routeText.color = UiKit.Ink;
-                routeText.text = "SHORTCUT PORTAL  " + LaneArrow(portalAhead.lane) + "  " + Mathf.Max(0f, portalAhead.transform.position.z - gm.Distance).ToString("0") + " m";
             }
             routeChip.gameObject.SetActive(routeAhead);
 
@@ -212,7 +203,6 @@ namespace DallasDash.UI
             else if (DashRun.CanRideWalls && rider && rider.Traversal.Surface == RunSurface.Road && (rider.Lane == 0 || rider.Lane == Tuning.Lanes - 1)
                 && DashRun.WallAvailable(rider.Lane == 0 ? -1 : 1, gm.Distance + 8f))
             { hintText = rider.Lane == 0 ? "< WALL RUN" : "WALL RUN >"; iconAngle = rider.Lane == 0 ? 180f : 0f; }
-            else if (TrackSpawner.SkyparkVoid(gm.Distance + 10f)) { hintText = "JUMP"; iconAngle = 90f; }
             else if (run.TrickCombo >= 2) { hintText = "TRICK x" + run.TrickCombo; iconAngle = 0f; }
             else hintText = "";
             movePill.SetActive(!string.IsNullOrEmpty(hintText));

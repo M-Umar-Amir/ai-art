@@ -56,6 +56,15 @@ namespace DallasDash.Gameplay
             return made;
         }
 
+        /// A person inside a building (shop customers and staff, terrace diners): pooled like the street residents and
+        /// returned when the street segment that owns them is culled (TrackSpawner.Cull calls Return).
+        public Transform Occupant(Transform parent, Vector3 world, float yaw, bool chatting, int variant)
+        {
+            if (!track) track = FindFirstObjectByType<TrackSpawner>();
+            var local = parent.InverseTransformPoint(world);
+            return Person(parent, local, yaw, ShirtTones[Mathf.Abs(variant) % ShirtTones.Length], chatting ? LifeMotion.Wave : LifeMotion.Idle, false, variant);
+        }
+
         public void Return(GameObject chunk)
         {
             if (!chunk) return;
@@ -75,7 +84,7 @@ namespace DallasDash.Gameplay
         {
             if (!people) people = Resources.Load<PeopleCatalogue>("PeopleCatalogue");
             if (!people || people.bodies == null) yield break;
-            for (int i = 0; i < 28; i++)
+            for (int i = 0; i < 52; i++) // street residents plus shop and terrace occupants (11 Nov 2026)
             {
                 var template = people.bodies[i % people.bodies.Length];
                 var made = Instantiate(template, poolRoot);
@@ -773,7 +782,7 @@ namespace DallasDash.Gameplay
 
         // ---------------------------------------------------------------- shared helpers
 
-        static bool Void(float worldZ) => TrackSpawner.SkyparkVoid(worldZ);
+        static bool Void(float worldZ) => false;
 
         /// The rooftop shortcut's ramp and the fuel-stop shoulder both own the right-hand pavement. Life
         /// steps aside there so it never stands inside the express deck or the pit canopy.

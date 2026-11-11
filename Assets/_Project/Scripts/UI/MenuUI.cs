@@ -19,6 +19,7 @@ namespace DallasDash.UI
 
         GameObject title, daily, settings, pause, busted, pauseButton;
         Text coinsLabel, bestLabel, dailyBadge, bustedScore, bustedBest, bustedRun, bustedCoins, toast;
+        readonly Text[] bustedTiles = new Text[4];
         Image[] dayTiles;
         Text[] dayLabels;
         Image[] dayIcons;
@@ -35,6 +36,7 @@ namespace DallasDash.UI
         GameObject settingsReturn, crewPanel;
         float toastTimer, captionTimer, captionAge, popupTimer;
         Text captionTitle, captionSub, popup;
+        Image popupBack;
         GameObject shopPanel, missionsPanel;
         Text shopCoins, missionsFooter, bustedMissions;
         Text[] upgradeButtons, upgradeNames;
@@ -118,7 +120,9 @@ namespace DallasDash.UI
             // Scene captions (Loading Up, Ran the Red, The Pursuit, street banners) and quick stunt popups.
             captionTitle = UiKit.Label(root, "", 118, new Vector2(0, 560), new Vector2(1000, 150), UiKit.Yellow);
             captionSub = UiKit.Label(root, "", 40, new Vector2(0, 450), new Vector2(1000, 60), Color.white);
-            popup = UiKit.Label(root, "", 72, new Vector2(0, 250), new Vector2(900, 100), UiKit.Yellow);
+            popupBack = UiKit.Panel(root, "Shout scrim", new Vector2(0, 250), new Vector2(900, 104), new Color(.02f, .03f, .08f, .72f));
+            popupBack.raycastTarget = false; popupBack.gameObject.SetActive(false);
+            popup = UiKit.Label(root, "", 72, new Vector2(0, 250), new Vector2(860, 96), UiKit.Yellow);
             var skip = UiKit.Label(root, "Tap to skip", 30, new Vector2(0, -860), new Vector2(600, 50), new Color(1, 1, 1, 0.7f));
             skipHint = skip.gameObject;
 
@@ -180,22 +184,29 @@ namespace DallasDash.UI
                 UiKit.Label(logo, "Crave It. Chase It. Get It.", 32, new Vector2(0, -145), new Vector2(760, 55), Color.white, TextAnchor.MiddleCenter, true);
             }
 
-            var play = UiKit.Button(t, "START CHASE", new Vector2(0, -290), new Vector2(830, 130), UiKit.Pink, Play, 54, "play");
+            // 11 Nov 2026 UI pass: one primary action, big and low on the screen where the thumb rests.
+            var play = UiKit.Button(t, "START CHASE", new Vector2(0, -470), new Vector2(900, 152), UiKit.Pink, Play, 56, "play");
             play.transform.Find("Face").gameObject.AddComponent<UiPulse>(); // the root's scale belongs to ButtonBounce
 
-            // Five icon tiles along the bottom; settings is the gear between the top pills.
-            // The same five tiles serve the menu and free roam (one menu screen).
+            // A docked tab bar of four destinations along the bottom edge (one shared dark bar, equal tabs).
+            var dock = UiKit.Panel(t, "Tab bar", new Vector2(0, TileRowY), new Vector2(1040, 176), new Color(.03f, .04f, .09f, .94f));
+            dock.raycastTarget = false;
+            titleKeep.Add(dock.gameObject);
             foreach (var tile in new[] {
-                Tile(t, "ACE", "rider", new Vector2(-440, TileRowY), UiKit.Yellow, ShowCrew),
-                Tile(t, "SHOP", "cart", new Vector2(-220, TileRowY), UiKit.Orange, ShowShop),
-                Tile(t, "MISSIONS", "list", new Vector2(0, TileRowY), UiKit.Blue, ShowMissions),
-                Tile(t, "RANKS", "trophy", new Vector2(220, TileRowY), UiKit.Purple, ShowRanks) })
+                Tile(t, "RIDER", "rider", new Vector2(-390, TileRowY), UiKit.Yellow, ShowCrew),
+                Tile(t, "SHOP", "cart", new Vector2(-130, TileRowY), UiKit.Orange, ShowShop),
+                Tile(t, "MISSIONS", "list", new Vector2(130, TileRowY), UiKit.Cyan, ShowMissions),
+                Tile(t, "RANKS", "trophy", new Vector2(390, TileRowY), UiKit.Purple, ShowRanks) })
             { titleKeep.Add(tile.gameObject); titleTiles.Add(tile.gameObject); }
-            var dailyBtn = Tile(t, "DAILY", "calendar", new Vector2(440, TileRowY), UiKit.Red, ShowDaily);
-            titleKeep.Add(dailyBtn.gameObject); titleTiles.Add(dailyBtn.gameObject);
-            var badge = UiKit.Panel(dailyBtn.transform, "Badge", new Vector2(82, 98), new Vector2(76, 76), UiKit.Yellow);
-            badge.sprite = UiKit.Gradient;
-            UiKit.Label(badge.transform, "!", 60, new Vector2(0, 2), new Vector2(82, 82), Color.white);
+            // Daily reward: a corner button under the wallet, with a badge while a reward is waiting.
+            var dailyBtn = UiKit.Button(t, "", Vector2.zero, new Vector2(110, 110), UiKit.Blue, ShowDaily, 44, "calendar");
+            var dailyRect = (RectTransform)dailyBtn.transform;
+            dailyRect.anchorMin = dailyRect.anchorMax = new Vector2(0f, 1f);
+            dailyRect.anchoredPosition = new Vector2(85f, -215f);
+            titleKeep.Add(dailyBtn.gameObject);
+            var badge = UiKit.Panel(dailyBtn.transform, "Badge", new Vector2(44, 44), new Vector2(48, 48), UiKit.Red);
+            badge.sprite = UiKit.Disc;
+            UiKit.Label(badge.transform, "!", 34, new Vector2(0, 1), new Vector2(48, 48), Color.white);
             badge.gameObject.AddComponent<UiPulse>().scale = 0.12f;
             dailyBadge = badge.GetComponentInChildren<Text>();
             var gear = UiKit.Button(t, "", Vector2.zero, new Vector2(110, 110), UiKit.Blue, () => ShowSettings(title), 44, "gear");
@@ -208,7 +219,7 @@ namespace DallasDash.UI
 
         /// Title elements shared by the menu and free roam, and the tile row that lifts while roaming.
         readonly System.Collections.Generic.HashSet<GameObject> titleKeep = new(), titleTiles = new();
-        const float TileRowY = -700f;
+        const float TileRowY = -790f;
 
         /// Hangs a top-bar element from the top edge of the safe area (centre-relative positions drift on tall phones).
         static void PinTop(RectTransform rt, float x)
@@ -220,11 +231,11 @@ namespace DallasDash.UI
         /// Square menu tile: big icon on top, a short word underneath.
         static Button Tile(Transform parent, string word, string icon, Vector2 pos, Color c, UnityEngine.Events.UnityAction onClick)
         {
-            var b = UiKit.Button(parent, "", pos, new Vector2(190, 150), UiKit.Blue, onClick);
+            var b = UiKit.Button(parent, "", pos, new Vector2(240, 150), new Color(.07f, .09f, .18f), onClick);
             var face = b.transform.Find("Face");
-            UiKit.Icon(face, icon, new Vector2(0, 22), 56);
-            UiKit.Panel(face,"Accent",new Vector2(0,70),new Vector2(50,4),c).raycastTarget=false;
-            UiKit.Label(face, word, 30, new Vector2(0, -42), new Vector2(180, 48), Color.white);
+            UiKit.Icon(face, icon, new Vector2(0, 22), 60);
+            UiKit.Panel(face, "Accent", new Vector2(0, 68), new Vector2(56, 5), c).raycastTarget = false;
+            UiKit.Label(face, word, 30, new Vector2(0, -44), new Vector2(230, 48), Color.white);
             return b;
         }
 
@@ -409,20 +420,21 @@ namespace DallasDash.UI
         void BuildPause(Transform root)
         {
             pause = UiKit.Shade(root, "Pause").gameObject;
-            var p = UiKit.FancyCard(pause.transform, new Vector2(0, 40), new Vector2(840, 900), UiKit.Purple).transform;
-            UiKit.Header(p, "PAUSED", 340, UiKit.Purple, 84);
+            var p = UiKit.FancyCard(pause.transform, new Vector2(0, 40), new Vector2(840, 1060), UiKit.Purple).transform;
+            UiKit.Header(p, "PAUSED", 420, UiKit.Purple, 84);
 
             // Add run stats display
-            var statsPanel = UiKit.Panel(p, "Stats", new Vector2(0, 190), new Vector2(740, 130), new Color(0.04f, 0.06f, 0.14f, 0.75f));
+            var statsPanel = UiKit.Panel(p, "Stats", new Vector2(0, 260), new Vector2(740, 130), new Color(0.04f, 0.06f, 0.14f, 0.75f));
             statsPanel.raycastTarget = false;
             Text pauseScore = UiKit.Label(statsPanel.transform, "SCORE: 0", 38, new Vector2(-210, 4), new Vector2(320, 55), UiKit.Yellow);
             Text pauseDist = UiKit.Label(statsPanel.transform, "DISTANCE: 0m", 34, new Vector2(210, 4), new Vector2(320, 55), Color.white);
             pauseScore.name = "PauseScore";
             pauseDist.name = "PauseDist";
 
-            UiKit.Button(p, "RESUME", new Vector2(0, 55), new Vector2(600, 160), UiKit.Green, Resume, 68, "play");
-            UiKit.Button(p, "SETTINGS", new Vector2(0, -130), new Vector2(600, 140), UiKit.Blue, () => { pause.SetActive(false); ShowSettings(pause); }, 56, "gear");
-            UiKit.Button(p, "QUIT RUN", new Vector2(0, -300), new Vector2(600, 140), UiKit.Red, QuitRun, 56);
+            UiKit.Button(p, "RESUME", new Vector2(0, 90), new Vector2(640, 160), UiKit.Pink, Resume, 56, "play");
+            UiKit.Button(p, "RESTART", new Vector2(0, -80), new Vector2(640, 120), UiKit.Blue, RestartRun, 44);
+            UiKit.Button(p, "SETTINGS", new Vector2(0, -225), new Vector2(640, 120), UiKit.Blue, () => { pause.SetActive(false); ShowSettings(pause); }, 44, "gear");
+            UiKit.Button(p, "QUIT RUN", new Vector2(0, -370), new Vector2(640, 110), UiKit.Red, QuitRun, 40);
             pause.SetActive(false);
         }
 
@@ -436,8 +448,8 @@ namespace DallasDash.UI
             GameManager.Instance.SetPaused(true);
 
             // Update pause stats
-            var scoreText = pause.transform.Find("Card/Stats/PauseScore")?.GetComponent<Text>();
-            var distText = pause.transform.Find("Card/Stats/PauseDist")?.GetComponent<Text>();
+            var scoreText = pause.transform.Find("FancyCard/Stats/PauseScore")?.GetComponent<Text>();
+            var distText = pause.transform.Find("FancyCard/Stats/PauseDist")?.GetComponent<Text>();
             if (scoreText) scoreText.text = $"SCORE: {GameManager.Instance.Score:N0}";
             if (distText) distText.text = $"DISTANCE: {GameManager.Instance.Distance:0}m";
 
@@ -476,6 +488,16 @@ namespace DallasDash.UI
             Pause();
         }
 
+        /// QoL (11 Nov 2026): start a fresh run straight from the pause menu, skipping the intro.
+        void RestartRun()
+        {
+            pause.SetActive(false);
+            if (countdown != null) { StopCoroutine(countdown); countdown = null; }
+            GameManager.Instance.SetPaused(false);
+            GameManager.Instance.ToMenu();
+            GameManager.Instance.StartRun();
+        }
+
         void QuitRun()
         {
             pause.SetActive(false);
@@ -490,20 +512,34 @@ namespace DallasDash.UI
         {
             busted = UiKit.Shade(root, "Busted").gameObject;
             busted.GetComponent<Image>().color = new Color(0.03f, 0.05f, 0.15f, 0.35f);
-            var p = UiKit.FancyCard(busted.transform, new Vector2(0, -120), new Vector2(940, 950), UiKit.Red).transform;
-            courseResult = UiKit.Label(p, "BUSTED!", 88, new Vector2(0, 350), new Vector2(900, 160), UiKit.Red, TextAnchor.MiddleCenter, true);
-            bustedScore = UiKit.Label(p, "", 102, new Vector2(0, 180), new Vector2(900, 130), Color.white, TextAnchor.MiddleCenter, true);
-            bustedBest = UiKit.Label(p, "", 48, new Vector2(0, 85), new Vector2(900, 65), UiKit.Cream);
-            bustedRun = UiKit.Label(p, "", 40, new Vector2(0, 28), new Vector2(900, 55), UiKit.Yellow);
-            bustedCoins = UiKit.Label(p, "", 56, new Vector2(42, -48), new Vector2(800, 75), UiKit.Yellow);
-            UiKit.Icon(p, "burger", new Vector2(-350, -48), 90);
-UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit.Green, Play, 72, "play").transform.Find("Face").gameObject.AddComponent<UiPulse>();
-            UiKit.Button(p, "MENU", new Vector2(0, -370), new Vector2(440, 130), UiKit.Blue, () => GameManager.Instance.ToMenu(), 56);
-            var strip = UiKit.Panel(busted.transform, "Missions", new Vector2(0, -800), new Vector2(940, 270), new Color(0.05f, 0.08f, 0.25f, 0.85f));
+            // 11 Nov 2026 UI pass: three levels only. 1) why the run ended, 2) the score with best/rank, 3) the
+            // stats; then one primary (DASH AGAIN) and one quiet secondary (MENU); missions folded into the card.
+            var p = UiKit.FancyCard(busted.transform, new Vector2(0, -60), new Vector2(960, 1240), UiKit.Red).transform;
+            courseResult = UiKit.Label(p, "BUSTED!", 64, new Vector2(0, 520), new Vector2(900, 90), UiKit.Red, TextAnchor.MiddleCenter, true);
+            var scoreBox = UiKit.Panel(p, "Score box", new Vector2(0, 340), new Vector2(860, 190), new Color(1f, 1f, 1f, .07f));
+            scoreBox.raycastTarget = false;
+            bustedScore = UiKit.Label(p, "", 120, new Vector2(0, 340), new Vector2(840, 150), Color.white, TextAnchor.MiddleCenter, true);
+            bustedScore.fontSize = 120; bustedScore.resizeTextMaxSize = 120; bustedScore.resizeTextMinSize = 72;
+            bustedBest = UiKit.Label(p, "", 36, new Vector2(0, 212), new Vector2(900, 54), UiKit.Gold);
+            // Four stat tiles: burgers, near misses, revives, distance.
+            string[] tileIcons = { "burger", "star", "shield", "flag" }, tileNames = { "BURGERS", "NEAR MISSES", "REVIVES", "DISTANCE" };
+            for (int i = 0; i < 4; i++)
+            {
+                var tile = UiKit.Panel(p, "Stat tile", new Vector2(-330 + i * 220, 120), new Vector2(200, 170), new Color(1f, 1f, 1f, .07f));
+                tile.raycastTarget = false;
+                UiKit.Icon(tile.transform, tileIcons[i], new Vector2(0, 40), 54);
+                bustedTiles[i] = UiKit.Label(tile.transform, "", 38, new Vector2(0, -22), new Vector2(190, 50), Color.white);
+                UiKit.Label(tile.transform, tileNames[i], 20, new Vector2(0, -60), new Vector2(190, 28), UiKit.Muted);
+            }
+            bustedRun = UiKit.Label(p, "", 26, new Vector2(0, 10), new Vector2(880, 40), UiKit.Muted);
+            bustedCoins = UiKit.Label(p, "", 32, new Vector2(0, -2), new Vector2(880, 48), UiKit.Gold);
+            UiKit.Button(p, "DASH AGAIN", new Vector2(0, -120), new Vector2(760, 160), UiKit.Pink, Play, 56, "play").transform.Find("Face").gameObject.AddComponent<UiPulse>();
+            UiKit.Button(p, "MENU", new Vector2(0, -275), new Vector2(520, 110), new Color(.08f, .1f, .2f), () => GameManager.Instance.ToMenu(), 40);
+            var strip = UiKit.Panel(p, "Missions", new Vector2(0, -450), new Vector2(880, 250), new Color(1f, 1f, 1f, .05f));
             strip.raycastTarget = false;
-            UiKit.Icon(strip.transform, "list", new Vector2(-400, 75), 75);
-            UiKit.Label(strip.transform, "MISSIONS", 42, new Vector2(-210, 75), new Vector2(320, 65), UiKit.Yellow, TextAnchor.MiddleLeft);
-            bustedMissions = UiKit.Label(strip.transform, "", 32, new Vector2(0, -32), new Vector2(860, 160), Color.white, TextAnchor.MiddleLeft);
+            UiKit.Icon(strip.transform, "list", new Vector2(-395, 82), 48);
+            UiKit.Label(strip.transform, "MISSIONS", 32, new Vector2(-230, 82), new Vector2(280, 50), UiKit.Yellow, TextAnchor.MiddleLeft);
+            bustedMissions = UiKit.Label(strip.transform, "", 30, new Vector2(0, -26), new Vector2(820, 160), Color.white, TextAnchor.MiddleLeft);
             bustedMissions.horizontalOverflow = HorizontalWrapMode.Wrap;
             busted.SetActive(false);
         }
@@ -565,7 +601,7 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             crewPanel.SetActive(false);
         }
 
-        static string Blurb(CharacterDef d) => "ACE / THE SPEEDSTER\nHero courier gear, hero e-bike. Ability: speed boost.";
+        static string Blurb(CharacterDef d) => "ACE / THE SPEEDSTER\nArmoured courier kit, hero e-bike. Ability: speed boost.";
 
         static bool Unlocked(CharacterDef d) => true;
 
@@ -835,8 +871,13 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
 
         void Popup(string msg)
         {
-            popup.fontSize = Mathf.Clamp((int)(1350f / Mathf.Max(1, msg.Length)), 38, 72);
+            popup.fontSize = Mathf.Clamp((int)(1250f / Mathf.Max(1, msg.Length)), 34, 60);
             popup.text = msg;
+            if (popupBack)
+            {
+                popupBack.gameObject.SetActive(!string.IsNullOrEmpty(msg));
+                popupBack.rectTransform.sizeDelta = new Vector2(Mathf.Clamp(msg.Length * popup.fontSize * 0.58f + 90f, 300f, 980f), 104f);
+            }
             popupTimer = 0.9f;
         }
 
@@ -884,11 +925,15 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
                 string best = gm.NewBest ? "NEW BEST SCORE!" : $"Best {PlayerProfile.BestScore:N0}";
                 var r = gm.LastRanks;
                 bustedBest.text = r.today <= 3 ? $"{best}   |   #{r.today} today" : best;
-                bustedCoins.text = $"+{gm.BurgersEarned:N0} burgers   /   coupon {Mathf.Min(PlayerProfile.CouponProgress, BurgerPrices.CouponThreshold):N0} of {BurgerPrices.CouponThreshold:N0}";
+                bustedCoins.text = $"10% coupon   {Mathf.Min(PlayerProfile.CouponProgress, BurgerPrices.CouponThreshold):N0} / {BurgerPrices.CouponThreshold:N0}";
                 var dash = DashRun.Instance;
                 courseResult.text = string.IsNullOrEmpty(DashRun.EndReason) ? "RUN OVER" : DashRun.EndReason;
                 courseResult.color = UiKit.Red;
-                bustedRun.text = dash ? $"{gm.Distance:N0} m   ·   {dash.Shortcuts} skypark shortcuts   ·   {gm.NearMisses} near misses   ·   {dash.Revives} revives" : "";
+                bustedRun.text = "";
+                bustedTiles[0].text = "+" + gm.BurgersEarned.ToString("N0");
+                bustedTiles[1].text = gm.NearMisses.ToString("N0");
+                bustedTiles[2].text = dash ? dash.Revives.ToString() : "0";
+                bustedTiles[3].text = gm.Distance.ToString("N0") + " m";
                 var lines = new System.Text.StringBuilder();
                 foreach (var m in Missions.Active) lines.AppendLine($"{m.Text}   {Mathf.Min(m.progress, m.target):N0}/{m.target:N0}");
                 bustedMissions.text = lines.ToString().TrimEnd();
@@ -950,7 +995,8 @@ UiKit.Button(p, "DASH AGAIN", new Vector2(0, -190), new Vector2(680, 180), UiKit
             {
                 popupTimer -= dt;
                 popup.transform.localScale = Vector3.one * (1f + Mathf.Max(0f, popupTimer - 0.7f) * 2.5f);
-                if (popupTimer <= 0f) popup.text = "";
+                if (popupBack) popupBack.transform.localScale = popup.transform.localScale;
+                if (popupTimer <= 0f) { popup.text = ""; if (popupBack) popupBack.gameObject.SetActive(false); }
             }
             if (toastTimer > 0f)
             {

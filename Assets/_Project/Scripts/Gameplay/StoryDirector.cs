@@ -112,8 +112,8 @@ namespace DallasDash.Gameplay
                 yield return null;
             }
 
-            // ---- 15 The Route: the two things that buy time, called out before the run takes over.
-            MenuUI.Instance.Caption("SHORTCUT PORTALS", "Ride through one to lose the cop on the Skypark roofs.", 2.2f);
+            // ---- 15 The Route: what wins the chase, called out before the run takes over.
+            MenuUI.Instance.Caption("STAY ON THE BIKE", "Ride clean to pull away. Crash and the cop closes in.", 2.2f);
             yield return RideToStart(z, speed);
         }
 

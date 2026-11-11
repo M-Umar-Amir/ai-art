@@ -9,8 +9,7 @@ namespace DallasDash.Core
     /// - One map, Neon Downtown, and one rider, Ace on his e-bike.
     /// - A POLICE CHASE replaces the delivery clock: an officer rides behind; crashes and running on foot let him
     ///   close in, riding clean on the bike opens the gap again. When he reaches Ace the run is BUSTED.
-    /// - The shortcut is a portal in a street lane ("GO THROUGH HERE FOR SHORTCUT"): it teleports Ace, on foot,
-    ///   to the Skypark rooftops; a compulsory portal later sends him back to Downtown on his bike, police shaken off.
+    /// - No shortcut (client, 11 Nov 2026): the Skypark portal was removed; the whole run is Downtown.
     /// - A busted or wiped-out run can be revived on the spot with burgers (BurgerPrices.Revive).
     /// - No kiosks, no fuel, no delivery timer.
     public class DashRun : MonoBehaviour
@@ -18,16 +17,11 @@ namespace DallasDash.Core
         public static DashRun Instance { get; private set; }
         public static readonly string[] CrewNames = { "ACE" };
         public static readonly string[] AbilityNames = { "SPEED BOOST" };
-        public static readonly string[] DistrictNames = { "NEON DOWNTOWN", "SKYPARK SHORTCUT" };
+        public static readonly string[] DistrictNames = { "NEON DOWNTOWN" };
 
-        /// Which world is being built: 0 Downtown, 1 the Skypark shortcut. Runtime state only (never saved):
-        /// the portal switches it mid-run and every run starts in Downtown.
-        public static int District { get; set; }
-        /// The Skypark stretch of the current shortcut, in run distance: entry portal to compulsory return portal.
-        public static float SkyFrom { get; private set; } = -1f;
-        public static float SkyTo { get; private set; } = -1f;
-        public const float SkyLength = 380f;
-        public static bool InSkypark => District == 1;
+        /// The only world: Downtown (0). Older builders still branch on District for the retired Skypark (1) and
+        /// Festivals (2); those branches are dead and are being removed file by file.
+        public static int District => 0;
 
         public float Battery { get; private set; } = 1f;
         public float Boost { get; private set; }
@@ -35,14 +29,14 @@ namespace DallasDash.Core
         public bool Shield { get; private set; }
         /// Retired hoverboard power-up state; always false.
         public bool Board => false;
-        /// Knocked off the e-bike by a crash (or in the Skypark shortcut): on foot until the bike is back.
+        /// Knocked off the e-bike by a crash: on foot until the bike is back.
         public bool OnFoot { get; private set; }
         /// Where the parked e-bike waits (distance and lane) while the rider is on foot in Downtown.
         public float BikeAt { get; private set; }
         public int BikeLane { get; private set; } = 1;
         /// Wall running was removed (client, 4 Nov 2026, later the same day). Kept so older call sites read naturally.
         public static bool CanRideWalls => false;
-        /// The old ramp-up rooftop course is retired; the Skypark portal is the shortcut now.
+        /// The old ramp-up rooftop course is retired, and there is no shortcut at all now.
         public static bool CanTakeRooftops => false;
         bool warnedWall, parkPending;
         public int WallSide => Surface == RunSurface.LeftWall ? -1 : Surface == RunSurface.RightWall ? 1 : 0;
@@ -52,10 +46,6 @@ namespace DallasDash.Core
         public float DashTime { get; private set; }
         public float DashCooldown { get; private set; }
         public float Slide { get; private set; }
-        /// Skypark shortcuts taken this run.
-        public int Shortcuts { get; private set; }
-        /// Seconds of the shortcut surge still running.
-        public float ShortcutTime { get; private set; }
         public int TrickCombo { get; private set; }
         /// Why the last run ended, shown on the results card.
         public static string EndReason { get; private set; } = "";
@@ -66,12 +56,13 @@ namespace DallasDash.Core
         public float PoliceGap { get; private set; } = StartGap;
         public const float StartGap = 14f, MaxGap = 24f;
         /// The officer's bike outpaces a runner; the e-bike pulls away from him.
-        public const float GainOnFoot = 1.7f, LoseOnBike = 0.55f;
+        /// 11 Nov 2026: with no Skypark to shake him off, clean riding must win back a crash in about five seconds.
+        public const float GainOnFoot = 1.7f, LoseOnBike = 1.0f;
         public const float CrashOnBike = 5f, CrashOnFoot = 9f, MissedLanding = 6f;
         /// 1 when the officer is right behind, 0 when he is at the far edge (HUD meter, siren loudness).
         public float Heat => Mathf.Clamp01(1f - PoliceGap / MaxGap);
-        /// The officer is off the rider's tail while Ace is in the Skypark (the portal shakes him off).
-        public bool PoliceActive => !InSkypark;
+        /// The officer is always on the rider's tail (no shortcut shakes him off any more).
+        public bool PoliceActive => true;
 
         // ---------- Revive
         public int Revives { get; private set; }
@@ -89,7 +80,6 @@ namespace DallasDash.Core
         public static bool WallAvailable(int side, float z)
         {
             if (side == 0 || z < 20f || TrackSpawner.NearJunction(z)) return false;
-            if (InSkypark) return false; // the Skypark is a roof course with open edges, no facade beside it
             return true;
         }
         public float WallRunSeconds => PowerUps.Active(PowerUp.Boots) ? 4f : 2.6f;
@@ -97,9 +87,6 @@ namespace DallasDash.Core
         public static bool GravityZone(float d) => false;
         public static float GravityZoneStart(float d) => d - Mathf.Repeat(d - 700f, 960f);
 
-        /// The Skypark shortcut keeps a speed surge alive for its whole length: it really is a short cut.
-        public const float RouteSpeedFactor = 1.3f;
-        public bool OnRoute => InSkypark;
         public bool OnRooftops => Surface == RunSurface.Rooftop;
         public float SurfaceHeight => rider ? rider.Traversal.Origin.y : 0f;
         public float JumpGravityFactor => FloatTime > 0f || PowerUps.Active(PowerUp.Boots) ? 0.68f : 1f;
@@ -109,7 +96,7 @@ namespace DallasDash.Core
         RiderController rider;
         TrackSpawner track;
 
-        void Awake() { Instance = this; District = 0; }
+        void Awake() { Instance = this; }
         void Start()
         {
             rider = FindFirstObjectByType<RiderController>();
@@ -128,15 +115,13 @@ namespace DallasDash.Core
                 FindFirstObjectByType<RiderLook>()?.Apply(0, true);
                 DashTime = DashCooldown = 0f;
                 TrickCombo = 0; lastTrick = -1; pendingTrickKind = -1;
-                Shortcuts = 0; WallRuns = 0; ShortcutTime = 0f;
+                WallRuns = 0;
                 PoliceGap = StartGap; Revives = 0; ReviveGrace = 0f; AwaitingRevive = false;
                 EndReason = "";
-                SkyFrom = SkyTo = -1f;
             }
             if (s == RunState.Ready || s == RunState.Intro)
             {
                 AwaitingRevive = false;
-                if (District != 0) { District = 0; SkyFrom = SkyTo = -1f; }
             }
             if (s != RunState.Running) { rider?.Traversal.Reset(); Slide = 0f; }
         }
@@ -215,27 +200,17 @@ namespace DallasDash.Core
         public void LeaveWall() { if (WallRunning && rider && !rider.Traversal.Moving) rider.AttachSurface(RunSurface.Road); }
         public void StartSlide() { if (CanAct()) Slide = 0.85f; }
 
-        /// A head-on crash: on the bike it knocks Ace off (the officer gains); on foot the officer gains a lot,
-        /// and in the Skypark (no police) a crash on foot is a wipe-out.
+        /// A head-on crash: on the bike it knocks Ace off (the officer gains); on foot the officer gains a lot.
         public static string LastStruck = "";
         public void Crash()
         {
             if (!CanAct() || !rider) return;
             if (Surface != RunSurface.Road && Surface != RunSurface.Rooftop) return;
-            Debug.Log($"[DashCrash] at {GameManager.Instance.Distance:0.0} lane={rider.Lane} surface={Surface} onFoot={OnFoot} gap={PoliceGap:0.0} sky={InSkypark} object={LastStruck}");
-            if (InSkypark)
-            {
-                if (OnFoot && crashedInSky) { End("WIPED OUT"); return; }
-                crashedInSky = true;
-                MenuUI.Instance?.Shout("STUMBLED! CAREFUL");
-                Haptics.Play(Haptics.Strength.Medium);
-                return;
-            }
+            Debug.Log($"[DashCrash] at {GameManager.Instance.Distance:0.0} lane={rider.Lane} surface={Surface} onFoot={OnFoot} gap={PoliceGap:0.0} object={LastStruck}");
             if (OnFoot) { PoliceGains(CrashOnFoot, "CRASHED"); Haptics.Play(Haptics.Strength.Medium); return; }
             KnockOffBike();
             PoliceGains(CrashOnBike, "KNOCKED OFF");
         }
-        bool crashedInSky;
 
         /// The run is over for `reason` unless the player revives with burgers.
         public void End(string reason)
@@ -280,9 +255,8 @@ namespace DallasDash.Core
             EndReason = "";
             PoliceGap = MaxGap;
             ReviveGrace = 2.5f;
-            crashedInSky = false;
             rider?.ResetRider();
-            if (!InSkypark && OnFoot) { Remount(); track?.ClearBikeReservation(); track?.RemoveParkedBike(); }
+            if (OnFoot) { Remount(); track?.ClearBikeReservation(); track?.RemoveParkedBike(); }
             track?.ClearAhead(gm.Distance, 45f);
             MenuUI.Instance?.Caption("REVIVED!", "-" + BurgerPrices.Revive(Revives - 1).ToString("N0") + " burgers  /  keep riding", 1.6f);
             Haptics.Play(Haptics.Strength.Heavy);
@@ -292,7 +266,7 @@ namespace DallasDash.Core
         /// A crash throws Ace off the e-bike: the bike is left lying in the road and he runs on.
         public void KnockOffBike()
         {
-            if (!CanAct() || OnFoot || !rider || InSkypark) return;
+            if (!CanAct() || OnFoot || !rider) return;
             if (Surface != RunSurface.Road || rider.Traversal.Moving) return;
             OnFoot = true;
             MenuUI.Instance?.Shout("KNOCKED OFF! GRAB THE BIKE");
@@ -303,7 +277,7 @@ namespace DallasDash.Core
             Haptics.Play(Haptics.Strength.Medium);
         }
 
-        /// Puts the e-bike in a lane a few seconds ahead, never in a junction or the portal's lane.
+        /// Puts the e-bike in a lane a few seconds ahead, never in a junction.
         void ParkBikeAhead(float d)
         {
             float z = d + Mathf.Max(60f, GameManager.Instance.Speed * 3.5f);
@@ -335,52 +309,6 @@ namespace DallasDash.Core
             OnFoot = false; warnedWall = false;
             FindFirstObjectByType<RiderLook>()?.Apply(0, true);
             MenuUI.Instance?.Shout("BACK ON THE E-BIKE");
-        }
-
-        // ---------- The Skypark portal shortcut
-
-        /// Ace rode through a shortcut portal: teleport to the Skypark rooftops, on foot, police shaken off.
-        public void EnterSkypark()
-        {
-            var gm = GameManager.Instance;
-            if (!CanAct() || InSkypark || !rider) return;
-            float d = gm.Distance;
-            if (rider.Traversal.Surface != RunSurface.Road) rider.AttachSurface(RunSurface.Road);
-            rider.Traversal.Reset();
-            rider.ResetRider();
-            SkyFrom = d; SkyTo = d + SkyLength;
-            District = 1;
-            Shortcuts++;
-            crashedInSky = false;
-            OnFoot = true; parkPending = false;
-            track?.ClearBikeReservation(); track?.RemoveParkedBike();
-            FindFirstObjectByType<RiderLook>()?.Apply(0, false);
-            track?.SwitchWorld(d);
-            ShortcutTime = 1f;
-            gm.AddBonus(250);
-            MenuUI.Instance?.Teleport(new Color(0.35f, 0.9f, 1f));
-            MenuUI.Instance?.Caption("SKYPARK SHORTCUT", "Run the rooftops  /  jump the gaps", 2.2f);
-            Haptics.Play(Haptics.Strength.Heavy);
-        }
-
-        /// The compulsory return portal at the end of the Skypark: back to Downtown, back on the bike.
-        public void ExitSkypark()
-        {
-            var gm = GameManager.Instance;
-            if (!gm || gm.State != RunState.Running || !InSkypark) return;
-            float d = gm.Distance;
-            rider?.Traversal.Reset();
-            rider?.ResetRider();
-            District = 0;
-            SkyFrom = SkyTo = -1f;
-            OnFoot = false; warnedWall = false;
-            FindFirstObjectByType<RiderLook>()?.Apply(0, true);
-            track?.SwitchWorld(d);
-            PoliceGap = MaxGap;
-            gm.AddBonus(250);
-            MenuUI.Instance?.Teleport(new Color(1f, 0.55f, 0.15f));
-            MenuUI.Instance?.Caption("BACK IN DOWNTOWN", "Cops shaken off  /  back on the e-bike", 2.2f);
-            Haptics.Play(Haptics.Strength.Heavy);
         }
 
         public void Trick(int kind)
@@ -415,8 +343,6 @@ namespace DallasDash.Core
             float dt = Time.deltaTime;
             DashTime = Mathf.Max(0f, DashTime - dt); DashCooldown = Mathf.Max(0f, DashCooldown - dt);
             ReviveGrace = Mathf.Max(0f, ReviveGrace - dt);
-            if (InSkypark) ShortcutTime = Mathf.Max(ShortcutTime, 0.3f);
-            ShortcutTime = Mathf.Max(0f, ShortcutTime - dt);
             Battery = Mathf.Min(1f, Battery + dt / 28f);
             Boost = Mathf.Max(0, Boost - dt); FloatTime = Mathf.Max(0, FloatTime - dt);
             Slide = Mathf.Max(0, Slide - dt); trickTime = Mathf.Max(0, trickTime - dt);
@@ -432,11 +358,8 @@ namespace DallasDash.Core
                 if (PoliceGap <= 0f) { PoliceGap = 0f; End("BUSTED!"); return; }
             }
 
-            // The return portal is compulsory: crossing its line sends Ace back to Downtown.
-            if (InSkypark && gm.Distance >= SkyTo) { ExitSkypark(); return; }
-
             float exitDistance = gm.Distance + gm.Speed * SurfaceTraversal.TransitionSeconds;
-            if (!InSkypark && OnFoot && (parkPending || gm.Distance > BikeAt + 4f)) { parkPending = false; ParkBikeAhead(gm.Distance); }
+            if (OnFoot && (parkPending || gm.Distance > BikeAt + 4f)) { parkPending = false; ParkBikeAhead(gm.Distance); }
             if (Surface != RunSurface.Road && Surface != RunSurface.Rooftop && !rider.Traversal.Moving)
             {
                 if (!WallRunning || (wallTime -= dt) <= 0f || !WallAvailable(WallSide, exitDistance)) rider.AttachSurface(RunSurface.Road);
