@@ -81,6 +81,7 @@
 <link rel="preload" as="video" href="/assets/EPICAL-LOGO-ANIMATION-9X16.mp4" media="(max-width:768px)" fetchpriority="high">
 <link rel="preload" as="video" href="/assets/EPICAL-LOGO-ANIMATION-16x9.mp4" media="(min-width:769px)" fetchpriority="high">
 <link rel="stylesheet" href="/assets/css/site.css">
+<link rel="stylesheet" href="/assets/css/case-study.css">
 <script>window.va=window.va||function(){(window.vaq=window.vaq||[]).push(arguments)}</script>
 <script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
 </head>
@@ -112,6 +113,7 @@
   <ul class="nav-links">
     <li><a href="/#hero">Home</a></li>
     <li><a href="/#portfolio">Work</a></li>
+    <li><a href="/#case-studies">Case Studies</a></li>
     <li><a href="/#services">Services</a></li>
     <li><a href="/#founder">Team</a></li>
     <li><a href="/#contact">Contact</a></li>
@@ -132,6 +134,7 @@
   <button class="nm-close" id="nm-close"><i class="fas fa-times"></i></button>
   <a href="/#hero">Home</a>
   <a href="/#portfolio">Work</a>
+  <a href="/#case-studies">Case Studies</a>
   <a href="/#services">Services</a>
   <a href="/#founder">Team</a>
   <a href="/#contact">Contact</a>
@@ -158,7 +161,7 @@
       <div id="hero-carousel"></div>
       <div class="hero-media-vignette"></div>
       <button class="hero-play" id="hero-play" aria-label="Play showreel"><span class="hero-play-ico"><i class="fas fa-play"></i></span></button>
-      <div class="hero-slide-tag"><span class="hs-num">01 / 09</span><span class="hs-name">Ember</span></div>
+      <div class="hero-slide-tag"><span class="hs-num">01 / 15</span><span class="hs-name">Zahra Noor</span></div>
       <div class="hero-dots"></div>
       <div class="hero-arrows"><button class="hero-arrow prev" aria-label="Previous project"><i class="fas fa-chevron-left"></i></button><button class="hero-arrow next" aria-label="Next project"><i class="fas fa-chevron-right"></i></button></div>
     </div>
@@ -264,6 +267,27 @@
   </div>
 </section>
 
+<!-- SHOWREEL (YouTube) -->
+<section id="showreel">
+  <div class="wrap">
+    <div class="showreel-head">
+      <div class="sec-eyebrow sr-up" style="justify-content:center">Watch</div>
+      <h2 class="sec-title sr-up">Showreel</h2>
+      <p class="sec-sub sr-up">AI commercials across automotive, product, tech and architecture, in one reel.</p>
+    </div>
+    <div class="showreel-frame sr-up">
+      <button class="yt-lite" data-yt="pbL3tDxL024" aria-label="Play Epical Studio Showreel">
+        <img src="https://i.ytimg.com/vi/pbL3tDxL024/maxresdefault.jpg" alt="" loading="lazy">
+        <span class="yt-play"><i class="fas fa-play"></i></span>
+        <span class="yt-cap">Epical Studio Showreel<small>AI Commercials · 2026</small></span>
+      </button>
+    </div>
+    <div class="showreel-cta"><a href="https://www.youtube.com/@EpicalStudio2026" target="_blank" rel="noopener" class="btn-ghost"><i class="fab fa-youtube"></i>Subscribe on YouTube</a></div>
+  </div>
+</section>
+
+<div class="grad-div"></div>
+
 <!-- PORTFOLIO -->
 <section id="portfolio">
   <div class="port-blob" style="width:500px;height:500px;background:#d4d4d8;top:-200px;left:-200px"></div>
@@ -276,6 +300,62 @@
     </div>
     <div class="project-grid" id="project-grid"></div>
     <div class="port-cta"><a href="/projects/all-work.html" class="btn-ghost">Explore All Work<i class="fas fa-arrow-right"></i></a></div>
+  </div>
+</section>
+
+<!-- CASE STUDIES -->
+<section id="case-studies">
+  <div class="wrap">
+    <div class="cs-head">
+      <div class="sec-eyebrow sr-up" style="justify-content:center">Client Work</div>
+      <h2 class="sec-title sr-up">Case Studies</h2>
+      <p class="sec-sub sr-up">From the brief to the final frame: how we plan, design and produce for real brands, across fashion films, food photography, digital campaigns and websites.</p>
+    </div>
+    <div class="cs-grid">
+      <a class="cs-card sr-up" href="/case-studies/zahra-noor.html">
+        <div class="cs-card-media"><video src="/assets/case-studies/zahra-noor/vid/01.mp4" poster="/assets/case-studies/zahra-noor/poster/01.jpg" muted loop playsinline preload="none" data-autoplay aria-hidden="true"></video></div>
+        <div class="cs-card-body">
+          <div class="cs-card-cat">Fashion · AI Brand Film</div>
+          <div class="cs-card-name">Zahra Noor</div>
+          <p class="cs-card-desc">A Garden Above the Clouds: one floral three-piece suit turned into a 15-second brand film, two vertical edits and social cutdowns, with no location shoot.</p>
+          <div class="cs-card-tags"><span class="cs-tag">Storyboard</span><span class="cs-tag">Brand Film</span><span class="cs-tag">9:16 Edits</span></div>
+          <span class="cs-card-link">Read Case Study<i class="fas fa-arrow-right"></i></span>
+        </div>
+      </a>
+      <a class="cs-card sr-up" href="/case-studies/happy-ice-cream.html">
+        <div class="cs-card-media"><img src="/assets/case-studies/happy-ice-cream/campaign/13.webp" alt="Happy Ice Cream heritage campaign" loading="lazy"></div>
+        <div class="cs-card-body">
+          <div class="cs-card-cat">Food &amp; Beverage · Digital Foundation</div>
+          <div class="cs-card-name">Happy Ice Cream</div>
+          <p class="cs-card-desc">A Karachi favourite since 1982. We covered product photography, heritage campaign concepts, a website redesign and a seven-phase sprint across Google, delivery apps, social and ads.</p>
+          <div class="cs-card-tags"><span class="cs-tag">Photography</span><span class="cs-tag">Campaign</span><span class="cs-tag">Website</span></div>
+          <span class="cs-card-link">Read Case Study<i class="fas fa-arrow-right"></i></span>
+        </div>
+      </a>
+      <a class="cs-card sr-up" href="/case-studies/igec-global.html">
+        <div class="cs-card-media"><img src="/assets/case-studies/igec-global/hero.webp" alt="IGEC Global website redesign" loading="lazy"></div>
+        <div class="cs-card-body">
+          <div class="cs-card-cat">Education · Website Redesign</div>
+          <div class="cs-card-name">IGEC Global</div>
+          <p class="cs-card-desc">A full redesign for an Australia-focused study and visa consultancy with almost 30 years of experience. It has a course finder, English and Arabic, accessibility tools and a booking-first journey.</p>
+          <div class="cs-card-tags"><span class="cs-tag">UX</span><span class="cs-tag">Web Design</span><span class="cs-tag">Front-End</span></div>
+          <span class="cs-card-link">Read Case Study<i class="fas fa-arrow-right"></i></span>
+        </div>
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FILMS (YouTube) -->
+<section id="films">
+  <div class="wrap">
+    <div class="films-head">
+      <div class="sec-eyebrow sr-up" style="justify-content:center">On YouTube</div>
+      <h2 class="sec-title sr-up">Films &amp; Commercials</h2>
+      <p class="sec-sub sr-up">Spec commercials and brand films made with our AI production pipeline, covering automotive, food, tech, interiors and more.</p>
+    </div>
+    <div class="films-grid" id="films-grid"></div>
+    <div class="films-cta"><a href="https://www.youtube.com/@EpicalStudio2026" target="_blank" rel="noopener" class="btn-ghost"><i class="fab fa-youtube"></i>More on YouTube</a></div>
   </div>
 </section>
 
@@ -390,6 +470,7 @@
       <img src="/assets/e.jpg" class="foot-logo-img" alt="Epical Studio" width="1280" height="853">
       <div class="socials">
         <a class="soc" href="https://www.instagram.com/epical_studio/" target="_blank" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        <a class="soc" href="https://www.youtube.com/@EpicalStudio2026" target="_blank" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
         <a class="soc" href="https://www.facebook.com/profile.php?id=61590392766722" target="_blank" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
         <a class="soc" href="https://x.com/Epical_Studio" target="_blank" aria-label="Twitter"><i class="fab fa-x-twitter"></i></a>
         <a class="soc" href="https://www.linkedin.com/company/smarthireai2026" target="_blank"><i class="fab fa-linkedin-in"></i></a>
@@ -399,6 +480,7 @@
       </div>
       <div class="foot-links">
         <a href="/#portfolio">Work</a>
+        <a href="/#case-studies">Case Studies</a>
         <a href="/#services">Services</a>
         <a href="/#founder">Team</a>
         <a href="/#contact">Contact</a>
@@ -422,6 +504,7 @@
 
 <script type="module">
 import {initChrome, initEnterOverlay, createParticles, initLensFlare, initHeroCarousel, openLightbox, initPageTransitions} from '/assets/js/site.js';
+import {initYouTubeLite, initInlineVideos} from '/assets/js/case-study.js';
 
 let showreelMedia = null;
 document.getElementById('hero-play')?.addEventListener('click', async ()=>{
@@ -440,23 +523,49 @@ document.getElementById('hero-play')?.addEventListener('click', async ()=>{
 });
 
 const PROJECTS = [
-  {slug:'ember', name:'Ember', category:'Food & Beverage', heroSkip:3},
-  {slug:'oreva', name:'Oreva', category:'Beverage'},
-  {slug:'essence', name:'Essence', category:'Perfume'},
-  {slug:'ascend', name:'Ascend', category:'Automotive'},
-  {slug:'horizon', name:'Horizon', category:'Architecture'},
-  {slug:'aura-europe', name:'Aura — Europe', category:'Fashion'},
-  {slug:'aura-subcontinent', name:'Aura — Sub-Continent', category:'Fashion'},
-  {slug:'genesis', name:'Genesis', category:'Signature Portraits'},
-  {slug:'aurelia-dumont', name:'Aurelia Dumont', category:'Brand Identity'},
-  {slug:'aura-fashion', name:'Aura — Fashion', category:'Fashion'},
-  {slug:'eclat-cosmetics', name:'Éclat Cosmetics', category:'Cosmetics'},
-  {slug:'lumina-jewels', name:'Lumina Jewels', category:'Jewelry'}
+  {slug:'ember', name:'Ember', category:'Food & Beverage', hero:['04','05','06','08','09']},
+  {slug:'oreva', name:'Oreva', category:'Beverage', hero:['06']},
+  {slug:'essence', name:'Essence', category:'Perfume', hero:['01','02','03','04','05','07']},
+  {slug:'ascend', name:'Ascend', category:'Automotive', hero:['02','03','05','07','09','10']},
+  {slug:'horizon', name:'Horizon', category:'Architecture', hero:['01','02','05','06','09','10']},
+  {slug:'aura-europe', name:'Aura — Europe', category:'Fashion', hero:['03','05','07']},
+  {slug:'aura-subcontinent', name:'Aura — Sub-Continent', category:'Fashion', hero:['06','07','08','09','10']},
+  {slug:'genesis', name:'Genesis', category:'Signature Portraits', hero:['01','02','03','04','05','06']},
+  {slug:'aurelia-dumont', name:'Aurelia Dumont', category:'Brand Identity', hero:['07']},
+  {slug:'aura-fashion', name:'Aura — Fashion', category:'Fashion', hero:['08','09','10','13']},
+  {slug:'eclat-cosmetics', name:'Éclat Cosmetics', category:'Cosmetics', hero:['01','13','14']},
+  {slug:'lumina-jewels', name:'Lumina Jewels', category:'Jewelry', hero:['10','11','12']}
+];
+
+/* hero carousel order: Zahra Noor → Happy Ice Cream → top YouTube film stills → showcase projects */
+const ZN = '/assets/case-studies/zahra-noor', HIC = '/assets/case-studies/happy-ice-cream';
+const yt = (id,title)=>({src:`https://i.ytimg.com/vi/${id}/maxresdefault.jpg`, title});
+const HERO = [
+  {slug:'zahra-noor', name:'Zahra Noor', media:[1,2,3,4,5,6].map(n=>({src:`${ZN}/stills/0${n}.webp`, title:'Zahra Noor — A Garden Above the Clouds'}))},
+  {slug:'happy-ice-cream', name:'Happy Ice Cream', media:[
+    {src:`${HIC}/campaign/13.webp`, title:'The Taste You Grew Up With'},
+    {src:`${HIC}/campaign/03.webp`, title:'Some Memories Never Melt'},
+    {src:`${HIC}/campaign/06.webp`, title:'Happiness Since 1982'},
+    {src:`${HIC}/campaign/07.webp`, title:'Indulgence, Elevated'},
+    {src:`${HIC}/campaign/09.webp`, title:'Your Signature Chocolate Joy'},
+    {src:`${HIC}/campaign/10.webp`, title:'Happiness In Every Sip'}
+  ]},
+  {slug:'films', name:'Films & Commercials', media:[
+    yt('pbL3tDxL024','Epical Studio Showreel'),
+    yt('miTugxUwg-8','Audi Concept — Night Drive'),
+    yt('3T2y9rBP3OA','BMW M — Boutique Showroom'),
+    yt('4TgLmliiAeg','ZingHouse — Zinger Burger'),
+    yt('wVXNwstzCtM','NoirGold — Too Loud to Hide'),
+    yt('h89qmuTo3xc','Stock to Stance — Sports Car Build')
+  ]},
+  /* showcase projects: only their landscape images (≈3:2 to 16:9), which fit the 8:5 frame without cropping */
+  ...PROJECTS.filter(p=>p.hero?.length).map(p=>({slug:p.slug, name:p.name,
+    media:p.hero.map(n=>({src:`/assets/projects/${p.slug}/img/${n}.webp`, title:`${p.name} — ${p.category}`}))}))
 ];
 
 /* build hero carousel slide shells */
 const carouselRoot = document.getElementById('hero-carousel');
-carouselRoot.innerHTML = PROJECTS.map(p=>`
+carouselRoot.innerHTML = HERO.map(p=>`
   <div class="hero-slide" data-slug="${p.slug}">
     <div class="hero-slide-inner"></div>
   </div>`).join('');
@@ -486,6 +595,31 @@ grid.querySelectorAll('img[data-src]').forEach(img=>{
   },{rootMargin:'300px'});
   io.observe(img);
 });
+
+/* Films & Commercials: latest long-form uploads from youtube.com/@EpicalStudio2026 */
+const FILMS = [
+  ['miTugxUwg-8','Audi Concept — Night Drive','Automotive'],
+  ['h89qmuTo3xc','Stock to Stance — Sports Car Build','Automotive'],
+  ['3T2y9rBP3OA','BMW M — Boutique Showroom','Automotive'],
+  ['4TgLmliiAeg','ZingHouse — Zinger Burger','Food'],
+  ['Rttg9puii5E','KRAVO — Chilli Lime Chips','Food'],
+  ['DksBpblc0oE','Peek Freans Sooper — Concept Spot','Food'],
+  ['wVXNwstzCtM','NoirGold — Too Loud to Hide','Tech'],
+  ['2dlaJMIXrYY','The Code Remembers — Action Short','VFX'],
+  ['ZSear0G2rOQ','Loom & Light — Curtains & Interiors','Interiors'],
+  ['S2Y26r_OpAU','Atelier Form — Exhibition Design','Design'],
+  ['7m8pYhVera4','Pen & Paper — Stationery Brand Film','Print'],
+  ['MD18qQ5uz94','Arriving to Play Tennis','Luxury Sport']
+];
+const escHtml = s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+document.getElementById('films-grid').innerHTML = FILMS.map(([id,t,c])=>`
+  <button class="yt-lite sr-up" data-yt="${id}" aria-label="Play ${escHtml(t)}">
+    <img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy">
+    <span class="yt-play"><i class="fas fa-play"></i></span>
+    <span class="yt-cap">${escHtml(t)}<small>${escHtml(c)}</small></span>
+  </button>`).join('');
+initYouTubeLite();
+initInlineVideos();
 
 /* duplicate the client logo track once so the RTL marquee (translateX -50%) loops seamlessly */
 const clientTrack = document.getElementById('client-track');
@@ -518,7 +652,7 @@ initEnterOverlay(()=>{
   requestAnimationFrame(()=>requestAnimationFrame(()=>{
     createParticles(document.getElementById('particles-hero'),{density:90});
     initLensFlare(document.getElementById('hero'), document.getElementById('hero-flare'));
-    initHeroCarousel(document.getElementById('hero'), PROJECTS);
+    initHeroCarousel(document.getElementById('hero'), HERO);
   }));
 });
 </script>

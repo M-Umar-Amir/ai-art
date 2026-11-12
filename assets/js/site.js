@@ -409,14 +409,28 @@ export function initHeroCarousel(root,projects){
     return manifestCache[slug];
   }
 
-  async function activateInner(slideEl,slug,skip){
+  /* a slide either lists its own images (p.media) or reads /assets/projects/<slug>/manifest.json */
+  async function slideMedia(p){
+    if(p.media)return p.media;
+    const s=p.heroSkip||0;
+    return (await loadManifest(p.slug)).filter(m=>m.type==='img').slice(s,s+6);
+  }
+
+  async function activateInner(slideEl,p){
     clearInterval(innerTimer);
-    const s=skip||0;
-    const media=(await loadManifest(slug)).filter(m=>m.type==='img').slice(s,s+6);
+    const media=await slideMedia(p);
     const layer=slideEl.querySelector('.hero-slide-inner');
     if(!layer)return;
     if(!media.length)return;
-    layer.innerHTML=media.map((m,i)=>`<img class="hero-slide-media${i===0?' active':''}" src="${m.src}" alt="${m.title||''}">`).join('');
+    if(!layer.children.length){
+      layer.innerHTML=media.map((m,i)=>`<img class="hero-slide-media${i===0?' active':''}" src="${m.src}" alt="${m.title||''}">`).join('');
+      /* YouTube maxres stills don't exist for every upload: fall back to hq */
+      layer.querySelectorAll('img').forEach(img=>img.addEventListener('error',()=>{
+        if(img.src.includes('/maxresdefault.'))img.src=img.src.replace('/maxresdefault.','/hqdefault.');
+      },{once:true}));
+    }else{
+      layer.querySelectorAll('.hero-slide-media').forEach((img,i)=>img.classList.toggle('active',i===0));
+    }
     if(media.length<2||REDUCED_MOTION)return;
     let i=0;
     innerTimer=setInterval(()=>{
@@ -437,9 +451,10 @@ export function initHeroCarousel(root,projects){
     if(tagName)tagName.textContent=p.name;
     if(tagNum)tagNum.textContent=String(active+1).padStart(2,'0')+' / '+String(projects.length).padStart(2,'0');
     dots();
-    activateInner(slide,p.slug,p.heroSkip);
+    activateInner(slide,p);
     /* preload next project's manifest */
-    loadManifest(projects[(active+1)%projects.length].slug);
+    const nextP=projects[(active+1)%projects.length];
+    if(!nextP.media)loadManifest(nextP.slug);
     if(manual)restartAutoplay();
   }
 
