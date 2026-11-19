@@ -6,7 +6,7 @@ using UnityEngine.InputSystem;
 namespace DallasDash.Core
 {
     /// The run's rules (client round, 4 Nov 2026):
-    /// - One map, Neon Downtown, and one rider, Ace on his e-bike.
+    /// - One map, Neon Downtown. Three riders (client, 19 Nov 2026): Ace and Nova on their e-bikes, Bolt on his own wheels.
     /// - A POLICE CHASE replaces the delivery clock: an officer rides behind; crashes and running on foot let him
     ///   close in, riding clean on the bike opens the gap again. When he reaches Ace the run is BUSTED.
     /// - No shortcut (client, 11 Nov 2026): the Skypark portal was removed; the whole run is Downtown.
@@ -15,8 +15,11 @@ namespace DallasDash.Core
     public class DashRun : MonoBehaviour
     {
         public static DashRun Instance { get; private set; }
-        public static readonly string[] CrewNames = { "ACE" };
-        public static readonly string[] AbilityNames = { "SPEED BOOST" };
+        public static readonly string[] CrewNames = { "ACE", "NOVA", "BOLT" };
+        public static readonly string[] AbilityNames = { "SPEED BOOST", "AIR TIME", "SHIELD" };
+        static int Who => PlayerProfile.Character;
+        /// Bolt is a robot on his own two wheels: there is no bike to fall off.
+        public static bool RidesOwnWheels => Who == 2;
         public static readonly string[] DistrictNames = { "NEON DOWNTOWN" };
 
         /// The only world: Downtown (0). Older builders still branch on District for the retired Skypark (1) and
@@ -112,7 +115,7 @@ namespace DallasDash.Core
                 Battery = 1f; Boost = FloatTime = Slide = wallTime = trickTime = 0f;
                 Shield = false;
                 OnFoot = warnedWall = false; BikeAt = 0f;
-                FindFirstObjectByType<RiderLook>()?.Apply(0, true);
+                FindFirstObjectByType<RiderLook>()?.Apply(Who, true);
                 DashTime = DashCooldown = 0f;
                 TrickCombo = 0; lastTrick = -1; pendingTrickKind = -1;
                 WallRuns = 0;
@@ -138,8 +141,13 @@ namespace DallasDash.Core
         {
             if (!CanAct() || Battery < 0.999f) return;
             Battery = 0f;
-            Boost = 4.5f;
-            MenuUI.Instance?.Shout(AbilityNames[0]);
+            switch (Who)
+            {
+                case 1: FloatTime = 7f; break;
+                case 2: Shield = true; break;
+                default: Boost = 4.5f; break;
+            }
+            MenuUI.Instance?.Shout(AbilityNames[Who]);
             Haptics.Play(Haptics.Strength.Medium);
         }
 
@@ -208,6 +216,13 @@ namespace DallasDash.Core
             if (Surface != RunSurface.Road && Surface != RunSurface.Rooftop) return;
             Debug.Log($"[DashCrash] at {GameManager.Instance.Distance:0.0} lane={rider.Lane} surface={Surface} onFoot={OnFoot} gap={PoliceGap:0.0} object={LastStruck}");
             if (OnFoot) { PoliceGains(CrashOnFoot, "CRASHED"); Haptics.Play(Haptics.Strength.Medium); return; }
+            if (RidesOwnWheels)
+            {
+                // Bolt cannot be knocked off a bike; he staggers and the officer gains the same ground.
+                PoliceGains(CrashOnBike, "STAGGERED");
+                Haptics.Play(Haptics.Strength.Medium);
+                return;
+            }
             KnockOffBike();
             PoliceGains(CrashOnBike, "KNOCKED OFF");
         }
@@ -266,14 +281,14 @@ namespace DallasDash.Core
         /// A crash throws Ace off the e-bike: the bike is left lying in the road and he runs on.
         public void KnockOffBike()
         {
-            if (!CanAct() || OnFoot || !rider) return;
+            if (!CanAct() || OnFoot || RidesOwnWheels || !rider) return;
             if (Surface != RunSurface.Road || rider.Traversal.Moving) return;
             OnFoot = true;
             MenuUI.Instance?.Shout("KNOCKED OFF! GRAB THE BIKE");
             parkPending = true; // parked next frame: this runs inside the track's hit-test loop
             var look = FindFirstObjectByType<RiderLook>();
-            look?.DropBike(0, rider.transform.position);
-            look?.Apply(0, false);
+            look?.DropBike(Who, rider.transform.position);
+            look?.Apply(Who, false);
             Haptics.Play(Haptics.Strength.Medium);
         }
 
@@ -307,7 +322,7 @@ namespace DallasDash.Core
         {
             if (!OnFoot) return;
             OnFoot = false; warnedWall = false;
-            FindFirstObjectByType<RiderLook>()?.Apply(0, true);
+            FindFirstObjectByType<RiderLook>()?.Apply(Who, true);
             MenuUI.Instance?.Shout("BACK ON THE E-BIKE");
         }
 

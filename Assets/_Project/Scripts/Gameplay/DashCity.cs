@@ -318,10 +318,10 @@ namespace DallasDash.Gameplay
         static void StreetDetail(TrackSpawner track, Transform parent, float side, float z, int district)
         {
             var concrete = Mat(track, "curbConcrete", new Color(.48f,.45f,.39f));
-            var iron = Mat(track, "drainIron", new Color(.065f,.075f,.08f));
-            var steel = Mat(track, "serviceSteel", new Color(.28f,.31f,.32f));
-            var timber = Mat(track, "benchTimber", new Color(.23f,.11f,.045f));
-            var joint = Mat(track, "curbJoint", new Color(.11f,.105f,.095f));
+            var iron = DetailCull.MarkDetail(Mat(track, "drainIron", new Color(.065f,.075f,.08f)));
+            var steel = DetailCull.MarkDetail(Mat(track, "serviceSteel", new Color(.28f,.31f,.32f)));
+            var timber = DetailCull.MarkDetail(Mat(track, "benchTimber", new Color(.23f,.11f,.045f)));
+            var joint = DetailCull.MarkDetail(Mat(track, "curbJoint", new Color(.11f,.105f,.095f)));
             float x = side * 4.28f;
             Part(parent, new Vector3(x,.10f,z+10), new Vector3(.26f,.24f,20), concrete);
             for (int i=0;i<10;i++)

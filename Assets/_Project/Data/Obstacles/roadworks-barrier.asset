@@ -15,9 +15,9 @@ MonoBehaviour:
   id: roadworks-barrier
   displayName: Roadworks barrier
   kind: 1
-  size: {x: 1.7800001, y: 0.945, z: 0.60203665}
+  size: {x: 1.9, y: 0.89957696, z: 0.5279172}
   weight: 2
   placeholderColor: {r: 1, g: 1, b: 1, a: 1}
-  prefab: {fileID: 1442959011449560881, guid: 32429cdc6748da047b75d0acb6d924b6, type: 3}
+  prefab: {fileID: 414615871172202077, guid: 3eca1282e8803a249be889f71c873c6d, type: 3}
   drift: 0
   heavy: 0

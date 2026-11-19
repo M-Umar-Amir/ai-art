@@ -351,6 +351,18 @@ namespace DallasDash.EditorTools
             d.obstacles.Add(Obstacle("electric-pod", "Autonomous delivery pod", TrackKind.Block, new Vector3(1.9f, 2.2f, 3.6f), 4, RoyalBlue, heavy: true, drift: 0.28f));
             // Retired from the mix (weight 0, client: no ducking); still built and measured for the old review shots.
             d.obstacles.Add(Obstacle("cargo-slide-gate", "Scaffolding over the lane / slide", TrackKind.Overhead, new Vector3(1.95f, 2.32f, 0.8f), 0, RoyalBlue));
+            // Approved hurdle sheets (client, 19 Nov 2026): new hurdle types join the street mix. Amber-lit ones are
+            // hopped, red-lit ones steered round; couriers, the sweeper and the head-height drone move with traffic.
+            d.obstacles.Add(Obstacle("h3-cable-ramp", "Cable ramp across the lane", TrackKind.Low, new Vector3(1.9f, 0.45f, 0.8f), 2, WarmYellow));
+            d.obstacles.Add(Obstacle("h3-crate-pallet", "Pallet of delivery crates", TrackKind.Low, new Vector3(1.6f, 1f, 1.1f), 2, SafetyOrange));
+            d.obstacles.Add(Obstacle("h3-box-spill", "Spilled parcel boxes", TrackKind.Low, new Vector3(1.8f, 0.8f, 1.2f), 2, Cream));
+            d.obstacles.Add(Obstacle("h3-planter", "Concrete planter", TrackKind.Low, new Vector3(1.9f, 0.95f, 0.8f), 2, ParkGreen));
+            d.obstacles.Add(Obstacle("h3-scaffold", "Scaffold tower with netting", TrackKind.Block, new Vector3(2f, 3.4f, 2f), 1, WarmYellow, heavy: true));
+            d.obstacles.Add(Obstacle("h3-scooter-row", "Parked delivery scooters", TrackKind.Block, new Vector3(2.1f, 1.3f, 1.4f), 2, WarmYellow, heavy: true));
+            d.obstacles.Add(Obstacle("h3-courier-ebike", "Courier on an e-bike", TrackKind.Block, new Vector3(0.8f, 1.9f, 1.9f), 3, SafetyOrange, heavy: true, drift: 0.3f));
+            d.obstacles.Add(Obstacle("h3-courier-kickscooter", "Courier on a kick scooter", TrackKind.Block, new Vector3(0.8f, 1.7f, 1.4f), 2, RoyalBlue, heavy: true, drift: 0.35f));
+            d.obstacles.Add(Obstacle("h3-street-sweeper", "Street-sweeper robot", TrackKind.Block, new Vector3(1.6f, 1.4f, 2.2f), 1, Cream, heavy: true, drift: 0.2f));
+            d.obstacles.Add(Obstacle("h3-drone", "Delivery drone at head height", TrackKind.Block, new Vector3(1.5f, 2.2f, 1f), 1, RoyalBlue, drift: 0.25f));
             return d;
         }
 
@@ -406,15 +418,15 @@ namespace DallasDash.EditorTools
             look.scooter = Model(riderVisual, DashAssets.Board(true), Vector3.zero, "Glide board");
             look.scooter.SetActive(false);
             look.scooterSeat = Vector3.up * 0.2f;
-            // One rider (client, 4 Nov 2026): Ace in his heavy hero kit on the heavy e-bike, and Ace on foot.
+            // Three riders again (client, 19 Nov 2026): Ace and Nova on e-bikes (and on foot after a crash), Bolt rolling.
             DashAssets.BrandFont = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
             DashAssets.BrandText = mats["SignText"];
-            look.seated = new GameObject[1]; look.standing = new GameObject[1];
-            for (int i = 0; i < 1; i++)
+            look.seated = new GameObject[3]; look.standing = new GameObject[3];
+            for (int i = 0; i < 3; i++)
             {
                 var crew = DashAssets.Crew(i);
-                look.seated[i] = Model(riderVisual, crew, Vector3.zero, "Ace riding");
-                look.standing[i] = Model(riderVisual, DashAssets.Runner(i), Vector3.zero, "Ace on foot");
+                look.seated[i] = Model(riderVisual, crew, Vector3.zero, DashRun.CrewNames[i] + " riding");
+                look.standing[i] = Model(riderVisual, DashAssets.Runner(i), Vector3.zero, DashRun.CrewNames[i] + " on foot");
                 
                 // Outfits recolour the rider only, never the e-bike under them.
                 var wearer = look.seated[i].transform.Find("Rider");
@@ -929,6 +941,12 @@ namespace DallasDash.EditorTools
             SetPrefab(data, "electric-pod", pod);
             SetPrefab(data, "roadworks-barrier", barricade);
             SetPrefab(data, "cargo-slide-gate", gate);
+            // Approved hurdle sheets (client, 19 Nov 2026) replace the kit and procedural looks of the existing hurdles.
+            foreach (var (id, model) in new[] { ("cones", "h3-cone-row"), ("roadworks-barrier", "h3-water-barrier"), ("roadworks", "h3-manhole-works"),
+                ("delivery-van", "h3-van"), ("taxi", "h3-taxi"), ("garbage-truck", "h3-garbage-truck"), ("slow-car", "h3-slow-car"),
+                ("food-truck", "h3-food-truck"), ("electric-pod", "h3-delivery-pod") })
+                SetPrefab(data, id, ModelImport.Get(model));
+            SetPrefab(data, "h3-drone", Hovering("h3-drone", ModelImport.Get("h3-drone"), 1.35f));
             MeasureHurdles(data);
         }
 
@@ -977,6 +995,16 @@ namespace DallasDash.EditorTools
                 EditorUtility.SetDirty(def);
                 Debug.Log($"[DallasDash] Hurdle {def.id}: {def.kind}, {def.size.x:F2} x {def.size.y:F2} x {def.size.z:F2} m");
             }
+        }
+
+        /// Lifts a model off the road (the drone flies at head height: steer round it, it cannot be hopped).
+        static GameObject Hovering(string id, GameObject model, float height)
+        {
+            if (!model) return null;
+            var root = new GameObject(id + "-hovering").transform;
+            var go = (GameObject)PrefabUtility.InstantiatePrefab(model, root);
+            go.transform.localPosition = Vector3.up * height;
+            return SavePrefab(root);
         }
 
         /// Three traffic cones across a lane, so the whole lane that the hit test covers is coned.

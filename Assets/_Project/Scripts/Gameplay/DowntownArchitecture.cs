@@ -72,9 +72,9 @@ namespace DallasDash.Gameplay
 
         // ------------------------------------------------------------------ towers
 
-        static Material Neon(TrackSpawner track, int h) => (h & 1) == 0
+        static Material Neon(TrackSpawner track, int h) => DetailCull.MarkNoShadow((h & 1) == 0
             ? DashCity.Mat(track, "roofNeonCyan", new Color(0.1f, 0.85f, 1f), 2.2f)
-            : DashCity.Mat(track, "roofNeonPink", new Color(1f, 0.1f, 0.55f), 2.2f);
+            : DashCity.Mat(track, "roofNeonPink", new Color(1f, 0.1f, 0.55f), 2.2f));
 
         /// A facade body (atlas material) from y0 to y1, set back `back` m from the street line, with roof slab,
         /// a lit parapet line and neon corner strips. Returns the roof height.
@@ -155,8 +155,8 @@ namespace DallasDash.Gameplay
             var neon = Neon(track, h);
             float top = Body(track, parent, side, z, face, 0f, Depth, Podium, y1, z + 0.6f, z + 19.4f, facade, neon);
             // Balconies with glass rails on alternate floors and bays.
-            var slab = DashCity.Mat(track, "balconySlab", new Color(.72f, .7f, .68f));
-            var rail = DashCity.Mat(track, "terraceGlass", new Color(.45f, .7f, .85f), .25f);
+            var slab = DetailCull.MarkNoShadow(DashCity.Mat(track, "balconySlab", new Color(.72f, .7f, .68f)));
+            var rail = DetailCull.MarkNoShadow(DashCity.Mat(track, "terraceGlass", new Color(.45f, .7f, .85f), .25f));
             for (int f = 1; f < floors; f += 2)
                 for (int b = (f / 2) % 2; b < 6; b += 2)
                 {
@@ -172,9 +172,9 @@ namespace DallasDash.Gameplay
         static void Terrace(TrackSpawner track, Transform parent, float side, float z, float face, float back, float y, int h)
         {
             var slab = DashCity.Mat(track, "terraceGraphite", new Color(.045f, .06f, .08f));
-            var glass = DashCity.Mat(track, "terraceGlass", new Color(.45f, .7f, .85f), .25f);
-            var cyan = DashCity.Mat(track, "architecturalCyan", new Color(.05f, .55f, .9f), 2f);
-            var soil = DashCity.Mat(track, "planterBox", new Color(.22f, .2f, .24f));
+            var glass = DetailCull.MarkNoShadow(DashCity.Mat(track, "terraceGlass", new Color(.45f, .7f, .85f), .25f));
+            var cyan = DetailCull.MarkNoShadow(DashCity.Mat(track, "architecturalCyan", new Color(.05f, .55f, .9f), 2f));
+            var soil = DetailCull.MarkDetail(DashCity.Mat(track, "planterBox", new Color(.22f, .2f, .24f)));
             float len = 12f, mid = z + 4f + (h % 3) * 2f + len * 0.5f - 2f;
             float edge = face + side * (back - 2.3f);
             P(parent, new Vector3(face + side * (back - 1.15f), y, mid), new Vector3(2.3f, 0.28f, len), slab);
@@ -196,9 +196,9 @@ namespace DallasDash.Gameplay
         static void RoofGarden(TrackSpawner track, Transform parent, float side, float z, float face, float back, float y, float width, int h)
         {
             var glass = DashCity.Mat(track, "terraceGlass", new Color(.45f, .7f, .85f), .25f);
-            var warm = DashCity.Mat(track, "terraceWarm", new Color(1f, .7f, .4f), 1.6f);
+            var warm = DetailCull.MarkNoShadow(DashCity.Mat(track, "terraceWarm", new Color(1f, .7f, .4f), 1.6f));
             var soil = DashCity.Mat(track, "planterBox", new Color(.22f, .2f, .24f));
-            var canvas = DashCity.Mat(track, "umbrella" + (h % 3), h % 3 == 0 ? new Color(.95f, .45f, .35f) : h % 3 == 1 ? new Color(.95f, .9f, .82f) : new Color(.3f, .62f, .7f));
+            var canvas = DetailCull.MarkDetail(DashCity.Mat(track, "umbrella" + (h % 3), h % 3 == 0 ? new Color(.95f, .45f, .35f) : h % 3 == 1 ? new Color(.95f, .9f, .82f) : new Color(.3f, .62f, .7f)));
             var steel = DashCity.Mat(track, "roofSteel", new Color(0.16f, 0.18f, 0.21f));
             float edge = face + side * (back + 0.1f);
             P(parent, new Vector3(edge, y + 0.5f, z + 10f), new Vector3(0.04f, 0.95f, 18.6f), glass);
@@ -348,23 +348,23 @@ namespace DallasDash.Gameplay
             var s = StyleFor(brand, h);
             string k = brand >= 0 ? "brand" + brand : "shop" + (h % 4);
             Vector3 In(float depth, float y, float pz) => new(face + side * depth, y, pz);
-            var wall = DashCity.Mat(track, k + "Wall", s.wall);
+            var wall = DetailCull.MarkDetail(DashCity.Mat(track, k + "Wall", s.wall));
             var accent = DashCity.Mat(track, k + "Accent", s.accent, brand == 1 || brand < 0 && h % 4 == 1 ? 0.9f : 0f);
-            var floor = DashCity.Mat(track, k + "Floor", s.floor);
-            var counter = DashCity.Mat(track, k + "Counter", s.counter);
+            var floor = DetailCull.MarkDetail(DashCity.Mat(track, k + "Floor", s.floor));
+            var counter = DetailCull.MarkDetail(DashCity.Mat(track, k + "Counter", s.counter));
             var canopy = DashCity.Mat(track, k + "Canopy", s.canopy);
-            var menu = DashCity.Mat(track, k + "Menu", s.menu, 0.6f);
-            var steel = DashCity.Mat(track, "shopSteel", new Color(.72f, .74f, .78f));
+            var menu = DetailCull.MarkDetail(DashCity.Mat(track, k + "Menu", s.menu, 0.6f));
+            var steel = DetailCull.MarkDetail(DashCity.Mat(track, "shopSteel", new Color(.72f, .74f, .78f)));
             steel.SetFloat("_Metallic", .8f); steel.SetFloat("_Smoothness", .7f);
-            var frame = DashCity.Mat(track, "shopFrame", new Color(.06f, .065f, .08f));
-            var ceiling = DashCity.Mat(track, "shopCeiling", new Color(.82f, .8f, .78f), .12f);
-            var panel = DashCity.Mat(track, "shopLightPanel", new Color(1f, .93f, .82f), 2.2f);
-            var pendant = DashCity.Mat(track, "shopPendant", new Color(1f, .72f, .4f), 2.6f);
-            var hot = DashCity.Mat(track, "shopHotLamp", new Color(1f, .55f, .2f), 1.8f);
-            var fridge = DashCity.Mat(track, "shopFridge", new Color(.6f, .85f, 1f), 1.1f);
-            var menuLine = DashCity.Mat(track, "shopMenuLine", new Color(1f, .96f, .88f), 1.4f);
-            var photo = DashCity.Mat(track, "shopMenuPhoto", new Color(1f, .62f, .25f), 1.2f);
-            var spill = DashCity.Mat(track, "shopSpill", new Color(1f, .78f, .5f), .35f);
+            var frame = DetailCull.MarkNoShadow(DashCity.Mat(track, "shopFrame", new Color(.06f, .065f, .08f)));
+            var ceiling = DetailCull.MarkDetail(DashCity.Mat(track, "shopCeiling", new Color(.82f, .8f, .78f), .12f));
+            var panel = DetailCull.MarkDetail(DashCity.Mat(track, "shopLightPanel", new Color(1f, .93f, .82f), 2.2f));
+            var pendant = DetailCull.MarkNoShadow(DashCity.Mat(track, "shopPendant", new Color(1f, .72f, .4f), 2.6f));
+            var hot = DetailCull.MarkDetail(DashCity.Mat(track, "shopHotLamp", new Color(1f, .55f, .2f), 1.8f));
+            var fridge = DetailCull.MarkDetail(DashCity.Mat(track, "shopFridge", new Color(.6f, .85f, 1f), 1.1f));
+            var menuLine = DetailCull.MarkDetail(DashCity.Mat(track, "shopMenuLine", new Color(1f, .96f, .88f), 1.4f));
+            var photo = DetailCull.MarkDetail(DashCity.Mat(track, "shopMenuPhoto", new Color(1f, .62f, .25f), 1.2f));
+            var spill = DetailCull.MarkNoShadow(DashCity.Mat(track, "shopSpill", new Color(1f, .78f, .5f), .35f));
 
             // Shell: floor, ceiling with light panels, back wall.
             P(parent, In(2.15f, 0.21f, z + 10f), new Vector3(4.3f, 0.04f, 17.6f), floor);

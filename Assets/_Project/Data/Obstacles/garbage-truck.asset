@@ -15,9 +15,9 @@ MonoBehaviour:
   id: garbage-truck
   displayName: Garbage truck on its round
   kind: 2
-  size: {x: 2.7826087, y: 2.7826016, z: 6.05}
+  size: {x: 2.7547555, y: 3.4075632, z: 5.6}
   weight: 1
   placeholderColor: {r: 0.1, g: 0.5, b: 0.22, a: 1}
-  prefab: {fileID: 4017676066112112728, guid: dbb1f3a899045204e9cf06d8aadff70b, type: 3}
+  prefab: {fileID: 2715439358846021865, guid: bf195b3089bde464c8a85a82fe899e06, type: 3}
   drift: 0
   heavy: 1

@@ -58,17 +58,36 @@ namespace DallasDash.EditorTools
         public static Font BrandFont;
         public static Material BrandText;
 
-        /// Ace on his heavy hero e-bike (client, 4 Nov 2026): the original mesh re-posed, the hero kit posed with
-        /// the same morphs, and a KFC courier box.
-        public static GameObject Crew(int character) => Cyclist("ace", "ebike", "ace-gear-ride", "KFC", new Color(0.89f, 0.1f, 0.17f), "ace-cyclist");
+        /// The crew from the approved sheets (client, 19 Nov 2026): Ace on his unchanged e-bike with the KFC box,
+        /// Nova on her purple e-bike, Bolt on his own two wheels. Their sheet outfits carry the armour, so the
+        /// separate hero kit is no longer added.
+        public static GameObject Crew(int character) => character switch
+        {
+            1 => Cyclist("nova", "ebike-nova", null, "KFC", new Color(0.89f, 0.1f, 0.17f), "nova-cyclist"),
+            2 => Bolt(),
+            _ => Cyclist("ace", "ebike", null, "KFC", new Color(0.89f, 0.1f, 0.17f), "ace-cyclist"),
+        };
 
-        /// The officer for the chase: Ace's build in police colours and kit, on the police e-bike.
-        public static GameObject Police() => Cyclist("police", "ebike-police", "police-gear-ride", "POLICE", new Color(0.06f, 0.12f, 0.42f), "police-cyclist");
+        /// Bolt (approved sheet 04): a two-wheel robot courier. He rolls on his own wheels, so the same model is his
+        /// riding and standing look and there is no bike to fall off.
+        public static GameObject Bolt()
+        {
+            var model = ModelImport.Get("bolt");
+            if (!model) throw new System.InvalidOperationException("Required crew model missing: bolt");
+            var root = new GameObject("Bolt rolling");
+            var body = (GameObject)PrefabUtility.InstantiatePrefab(model, root.transform);
+            body.name = "Rider";
+            return Save(root, "bolt-rolling");
+        }
+
+        /// The officer for the chase (approved sheet 02): his own body with the helmet modelled in, on the police e-bike.
+        public static GameObject Police() => Cyclist("police", "ebike-police", null, "POLICE", new Color(0.06f, 0.12f, 0.42f), "police-cyclist");
 
         /// Ace or Nova on foot (after a crash): the original mesh in a running stride with morph keys.
         public static GameObject Runner(int character)
         {
-            string id = "ace";
+            if (character == 2) return Bolt();
+            string id = character == 1 ? "nova" : "ace";
             var model = ModelImport.Get(id + "-run");
             if (!model) throw new System.InvalidOperationException("Required runner model missing: " + id);
             var root = new GameObject(id + " on foot");
@@ -76,7 +95,7 @@ namespace DallasDash.EditorTools
             body.name = "Rider";
             var motion = root.AddComponent<DallasDash.Gameplay.RunnerMotion>();
             motion.body = body.GetComponentInChildren<SkinnedMeshRenderer>();
-            motion.gear = new[] { Gear(root, id + "-gear-run", "Run180") };
+            motion.gear = new SkinnedMeshRenderer[0];
             if (!motion.body || motion.body.sharedMesh.GetBlendShapeIndex("Run180") < 0)
                 throw new System.InvalidOperationException("Runner mesh has no stride morphs: " + id);
             return Save(root, id + "-runner");
@@ -169,7 +188,7 @@ namespace DallasDash.EditorTools
             rider.name = "Rider";
             var motion = root.AddComponent<DallasDash.Gameplay.CyclistMotion>();
             motion.body = rider.GetComponentInChildren<SkinnedMeshRenderer>();
-            motion.gear = new[] { Gear(root, gearId, "Pedal180") };
+            motion.gear = gearId == null ? new SkinnedMeshRenderer[0] : new[] { Gear(root, gearId, "Pedal180") };
             BoxBrand(root, brand, ink);
             Transform Find(string node)
             {

@@ -254,13 +254,16 @@ namespace DallasDash.Gameplay
             var chase = FindFirstObjectByType<ChaseController>();
             Check(menu && gm && run && track && rider, "scene dependencies");
             Check(chase && chase.officer, "the police officer is in the scene");
-            Check(DashRun.CrewNames.Length == 1 && DashRun.CrewNames[0] == "ACE", "Ace is the only rider");
+            Check(DashRun.CrewNames.Length == 3 && DashRun.CrewNames[0] == "ACE", "the crew is Ace, Nova and Bolt (client, 19 Nov 2026)");
             typeof(MenuUI).GetMethod("ExitCity", BindingFlags.Instance | BindingFlags.NonPublic)?.Invoke(menu, null);
             yield return null;
             menu.Open("none"); track.RefreshDistrict();
             yield return Shot("title");
             foreach (string panel in new[] { "crew", "shop", "missions", "rewards", "settings" })
             { menu.Open(panel); yield return Shot(panel); menu.Open("none"); }
+            // The crew carousel: Nova and Bolt (approved sheets, 19 Nov 2026).
+            menu.Open("crew"); menu.FlipCrew(1); yield return new WaitForSeconds(0.4f); yield return Shot("crew-nova");
+            menu.FlipCrew(1); yield return new WaitForSeconds(0.4f); yield return Shot("crew-bolt"); menu.Open("none");
 
             RiderInput.Override = () => RiderInput.Action.None;
             // ---- Ability and pause.

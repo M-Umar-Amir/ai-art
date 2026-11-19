@@ -55,7 +55,7 @@ namespace DallasDash.EditorTools
             // The police chase replaces the delivery clock.
             Check(DashRun.StartGap > 0f && DashRun.MaxGap > DashRun.StartGap && DashRun.GainOnFoot > DashRun.LoseOnBike, "the officer gains on a runner and drops back from the e-bike");
             Check(DashRun.CrashOnFoot > DashRun.CrashOnBike && DashRun.StartGap / DashRun.GainOnFoot > 5f, "a crash costs ground; on foot there is time to reach the bike");
-            Check(DashRun.CrewNames.Length == 1 && DashRun.DistrictNames[0] == "NEON DOWNTOWN", "one rider (Ace) and one map (Downtown)");
+            Check(DashRun.CrewNames.Length == 3 && DashRun.AbilityNames.Length == 3 && DashRun.DistrictNames.Length == 1 && DashRun.DistrictNames[0] == "NEON DOWNTOWN", "three riders (Ace, Nova, Bolt, client 19 Nov) and one map (Downtown)");
             Check(DashRun.DistrictNames.Length == 1 && DashRun.District == 0, "no shortcut: Downtown is the only world (client, 11 Nov 2026)");
             Check(typeof(TrackSpawner).GetProperty("Portal") == null && typeof(DashRun).GetMethod("EnterSkypark") == null, "the Skypark portal shortcut is removed");
             var codes = new HashSet<string>();
@@ -123,27 +123,17 @@ namespace DallasDash.EditorTools
             Check(traversal.Origin == interrupted, "zone exit does not teleport mid-transition");
             traversal.Tick(1f); Check(traversal.Origin == Vector3.zero, "zone exit returns to road");
             traversal.Reset(); Check(traversal.Normal == Vector3.up && !traversal.Moving, "retry resets contact frame");
-            foreach (string id in new[] { "ace", "neon-block-a", "neon-block-b", "skybridge", "ace-gear-ride", "ace-gear-run", "police-ride", "police-gear-ride", "ebike-police" })
+            foreach (string id in new[] { "ace", "nova", "bolt", "ace-ride", "ace-run", "nova-ride", "nova-run", "neon-block-a", "neon-block-b", "skybridge", "police-ride", "ebike-police" })
             {
                 var prefab = ModelImport.Get(id);
                 Check(prefab && (prefab.GetComponentInChildren<MeshFilter>() || prefab.GetComponentInChildren<SkinnedMeshRenderer>()), "real model imported: " + id);
             }
-            // Client, 11 Nov 2026: Ace rides without a helmet (the officer keeps his). Geometry check: a helmet puts
-            // the top of the gear mesh at the top of the rider's head; without it the gear stops at the shoulders.
-            foreach (var (gearId, bodyId, wantHelmet) in new[] { ("ace-gear-ride", "ace-ride", false), ("ace-gear-run", "ace-run", false), ("police-gear-ride", "police-ride", true) })
+            // Approved sheets (client, 19 Nov 2026): the outfits carry their own armour, so no separate hero kit is
+            // added to any rider; the officer's helmet is part of his body mesh.
+            foreach (string id in new[] { "ace-cyclist", "nova-cyclist", "police-cyclist" })
             {
-                float Top(string id)
-                {
-                    float top = float.NegativeInfinity;
-                    foreach (var r in ModelImport.Get(id).GetComponentsInChildren<SkinnedMeshRenderer>())
-                        if (r.sharedMesh) top = Mathf.Max(top, r.sharedMesh.bounds.max.y);
-                    foreach (var f in ModelImport.Get(id).GetComponentsInChildren<MeshFilter>())
-                        if (f.sharedMesh) top = Mathf.Max(top, f.sharedMesh.bounds.max.y);
-                    return top;
-                }
-                float gearTop = Top(gearId), bodyTop = Top(bodyId);
-                bool helmet = gearTop > bodyTop - 0.12f;
-                Check(helmet == wantHelmet, (wantHelmet ? "the officer wears his helmet: " : "Ace has no helmet: ") + $"{gearId} top {gearTop:0.00} vs {bodyId} {bodyTop:0.00}");
+                var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/_Project/Art/DashRiders/" + id + ".prefab");
+                Check(prefab && prefab.GetComponentsInChildren<SkinnedMeshRenderer>(true).Length == 1, "one skinned body, no add-on kit: " + id);
             }
             var city = ModelImport.Get("neon-block-a"); bool hasDarkMaterial = false;
             foreach (var renderer in city.GetComponentsInChildren<Renderer>()) foreach (var material in renderer.sharedMaterials)
@@ -156,7 +146,7 @@ namespace DallasDash.EditorTools
             // The client's original meshes must remain the live crew, rather than replacement people.
             UnityEditor.SceneManagement.EditorSceneManager.OpenScene("Assets/_Project/Scenes/Main.unity");
             var liveLook = UnityEngine.Object.FindFirstObjectByType<RiderLook>(FindObjectsInactive.Include);
-            Check(liveLook && liveLook.seated.Length == 1 && liveLook.standing.Length == 1, "Ace's riding and on-foot slots exist");
+            Check(liveLook && liveLook.seated.Length == 3 && liveLook.standing.Length == 3, "riding and on-foot slots exist for Ace, Nova and Bolt");
             var liveChase = UnityEngine.Object.FindFirstObjectByType<ChaseController>(FindObjectsInactive.Include);
             Check(liveChase && liveChase.officerPrefab, "the police chase rig has its officer");
             if (liveChase && liveChase.officerPrefab)
@@ -179,9 +169,9 @@ namespace DallasDash.EditorTools
                 Check(obstacle && obstacle.prefab && obstacle.prefab.GetComponentsInChildren<Renderer>(true).Length > 0, "obstacle has a real model: " + obstacle.name);
             Check(liveTrack.routeHurdleModel, "traversal hurdle model assigned");
             Check(liveTrack.pickups.Length == 1 && liveTrack.pickups[0].id == "burger", "burgers are the only pickup");
-            for (int character = 0; character < 1; character++)
+            for (int character = 0; character < 3; character++)
             {
-                string id = "ace";
+                string id = new[] { "ace", "nova", "bolt" }[character];
                 var original = ModelImport.Get(id);
                 Check(original, "original crew prefab exists: " + id);
                 var bounds = RenderBounds(original);
@@ -203,10 +193,6 @@ namespace DallasDash.EditorTools
                     int originalVertices = 0;
                     foreach (var mesh in meshes) originalVertices += mesh.vertexCount;
                     Check(skin && skin.sharedMesh && skin.sharedMesh.vertexCount == originalVertices, "cyclist is the original mesh re-posed: " + id);
-                    int gearSkins = 0;
-                    foreach (var other in slot.GetComponentsInChildren<SkinnedMeshRenderer>(true))
-                        if (other != skin && other.sharedMesh && other.sharedMesh.GetBlendShapeIndex("Pedal180") >= 0) gearSkins++;
-                    Check(gearSkins >= 1, "Ace wears the heavy hero gear, posed with the same pedal morphs");
                     Check(skin && skin.sharedMesh.GetBlendShapeIndex("Pedal180") >= 0 && skin.sharedMesh.GetBlendShapeIndex("Stand") >= 0, "cyclist has pedal and stand morphs: " + id);
                     var motion = slot.GetComponentInChildren<CyclistMotion>(true);
                     Check(motion && motion.crank && motion.frontWheel && motion.rearWheel, "e-bike crank and wheels are animated: " + id);

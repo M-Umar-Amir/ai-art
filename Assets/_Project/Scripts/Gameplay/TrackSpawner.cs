@@ -1141,7 +1141,9 @@ namespace DallasDash.Gameplay
                 mesh.CombineMeshes(group.Value.ToArray(), true, true); mesh.RecalculateBounds();
                 var batch = new GameObject("City batch / " + group.Key.name); batch.transform.SetParent(root.transform, false);
                 batch.AddComponent<MeshFilter>().sharedMesh = mesh;
-                batch.AddComponent<MeshRenderer>().sharedMaterial = group.Key;
+                var batchRenderer = batch.AddComponent<MeshRenderer>();
+                batchRenderer.sharedMaterial = group.Key;
+                DetailCull.Classify(root, batchRenderer, group.Key); // near-only detail, no-shadow neon (perf, 11 Nov 2026)
                 lifetime.meshes.Add(mesh);
             }
             foreach (var original in combineBuffer)

@@ -15,11 +15,11 @@ namespace DallasDash.Core
             set { PlayerPrefs.SetInt("best", value); Save(); }
         }
 
-        /// The one rider is Ace (client, 4 Nov 2026). Kept as a property so older call sites read naturally.
+        /// The selected rider: 0 Ace, 1 Nova, 2 Bolt. Nova and Bolt came back on 19 Nov 2026 (client); all three are free.
         public static int Character
         {
-            get => 0;
-            set { }
+            get => Mathf.Clamp(PlayerPrefs.GetInt("character", 0), 0, 2);
+            set { PlayerPrefs.SetInt("character", Mathf.Clamp(value, 0, 2)); Save(); }
         }
 
         /// Burgers collected toward the next 10% coupon (BurgerPrices.CouponThreshold). Spending burgers does not

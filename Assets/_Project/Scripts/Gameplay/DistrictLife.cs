@@ -49,6 +49,7 @@ namespace DallasDash.Gameplay
                 var reused = stack.Pop();
                 reused.transform.SetParent(parent, false);
                 reused.gameObject.SetActive(true);
+                foreach (var r in reused.GetComponentsInChildren<Renderer>(true)) r.enabled = true; // may have been distance-culled indoors
                 return reused;
             }
             var made = Instantiate(template, parent);
@@ -62,7 +63,12 @@ namespace DallasDash.Gameplay
         {
             if (!track) track = FindFirstObjectByType<TrackSpawner>();
             var local = parent.InverseTransformPoint(world);
-            return Person(parent, local, yaw, ShirtTones[Mathf.Abs(variant) % ShirtTones.Length], chatting ? LifeMotion.Wave : LifeMotion.Idle, false, variant);
+            var person = Person(parent, local, yaw, ShirtTones[Mathf.Abs(variant) % ShirtTones.Length], chatting ? LifeMotion.Wave : LifeMotion.Idle, false, variant);
+            // Indoor and terrace people are near-only detail (DetailCull); a pooled body may come back with its
+            // renderers switched off by the block it last stood in.
+            var cull = parent.GetComponent<DetailCull>() ?? parent.gameObject.AddComponent<DetailCull>();
+            foreach (var r in person.GetComponentsInChildren<Renderer>(true)) { r.enabled = true; cull.renderers.Add(r); }
+            return person;
         }
 
         public void Return(GameObject chunk)

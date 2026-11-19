@@ -20,7 +20,6 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - Outline
-  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3

@@ -118,6 +118,7 @@ namespace DallasDash.Gameplay
         public void ParkBike(float z, int lane)
         {
             if (parkedBike) Destroy(parkedBike);
+            if (DashRun.RidesOwnWheels) return; // Bolt has no e-bike to park
             int character = Mathf.Clamp(PlayerProfile.Character, 0, 1);
             var model = parkedBikes != null && parkedBikes.Length > character ? parkedBikes[character] : null;
             if (!model) return;

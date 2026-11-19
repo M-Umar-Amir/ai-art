@@ -15,9 +15,9 @@ MonoBehaviour:
   id: roadworks
   displayName: Lane closed for roadworks
   kind: 2
-  size: {x: 2.4052641, y: 2.4166906, z: 5.9976444}
+  size: {x: 2.363959, y: 2.6, z: 2.50567}
   weight: 3
   placeholderColor: {r: 1, g: 0.45, b: 0.08, a: 1}
-  prefab: {fileID: 7553023709885556114, guid: b0406f6d2ea52604cb2c9c4f3aed3bc6, type: 3}
+  prefab: {fileID: 2846168466423277501, guid: b0d4cac9e96b38f4a98c4bd884eef8ee, type: 3}
   drift: 0
   heavy: 1

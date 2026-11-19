@@ -33,7 +33,7 @@ namespace DallasDash.EditorTools
         {
             ["ace"] = new Spec { size = 2.0f, outline = 0.009f },
             ["nova"] = new Spec { size = 1.95f, outline = 0.009f },
-            ["bolt"] = new Spec { size = 2.15f, outline = 0.009f },
+            ["bolt"] = new Spec { size = 1.9f, outline = 0.009f }, // approved sheet 04: two-wheel robot, a head shorter than Ace
             // Seated on the e-bike by models/pose_cyclist.py: already in metres in bike space.
             ["ace-ride"] = new Spec { fit = Fit.Keep, outline = 0.009f },
             ["nova-ride"] = new Spec { fit = Fit.Keep, outline = 0.009f },
@@ -50,6 +50,27 @@ namespace DallasDash.EditorTools
             // Quaternius pedestrians, already in metres (models/make_people.py).
             ["people-male"] = new Spec { fit = Fit.Keep, outline = 0.008f },
             ["people-female"] = new Spec { fit = Fit.Keep, outline = 0.008f },
+            // Approved hurdle sheets 06-08 (client, 19 Nov 2026), Hunyuan3D-2 from the sheets. Real-world sizes.
+            // Vehicles face +Z (same way as the rider, seen from behind); roadside props turn to face the rider.
+            ["h3-cone-row"] = new Spec { size = 2.0f, fit = Fit.Longest, yaw = 180f, outline = 0.01f },
+            ["h3-water-barrier"] = new Spec { size = 1.9f, fit = Fit.Longest, yaw = 180f, outline = 0.01f },
+            ["h3-cable-ramp"] = new Spec { size = 1.9f, fit = Fit.Longest, yaw = 90f, outline = 0.01f },
+            ["h3-crate-pallet"] = new Spec { size = 1.0f, fit = Fit.Height, yaw = 180f, outline = 0.01f },
+            ["h3-box-spill"] = new Spec { size = 1.8f, fit = Fit.Longest, yaw = 90f, outline = 0.01f },
+            ["h3-planter"] = new Spec { size = 1.05f, fit = Fit.Height, yaw = 180f, outline = 0.01f },
+            ["h3-van"] = new Spec { size = 4.9f, fit = Fit.Longest, outline = 0.012f },
+            ["h3-taxi"] = new Spec { size = 4.5f, fit = Fit.Longest, outline = 0.012f },
+            ["h3-garbage-truck"] = new Spec { size = 5.6f, fit = Fit.Longest, outline = 0.012f },
+            ["h3-food-truck"] = new Spec { size = 5.0f, fit = Fit.Longest, alongZ = true, outline = 0.012f },
+            ["h3-delivery-pod"] = new Spec { size = 1.9f, fit = Fit.Height, outline = 0.012f },
+            ["h3-scaffold"] = new Spec { size = 3.1f, fit = Fit.Height, yaw = 180f, outline = 0.01f },
+            ["h3-scooter-row"] = new Spec { size = 2.1f, fit = Fit.Longest, yaw = 180f, outline = 0.01f },
+            ["h3-manhole-works"] = new Spec { size = 2.6f, fit = Fit.Height, yaw = 180f, outline = 0.01f },
+            ["h3-courier-ebike"] = new Spec { size = 1.9f, fit = Fit.Longest, alongZ = true, yaw = 180f, outline = 0.01f },
+            ["h3-courier-kickscooter"] = new Spec { size = 1.7f, fit = Fit.Height, alongZ = true, yaw = 180f, outline = 0.01f },
+            ["h3-slow-car"] = new Spec { size = 3.8f, fit = Fit.Longest, outline = 0.012f },
+            ["h3-drone"] = new Spec { size = 1.5f, fit = Fit.Longest, yaw = 180f, outline = 0.01f },
+            ["h3-street-sweeper"] = new Spec { size = 2.2f, fit = Fit.Longest, outline = 0.01f },
             ["neon-block-a"] = new Spec { fit = Fit.Keep },
             ["neon-block-b"] = new Spec { fit = Fit.Keep },
             ["skybridge"] = new Spec { fit = Fit.Keep },

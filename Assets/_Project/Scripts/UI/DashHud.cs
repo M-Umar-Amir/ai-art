@@ -154,7 +154,7 @@ namespace DallasDash.UI
             foodText.text = RidersEconomy.Burgers.ToString("N0");
 
             // Ability: name, full gauge, READY when charged.
-            abilityLabel.text = DashRun.AbilityNames[0];
+            abilityLabel.text = DashRun.AbilityNames[PlayerProfile.Character];
             batteryFill.rectTransform.localScale = new Vector3(Mathf.Clamp01(run.Battery), 1, 1);
             batteryFill.color = run.Battery >= .999f ? UiKit.Green : UiKit.Cyan;
             battery.text = run.Battery >= .999f ? "READY" : "";

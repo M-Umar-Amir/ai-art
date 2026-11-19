@@ -193,7 +193,7 @@ namespace DallasDash.UI
             dock.raycastTarget = false;
             titleKeep.Add(dock.gameObject);
             foreach (var tile in new[] {
-                Tile(t, "RIDER", "rider", new Vector2(-390, TileRowY), UiKit.Yellow, ShowCrew),
+                Tile(t, "CREW", "rider", new Vector2(-390, TileRowY), UiKit.Yellow, ShowCrew),
                 Tile(t, "SHOP", "cart", new Vector2(-130, TileRowY), UiKit.Orange, ShowShop),
                 Tile(t, "MISSIONS", "list", new Vector2(130, TileRowY), UiKit.Cyan, ShowMissions),
                 Tile(t, "RANKS", "trophy", new Vector2(390, TileRowY), UiKit.Purple, ShowRanks) })
@@ -559,7 +559,7 @@ namespace DallasDash.UI
         {
             crewPanel = UiKit.Shade(root, "Crew").gameObject;
             var p = UiKit.FancyCard(crewPanel.transform, new Vector2(0, 20), new Vector2(1040, 1720), UiKit.Purple).transform;
-            UiKit.Header(p, "ACE", 760, UiKit.Purple, 88);
+            UiKit.Header(p, "THE CREW", 760, UiKit.Purple, 88);
 
             // Pedestal: a soft spotlight pool behind, a glowing disc under the feet.
             var glow = UiKit.Centered(p, "Spotlight", new Vector2(0, 170), new Vector2(860, 950)).gameObject.AddComponent<Image>();
@@ -578,8 +578,11 @@ namespace DallasDash.UI
             crewPortrait.raycastTarget = false;
             crewLock = UiKit.Icon(p, "lock", new Vector2(0, 210), 230);
 
-            // One rider (client, 4 Nov 2026): no carousel arrows or dots.
-            int n = 0;
+            // Three riders again (client, 19 Nov 2026): arrows flip the carousel, dots show the position.
+            var left = UiKit.Button(p, "", new Vector2(-420, 190), new Vector2(140, 160), UiKit.Blue, () => FlipCrew(-1), 44, "play");
+            left.transform.Find("Face/play Icon").localRotation = Quaternion.Euler(0f, 0f, 180f);
+            UiKit.Button(p, "", new Vector2(420, 190), new Vector2(140, 160), UiKit.Blue, () => FlipCrew(1), 44, "play");
+            int n = crew != null ? crew.Length : 0;
             crewDots = new Image[n];
             for (int i = 0; i < n; i++)
             {
@@ -601,7 +604,12 @@ namespace DallasDash.UI
             crewPanel.SetActive(false);
         }
 
-        static string Blurb(CharacterDef d) => "ACE / THE SPEEDSTER\nArmoured courier kit, hero e-bike. Ability: speed boost.";
+        static string Blurb(CharacterDef d) => d.id switch
+        {
+            "nova" => "NOVA / THE HIGH FLYER\nNeon purple e-bike. Ability: extended air time.",
+            "bolt" => "BOLT / THE ROBOT COURIER\nRolls on his own wheels. Ability: one-hit shield.",
+            _ => "ACE / THE SPEEDSTER\nHero e-bike. Ability: speed boost.",
+        };
 
         static bool Unlocked(CharacterDef d) => true;
 
@@ -615,7 +623,7 @@ namespace DallasDash.UI
         void ShowCrew()
         {
             if (!studio) studio = CrewStudio.Create(transform);
-            crewIndex = 0;
+            crewIndex = PlayerProfile.Character;
             crewPanel.SetActive(true);
             if (studio)
             {
@@ -639,13 +647,18 @@ namespace DallasDash.UI
             RefreshCrew();
         }
 
-        void PickCrew(int i) => CloseCrew();
+        void PickCrew(int i)
+        {
+            PlayerProfile.Character = i;
+            FindFirstObjectByType<RiderLook>()?.Apply(i, true);
+            RefreshCrew();
+        }
 
         void RefreshCrew()
         {
             if (crew == null || crew.Length == 0) return;
-            crewIndex = 0;
-            var def = crew[0];
+            crewIndex = Mathf.Clamp(crewIndex, 0, crew.Length - 1);
+            var def = crew[crewIndex];
             bool open = Unlocked(def), sel = PlayerProfile.Character == crewIndex;
             if (studio) studio.Show(crewIndex);
             crewPortrait.color = open ? Color.white : new Color(0.08f, 0.1f, 0.25f, 1f);
@@ -654,8 +667,8 @@ namespace DallasDash.UI
             crewBlurb.text = Blurb(def);
             outfitButton.text = DashInventory.Outfit(crewIndex) == 1 ? "ION OUTFIT EQUIPPED / USE ORIGINAL"
                 : DashInventory.OwnsOutfit(crewIndex) ? "EQUIP ION OUTFIT" : $"ION OUTFIT  /  {BurgerPrices.Outfit} BURGERS";
-            crewButton.text = "READY TO RIDE";
-            crewButtonFace.color = Color.Lerp(UiKit.Green, Color.white, 0.12f);
+            crewButton.text = sel ? "RIDING" : "SELECT";
+            crewButtonFace.color = Color.Lerp(sel ? UiKit.Yellow : UiKit.Green, Color.white, 0.12f);
             for (int i = 0; i < crewDots.Length; i++)
                 crewDots[i].color = i == crewIndex ? UiKit.Yellow : new Color(1f, 1f, 1f, 0.3f);
         }

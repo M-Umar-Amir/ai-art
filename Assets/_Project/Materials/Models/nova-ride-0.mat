@@ -20,7 +20,6 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - Outline
-  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -68,7 +67,7 @@ Material:
     - _RimStrength: 0
     - _RoughnessStrength: 0
     - _ShadowSoftness: 0.18
-    - _Smoothness: 0.3
+    - _Smoothness: 0.08
     - _SurfaceStyle: 1
     - _WardrobeHeight: 0
     - _WardrobeMin: 0
