@@ -1,5 +1,5 @@
-# Cloud render of the current film/ (video only; audio is muxed locally). Keeps ONE render: deletes older render-* releases first.
-# 12 parallel chunks -> release assets -> joined video_silent.mp4 on the release.
+# Cloud render of whatever this branch holds: a 2D canvas film (film/build.mjs) or a Blender scene (blender/scene.py).
+# Keeps ONE render: the release job deletes older render-* releases first. Video only; audio/captions are added locally.
 name: cloud-render
 on:
   push:
@@ -9,11 +9,15 @@ permissions:
   contents: write
 env:
   TAG: render-${{ github.run_id }}
-  CHUNKS: "12"
 jobs:
   release:
     runs-on: ubuntu-latest
+    outputs:
+      kind: ${{ steps.k.outputs.kind }}
     steps:
+      - uses: actions/checkout@v4
+      - id: k
+        run: if [ -f blender/scene.py ]; then echo "kind=blender" >> $GITHUB_OUTPUT; else echo "kind=film" >> $GITHUB_OUTPUT; fi
       - name: Delete the previous render (one video kept at a time), then open a new release
         env: { GH_TOKEN: "${{ github.token }}" }
         run: |
@@ -21,19 +25,22 @@ jobs:
             echo "deleting old render release $t"; gh release delete "$t" --repo "$GITHUB_REPOSITORY" --cleanup-tag -y
           done
           gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Render $GITHUB_RUN_ID" --notes "Cloud render. Download video_silent.mp4."
-  render:
+
+  film:
     needs: release
+    if: needs.release.outputs.kind == 'film'
     runs-on: ubuntu-latest
     timeout-minutes: 120
     strategy:
       fail-fast: false
       matrix:
         part: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+    env: { CHUNKS: "12" }
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22 }
-      - name: System deps (ffmpeg, Georgia & Courier fonts)
+      - name: System deps
         run: |
           echo "ttf-mscorefonts-installer msttcorefonts/accepted-mscorefonts-eula select true" | sudo debconf-set-selections
           sudo apt-get update -qq
@@ -55,14 +62,44 @@ jobs:
           DUR=$(python3 -c "import json;print(json.load(open('src/beats.json'))['duration'])")
           P=${{ matrix.part }}
           A=$(python3 -c "print(round($DUR*$P/$CHUNKS,3))"); B=$(python3 -c "print(round($DUR*($P+1)/$CHUNKS,3))")
-          echo "part $P: $A -> $B s"
           node render.mjs --from $A --to $B --workers 2 --no-audio --out build/part_$(printf %02d $P).mp4 2>&1 | grep -E "rendering|frames, |done|ERROR|Error" | tail -n 40
-      - name: Upload chunk
-        working-directory: film
-        run: gh release upload "$TAG" build/part_*.mp4 --repo "$GITHUB_REPOSITORY" --clobber
+      - run: gh release upload "$TAG" film/build/part_*.mp4 --repo "$GITHUB_REPOSITORY" --clobber
         env: { GH_TOKEN: "${{ github.token }}" }
+
+  blender:
+    needs: release
+    if: needs.release.outputs.kind == 'blender'
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        part: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    env:
+      CHUNKS: "20"
+      BLENDER_URL: https://download.blender.org/release/Blender4.5/blender-4.5.15-linux-x64.tar.xz
+    steps:
+      - uses: actions/checkout@v4
+      - name: Blender + ffmpeg
+        run: |
+          sudo apt-get update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
+          curl -sL "$BLENDER_URL" | tar -xJ -C "$HOME"
+          echo "BL=$(ls -d $HOME/blender-*/)blender" >> $GITHUB_ENV
+      - name: Render chunk
+        working-directory: blender
+        run: |
+          N=$(python3 -c "import re;s=open('scene.py').read();print(int(round(float(re.search(r'^DUR = ([0-9.]+)',s,re.M).group(1))*24)))")
+          P=${{ matrix.part }}; A=$(( N * P / CHUNKS )); B=$(( N * (P + 1) / CHUNKS ))
+          echo "part $P: frames $A..$((B-1)) of $N"
+          "$BL" -b --python scene.py -- $A $B frames 100 ${{ vars.SAMPLES || 32 }} 2>&1 | grep -E "FRAME|CHUNK_DONE|Error|Traceback" | tail -n 60
+          ls frames | wc -l
+          ffmpeg -y -loglevel error -framerate 24 -start_number $A -i frames/f%05d.png -frames:v $((B-A)) -c:v libx264 -preset slow -crf 14 -pix_fmt yuv420p part_$(printf %02d $P).mp4
+      - run: gh release upload "$TAG" blender/part_*.mp4 --repo "$GITHUB_REPOSITORY" --clobber
+        env: { GH_TOKEN: "${{ github.token }}" }
+
   join:
-    needs: render
+    needs: [release, film, blender]
+    if: always() && needs.release.result == 'success' && (needs.film.result == 'success' || needs.blender.result == 'success')
     runs-on: ubuntu-latest
     steps:
       - run: sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null
