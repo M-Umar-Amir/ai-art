@@ -83,7 +83,10 @@ jobs:
       - name: Blender + ffmpeg
         run: |
           sudo apt-get update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq ffmpeg libxi6 libxxf86vm1 libxfixes3 libxrender1 libgl1 libegl1 libxkbcommon0 libsm6 > /dev/null
-          curl -sL "$BLENDER_URL" | tar -xJ -C "$HOME"
+          for i in 1 2 3 4 5; do
+            curl -fsSL --retry 5 --retry-delay 10 -o "$HOME/bl.tar.xz" "$BLENDER_URL" && tar -xJf "$HOME/bl.tar.xz" -C "$HOME" && break
+            echo "download/extract failed, retry $i"; rm -rf "$HOME/bl.tar.xz" "$HOME"/blender-*/; sleep 20
+          done
           echo "BL=$(ls -d $HOME/blender-*/)blender" >> $GITHUB_ENV
       - name: Render chunk
         working-directory: blender
