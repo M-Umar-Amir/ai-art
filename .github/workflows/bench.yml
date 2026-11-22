@@ -1,0 +1,26 @@
+# One-off speed test: courtyard scene, Eevee (software GL via Xvfb + Mesa llvmpipe) vs Cycles CPU. Touches no releases.
+name: bench
+on: workflow_dispatch
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: deps
+        run: |
+          sudo apt-get update -qq && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y -qq xvfb libgl1-mesa-dri libglx-mesa0 libegl-mesa0 mesa-utils libxi6 libxxf86vm1 libxfixes3 libxrender1 libxkbcommon0 libsm6 > /dev/null
+          for i in 1 2 3; do curl -fsSL --retry 5 -o bl.tar.xz https://download.blender.org/release/Blender4.5/blender-4.5.15-linux-x64.tar.xz && tar -xJf bl.tar.xz -C $HOME && break; sleep 15; done
+          nproc; free -g
+      - name: glinfo
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" glxinfo -B | head -20 || true
+      - name: eevee 720p 16 samples (portrait)
+        working-directory: bench
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" $HOME/blender-*/blender -b --python courtyard.py -- e.png portrait 16 pool EEVEE 67 3 2>&1 | grep -E "BENCHTIME|Error|rror" | head -20
+      - name: eevee 1080p 32 samples (portrait)
+        working-directory: bench
+        run: xvfb-run -a -s "-screen 0 1920x1080x24" $HOME/blender-*/blender -b --python courtyard.py -- e2.png portrait 32 pool EEVEE 100 2 2>&1 | grep -E "BENCHTIME|Error|rror" | head -20
+      - name: cycles 1080p 32 samples (portrait)
+        working-directory: bench
+        run: $HOME/blender-*/blender -b --python courtyard.py -- c.png portrait 32 pool CYCLES 100 2 2>&1 | grep -E "BENCHTIME|Error|rror" | head -20
+      - uses: actions/upload-artifact@v4
+        with: { name: bench-frames, path: "bench/*_1.png", retention-days: 1 }
