@@ -1,6 +1,6 @@
-# Cloud render of "The Proof Nobody Can Read" (video only; audio is muxed locally).
+# Cloud render of the current film/ (video only; audio is muxed locally). Keeps ONE render: deletes older render-* releases first.
 # 12 parallel chunks -> release assets -> joined video_silent.mp4 on the release.
-name: render-riemann
+name: cloud-render
 on:
   push:
     branches: [render-riemann]
@@ -8,15 +8,19 @@ on:
 permissions:
   contents: write
 env:
-  TAG: render-riemann-${{ github.run_id }}
-  DUR: "1956.83"
+  TAG: render-${{ github.run_id }}
   CHUNKS: "12"
 jobs:
   release:
     runs-on: ubuntu-latest
     steps:
-      - run: gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Riemann render $GITHUB_RUN_ID" --notes "Cloud render parts. Download video_silent.mp4."
+      - name: Delete the previous render (one video kept at a time), then open a new release
         env: { GH_TOKEN: "${{ github.token }}" }
+        run: |
+          for t in $(gh release list --repo "$GITHUB_REPOSITORY" --limit 100 --json tagName --jq '.[].tagName' | grep '^render-' || true); do
+            echo "deleting old render release $t"; gh release delete "$t" --repo "$GITHUB_REPOSITORY" --cleanup-tag -y
+          done
+          gh release create "$TAG" --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --prerelease --title "Render $GITHUB_RUN_ID" --notes "Cloud render. Download video_silent.mp4."
   render:
     needs: release
     runs-on: ubuntu-latest
@@ -48,6 +52,7 @@ jobs:
           CINEMATIC_CHANNEL: chromium
         run: |
           node build.mjs
+          DUR=$(python3 -c "import json;print(json.load(open('src/beats.json'))['duration'])")
           P=${{ matrix.part }}
           A=$(python3 -c "print(round($DUR*$P/$CHUNKS,3))"); B=$(python3 -c "print(round($DUR*($P+1)/$CHUNKS,3))")
           echo "part $P: $A -> $B s"
