@@ -11,6 +11,7 @@ env:
   TAG: render-${{ github.run_id }}
 jobs:
   release:
+    if: "!contains(github.event.head_commit.message, '[bench]')"
     runs-on: ubuntu-latest
     outputs:
       kind: ${{ steps.k.outputs.kind }}

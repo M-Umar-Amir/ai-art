@@ -1,8 +1,11 @@
 # One-off speed test: courtyard scene, Eevee (software GL via Xvfb + Mesa llvmpipe) vs Cycles CPU. Touches no releases.
 name: bench
-on: workflow_dispatch
+on:
+  push:
+    branches: [render-riemann]
 jobs:
   bench:
+    if: contains(github.event.head_commit.message, '[bench]')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
