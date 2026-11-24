@@ -42,7 +42,21 @@ function finish(g, t) {
   if (f < 1) { g.fillStyle = `rgba(0,0,0,${1 - f})`; g.fillRect(0, 0, W, H); }
 }
 window.renderAt = renderAt;
-(function () {
+// v2: async preparation before a frame is drawn (the renderer awaits window.prepareFrame(t) before renderAt(t)).
+// Decodes the clip frames needed at t (and drops far-away ones), so memory stays small.
+window.prepareFrame = async function (t) {
+  const jobs = [];
+  for (const u of CLIPUSE) {
+    const s = SHOTS.find(x => x.name === u.shot); if (!s) continue;
+    if (t < s.t0 - 0.05 || t > s.t1 + 1.0) continue;
+    const i = clipIndex(u.key, t, s.t0, u);
+    for (const k of [i]) jobs.push(clipLoad(u.key, k));
+  }
+  await Promise.all(jobs);
+  clipEvict(t);
+};
+(async function () {
+  await assetsReady();
   const q = new URLSearchParams(location.search), ui = document.getElementById('ui');
   const end = SHOTS.length ? SHOTS[SHOTS.length - 1].t1 : 0;
   if (Math.abs(end - DUR) > 1e-3) console.warn(`shots end at ${end} s but beats.json duration is ${DUR} s`);

@@ -1,0 +1,279 @@
+{
+ "github": {
+  "url": "https://github.com/anthropics/formal-math/tree/main/vp-vnp",
+  "w": 1920,
+  "h": 3278,
+  "hl": {
+   "VP ≠ VNP over every field": [
+    555,
+    1809,
+    565,
+    65
+   ],
+   "discovered by an internal research Claude model": [
+    712,
+    2045,
+    515,
+    32
+   ],
+   "no human mathematician has checked the proof": [
+    945,
+    2081,
+    513,
+    32
+   ],
+   "no machine checks that this file says what is claimed": [
+    555,
+    2448,
+    1252,
+    68
+   ],
+   "This does not settle P vs NP": [
+    1106,
+    1985,
+    292,
+    32
+   ]
+  }
+ },
+ "statement": {
+  "url": "https://github.com/anthropics/formal-math/blob/main/vp-vnp/Statement.lean",
+  "w": 1920,
+  "h": 3548,
+  "hl": {}
+ },
+ "viola": {
+  "url": "https://emanueleviola.wordpress.com/2026/11/23/vp-vnp-i-do-not-complain-the-antelope-falls-with-the-arrow/",
+  "w": 1920,
+  "h": 1350,
+  "hl": {}
+ },
+ "fortnow": {
+  "url": "https://blog.computationalcomplexity.org/",
+  "w": 1920,
+  "h": 5400,
+  "hl": {
+   "Why read proofs anymore": [
+    798,
+    362,
+    378,
+    38
+   ],
+   "They are mostly Lean-verified": [
+    891,
+    1245,
+    316,
+    29
+   ],
+   "not the one to thoroughly check all the details": [
+    798,
+    1245,
+    805,
+    62
+   ]
+  }
+ },
+ "godel": {
+  "url": "https://rjlipton.com/the-gdel-letter/",
+  "w": 1920,
+  "h": 1350,
+  "hl": {}
+ },
+ "losttrans": {
+  "url": "https://arxiv.org/abs/2610.08144",
+  "w": 1920,
+  "h": 1712,
+  "hl": {
+   "Navier-Stokes lost in translation": [
+    30,
+    161,
+    535,
+    39
+   ]
+  }
+ },
+ "bosonsamp": {
+  "url": "https://arxiv.org/abs/1011.3245",
+  "w": 1920,
+  "h": 1734,
+  "hl": {
+   "The Computational Complexity of Linear Optics": [
+    30,
+    161,
+    791,
+    39
+   ],
+   "permanent": [
+    851,
+    534,
+    98,
+    23
+   ]
+  }
+ },
+ "clay": {
+  "url": "https://www.claymath.org/millennium/p-vs-np/",
+  "w": 1920,
+  "h": 4403,
+  "hl": {
+   "P vs NP": [
+    681,
+    860,
+    107,
+    41
+   ]
+  }
+ },
+ "brilliant": {
+  "url": "https://pequalnp.com/",
+  "w": 1920,
+  "h": 4184,
+  "hl": {
+   "P": [
+    36,
+    34,
+    19,
+    33
+   ]
+  }
+ },
+ "paper_p1": {
+  "url": "pdf",
+  "w": 1429,
+  "h": 2021,
+  "hl": {
+   "every arithmetic circuit that computes the permanent": [
+    552,
+    450,
+    539,
+    22
+   ],
+   "does not settle that conjecture": [
+    569,
+    586,
+    292,
+    22
+   ],
+   "discovered by an internal research Claude model": [
+    451,
+    665,
+    463,
+    22
+   ]
+  }
+ },
+ "paper_thm": {
+  "url": "pdf",
+  "w": 1429,
+  "h": 2021,
+  "hl": {
+   "Theorem 1.1": [
+    189,
+    349,
+    800,
+    881
+   ],
+   "We do not claim that the exponent 1/3 is optimal": [
+    614,
+    491,
+    579,
+    26
+   ]
+  }
+ },
+ "paper_fig1": {
+  "url": "pdf",
+  "w": 1429,
+  "h": 2021,
+  "hl": {
+   "Figure 1. The structure of the proof": [
+    277,
+    967,
+    447,
+    32
+   ]
+  }
+ },
+ "paper_cases": {
+  "url": "pdf",
+  "w": 1429,
+  "h": 2021,
+  "hl": {
+   "We do not know which of the two hypotheses holds": [
+    219,
+    274,
+    581,
+    26
+   ]
+  }
+ },
+ "paper_lean": {
+  "url": "pdf",
+  "w": 1429,
+  "h": 2021,
+  "hl": {
+   "The proofs in this paper were found and written by AI": [
+    219,
+    389,
+    650,
+    26
+   ],
+   "No human mathematician has": [
+    887,
+    389,
+    351,
+    26
+   ],
+   "checked the proofs": [
+    190,
+    420,
+    208,
+    26
+   ]
+  }
+ },
+ "paper_appq": {
+  "url": "pdf",
+  "w": 1429,
+  "h": 2021,
+  "hl": {
+   "Whether the statements say what is meant was judged only by AI readers": [
+    219,
+    1131,
+    874,
+    26
+   ],
+   "No human": [
+    1117,
+    1131,
+    121,
+    26
+   ]
+  }
+ },
+ "godel_letter": {
+  "url": "pdf",
+  "w": 1224,
+  "h": 1584,
+  "hl": {
+   "Princeton": [
+    144,
+    149,
+    93,
+    22
+   ],
+   "replaced by a machine": [
+    503,
+    638,
+    216,
+    22
+   ],
+   "completely": [
+    392,
+    638,
+    620,
+    76
+   ]
+  }
+ }
+}

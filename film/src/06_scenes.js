@@ -1,17 +1,26 @@
 // ================= scene helpers: shot wrapper with camera drift, the tea cup, the Navier-Stokes equation, flow vignettes =================
 // scene(): a shot whose t1 comes from the next shot's start (95_timeline). S._sh is the shot itself.
+// v2: hard cuts by default; a quick dark dip where a new VO section starts (t0 within 0.8 s of a section start)
 function scene(name, t0, prep, draw, o = {}) {
-  shot(name, t0, 0, () => { const S = prep ? prep() : {}; S._sh = SHOTS.find(s => s.name === name); return S; }, draw, o.in === undefined ? { in: { type: 'dissolve', dur: 0.8 } } : o);
+  const atSec = B.sec.some((s, i) => i > 0 && Math.abs(t0 - s) < 0.8);
+  const tr = o.in !== undefined ? o.in : (atSec ? { type: 'dip', dur: 0.32, color: '#000' } : undefined);
+  shot(name, t0, 0, () => { const S = prep ? prep() : {}; S._sh = SHOTS.find(s => s.name === name); return S; }, draw, tr ? { in: tr } : {});
 }
 // a paper board shot: drifting paper plate + items drawn in board space
 function board(name, t0, tone, seed, draw, o = {}) {
   scene(name, t0, () => Object.assign({ pl: paperPlate(seed, tone) }, o.prep ? o.prep() : {}), (g, l, t, S) => {
-    g.save(); plateDrift(g, S.pl, t, S._sh.t0, S._sh.t1, o.cam || {}); draw(g, t, S); g.restore(); if (o.over) o.over(g, t, S);
+    g.save(); const [z, cx, cy] = punchCam(t, S._sh, o); cam(g, cx, cy, z); plateDraw(g, S.pl); draw(g, t, S); g.restore(); if (o.over) o.over(g, t, S);
   }, o.tr ? { in: o.tr } : {});
 }
 function deepScene(name, t0, seed, draw, o = {}) {
   scene(name, t0, () => Object.assign({ pl: deepPlate(seed, o.warm ?? 0) }, o.prep ? o.prep() : {}), (g, l, t, S) => {
-    g.save(); plateDrift(g, S.pl, t, S._sh.t0, S._sh.t1, o.cam || { z1: 1.06 }); draw(g, t, S); g.restore(); if (o.over) o.over(g, t, S);
+    g.save(); const [z, cx, cy] = punchCam(t, S._sh, o); cam(g, cx, cy, z); plateDraw(g, S.pl); draw(g, t, S); g.restore(); if (o.over) o.over(g, t, S);
+  }, o.tr ? { in: o.tr } : {});
+}
+// a plain-scene wrapper with the punch camera (dark or custom background drawn by bgFn)
+function flat(name, t0, bg, draw, o = {}) {
+  scene(name, t0, () => (o.prep ? o.prep() : {}), (g, l, t, S) => {
+    g.fillStyle = bg; g.fillRect(0, 0, W, H); g.save(); const [z, cx, cy] = punchCam(t, S._sh, o); cam(g, cx, cy, z); draw(g, t, S); g.restore(); if (o.over) o.over(g, t, S);
   }, o.tr ? { in: o.tr } : {});
 }
 

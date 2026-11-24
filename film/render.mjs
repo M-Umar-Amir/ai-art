@@ -19,7 +19,7 @@ const html = resolve(arg('html', `build/${slug}.html`));
 const scale = +arg('scale', 1);
 const workers = +arg('workers', Math.max(1, Math.min(4, os.cpus().length - 1)));
 // 2D canvas needs no special GPU flags; set CINEMATIC_CHROME_ARGS to pass extra Chromium flags if needed.
-const GL = process.env.CINEMATIC_CHROME_ARGS ? process.env.CINEMATIC_CHROME_ARGS.split(' ') : [];
+const GL = process.env.CINEMATIC_CHROME_ARGS ? process.env.CINEMATIC_CHROME_ARGS.split(' ') : ((process.env.CINEMATIC_CHANNEL || 'msedge') === 'chromium' ? ['--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'] : []);
 const url = `file://${html}?render=1&scale=${scale}`;
 
 async function openPage() {
@@ -27,10 +27,10 @@ async function openPage() {
   const p = await b.newPage({ viewport: { width: 1280, height: 720 } });
   p.on('pageerror', e => console.log('PAGE ERROR', e.message));
   p.on('console', m => { if (m.type() === 'error' || m.type() === 'warning') console.log('console:', m.text()); });
-  await p.goto(url); await p.waitForFunction(() => window.__ready === true, null, { timeout: 120000 });
+  await p.goto(url); await p.waitForFunction(() => window.__ready === true, null, { timeout: 300000 });
   return { b, p };
 }
-const grab = (p, t, type = 'image/jpeg') => p.evaluate(([t, type]) => { renderAt(t); return document.getElementById('c').toDataURL(type, 0.94); }, [t, type])
+const grab = (p, t, type = 'image/jpeg') => p.evaluate(async ([t, type]) => { if (window.prepareFrame) await window.prepareFrame(t); renderAt(t); return document.getElementById('c').toDataURL(type, 0.94); }, [t, type])
   .then(d => Buffer.from(d.slice(d.indexOf(',') + 1), 'base64'));
 
 if (A.includes('--design')) { // planning step: character / key-element sheet
