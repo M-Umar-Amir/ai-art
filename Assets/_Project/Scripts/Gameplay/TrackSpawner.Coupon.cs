@@ -63,12 +63,18 @@ namespace DallasDash.Gameplay
 
         void Reserve(int lane, float z)
         {
-            // Hazards already standing in the lane around the spot are cleared, so the way in is always open.
+            // Hazards in the lane around the spot are cleared, so the way in is always open: anything whose length
+            // overlaps the zone (a 30 m streetcar centred outside it still covers it), and any courier or pod riding in
+            // from behind to meet the rider inside it (where it stands now is not where the rider will meet it).
+            float from = z - 18f, to = z + 10f;
             for (int i = live.Count - 1; i >= 0; i--)
             {
                 var o = live[i];
                 if (!o || o.kind == TrackKind.Pickup || o.lane != lane || o.lateral) continue;
-                if (Mathf.Abs(o.transform.position.z - z) > 18f) continue;
+                float c = o.transform.position.z, half = Mathf.Max(o.halfLength, 0.5f);
+                bool overlaps = c + half > from && c - half < to;
+                bool ridesIn = o.drift > 0f && o.meetZ + half > from && o.meetZ - half < to;
+                if (!overlaps && !ridesIn) continue;
                 Pool.Release(o.gameObject); live.RemoveAt(i);
             }
             reservedLane = lane; reservedFrom = z - 18f; reservedTo = z + 10f;

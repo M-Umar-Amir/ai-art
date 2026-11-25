@@ -61,7 +61,7 @@ namespace DallasDash.EditorTools
             ["h3-van"] = new Spec { size = 4.9f, fit = Fit.Longest, outline = 0.012f },
             ["h3-taxi"] = new Spec { size = 4.5f, fit = Fit.Longest, outline = 0.012f },
             ["h3-garbage-truck"] = new Spec { size = 5.6f, fit = Fit.Longest, outline = 0.012f },
-            ["h3-food-truck"] = new Spec { size = 5.0f, fit = Fit.Longest, alongZ = true, outline = 0.012f },
+            ["h3-food-truck"] = new Spec { size = 5.0f, fit = Fit.Longest, alongZ = true, stretchX = 2.6f, outline = 0.012f },
             ["h3-delivery-pod"] = new Spec { size = 1.9f, fit = Fit.Height, outline = 0.012f },
             ["h3-scaffold"] = new Spec { size = 3.1f, fit = Fit.Height, yaw = 180f, outline = 0.01f },
             ["h3-scooter-row"] = new Spec { size = 2.1f, fit = Fit.Longest, yaw = 180f, outline = 0.01f },
@@ -155,8 +155,11 @@ namespace DallasDash.EditorTools
                 b = Bounds(model);
                 if (spec.stretchX > 0f)
                 {
+                    // Scale whichever local axis lies across the street (world X): a model turned 90 degrees by
+                    // alongZ has its own Z there.
                     var sc = model.transform.localScale;
-                    sc.x *= spec.stretchX / Mathf.Max(b.size.x, 1e-4f);
+                    float f = spec.stretchX / Mathf.Max(b.size.x, 1e-4f);
+                    if (Mathf.Abs(model.transform.right.x) >= Mathf.Abs(model.transform.forward.x)) sc.x *= f; else sc.z *= f;
                     model.transform.localScale = sc;
                     b = Bounds(model);
                 }
@@ -164,6 +167,9 @@ namespace DallasDash.EditorTools
             }
 
             int mi = 0;
+            // A flat-coloured GLB (no embedded images, e.g. the 25 Nov 2026 Bolt) must not pick up an older baked map
+            // of the same id, and keeps its authored colours (TextureKit leaves materials tagged DashAuthoredColour).
+            bool glbImages = TextureBake.HasImages(SourcePath(id));
             foreach (var r in model.GetComponentsInChildren<Renderer>())
             {
                 var mats = r.sharedMaterials;
@@ -179,11 +185,12 @@ namespace DallasDash.EditorTools
                     if (!tex) tex = BaseTexture(mats[i]);
                     // A texture baked in this same batch may still be importing: load it again by path.
                     if (tex && !AssetDatabase.Contains(tex)) tex = null;
-                    if (!tex) tex = AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/_Project/Art/Textures/Baked/{id}-{mi - 1}.png");
+                    if (!tex && glbImages) tex = AssetDatabase.LoadAssetAtPath<Texture2D>($"Assets/_Project/Art/Textures/Baked/{id}-{mi - 1}.png");
                     m.SetTexture("_BaseMap", tex);
                     if (tex) { m.SetTextureScale("_BaseMap", Vector2.one); m.SetTextureOffset("_BaseMap", Vector2.zero); }
                     bool authored = TextureBake.Colors(SourcePath(id), mats[i] ? mats[i].name : null, out var glbColor, out var glbGlow);
                     m.SetColor("_BaseColor", authored ? glbColor : BaseColor(mats[i]));
+                    m.SetOverrideTag("DashAuthoredColour", !tex && authored && !glbImages ? "1" : "");
                     m.SetFloat("_OutlineWidth", spec.outline);
                     bool architecture = id.StartsWith("neon-block") || id == "skybridge" || id.EndsWith("-board") || id == "electric-pod" || id == "bolt" || id.StartsWith("ebike") || id.Contains("-gear-");
                     m.SetFloat("_SurfaceStyle", 1f);

@@ -374,8 +374,13 @@ namespace DallasDash.Gameplay
                 Block(root, new Vector3(x, 0.98f, z + dz), new Vector3(0.08f, 1.9f, 0.08f), cream);
             for (int i = 0; i < 4; i++)
                 Block(root, new Vector3(x - 0.36f + i * 0.24f, 1.48f, z - 1.4f), Vector3.one * 0.16f, i % 2 == 0 ? green : warm, PrimitiveType.Sphere);
-            string[] names = { "TACO CART", "NOODLE BAR", "DASH DELI", "JUICE STOP" };
-            DashCity.Text(track, root, names[Mathf.Abs(chunk) % names.Length], root.position + new Vector3(x, 2.2f, z - 1.52f), 0.055f, new Color(1f, 0.95f, 0.82f));
+            // A flower cart now, with no name on it: KFC is the only food brand on the street (client, 25 Nov 2026).
+            foreach (float dz in new[] { -0.75f, 0f, 0.75f })
+            {
+                Block(root, new Vector3(x, 1.42f, z + dz), new Vector3(0.95f, 0.34f, 0.55f), track.foliageMaterial);
+                Block(root, new Vector3(x - 0.2f, 1.62f, z + dz), Vector3.one * 0.14f, dz < 0f ? red : warm);
+                Block(root, new Vector3(x + 0.22f, 1.6f, z + dz + 0.12f), Vector3.one * 0.12f, dz > 0f ? red : warm);
+            }
             Person(root, new Vector3(x + side * 0.72f, 0f, z + 0.3f), side < 0 ? 90f : -90f, ShirtTones[Mathf.Abs(chunk + 2) % ShirtTones.Length], LifeMotion.Wave, false, Mathf.Abs(chunk) + 6);
         }
 

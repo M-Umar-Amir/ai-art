@@ -55,6 +55,14 @@ namespace DallasDash.Gameplay
             playedFull = true;
         }
 
+        /// The short intro only ("police chase", ride to the start), never Loading Up / Ran the Red (the showcase).
+        public void PlayShort()
+        {
+            if (running != null) StopCoroutine(running);
+            running = StartCoroutine(ShortIntro());
+            playedFull = true;
+        }
+
         IEnumerator FullIntro()
         {
             var gm = GameManager.Instance;
@@ -69,7 +77,7 @@ namespace DallasDash.Gameplay
             look.Apply(PlayerProfile.Character, false);
             rider.transform.position = new Vector3(CurbX, 0f, CurbZ);
             trafficLight.Set(TrafficLight.Phase.Green);
-            MenuUI.Instance.Caption("LOADING UP", "FOOD INC delivery league", 2.4f);
+            MenuUI.Instance.Caption("LOADING UP", "Your KFC order is in the box", 2.4f);
             Vector3 bagFrom = rider.transform.position + new Vector3(0.9f, 1.05f, 0.35f);
             Vector3 bagTo = rider.transform.position + new Vector3(0f, 1.15f, -0.55f);
             if (bag) bag.gameObject.SetActive(true);

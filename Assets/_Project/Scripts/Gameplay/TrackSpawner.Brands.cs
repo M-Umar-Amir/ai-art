@@ -3,21 +3,15 @@ using UnityEngine;
 
 namespace DallasDash.Gameplay
 {
-    /// Yum! Brands on the street (client, 4 Nov 2026: "the shops in track and vehicles and more things should be
-    /// branded for companies owned by Yum", with their official logos; "I didn't see any delivery vehicle or any
-    /// hurdle with branding"). KFC, Taco Bell, Pizza Hut and The Habit Burger Grill: shop signs and billboards
-    /// (NaturalArchitecture), and the hurdles themselves: delivery vans, delivery pods, trucks and the food truck
-    /// carry logo panels, taxis a roof-topper ad, other couriers a branded delivery box, roadworks barriers and
-    /// the scaffolding a logo banner. Ace's own box is KFC (DashAssets). Every sign takes the next brand in one
-    /// rotation, so all four appear equally and in order.
+    /// KFC on the street. Client, 4 Nov 2026: branded shops, billboards and fleet with official logos, a brand in view
+    /// every frame. Client, 25 Nov 2026: "only kfc outlets, remove others, only kfc branding": Taco Bell, Pizza Hut and
+    /// The Habit are gone, so the rotation has one entry and every sign, van livery, taxi topper, courier box, barrier
+    /// and scaffold banner is KFC. (The name YumBrands stays so the brand plumbing is unchanged.)
     public partial class TrackSpawner
     {
         public static readonly (string name, Color board, Color ink)[] YumBrands =
         {
-            ("KFC", new Color(0.89f, 0.1f, 0.17f), Color.white),
-            ("TACO BELL", new Color(0.44f, 0.13f, 0.51f), Color.white),
-            ("PIZZA HUT", new Color(0.93f, 0.19f, 0.14f), Color.white),
-            ("THE HABIT", new Color(0.12f, 0.12f, 0.14f), new Color(1f, 0.6f, 0.12f)),
+            ("KFC", new Color(0.89f, 0.0f, 0.17f), Color.white),
         };
         int vehicleBrand;
         /// The n-th sign in the street's brand rotation (works for blocks behind the start too).
@@ -29,10 +23,15 @@ namespace DallasDash.Gameplay
             BrandVisibility.Square = brandSquare; BrandVisibility.Wide = brandWide; BrandVisibility.Board = brandBoard;
         }
 
+        /// Client, 25 Nov 2026: "remove branding from on street such as vehicles and barriers, only keep branding off
+        /// roads like hoardings and billboards". Hurdles (vans, pods, taxis, trucks, couriers, barriers, roadworks,
+        /// scaffolds) carry no KFC any more; the plumbing stays so it can be switched back on.
+        public static readonly bool BrandHurdles = false;
+
         /// Brands a hurdle as it comes off the pool, with the next brand in the rotation.
         void BrandVehicle(GameObject go, string id)
         {
-            if (!HurdleBrand.Brands(id)) return;
+            if (!BrandHurdles || !HurdleBrand.Brands(id)) return;
             var brand = go.GetComponent<HurdleBrand>() ?? go.AddComponent<HurdleBrand>();
             brand.Apply(this, id, BrandAt(vehicleBrand++));
         }
@@ -44,7 +43,7 @@ namespace DallasDash.Gameplay
         bool built;
 
         public static bool Brands(string id) => id is "delivery-van" or "electric-pod" or "food-truck" or "taxi" or "garbage-truck"
-            or "courier-a" or "courier-b" or "scooter-courier" or "roadworks-barrier" or "roadworks" or "cargo-slide-gate";
+            or "courier-a" or "courier-b" or "scooter-courier" or "h3-courier-ebike" or "h3-courier-kickscooter" or "roadworks-barrier" or "roadworks" or "cargo-slide-gate";
 
         public void Apply(TrackSpawner track, string id, int brand)
         {
@@ -61,9 +60,10 @@ namespace DallasDash.Gameplay
         Vector4 sideRect, rearRect, stripe;
         static readonly Dictionary<string, Material> liveryMats = new();
 
-        static bool LiveryVehicle(string id) => id is "delivery-van" or "electric-pod" or "food-truck" or "garbage-truck";
+        static bool LiveryVehicle(string id) => id is "delivery-van" or "electric-pod" or "food-truck" or "garbage-truck"
+            or "h3-courier-ebike" or "h3-courier-kickscooter";
 
-        void BuildLivery(Vector3 c, Vector3 size, float bottom, float back)
+        void BuildLivery(string id, Vector3 c, Vector3 size, float bottom, float back)
         {
             foreach (var r in GetComponentsInChildren<MeshRenderer>())
             {
@@ -76,6 +76,23 @@ namespace DallasDash.Gameplay
             float w = Mathf.Min(size.z * 0.5f, size.y * 0.34f * aspect), h = w / aspect;
             sideRect = new Vector4(c.z - size.z * 0.12f, bottom + size.y * 0.56f, w, h);
             float rw = Mathf.Min(size.x * 0.72f, size.y * 0.3f * aspect);
+            if (id == "electric-pod")
+            {
+                // The approved pod (19 Nov 2026) has rounded flanks: keep the logo on the flat middle of each side and
+                // the back, or it is clipped where the curve turns away and a cut-off fragment shows.
+                w = size.z * 0.42f; h = w / aspect; rw = size.x * 0.46f;
+                sideRect = new Vector4(c.z - size.z * 0.04f, bottom + size.y * 0.5f, w, h);
+            }
+            if (id.StartsWith("h3-courier"))
+            {
+                // Approved couriers (19 Nov 2026) carry their own modelled delivery box high on the back: the logo goes
+                // on the back of that box only (what the rider sees, coming up behind), never on the courier.
+                rw = size.x * 0.5f;
+                rearRect = new Vector4(c.x, bottom + size.y * 0.7f, rw, rw / aspect);
+                sideRect = new Vector4(0f, -100f, 0.01f, 0.01f);
+                stripe = new Vector4(1f, 0f, 0f, 0f);
+                return;
+            }
             rearRect = new Vector4(c.x, bottom + size.y * 0.6f, rw, rw / aspect);
             stripe = new Vector4(bottom + size.y * 0.2f, bottom + size.y * 0.29f, 0f, 0f);
         }
@@ -176,7 +193,7 @@ namespace DallasDash.Gameplay
                 }
                 default:
                 {
-                    if (LiveryVehicle(id)) { BuildLivery(c, size, bottom, back); break; }
+                    if (LiveryVehicle(id)) { BuildLivery(id, c, size, bottom, back); break; }
                     // Anything else branded: logo panels flush on each side and the back.
                     float h = Mathf.Min(0.95f, size.y * 0.36f), w = Mathf.Min(size.z * 0.62f, h * wide), y = bottom + size.y * 0.56f;
                     foreach (float side in new[] { -1f, 1f })

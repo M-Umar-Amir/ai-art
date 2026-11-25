@@ -19,6 +19,9 @@ namespace DallasDash.Gameplay
     /// Anything placed on the straight track. Hit tests are lane + distance, like the web sim, so no physics is needed.
     public class TrackObject : MonoBehaviour
     {
+        /// Its renderers carry the shader user value bit that keeps hurdles and burgers clear of the Toronto
+        /// skyline's far fade (ToonCommon IsTrackObject); set once per pooled object.
+        [System.NonSerialized] public bool shaderTagged;
         public TrackKind kind;
         public int lane;
         public RunSurface surface = RunSurface.Road;

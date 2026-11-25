@@ -82,6 +82,8 @@ namespace DallasDash.EditorTools
                 // Shaders without a base map (sky, text, particles) are intentionally untextured.
                 if (!mat.HasProperty("_BaseMap")) { skipped++; continue; }
                 if (mat.GetTexture("_BaseMap")) { kept++; continue; }
+                // Flat authored colours from the model itself (ModelImport, e.g. Bolt 25 Nov 2026): keep them clean.
+                if (mat.GetTag("DashAuthoredColour", false) == "1") { kept++; continue; }
 
                 var pick = Pick(mat.name.ToLowerInvariant());
                 mat.SetTexture("_BaseMap", textures[pick.kind]);

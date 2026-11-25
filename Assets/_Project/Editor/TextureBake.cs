@@ -39,6 +39,15 @@ namespace DallasDash.EditorTools
 
         /// Base colour and emission of a material straight from the .glb JSON: reading them back off glTFast's
         /// imported materials is unreliable in a batch import (they came back white for authored props).
+        /// True when the GLB embeds any image (a painted model); false for a flat-coloured one such as the 25 Nov
+        /// 2026 Bolt, whose materials are authored colours only.
+        public static bool HasImages(string glbPath)
+        {
+            if (!File.Exists(glbPath)) return false;
+            var g = Load(glbPath).json;
+            return g.images != null && g.images.Length > 0;
+        }
+
         public static bool Colors(string glbPath, string material, out Color baseColor, out Color emissive)
         {
             baseColor = Color.white; emissive = Color.black;

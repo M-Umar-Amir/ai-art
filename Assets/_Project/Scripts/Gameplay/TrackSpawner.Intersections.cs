@@ -39,7 +39,8 @@ namespace DallasDash.Gameplay
             var red = DashCity.Mat(this, "signalRed", new Color(1f, 0.12f, 0.1f), 2.6f);
             var green = DashCity.Mat(this, "signalGreen", new Color(0.15f, 1f, 0.45f), 2.6f);
             var unlit = DashCity.Mat(this, "signalOff", new Color(0.12f, 0.12f, 0.12f));
-            var blade = DashCity.Mat(this, "streetBlade", new Color(0.05f, 0.4f, 0.22f));
+            // City of Toronto street-name blades: reflective blue with white lettering (25 Nov 2026).
+            var blade = DashCity.Mat(this, "streetBladeToronto", TorontoStreet.SignBlue, 0.12f);
             // Cross road out to both sides, its centre line, and corner kerbs.
             foreach (float side in new[] { -1f, 1f })
             {
@@ -83,10 +84,27 @@ namespace DallasDash.Gameplay
                     // Street-name blades.
                     Block(t, new Vector3(side * 4.55f, 2.9f, cz + (near ? -0.5f : 0.5f)), new Vector3(1.3f, 0.3f, 0.05f), blade);
                 }
-            string[] streets = { "MARKET ST", "5TH AVE", "BAYVIEW BLVD", "UNION ST", "ELM ST", "HARBOR WAY" };
-            string name = streets[Mathf.Abs(Mathf.RoundToInt(z / 20f)) % streets.Length];
+            // Real downtown cross streets, west to east along King Street West, one per junction in run order.
+            var streets = TorontoStreet.CrossStreets;
+            string name = streets[Mathf.Abs(Mathf.FloorToInt(z / 320f)) % streets.Length];
             foreach (float side in new[] { -1f, 1f })
                 DashCity.Text(this, t, name, new Vector3(side * 4.55f, 2.9f, z + 0.03f), 0.022f, Color.white);
+        }
+
+        /// Downtown Toronto: a streetcar on the cross street's centre track, just beyond the corner buildings, headlamps
+        /// toward the junction, so it shows through the junction as the rider arrives. Scenery only (no hit box): the
+        /// cross traffic runs in the lanes either side of it (z = mid +/- 3.2 m; the car is 2.54 m wide).
+        void ParkCrossStreetcar(Transform t, float z)
+        {
+            if (!TorontoStreet.Active || obstacles == null) return;
+            ObstacleDef car = null;
+            foreach (var def in obstacles) if (def && def.id == "streetcar" && def.prefab) car = def;
+            if (!car) return;
+            float side = (Mathf.FloorToInt(z / 320f) & 1) == 0 ? 1f : -1f;
+            var go = Instantiate(car.prefab, t);
+            go.name = "Streetcar on the cross street";
+            go.transform.SetPositionAndRotation(new Vector3(side * (DowntownArchitecture.Front + 3f + car.size.z * 0.5f), 0f, z + 10f),
+                Quaternion.Euler(0f, -side * 90f, 0f));
         }
 
         PeopleCatalogue junctionPeople;

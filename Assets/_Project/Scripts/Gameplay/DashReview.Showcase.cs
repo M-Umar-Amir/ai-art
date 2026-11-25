@@ -8,11 +8,14 @@ using UnityEngine;
 
 namespace DallasDash.Gameplay
 {
-    /// The 4 Nov 2026 showcase (-dash-showcase <out>): one continuous take, no narration, game music only, covering
-    /// every part of the run. Shot list (camera state in brackets):
+    /// The showcase (-dash-showcase <out>): one continuous take, no narration, game music only, covering every part
+    /// of the run. 19 Nov 2026 round: the approved concept sheets (new Ace, Nova and Bolt back, new officer and hurdles).
+    /// Shot list (camera state in brackets):
     ///   1. Title screen, coupon meter and START CHASE [menu camera, wide] - decompression beat.
-    ///   2. Ace in his heavy hero kit on the KFC e-bike [director orbit, medium], back to the street.
-    ///   3. Story intro, "ran the red" [authored intro rig] handing off to the run's follow camera.
+    ///   1b. The crew carousel: Ace, Nova, Bolt on the lit pedestal [menu, medium portrait].
+    ///   2. (Retired 25 Nov 2026, client: no 360-degree model view.) The rider orbits are gone.
+    ///   3. The short "police chase" intro [authored intro rig] handing off to the run's follow camera. (25 Nov 2026,
+    ///      client: no "Loading Up" and no "Ran the Red" scenes in the showcase.)
     ///   4. The chase on the branded street [gameplay follow]: police meter, shops, billboards, branded hurdles.
     ///   5. A crash: knocked off, the officer rides into frame, Ace grabs his bike back [follow].
     ///   6. (Retired 11 Nov 2026: the Skypark portal shortcut.) Long clean riding down Downtown [follow].
@@ -37,6 +40,9 @@ namespace DallasDash.Gameplay
         IEnumerator Showcase()
         {
             PlayerPrefs.SetInt("coached_runs", 2);
+            // The run is ridden as Bolt by default (user, 25 Nov 2026: "for recording later, use bolt"; his updated
+            // mesh is in, Ace and Nova follow); -rider 0|1|2 picks another.
+            PlayerProfile.Character = showcaseRider;
             BurgerPrices.UnlockAllForReview();
             DashRun.AutoDeclineRevive = false;
             PlayerProfile.Burgers = 30000;
@@ -51,7 +57,7 @@ namespace DallasDash.Gameplay
             menu.Open("none"); track.RefreshDistrict();
             for (int f = 0; f < 90; f++) yield return null;
 
-            filmSeconds = 170; // upper bound; the take ends when the shot list does
+            filmSeconds = 200; // upper bound; the take ends when the shot list does
             PrepareFilmCamera(); SaveFilmMusic(); StartFilmEncoder();
             Time.captureFramerate = 30; Application.targetFrameRate = 30; recording = true;
 
@@ -59,27 +65,20 @@ namespace DallasDash.Gameplay
             Event("TITLE");
             yield return Frames(120);
 
-            // 2. Ace orbit (director camera; menus hidden; a lower-third card).
-            var cam = Camera.main;
-            var follow = cam.GetComponent<FollowCamera>(); var brain = cam.GetComponent<CinemachineBrain>();
-            Vector3 camPos = cam.transform.position; Quaternion camRot = cam.transform.rotation;
-            if (follow) follow.enabled = false; if (brain) brain.enabled = false;
-            var canvases = FindObjectsByType<Canvas>(FindObjectsSortMode.None);
-            foreach (var canvas in canvases) canvas.enabled = false;
-            BuildReelCard();
-            look.Apply(0, true);
-            Card("ACE", "HEAVY HERO KIT  /  KFC COURIER E-BIKE");
-            Event("ACE ORBIT");
-            yield return Orbit(cam, rider.transform.position + Vector3.up * 1.05f, 3.4f, .5f, -150f, -30f, 6f, 42f);
-            if (reelTitle) Destroy(reelTitle.canvas.gameObject); // the lower-third goes with the orbit
-            foreach (var canvas in canvases) if (canvas) canvas.enabled = true;
-            cam.transform.SetPositionAndRotation(camPos, camRot);
-            if (follow) follow.enabled = true; if (brain) brain.enabled = true;
+            // 1b. The crew carousel (browsing only: the selected rider stays the showcase rider).
+            menu.Open("crew"); Event("CREW ACE");
+            yield return Frames(66);
+            menu.FlipCrew(1); Event("CREW NOVA");
+            yield return Frames(66);
+            menu.FlipCrew(1); Event("CREW BOLT");
+            yield return Frames(66);
+            menu.FlipCrew(1); menu.Open("none");
+            yield return Frames(15);
 
-            // 3. Story intro, then the run.
+            // 3. The short intro (no Loading Up, no Ran the Red), then the run.
             Event("INTRO");
             RiderInput.Override = () => ShowcaseInput(track, rider, run, gm);
-            if (StoryDirector.Instance) StoryDirector.Instance.Play(); else gm.StartRun();
+            if (StoryDirector.Instance) StoryDirector.Instance.PlayShort(); else gm.StartRun();
             for (int guard = 0; gm.State != RunState.Running && guard < 30 * 20; guard++) yield return null;
             Check(gm.State == RunState.Running, "showcase run starts");
             Event("RUN");
@@ -89,7 +88,7 @@ namespace DallasDash.Gameplay
             bool crashed = false, back = false, coupon = false, couponWon = false;
             int coupons = DemoRewards.Ledger.coupons.Count;
             float backAt = -1f;
-            int frameLimit = 150 * 30;
+            int frameLimit = 175 * 30;
             while (filmFrame < frameLimit && gm.State == RunState.Running)
             {
                 float d = gm.Distance;
@@ -97,7 +96,10 @@ namespace DallasDash.Gameplay
                 if (!crashed && d > 230f && !run.OnFoot && rider.Traversal.Surface == RunSurface.Road && !rider.Airborne
                     && !TrackSpawner.NearJunction(d + 15f) && !TrackSpawner.NearJunction(d + 60f))
                 {
-                    crashed = true; run.KnockOffBike(); run.PoliceGains(DashRun.CrashOnBike + 3f); Event("CRASH, ON FOOT");
+                    crashed = true;
+                    // Bolt rolls on his own wheels: a crash staggers him instead of knocking him off a bike.
+                    if (DashRun.RidesOwnWheels) { run.Crash(); Event("CRASH, STAGGERED"); }
+                    else { run.KnockOffBike(); run.PoliceGains(DashRun.CrashOnBike); Event("CRASH, ON FOOT"); }
                 }
                 if (crashed && !run.OnFoot && !back) { back = true; backAt = d; Event("BACK ON THE E-BIKE"); }
                 if (track.Coupon && !coupon) { coupon = true; Event("COUPON ON THE ROAD"); }

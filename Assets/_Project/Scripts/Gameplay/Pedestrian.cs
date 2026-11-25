@@ -77,6 +77,76 @@ namespace DallasDash.Gameplay
             Resume(movers);
         }
 
+        // ---------------------------------------------------------------- knit toques
+        // Downtown Toronto in late November (client, 25 Nov 2026: "people ... based on downtown toronto"): about half
+        // the crowd wears a knit toque with a pom-pom. One shared mesh; one renderer per pooled body, built once on the
+        // head bone while the body is still in its bind pose (straight after pooling), so it then rides the animation.
+
+        Renderer toque;
+        static Mesh toqueMesh;
+        static readonly System.Collections.Generic.Dictionary<int, Material> toqueMats = new();
+        static readonly Color[] ToqueColours =
+        {
+            new(.72f, .08f, .1f), new(.12f, .16f, .3f), new(.2f, .2f, .22f), new(.86f, .83f, .76f), new(.18f, .32f, .22f), new(.85f, .6f, .12f),
+        };
+
+        bool Toque(int variant)
+        {
+            bool wear = DallasDash.Core.DashRun.District == 0 && Mathf.Abs(variant * 13 + 5) % 100 < 48;
+            // On/off by GameObject: DetailCull and the pool switch renderers, not objects.
+            if (!wear) { if (toque) toque.gameObject.SetActive(false); return false; }
+            if (!toque && !BuildToque()) return false;
+            int c = Mathf.Abs(variant * 5 + 1) % ToqueColours.Length;
+            if (!toqueMats.TryGetValue(c, out var m) || !m)
+            {
+                m = new Material(body.sharedMaterial) { name = "Toque " + c };
+                m.SetTexture("_BaseMap", Texture2D.whiteTexture);
+                m.SetColor("_BaseColor", ToqueColours[c]);
+                m.SetColor("_EmissionColor", Color.black);
+                if (m.HasProperty("_EmissionMapOn")) m.SetFloat("_EmissionMapOn", 0f);
+                if (m.HasProperty("_Smoothness")) m.SetFloat("_Smoothness", .1f);
+                toqueMats[c] = m;
+            }
+            toque.sharedMaterial = m;
+            toque.gameObject.SetActive(true);
+            return true;
+        }
+
+        bool BuildToque()
+        {
+            if (!body) return false;
+            Transform head = null;
+            foreach (var t in GetComponentsInChildren<Transform>(true)) if (t.name == "Head") { head = t; break; }
+            if (!head) return false;
+            if (!toqueMesh)
+            {
+                // Crown (lower half hidden in the head), ribbed cuff and pom-pom, merged; origin at the cuff.
+                var parts = new System.Collections.Generic.List<CombineInstance>();
+                Mesh Shape(PrimitiveType type)
+                {
+                    var go = GameObject.CreatePrimitive(type);
+                    var mesh = go.GetComponent<MeshFilter>().sharedMesh;
+                    Destroy(go);
+                    return mesh;
+                }
+                var sphere = Shape(PrimitiveType.Sphere); var cylinder = Shape(PrimitiveType.Cylinder);
+                parts.Add(new CombineInstance { mesh = sphere, transform = Matrix4x4.TRS(new Vector3(0f, .05f, 0f), Quaternion.identity, new Vector3(.215f, .15f, .23f)) });
+                parts.Add(new CombineInstance { mesh = cylinder, transform = Matrix4x4.TRS(Vector3.zero, Quaternion.identity, new Vector3(.226f, .03f, .238f)) });
+                parts.Add(new CombineInstance { mesh = sphere, transform = Matrix4x4.TRS(new Vector3(0f, .135f, 0f), Quaternion.identity, Vector3.one * .065f) });
+                toqueMesh = new Mesh { name = "Toque" };
+                toqueMesh.CombineMeshes(parts.ToArray(), true, true);
+            }
+            // The crown of the head is the top of the bind-pose body; the cuff sits 8.5 cm below it.
+            float top = body.bounds.max.y;
+            var hat = new GameObject("Toque", typeof(MeshFilter), typeof(MeshRenderer));
+            hat.transform.SetPositionAndRotation(new Vector3(head.position.x, top - .085f, head.position.z), Quaternion.Euler(0f, transform.eulerAngles.y, 0f));
+            hat.transform.SetParent(head, true);
+            hat.GetComponent<MeshFilter>().sharedMesh = toqueMesh;
+            toque = hat.GetComponent<MeshRenderer>();
+            toque.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            return true;
+        }
+
         Behaviour[] Pause()
         {
             var movers = System.Array.FindAll(GetComponents<Behaviour>(), b => b is LifeStroller || b is StreetCrosser);
@@ -99,10 +169,14 @@ namespace DallasDash.Gameplay
             int pick = hair != null && hair.Length > 0 ? Mathf.Abs(variant * 7 + 3) % hair.Length : -1;
             var tint = new MaterialPropertyBlock();
             tint.SetColor("_BaseColor", catalogue.hairTints[Mathf.Abs(variant * 3) % catalogue.hairTints.Length] * 2.2f);
+            bool toqued = Toque(variant);
             for (int i = 0; i < (hair?.Length ?? 0); i++)
             {
                 if (!hair[i]) continue;
-                hair[i].gameObject.SetActive(i == pick);
+                // Under a toque only long hair (and a beard) still shows.
+                string n = hair[i].name;
+                bool hidden = toqued && (n.Contains("Buns") || n.Contains("Buzzed") || n.Contains("SimpleParted"));
+                hair[i].gameObject.SetActive(i == pick && !hidden);
                 if (i == pick) hair[i].SetPropertyBlock(tint);
             }
             if (!animator) return;

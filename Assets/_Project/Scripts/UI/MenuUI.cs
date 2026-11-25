@@ -13,7 +13,9 @@ namespace DallasDash.UI
     {
         public static MenuUI Instance { get; private set; }
         public Font font;
-        public Sprite logoSprite;
+        public Sprite logoSprite; // retired 25 Nov 2026 with the Dash Riders wordmark; kept so scenes deserialize
+        /// The game's name on the title screen; empty until the client picks the new name (25 Nov 2026).
+        public const string GameName = "";
         /// Finn, Faye, Fizz-11, in PlayerProfile.Character order. Their pack sheets are the crew portraits.
         public CharacterDef[] crew;
 
@@ -154,34 +156,15 @@ namespace DallasDash.UI
             PinTop(bestPill, 320f);
             titleKeep.Add(coinsPill.gameObject); titleKeep.Add(bestPill.gameObject);
 
-            // Logo: big amber wordmark, a tilted purple ribbon, and the tagline; the whole lockup floats.
-            var logo = UiKit.Centered(t, "Logo", new Vector2(0, 680), new Vector2(760, 300));
-            var lp = logo.gameObject.AddComponent<UiPulse>();
-            lp.scale = 0f; lp.speed = 1f; lp.bob = 2f; lp.tilt = 0f;
-            UiKit.Label(logo, "DASH", 190, new Vector2(0, 85), new Vector2(1000, 210), UiKit.Yellow, TextAnchor.MiddleCenter, true);
-            var ribbon = UiKit.Panel(logo, "Ribbon", new Vector2(0, -65), new Vector2(640, 126), UiKit.Purple);
-            ribbon.sprite = UiKit.Gradient;
-            ribbon.transform.localRotation = Quaternion.Euler(0, 0, -3f);
-            UiKit.Label(ribbon.transform, "RIDERS", 98, new Vector2(0, 4), new Vector2(640, 126), Color.white, TextAnchor.MiddleCenter, true);
-            // The fourth lane: a cyan lane line under the lockup, the same marking the express deck uses.
-            // It lives on the title root so it also shows when the PDF wordmark sprite replaces the type.
-            var lane = UiKit.Panel(t, "Lane line", new Vector2(0, 440), new Vector2(560, 10), UiKit.Cyan);
-            lane.raycastTarget = false;
-            lane.sprite = UiKit.Gradient;
-            foreach (float x in new[] { -320f, 320f })
+            // Title lockup. 25 Nov 2026: the "Dash Riders" name and the "Crave It. Chase It. Get It." tagline are both
+            // off the main menu (client: "new name tbd later"), so the street shows through the top of the screen.
+            // Set GameName to bring a wordmark back here.
+            if (!string.IsNullOrEmpty(GameName))
             {
-                var dash = UiKit.Panel(t, "Lane dash", new Vector2(x, 440), new Vector2(70, 10), new Color(1f, 1f, 1f, 0.4f));
-                dash.raycastTarget = false;
-            }
-            var tag = UiKit.Panel(logo, "Tagline", new Vector2(0, -185), new Vector2(1080, 70), new Color(0.05f, 0.08f, 0.25f, 0.85f));
-            tag.raycastTarget = false;
-            UiKit.Label(tag.transform, "Crave It. Chase It. Get It.", 34, new Vector2(0, 2), new Vector2(1060, 66), UiKit.Cream);
-            if (logoSprite)
-            {
-                foreach (Transform child in logo) child.gameObject.SetActive(false);
-                var image = UiKit.Centered(logo, "PDF wordmark", new Vector2(0, 30), new Vector2(560, 310)).gameObject.AddComponent<Image>();
-                image.sprite = logoSprite; image.preserveAspect = true; image.raycastTarget = false;
-                UiKit.Label(logo, "Crave It. Chase It. Get It.", 32, new Vector2(0, -145), new Vector2(760, 55), Color.white, TextAnchor.MiddleCenter, true);
+                var logo = UiKit.Centered(t, "Logo", new Vector2(0, 680), new Vector2(760, 300));
+                var lp = logo.gameObject.AddComponent<UiPulse>();
+                lp.scale = 0f; lp.speed = 1f; lp.bob = 2f; lp.tilt = 0f;
+                UiKit.Label(logo, GameName, 150, new Vector2(0, 30), new Vector2(1000, 190), UiKit.Yellow, TextAnchor.MiddleCenter, true);
             }
 
             // 11 Nov 2026 UI pass: one primary action, big and low on the screen where the thumb rests.

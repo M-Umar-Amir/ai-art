@@ -20,6 +20,7 @@ Material:
   stringTagMap: {}
   disabledShaderPasses:
   - Outline
+  - SRPDEFAULTUNLIT
   m_LockedProperties: 
   m_SavedProperties:
     serializedVersion: 3
@@ -47,6 +48,8 @@ Material:
     m_Ints: []
     m_Floats:
     - _AmbientStrength: 0.35
+    - _Backdrop: 0
+    - _BackdropFeet: 0
     - _BumpScale: 0
     - _CrewIndex: 0
     - _Cull: 2

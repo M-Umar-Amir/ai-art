@@ -363,6 +363,9 @@ namespace DallasDash.EditorTools
             d.obstacles.Add(Obstacle("h3-courier-kickscooter", "Courier on a kick scooter", TrackKind.Block, new Vector3(0.8f, 1.7f, 1.4f), 2, RoyalBlue, heavy: true, drift: 0.35f));
             d.obstacles.Add(Obstacle("h3-street-sweeper", "Street-sweeper robot", TrackKind.Block, new Vector3(1.6f, 1.4f, 2.2f), 1, Cream, heavy: true, drift: 0.2f));
             d.obstacles.Add(Obstacle("h3-drone", "Delivery drone at head height", TrackKind.Block, new Vector3(1.5f, 2.2f, 1f), 1, RoyalBlue, drift: 0.25f));
+            // Downtown Toronto (client, 25 Nov 2026): a TTC streetcar stopped on its track in an outer lane, 30 m long,
+            // steered round (TrackSpawner places it only on a track lane with its whole length clear).
+            d.obstacles.Add(Obstacle("streetcar", "Streetcar stopped on its track", TrackKind.Block, new Vector3(2.54f, 3.84f, 30.2f), 2, SignRed, heavy: true));
             return d;
         }
 
@@ -452,19 +455,49 @@ namespace DallasDash.EditorTools
             spawner.dashLamp = PropModels.Lamp();
             spawner.dashPlanter = PropModels.Planter();
 
-            spawner.hologramTextures = new[] {
-                AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-ace.png"),
-                AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-nova.png"),
-                AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Visuals/billboard-food.png") };
+            // The brick street and its KFC art (client, 25 Nov 2026; models/kfc-street, copied by Apply.ps1).
+            Texture2D Street(string file, bool normal = false, bool repeat = true, bool optional = false)
+            {
+                string path = Root + "/Art/DashRiders/Street/" + file + ".png";
+                if (!(AssetImporter.GetAtPath(path) is TextureImporter importer))
+                {
+                    if (optional) return null;
+                    throw new System.InvalidOperationException("Missing street texture " + path);
+                }
+                var type = normal ? TextureImporterType.NormalMap : TextureImporterType.Default;
+                var wrap = repeat ? TextureWrapMode.Repeat : TextureWrapMode.Clamp;
+                if (importer.textureType != type || importer.wrapMode != wrap || importer.maxTextureSize != 2048 || importer.anisoLevel != 8 || !importer.mipmapEnabled)
+                {
+                    importer.textureType = type; importer.wrapMode = wrap; importer.maxTextureSize = 2048; importer.anisoLevel = 8;
+                    importer.mipmapEnabled = true; importer.textureCompression = TextureImporterCompression.Compressed;
+                    importer.SaveAndReimport();
+                }
+                return AssetDatabase.LoadAssetAtPath<Texture2D>(path);
+            }
+            string[] facades = { "loft", "warehouse", "buff", "loft-plain", "warehouse-plain", "buff-plain" };
+            spawner.facadeAlbedo = System.Array.ConvertAll(facades, f => Street("facade-" + f + "-albedo"));
+            spawner.facadeNormal = System.Array.ConvertAll(facades, f => Street("facade-" + f + "-normal", normal: true));
+            spawner.facadeEmission = System.Array.ConvertAll(facades, f => Street("facade-" + f + "-emission", optional: true));
+            spawner.kfcAdDark = Street("kfc-ad-dark", repeat: false);
+            spawner.kfcAdRed = Street("kfc-ad-red", repeat: false);
+            spawner.kfcAdPink = Street("kfc-ad-pink", repeat: false);
+            spawner.kfcAdBanner = Street("kfc-ad-banner", repeat: false);
+            spawner.kfcAwning = Street("kfc-awning", repeat: false);
+            spawner.kfcStripes = Street("kfc-stripes");
+            spawner.kfcPanel = Street("kfc-panel", repeat: false);
+            spawner.kfcPoster = Street("kfc-poster", repeat: false);
+            spawner.shopIcons = Street("shop-icons", repeat: false);
+            // Screens that used to show Dash City holograms now show KFC ads only.
+            spawner.hologramTextures = new[] { spawner.kfcAdDark, spawner.kfcAdRed, spawner.kfcAdPink };
             spawner.hologramMaterial = DashAssets.HologramMaterial();
             spawner.chase = chase;
-            // Official Yum! Brands logo signs (models/make_brand_signs.py), in TrackSpawner.YumBrands order.
-            Texture2D[] Logos(string format) => System.Array.ConvertAll(new[] { "kfc", "tacobell", "pizzahut", "habit" },
+            // Official KFC logo signs (models/make_brand_signs.py). KFC is the only brand since 25 Nov 2026.
+            Texture2D[] Logos(string format) => System.Array.ConvertAll(new[] { "kfc" },
                 b => AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/" + b + "-" + format + ".png")
                      ?? throw new System.InvalidOperationException("Missing brand logo " + b + "-" + format));
             spawner.brandSquare = Logos("square"); spawner.brandWide = Logos("wide"); spawner.brandBoard = Logos("board");
             // Vehicle liveries (11 Nov 2026): transparent official logos projected into the vehicle paint (HurdleBrand).
-            foreach (var b in new[] { "kfc", "tacobell", "pizzahut", "habit" })
+            foreach (var b in new[] { "kfc" })
                 if (AssetImporter.GetAtPath(Root + "/Art/DashRiders/Brands/" + b + "-livery.png") is TextureImporter liveryImporter
                     && (liveryImporter.wrapMode != TextureWrapMode.Clamp || !liveryImporter.alphaIsTransparency))
                 {
@@ -581,7 +614,7 @@ namespace DallasDash.EditorTools
 
             var menus = new GameObject("MenuUI").AddComponent<DallasDash.UI.MenuUI>();
             menus.font = AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/Rajdhani-SemiBold.ttf") ?? AssetDatabase.LoadAssetAtPath<Font>(Root + "/Fonts/LilitaOne-Regular.ttf");
-            menus.logoSprite = AssetDatabase.LoadAssetAtPath<Sprite>(Root + "/Art/DashRiders/Visuals/dash-riders-logo.png");
+            menus.logoSprite = null; // the Dash Riders wordmark is retired from the menu (25 Nov 2026)
             menus.crew = data.characters.ToArray();
             menus.couponArt = AssetDatabase.LoadAssetAtPath<Texture2D>(Root + "/Art/DashRiders/Brands/coupon-ticket-ui.png")
                 ?? throw new System.InvalidOperationException("Missing coupon ticket artwork");
@@ -925,6 +958,7 @@ namespace DallasDash.EditorTools
             var neonBarrier = PropModels.Barrier(true);
             var pod = PropModels.Pod();
             var gate = PropModels.CargoGate();
+            var streetcar = PropModels.Streetcar();
 
             SetPrefab(data, "cones", BuildConeRow(cone));
             if (KitImport.Available)
@@ -941,6 +975,7 @@ namespace DallasDash.EditorTools
             SetPrefab(data, "electric-pod", pod);
             SetPrefab(data, "roadworks-barrier", barricade);
             SetPrefab(data, "cargo-slide-gate", gate);
+            SetPrefab(data, "streetcar", streetcar);
             // Approved hurdle sheets (client, 19 Nov 2026) replace the kit and procedural looks of the existing hurdles.
             foreach (var (id, model) in new[] { ("cones", "h3-cone-row"), ("roadworks-barrier", "h3-water-barrier"), ("roadworks", "h3-manhole-works"),
                 ("delivery-van", "h3-van"), ("taxi", "h3-taxi"), ("garbage-truck", "h3-garbage-truck"), ("slow-car", "h3-slow-car"),

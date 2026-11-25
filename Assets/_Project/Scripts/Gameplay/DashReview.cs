@@ -25,6 +25,8 @@ namespace DallasDash.Gameplay
         bool film, benchmark, recording;
         int filmFrame;
         int filmSeconds = 60;
+        /// The showcase rider (0 Ace, 1 Nova, 2 Bolt): Bolt by default since his updated mesh (25 Nov 2026).
+        int showcaseRider = 2;
         System.Diagnostics.Process filmEncoder;
         byte[] filmBytes;
         string encoderPath;
@@ -50,7 +52,7 @@ namespace DallasDash.Gameplay
         static void Boot()
         {
             var args = Environment.GetCommandLineArgs();
-            for (int i = 0; i < args.Length - 1; i++) if (args[i] == "-dash-review" || args[i] == "-dash-playtest" || args[i] == "-dash-film" || args[i] == "-dash-benchmark" || args[i] == "-dash-walkthrough" || args[i] == "-dash-mechanics" || args[i] == "-dash-documentary" || args[i] == "-dash-botcheck" || args[i] == "-dash-crew-reel" || args[i] == "-dash-showcase")
+            for (int i = 0; i < args.Length - 1; i++) if (args[i] == "-dash-review" || args[i] == "-dash-playtest" || args[i] == "-dash-film" || args[i] == "-dash-benchmark" || args[i] == "-dash-walkthrough" || args[i] == "-dash-mechanics" || args[i] == "-dash-documentary" || args[i] == "-dash-botcheck" || args[i] == "-dash-crew-reel" || args[i] == "-dash-showcase" || args[i] == "-dash-skyline")
             {
                 var review = new GameObject("Dash Review").AddComponent<DashReview>();
                 Application.runInBackground = true;
@@ -61,6 +63,7 @@ namespace DallasDash.Gameplay
                 review.botcheck = args[i] == "-dash-botcheck";
                 review.crewReel = args[i] == "-dash-crew-reel";
                 review.showcase = args[i] == "-dash-showcase";
+                review.skylineProbe = args[i] == "-dash-skyline";
                 WalkthroughActive = review.walkthrough || review.documentary;
                 review.film = args[i] == "-dash-film";
                 review.benchmark = args[i] == "-dash-benchmark";
@@ -71,6 +74,7 @@ namespace DallasDash.Gameplay
                     if (args[j] == "-film-seconds" && int.TryParse(args[j + 1], out int seconds)) review.filmSeconds = Mathf.Clamp(seconds, 1, 300);
                     if (args[j] == "-encoder") review.encoderPath = args[j + 1];
                     if (args[j] == "-district") int.TryParse(args[j + 1], out review.district);
+                    if (args[j] == "-rider" && int.TryParse(args[j + 1], out int riderIndex)) review.showcaseRider = Mathf.Clamp(riderIndex, 0, 2);
                     if (args[j] == "-skip-menu") review.skipMenu = true;
                     if (args[j] == "-menu-only") review.menuOnly = true;
                     if (args[j] == "-mp-only") review.mpOnly = true;
@@ -241,6 +245,7 @@ namespace DallasDash.Gameplay
             Directory.CreateDirectory(output); Backup();
             if (crewReel) { yield return CrewReel(); yield break; }
             if (showcase) { yield return Showcase(); yield break; }
+            if (skylineProbe) { yield return SkylineProbe(); yield break; }
             if (mechanics || documentary || walkthrough) { Debug.LogError("[DashReview] FAIL kiosk walkthroughs were retired on 4 Nov 2026"); Application.Quit(1); yield break; }
             if (botcheck) { yield return BotCheck(); yield break; }
             if (continuous) { yield return ContinuousRun(); yield break; }
@@ -514,7 +519,7 @@ namespace DallasDash.Gameplay
             };
             UnityEngine.Random.InitState(7421 + continuousAttempt * 101 + filmTakeSeed * 7919);
             gm.StartRun();
-            if (film) { PrepareFilmCamera(); FindFirstObjectByType<FollowCamera>().MovieFraming = true; SaveFilmMusic(); StartFilmEncoder(); MenuUI.Instance.Caption("ACE / NEON DOWNTOWN", "POLICE CHASE", 2.5f); Time.captureFramerate = 30; Application.targetFrameRate = 30; recording = true; }
+            if (film) { PrepareFilmCamera(); FindFirstObjectByType<FollowCamera>().MovieFraming = true; SaveFilmMusic(); StartFilmEncoder(); MenuUI.Instance.Caption("ACE / DOWNTOWN TORONTO", "POLICE CHASE", 2.5f); Time.captureFramerate = 30; Application.targetFrameRate = 30; recording = true; }
             float deadline = Time.realtimeSinceStartup + (film ? 1800f : 150f);
             bool retryAttempt = false;
             const float Goal = 1250f;

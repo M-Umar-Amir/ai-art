@@ -24,11 +24,12 @@ Shader "FoodInc/TextCurved"
             #include "ToonCommon.hlsl"
             TEXTURE2D(_MainTex); SAMPLER(sampler_MainTex);
             struct A { float4 positionOS : POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; };
-            struct V { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; };
+            struct V { float4 positionCS : SV_POSITION; float2 uv : TEXCOORD0; half4 color : COLOR; float3 positionWS : TEXCOORD1; };
             V vert(A v)
             {
                 V o;
-                o.positionCS = TransformWorldToHClip(CurveWorld(TransformObjectToWorld(v.positionOS.xyz)));
+                o.positionWS = TransformObjectToWorld(v.positionOS.xyz);
+                o.positionCS = TransformWorldToHClip(CurveWorld(o.positionWS));
                 o.uv = v.uv;
                 o.color = v.color;
                 return o;
@@ -37,6 +38,7 @@ Shader "FoodInc/TextCurved"
             {
                 half4 c = i.color;
                 c.a *= SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, i.uv).a;
+                c.a *= 1 - FarFadeAmount(i.positionWS); // fades out as its board melts into the sky (TorontoSkyline)
                 clip(c.a - 0.02h);
                 return c;
             }

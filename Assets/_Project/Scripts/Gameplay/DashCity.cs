@@ -21,7 +21,10 @@ namespace DallasDash.Gameplay
             track.laneLineMaterial = Mat(track, "lanes" + d, d == 2 ? new Color(.32f,.36f,.46f) : new Color(.83f, .8f, .68f));
             ApplyNaturalLight(d);
             NightLighting.Ensure();
-            SkyTraffic.Ensure(track);
+            // Downtown is Toronto (client, 25 Nov 2026): the CN Tower and the Financial District on the horizon
+            // ahead replace the PDF cover's flying air taxis.
+            if (d == 0) TorontoSkyline.Ensure(track);
+            else SkyTraffic.Ensure(track);
 
             if (track.kitTrees != null) foreach (var tree in track.kitTrees) {
                 if (!tree) continue;
@@ -195,8 +198,7 @@ namespace DallasDash.Gameplay
                     }
                 }
                 Part(parent, new Vector3(side * 10f, 3.15f, z + 0.2f), new Vector3(7f, 1.3f, 0.16f), ink);
-                string[] words = { "FOOD INC", "TACO LAB", "PIZZA ORBIT", "BURGER BYTE", "DASH MARKET" };
-                Text(track, parent, words[Mathf.Abs(block) % words.Length], new Vector3(side * 10f, 3.15f, z + 0.08f), 0.075f, Accent(d));
+                // (No invented outlet names: KFC is the only brand on the street, client 25 Nov 2026.)
             }
             // Tall silhouettes and vertical light strips replace the Dallas landmarks.
             float towerHeight = 28f + Mathf.Abs(block * 13 % 5) * 7f;
@@ -363,6 +365,9 @@ namespace DallasDash.Gameplay
             if (!route)
             {
                 StreetDetail(track, parent, side, z, d);
+                // Toronto pavement: streetcar stop before each junction, bins, post-and-ring stands, bike share.
+                if (d == 0) TorontoStreet.Furniture(track, parent, side, z, Mathf.Abs(block * 7 + (side > 0 ? 3 : 0)),
+                    side > 0f && TrackSpawner.Junction(z + track.segmentLength), KfcStreet.OutletAt(block, side));
                 var stone = Mat(track, "promenade" + d, d == 1 ? new Color(.43f,.54f,.53f) : new Color(.14f,.19f,.27f));
                 var warmLight = Mat(track, "promenadeWarm", new Color(.45f,.33f,.19f), .08f);
                 Part(parent, new Vector3(side * 6f, -.12f, z + 10f), new Vector3(3.8f,.22f,20f), stone);
@@ -428,7 +433,9 @@ namespace DallasDash.Gameplay
                     Part(parent, new Vector3(side * 6.5f, 3.6f, z + 12f), new Vector3(1.8f, 0.12f, 2.5f), parkourMat);
                 }
             }
-            if (block % 4 == 0 && !route)
+            // Downtown carries KFC branding only (client, 25 Nov 2026), so the painted "Food Inc" district signs stay
+            // in the other districts.
+            if (block % 4 == 0 && !route && d != 0)
             {
                 float h = d == 1 ? 5.5f : 4.3f;
                 var at = new Vector3(side * 5f, h, z + 9f); // street side of the wall-run line (x 6.2-8)
@@ -448,8 +455,15 @@ namespace DallasDash.Gameplay
                 text.font = track.signFont; text.fontSize = 64; text.characterSize = .06f; text.anchor = TextAnchor.MiddleCenter;
                 text.color = new Color(.94f, .89f, .74f); lettering.GetComponent<Renderer>().sharedMaterial = track.signTextMaterial;
             }
+            // Downtown's brick street (25 Nov 2026) has festoon lights strung between the facades on alternate blocks,
+            // where both sides are full-height buildings (not a KFC lot, not across a junction), instead of skybridges.
+            if (d == 0)
+            {
+                if (side < 0 && (block & 1) == 0 && !KfcStreet.OutletAt(block, -1f) && !KfcStreet.OutletAt(block, 1f) && !TrackSpawner.Junction(z - 20f))
+                    KfcStreet.StringLights(track, parent, z);
+            }
             // Connected multi-level urban walkways, with real suspension geometry and garden ends.
-            if (side < 0 && track.dashBridge && Mathf.Abs(block) % 4 == 1)
+            else if (side < 0 && track.dashBridge && Mathf.Abs(block) % 4 == 1)
             {
                 var bridge = Object.Instantiate(track.dashBridge, new Vector3(0, 8f, z + 10f), Quaternion.identity, parent); // above the 5.2 m wall-run line
                 bridge.name = "Suspended garden walkway";

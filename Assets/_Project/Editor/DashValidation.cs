@@ -55,7 +55,7 @@ namespace DallasDash.EditorTools
             // The police chase replaces the delivery clock.
             Check(DashRun.StartGap > 0f && DashRun.MaxGap > DashRun.StartGap && DashRun.GainOnFoot > DashRun.LoseOnBike, "the officer gains on a runner and drops back from the e-bike");
             Check(DashRun.CrashOnFoot > DashRun.CrashOnBike && DashRun.StartGap / DashRun.GainOnFoot > 5f, "a crash costs ground; on foot there is time to reach the bike");
-            Check(DashRun.CrewNames.Length == 3 && DashRun.AbilityNames.Length == 3 && DashRun.DistrictNames.Length == 1 && DashRun.DistrictNames[0] == "NEON DOWNTOWN", "three riders (Ace, Nova, Bolt, client 19 Nov) and one map (Downtown)");
+            Check(DashRun.CrewNames.Length == 3 && DashRun.AbilityNames.Length == 3 && DashRun.DistrictNames.Length == 1 && DashRun.DistrictNames[0] == "DOWNTOWN TORONTO", "three riders (Ace, Nova, Bolt, client 19 Nov) and one map (Downtown)");
             Check(DashRun.DistrictNames.Length == 1 && DashRun.District == 0, "no shortcut: Downtown is the only world (client, 11 Nov 2026)");
             Check(typeof(TrackSpawner).GetProperty("Portal") == null && typeof(DashRun).GetMethod("EnterSkypark") == null, "the Skypark portal shortcut is removed");
             var codes = new HashSet<string>();

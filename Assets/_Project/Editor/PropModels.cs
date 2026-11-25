@@ -505,6 +505,89 @@ namespace DallasDash.EditorTools
             return Save(root, variant);
         }
 
+        // ================= TTC streetcar =================
+
+        /// Downtown Toronto's streetcar (client, 25 Nov 2026: "transport ... based on downtown toronto"): a five-section
+        /// low-floor car in the TTC's red and white with the black window band, 30.2 m x 2.54 m x 3.84 m (TTC figures),
+        /// cabs at both ends (big black windscreen, LED destination sign, headlamps one end, tail lamps the other),
+        /// articulation bellows, glazed doors, roof equipment and a single-arm pantograph whose head meets the trolley
+        /// wire at 5.7 m (TorontoStreet.WireHeight). Pivot at the middle of its length on the road, +Z is the A end.
+        /// No logos, no ads (client: no branding on anything in the roadway).
+        public static GameObject Streetcar() => Cached("ttcStreetcar", BuildStreetcar);
+
+        static GameObject BuildStreetcar()
+        {
+            variant = "ttcStreetcar";
+            var root = new GameObject(variant);
+            var t = root.transform;
+            var red = M("ttcRed", new Color(0.78f, 0.04f, 0.07f), 0f, 0.55f, 0.1f);
+            var white = M("ttcWhite", new Color(0.93f, 0.93f, 0.91f), 0f, 0.5f, 0.1f);
+            var roof = M("ttcRoof", new Color(0.62f, 0.63f, 0.65f), 0f, 0.4f, 0.2f);
+            var window = M("ttcWindow", new Color(0.16f, 0.15f, 0.13f), 0.5f, 0.88f, 0.3f);
+            var door = M("ttcDoor", new Color(0.34f, 0.31f, 0.26f), 0.35f, 0.85f, 0.2f);
+            var bellows = M("ttcBellows", new Color(0.09f, 0.09f, 0.1f), 0f, 0.2f, 0f);
+            var headlamp = M("ttcHeadlamp", new Color(1f, 0.97f, 0.88f), 2.4f);
+            var tail = M("ttcTail", new Color(1f, 0.08f, 0.06f), 1.8f);
+
+            const float L = 15.1f; // half length
+            Ring[] Band(float w, float h, float half, float square) => new[]
+            {
+                new Ring(-half, w - 0.22f, h, square), new Ring(-half + 0.15f, w - 0.08f, h, square), new Ring(-half + 0.4f, w, h, square),
+                new Ring(half - 0.4f, w, h, square), new Ring(half - 0.15f, w - 0.08f, h, square), new Ring(half, w - 0.22f, h, square),
+            };
+            var along = new Vector3(90f, 0f, 0f); // lofts run along Y; turned to run down the street
+            Part(t, "Lower body", Loft("lower", Band(1.27f, 0.45f, L, 6f), 28), red, new Vector3(0f, 0.67f, 0f), along);
+            Part(t, "Window band", Loft("windows", Band(1.255f, 0.7f, L - 0.01f, 6f), 28), window, new Vector3(0f, 1.82f, 0f), along);
+            Part(t, "Upper body", Loft("upper", Band(1.27f, 0.35f, L, 6f), 28), white, new Vector3(0f, 2.87f, 0f), along);
+            Part(t, "Roof", Loft("roof", Band(1.12f, 0.1f, L - 0.5f, 4f), 24), roof, new Vector3(0f, 3.32f, 0f), along);
+
+            // Five sections: bellows between them, a glazed door on each side of every section, bogies under three.
+            for (int k = 1; k <= 4; k++)
+                Part(t, "Bellows", Box("bellows", new Vector3(2.58f, 2.95f, 0.36f), 0.03f), bellows, new Vector3(0f, 1.8f, -L + 6.04f * k));
+            foreach (float s in new[] { -10.6f, -6.04f, 0f, 6.04f, 10.6f })
+                foreach (float x in new[] { -1.275f, 1.275f })
+                    Part(t, "Door", Box("door", new Vector3(0.03f, 2.05f, 1.3f), 0.01f), door, new Vector3(x, 1.28f, s));
+            foreach (float s in new[] { -12.08f, 0f, 12.08f })
+                Part(t, "Bogie", Box("bogie", new Vector3(2.1f, 0.22f, 2.6f), 0.02f), Ink, new Vector3(0f, 0.11f, s));
+            foreach (float s in new[] { -12f, 0f, 12f })
+                Part(t, "Roof unit", Box("roofUnit", new Vector3(1.6f, 0.45f, 2.6f), 0.06f), white, new Vector3(0f, 3.62f, s));
+
+            // Cab ends: destination sign on the windscreen, anticlimber, headlamps at the A end, tail lamps at the B end,
+            // mirrors on arms at the A end.
+            foreach (float e in new[] { -1f, 1f })
+            {
+                Part(t, "Destination sign", Box("destination", new Vector3(1.5f, 0.24f, 0.03f), 0.005f), Amber, new Vector3(0f, 2.32f, e * (L + 0.01f)));
+                Part(t, "Anticlimber", Box("anticlimber", new Vector3(2.2f, 0.18f, 0.12f), 0.02f), Ink, new Vector3(0f, 0.3f, e * (L + 0.02f)));
+                foreach (float x in new[] { -0.8f, 0.8f })
+                    Part(t, e > 0 ? "Headlamp" : "Tail lamp", Box(e > 0 ? "headlamp" : "taillamp", new Vector3(0.3f, 0.14f, 0.04f), 0.01f),
+                        e > 0 ? headlamp : tail, new Vector3(x, 0.74f, e * (L + 0.01f)));
+            }
+            foreach (float x in new[] { -1f, 1f })
+            {
+                Part(t, "Mirror arm", Box("mirrorArm", new Vector3(0.24f, 0.04f, 0.04f), 0.01f), Ink, new Vector3(x * 1.36f, 2.42f, L - 0.45f));
+                Part(t, "Mirror", Box("mirror", new Vector3(0.06f, 0.34f, 0.22f), 0.01f), Ink, new Vector3(x * 1.48f, 2.28f, L - 0.45f));
+            }
+
+            // Single-arm pantograph on the second section, its head on the 5.7 m trolley wire.
+            const float ps = -6.04f;
+            Part(t, "Pantograph base", Box("pantoBase", new Vector3(1.1f, 0.12f, 0.9f), 0.02f), SteelDark, new Vector3(0f, 3.48f, ps));
+            foreach (float x in new[] { -0.42f, 0.42f })
+                Part(t, "Insulator", Box("pantoInsulator", new Vector3(0.12f, 0.16f, 0.12f), 0.02f), Ink, new Vector3(x, 3.6f, ps - 0.3f));
+            var pivot = new Vector3(0f, 3.58f, ps - 0.6f);
+            var knee = new Vector3(0f, 4.7f, ps + 0.5f);
+            var head = new Vector3(0f, 5.6f, ps - 0.2f);
+            foreach (var (a, b, w) in new[] { (pivot, knee, 0.08f), (knee, head, 0.05f) })
+            {
+                var v = b - a;
+                Part(t, "Pantograph arm", Box(w > 0.06f ? "pantoArmLower" : "pantoArmUpper", new Vector3(w, w, v.magnitude), 0.01f), SteelDark, (a + b) * 0.5f, Quaternion.LookRotation(v).eulerAngles);
+            }
+            Part(t, "Pantograph head", Box("pantoHead", new Vector3(1.6f, 0.05f, 0.12f), 0.01f), Steel, new Vector3(0f, 5.645f, ps - 0.2f));
+            foreach (float x in new[] { -1f, 1f })
+                Part(t, "Pantograph horn", Box("pantoHorn", new Vector3(0.3f, 0.04f, 0.1f), 0.01f), Steel,
+                    new Vector3(x * 0.92f, 5.6f, ps - 0.2f), new Vector3(0f, 0f, -x * 25f));
+            return Save(root, variant);
+        }
+
         // ================= street dressing =================
 
         /// A clean contemporary lamp: plinth, tapered pole, arm over the road and a lit head bar.

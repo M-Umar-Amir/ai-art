@@ -20,7 +20,7 @@ namespace DallasDash.Core
         static int Who => PlayerProfile.Character;
         /// Bolt is a robot on his own two wheels: there is no bike to fall off.
         public static bool RidesOwnWheels => Who == 2;
-        public static readonly string[] DistrictNames = { "NEON DOWNTOWN" };
+        public static readonly string[] DistrictNames = { "DOWNTOWN TORONTO" }; // client, 25 Nov 2026: the city is downtown Toronto
 
         /// The only world: Downtown (0). Older builders still branch on District for the retired Skypark (1) and
         /// Festivals (2); those branches are dead and are being removed file by file.

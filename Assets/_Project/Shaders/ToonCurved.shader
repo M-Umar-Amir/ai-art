@@ -47,6 +47,8 @@ Shader "FoodInc/ToonCurved"
         // Alpha-tested cut-outs (tree leaves): 0 keeps everything. Leaves also render both faces.
         _Cutoff ("Alpha Cutoff", Range(0,1)) = 0
         [Enum(UnityEngine.Rendering.CullMode)] _Cull ("Cull", Float) = 2
+        [HideInInspector] _Backdrop ("Skyline backdrop haze", Range(0,1)) = 0
+        [HideInInspector] _BackdropFeet ("Skyline haze height", Float) = 0
     }
     SubShader
     {
@@ -227,7 +229,15 @@ Shader "FoodInc/ToonCurved"
                     }
                     c = lerp(c, UniversalFragmentPBR(data, surface).rgb * lerp(1, contact * canyon, vertical), _SurfaceStyle);
                 }
-                c = MixFog(c, i.fog);
+                if (_Backdrop > 0)
+                {
+                    // Far skyline: fixed atmospheric haze toward the fog colour, thickest at the feet, where the
+                    // distant city fades into the dusk. Lit windows and the tower lights keep part of their glow.
+                    half feet = _BackdropFeet > 0 ? 1 - smoothstep(0, _BackdropFeet, i.localY) : 0;
+                    half haze = saturate(_Backdrop + (1 - _Backdrop) * 0.35 * feet);
+                    c = lerp(c, _BackdropHazeColor.a > 0 ? _BackdropHazeColor.rgb : unity_FogColor.rgb, haze);
+                }
+                else c = FarSkyFade(MixFog(c, i.fog), i.positionWS);
                 return half4(c, 1);
             }
             ENDHLSL
@@ -244,12 +254,13 @@ Shader "FoodInc/ToonCurved"
             #pragma multi_compile_fog
             #pragma multi_compile_instancing
             struct Attributes { float4 positionOS : POSITION; float3 normalOS : NORMAL; UNITY_VERTEX_INPUT_INSTANCE_ID };
-            struct Varyings { float4 positionCS : SV_POSITION; half fog : TEXCOORD0; };
+            struct Varyings { float4 positionCS : SV_POSITION; half fog : TEXCOORD0; float3 positionWS : TEXCOORD1; };
             Varyings vert(Attributes v)
             {
                 Varyings o;
                 UNITY_SETUP_INSTANCE_ID(v);
                 float3 ws = TransformObjectToWorld(DashPoseOS(v.positionOS.xyz));
+                o.positionWS = ws;
                 float3 nws = normalize(TransformObjectToWorldNormal(v.normalOS));
                 // Width in world units, scaled by distance a little so far objects keep a readable line.
                 float dist = distance(ws, _WorldSpaceCameraPos);
@@ -259,7 +270,10 @@ Shader "FoodInc/ToonCurved"
                 o.fog = ComputeFogFactor(o.positionCS.z);
                 return o;
             }
-            half4 frag(Varyings i) : SV_Target { return half4(MixFog(_OutlineColor.rgb, i.fog), 1); }
+            half4 frag(Varyings i) : SV_Target
+            {
+                return half4(FarSkyFade(MixFog(_OutlineColor.rgb, i.fog), i.positionWS), 1);
+            }
             ENDHLSL
         }
 

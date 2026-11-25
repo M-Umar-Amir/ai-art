@@ -103,14 +103,8 @@ namespace DallasDash.Gameplay
         public static bool BrandedPreview;
         static readonly (string name, Color board, Color ink)[] Brands =
         {
+            // KFC only since 25 Nov 2026 ("only kfc branding"), presentation stills included.
             ("KFC", new Color(0.89f, 0.1f, 0.17f), Color.white),
-            ("TACO BELL", new Color(0.44f, 0.13f, 0.51f), Color.white),
-            ("PIZZA HUT", new Color(0.93f, 0.19f, 0.14f), Color.white),
-            ("THE HABIT", new Color(0.12f, 0.12f, 0.14f), new Color(1f, 0.6f, 0.12f)),
-            ("BELLAGREEN", new Color(0.36f, 0.58f, 0.24f), Color.white),
-            ("AU BON PAIN", new Color(0.55f, 0.08f, 0.16f), new Color(1f, 0.95f, 0.85f)),
-            ("LONG JOHN SILVER'S", new Color(0.05f, 0.24f, 0.5f), new Color(1f, 0.82f, 0.1f)),
-            ("TIM HORTONS", new Color(0.78f, 0.06f, 0.18f), Color.white),
         };
         int brandIndex;
         readonly Dictionary<Color, Material> brandMats = new();
@@ -191,6 +185,7 @@ namespace DallasDash.Gameplay
             plazas.Clear();
             nextRow = firstRowAt;
             nextPowerUp = FirstPowerUpAt;
+            nextStreetcar = 150f;
             brandIndex = 0;
             lastOpen = 1;
             builtRooftops.Clear();
@@ -312,6 +307,8 @@ namespace DallasDash.Gameplay
                     if ((gapLane < 0 || dz < 5f || dz > 13f) && !junction)
                         Block(t, new Vector3(lx, 0.005f, z + dz + 1.25f), new Vector3(0.12f, 0.02f, 2.5f), laneLineMaterial);
             DashCity.Signature(this, t, z);
+            // Downtown Toronto: streetcar rails in the outer lanes and the trolley wire overhead (25 Nov 2026).
+            if (gapLane < 0) TorontoStreet.Segment(this, t, z, segmentLength, junction);
             segmentIndex++;
             Combine(root);
             yield return null;
@@ -338,6 +335,7 @@ namespace DallasDash.Gameplay
                 yield return null;
                 if (!root) yield break;
                 SpawnCrossTraffic(z);
+                ParkCrossStreetcar(t, z);
             }
             BatchCohort(root, z);
         }
@@ -462,6 +460,21 @@ namespace DallasDash.Gameplay
                 if (LaneReserved(lane, z)) { SpawnPickupLine(lane, z); continue; }
                 if (rampLane && lane == RooftopCourse.EntryLane) { if (!RooftopCourse.OnRamp(z) && !RooftopCourse.OnRamp(z + 5f)) SpawnPickupLine(lane, z); continue; }
                 if (token && lane == open) { SpawnPowerUp((PowerUp)Random.Range(0, PowerUps.Count), lane, z); continue; }
+                // Downtown Toronto: a streetcar stopped on its track every 300-450 m (first one early in the run), with
+                // burgers in the other lanes along its length so the stretch beside it is not empty.
+                if (lane != open && z >= nextStreetcar && TorontoStreet.Active && TorontoStreet.TrackLane(lane))
+                {
+                    var streetcar = StreetcarDef();
+                    if (streetcar && StreetcarFits(lane, z, streetcar.size.z) && SpawnObstacle(streetcar, lane, z) == streetcar)
+                    {
+                        longest = Mathf.Max(longest, streetcar.size.z);
+                        nextStreetcar = z + Random.Range(300f, 450f);
+                        for (int other = 0; other < Tuning.Lanes; other++)
+                            if (other != lane)
+                                foreach (float dz in new[] { 9f, 18f, 27f }) SpawnPickupLine(other, z + dz);
+                        continue;
+                    }
+                }
                 if (lane == open || Random.value < 0.45f || obstacles == null || obstacles.Length == 0)
                 {
                     SpawnPickupLine(lane, z);
@@ -640,6 +653,12 @@ namespace DallasDash.Gameplay
         /// Places an obstacle (or a standing substitute for a courier with no room); returns what was placed.
         ObstacleDef SpawnObstacle(ObstacleDef def, int lane, float z)
         {
+            // A stopped streetcar only stands on a track lane with its whole length clear; otherwise pick again.
+            if (def && def.id == "streetcar" && !StreetcarFits(lane, z, def.size.z))
+            {
+                for (int tries = 0; tries < 6 && def && def.id == "streetcar"; tries++) def = WeightedObstacle();
+                if (!def || def.id == "streetcar") return null;
+            }
             // Another courier rides toward its meeting point from behind it, so it needs its lane clear for that
             // stretch; otherwise put something that stands still there instead.
             float path = def.drift * (z - GameManager.Instance.Distance) + def.size.z + 2f;
@@ -661,6 +680,15 @@ namespace DallasDash.Gameplay
             go.name = def.displayName;
             go.transform.SetParent(transform);
             go.transform.position = new Vector3(Tuning.LaneX[lane], def.prefab ? 0f : def.size.y / 2f, z);
+            go.transform.rotation = Quaternion.identity;
+            if (def.id == "streetcar")
+            {
+                // It stands from just before the row forward (SpawnRow adds its length to the gap after the row), facing
+                // its way of travel: westbound with the rider on the right-hand track, oncoming on the left.
+                go.transform.SetPositionAndRotation(new Vector3(Tuning.LaneX[lane], 0f, z + def.size.z * 0.5f - 1f),
+                    lane == 0 ? Quaternion.Euler(0f, 180f, 0f) : Quaternion.identity);
+                Debug.Log($"[Streetcar] stopped on lane {lane} from {z - 1f:0} to {z - 1f + def.size.z:0} m");
+            }
             BrandVehicle(go, def.id);
             if (!def.prefab)
             {
@@ -677,6 +705,34 @@ namespace DallasDash.Gameplay
             t.meetZ = z;
             if (t.drift > 0f) PlaceTraffic(t, GameManager.Instance.Distance);
             return def;
+        }
+
+        float nextStreetcar = 150f;
+        ObstacleDef streetcarDef;
+        ObstacleDef StreetcarDef()
+        {
+            if (streetcarDef || obstacles == null) return streetcarDef;
+            foreach (var def in obstacles) if (def && def.id == "streetcar" && def.prefab) streetcarDef = def;
+            return streetcarDef;
+        }
+
+        /// A stopped streetcar (30 m) stands only on a streetcar track lane, and only where its whole length is clear of
+        /// junctions (cross traffic), the coupon lane, the parked e-bike, the rooftop ramp and roof gaps, and of anything
+        /// already standing in that lane.
+        bool StreetcarFits(int lane, float z, float length)
+        {
+            if (!TorontoStreet.Active || !TorontoStreet.TrackLane(lane)) return false;
+            for (float k = -1f; k <= length; k += 2f)
+            {
+                float at = z + k;
+                if (NearJunction(at) || LaneReserved(lane, at)) return false;
+                if (lane == RooftopCourse.EntryLane && RooftopCourse.KeepLaneClear(at)) return false;
+                if (lane == BikeReservedLane && at > BikeReservedFrom && at < BikeReservedTo) return false;
+                if (DashRun.RoofGapLane(Mathf.Floor(at / 20f) * 20f) >= 0) return false;
+            }
+            foreach (var o in live)
+                if (o && o.kind != TrackKind.Pickup && o.lane == lane && o.transform.position.z + o.halfLength > z - 2f && o.transform.position.z - o.halfLength < z + length) return false;
+            return true;
         }
 
         /// No obstacle in this lane over the stretch a courier rides through before the rider meets it.
@@ -1127,6 +1183,7 @@ namespace DallasDash.Gameplay
                 var renderer = mf.GetComponent<MeshRenderer>();
                 if (!renderer || !renderer.enabled || !renderer.sharedMaterial || renderer.HasPropertyBlock() || mf.GetComponent<TextMesh>()) continue;
                 if (mf.GetComponentInParent<Pedestrian>() || mf.GetComponentInParent<LODGroup>() || mf.GetComponentInParent<Billboard>() || mf.GetComponentInParent<Bobber>() || mf.GetComponentInParent<Blinker>() || mf.GetComponentInParent<TrafficLight>()) continue;
+                if (mf.GetComponent<StreetMeshBatch>()) continue; // already merged by StreetMesh
                 if (!combineGroups.TryGetValue(renderer.sharedMaterial, out var pieces))
                     combineGroups[renderer.sharedMaterial] = pieces = new List<CombineInstance>();
                 pieces.Add(new CombineInstance { mesh = mf.sharedMesh, transform = root.transform.worldToLocalMatrix * mf.transform.localToWorldMatrix });
@@ -1197,6 +1254,7 @@ namespace DallasDash.Gameplay
             var col = go.GetComponent<Collider>();
             if (col) Destroy(col);
             var t = go.GetComponent<TrackObject>() ?? go.AddComponent<TrackObject>();
+            if (!t.shaderTagged) { TagTrackRenderers(go); t.shaderTagged = true; }
             t.consumed = t.nearMiss = t.passed = t.heavy = t.struck = false;
             t.surface = RunSurface.Road; t.powerUp = -1; t.drift = t.meetZ = 0f; t.height = 0.8f;
             t.baseHeight = 0f;
@@ -1208,6 +1266,14 @@ namespace DallasDash.Gameplay
             t.points = points;
             t.oncoming = oncoming;
             live.Add(t);
+        }
+
+        /// Shader user value bit 0 marks a hurdle, burger or coupon: the Toronto skyline's far fade leaves it alone and
+        /// past the skyline card it still draws in front, so it shows coming over the crest (ToonCommon.hlsl).
+        static void TagTrackRenderers(GameObject go)
+        {
+            foreach (var r in go.GetComponentsInChildren<MeshRenderer>(true)) r.SetShaderUserValue(r.GetShaderUserValue() | 1u);
+            foreach (var r in go.GetComponentsInChildren<SkinnedMeshRenderer>(true)) r.SetShaderUserValue(r.GetShaderUserValue() | 1u);
         }
 
         /// Lane + distance overlap test against the rider, mirroring sim.js.
@@ -1454,12 +1520,14 @@ namespace DallasDash.Gameplay
         {
             int total = 0;
             // Weight 0 retires a hurdle from the street mix (the slide-under scaffold, 11 Nov 2026: no ducking).
-            foreach (var o in obstacles) total += Mathf.Max(0, o.weight);
+            // The streetcar is placed on its own schedule only (SpawnRow), never by the random pick or a re-pick.
+            int Weight(ObstacleDef o) => o && o.id != "streetcar" ? Mathf.Max(0, o.weight) : 0;
+            foreach (var o in obstacles) total += Weight(o);
             if (total <= 0) return obstacles[0];
             int r = Random.Range(0, total);
             foreach (var o in obstacles)
             {
-                r -= Mathf.Max(0, o.weight);
+                r -= Weight(o);
                 if (r < 0) return o;
             }
             return obstacles[0];

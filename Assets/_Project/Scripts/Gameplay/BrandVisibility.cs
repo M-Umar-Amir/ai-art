@@ -77,9 +77,18 @@ namespace DallasDash.Gameplay
 
         public static void Live(Renderer r, bool rider) => marks.Add(new Mark { renderer = r, rider = rider });
 
+        /// A KFC ad or logo face on the street (bulletin, corner screen, awning, poster) that will be merged into the
+        /// street mesh: counted by its bounds and the segment that owns it, like the logo faces above.
+        public static void Static(Transform owner, Renderer r) => Static(owner, r, -r.transform.forward);
+        public static void Static(Transform owner, Renderer r, Vector3 normal) => Static(owner, r.bounds, normal);
+        public static void Static(Transform owner, Bounds bounds, Vector3 normal) =>
+            marks.Add(new Mark { owner = owner, bounds = bounds, normal = normal.normalized });
+
         public static (int street, int rider) InView(Camera cam, float maxDistance = 170f)
         {
             if (!cam) return (0, 0);
+            // Past the Toronto skyline's far fade the street is dissolved out: a board there is not seen.
+            if (TorontoSkyline.FarFadeOn) maxDistance = Mathf.Min(maxDistance, TorontoSkyline.FadeStart);
             GeometryUtility.CalculateFrustumPlanes(cam, planes);
             var eye = cam.transform.position;
             int street = 0, rider = 0;

@@ -15,7 +15,7 @@ MonoBehaviour:
   id: food-truck
   displayName: Parked food truck
   kind: 2
-  size: {x: 3.6817324, y: 3.7714918, z: 5.0000005}
+  size: {x: 2.6000001, y: 3.7714918, z: 5.0000005}
   weight: 1
   placeholderColor: {r: 0.96, g: 0.93, b: 0.84, a: 1}
   prefab: {fileID: 1654158000198858854, guid: a3feaf70e906f9948a43cc1887f52674, type: 3}
