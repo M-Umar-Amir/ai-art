@@ -35,7 +35,7 @@ const three = `<script type="importmap">${JSON.stringify({ imports: { 'three-cor
 let audio = '';
 if (existsSync('build/audio.wav')) {
   const m4a = 'build/audio.m4a';
-  if (!existsSync(m4a) || statSync(m4a).mtimeMs < statSync('build/audio.wav').mtimeMs) execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', 'build/audio.wav', '-af', 'loudnorm=I=-14:TP=-1.5:LRA=11', '-ar', '48000', '-c:a', 'aac', '-b:a', '160k', m4a]);
+  if (!existsSync(m4a) || statSync(m4a).mtimeMs < statSync('build/audio.wav').mtimeMs) execFileSync(process.env.FFMPEG || 'D:/ai-art/tools/ffbin/ffmpeg.exe', ['-y', '-loglevel', 'error', '-i', 'build/audio.wav', '-af', 'loudnorm=I=-14:TP=-1.5:LRA=11', '-ar', '48000', '-c:a', 'aac', '-b:a', '160k', m4a]);
   audio = `<audio id="snd" preload="auto" src="data:audio/mp4;base64,${readFileSync(m4a).toString('base64')}"></audio>`;
 }
 

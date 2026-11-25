@@ -30,15 +30,7 @@ function credit(g, text, o = {}) {
   g.fillRect((o.align === 'left' ? x : x - w) - 8, y - (o.size ?? 20) - 6, w + 16, (o.size ?? 20) + 10);
   g.fillStyle = 'rgba(255,255,255,0.85)'; g.fillText(text, x, y - 2); g.restore();
 }
-const CREDIT = {
-  godel: 'Kurt Gödel, 1925 · public domain', vonneumann: 'John von Neumann · LANL', valiant: 'Leslie Valiant · Dennis Hamilton, CC BY 2.0',
-  cook: 'Stephen Cook · Jiří Janíček, CC BY-SA 3.0', karp: 'Richard Karp · Rama, CC BY-SA 2.0 FR', levin: 'Leonid Levin · Sergio01, CC BY-SA 3.0',
-  pauli: 'Wolfgang Pauli · Nobel Foundation, public domain', bose: 'Satyendra Nath Bose, 1925 · public domain', fermi: 'Enrico Fermi · US DOE, public domain',
-  dirac: 'Paul Dirac, 1933 · public domain', strassen: 'Volker Strassen · David Eppstein, CC BY-SA 3.0', cantor: 'Georg Cantor · public domain',
-  turing: 'Alan Turing · Elliott & Fry, public domain', aaronson: 'Scott Aaronson · public domain', razborov: 'Alexander Razborov · Petra Lein, CC BY-SA 2.0 DE',
-  eniac: 'ENIAC · CC BY 4.0', sudoku: 'Sudoku · Tim Stellmach, CC0', tsp: 'Travelling salesman · public domain', laser_sky: 'Starfire Optical Range · US Air Force, public domain',
-  green_laser: 'Green laser · CC BY-SA 4.0',
-};
+const CREDIT = { "foucault": "Léon Foucault · Bertall & Cie. Fizped · public domain", "pendulum": "Foucault pendulum, Panthéon · Rémih, CC BY-SA 3.0", "pantheon": "Panthéon, Paris · Moonik, CC BY-SA 3.0", "galileo": "Galileo, by Justus Sustermans · Justus Sustermans · public domain", "newton": "Isaac Newton, by Godfrey Kneller · Godfrey Kneller · public domain", "maupertuis": "Maupertuis · public domain", "voltaire": "Voltaire, by Largillière · Nicolas de Largillière, CC0", "cassini": "Jacques Cassini · public domain", "chimborazo": "Chimborazo · Dick Culbert from Gibsons, B.C., Canad, CC BY 2.0", "huascaran": "Huascarán · MrBasically, CC BY-SA 4.0", "everest": "Mount Everest · Rdevany, CC BY-SA 3.0", "venus": "Venus, Mariner 10 · NASA/JPL-Caltech · public domain", "mars": "Mars · Kevin Gill from Los Angeles, CC BY 2.0", "tornado": "Elie, Manitoba tornado, 2007 · Justin Hobson (Justin1569 at English W, CC BY-SA 3.0", "southpole": "Amundsen–Scott station · Christopher Michel, CC BY 4.0", "bluemarble": "The Blue Marble, Apollo 17 · Harrison Schmitt / Apollo 17 · public domain", "coriolis": "Gaspard-Gustave de Coriolis · gravure de Zéphyrin Belliard d'après l · public domain", "aurora": "Aurora, Alaska · United States Air Force photo by S · public domain", "lrrr": "Apollo 11 laser reflector · NASA · public domain", "mercury": "Mercury, MESSENGER · NASA/Johns Hopkins University Appl · public domain", "london": "London · Ilya Grigorik, CC BY-SA 3.0", "karachi": "Clifton, Karachi · Ktownboy103, CC0", "fighter": "F-16 · Master Sgt. Andy Dunaway · public domain", "tohoku": "Sendai, 2011 · U.S. Navy photo · public domain", "rudist": "Rudist fossil · Wilson44691 · public domain", "coral": "Haeckel, Tetracoralla · Ernst Haeckel · public domain", "iss": "ISS · NASA · public domain", "hurricane": "Hurricane Katrina · NASA · public domain", "svalbard": "Svalbard, Landsat 7 · public domain", "sonicboom": "F/A-18 at the sound barrier · Ensign John Gay · public domain", "atomicclock": "NIST-F1 · National Institute of Standards and Te · public domain", "heliophyllum": "Heliophyllum, Devonian coral · Wilson44691, CC0", "babylon": "Babylonian astronomical tablet · The original uploader was Linguica at · public domain", "greenland": "Greenland ice sheet · Eric Gaba (Sting - fr:Sting), CC BY-SA 3.0", "moon": "The Moon · Gregory H. Revera, CC BY-SA 3.0", "maven": "MAVEN · NASA · public domain", "akatsuki": "Akatsuki · 江戸村のとくぞう, CC BY-SA 4.0", "cyclone": "Tropical cyclone · NASA/Goddard Space Flight Center, CC BY 2.0", "eclipse": "Solar eclipse · Luc Viatour, CC BY-SA 3.0", "lunokhod": "Lunokhod replica · Petar Milošević, CC BY-SA 3.0", "apollo11": "Apollo 11 · Neil A. Armstrong · public domain" };
 // ---------- photos ----------
 // full-frame photo with a slow Ken Burns move; o.from/o.to = [cx, cy, z]; o.bw for black and white
 function photoFull(g, key, t, t0, t1, o = {}) {
@@ -164,7 +156,8 @@ function secAt(t) { let i = 0; for (let k = 0; k < B.sec.length; k++) if (t >= B
 function sentCount(t) { const i = secAt(t), ss = (B.sent && B.sent[i]) || []; let k = 0; for (const s of ss) if (B.sec[i] + s <= t + 1e-3) k++; return i * 1000 + k; }
 const PUNCH = [[1.0, 960, 540], [1.1, 920, 525], [1.05, 1000, 560], [1.13, 960, 510]];
 function punchCam(t, sh, o = {}) {
-  if (o.punch === false) return [1, 960, 540];
-  const j = Math.max(0, sentCount(t) - sentCount(sh.t0 + 0.02)), P = o.frames || PUNCH, f = P[j % P.length];
+  let P = o.frames || PUNCH;
+  if (o.punch === false) { if (sh.t1 - sh.t0 < 11) return [1, 960, 540]; P = [[1, 960, 540], [1.05, 960, 540], [1.03, 945, 532], [1.06, 972, 546]]; }
+  const j = Math.max(0, sentCount(t) - sentCount(sh.t0 + 0.02)), f = P[j % P.length];
   return [f[0] * (1 + 0.012 * seg(t, sh.t0, sh.t1)), f[1], f[2]];
 }
